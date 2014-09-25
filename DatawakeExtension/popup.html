@@ -1,0 +1,98 @@
+<!--
+
+ Copyright 2014 Sotera Defense Solutions, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+<!doctype html>
+<html>
+
+    <head>
+    <title>Chrome Data Wake Popup</title>
+    <link href=css/jquery-ui-1.10.4.custom.min.css rel=stylesheet>
+        <link href=css/jRating.jquery.css rel=stylesheet>
+    <style>
+      body {
+        min-width: 357px;
+        overflow-x: hidden;
+        height: 100;
+      }
+
+      img {
+        margin: 5px;
+        border: 2px solid black;
+        vertical-align: middle;
+        width: 75px;
+        height: 75px;
+      }
+    </style>
+
+    <!--
+      - JavaScript and HTML must be in separate files: see our Content Security
+      - Policy documentation[1] for details and explanation.
+      -
+      - [1]: http://developer.chrome.com/extensions/contentSecurityPolicy.html
+     -->
+      <script src="js/d3.min.js"></script>
+      <script src="js/jquery-1.11.0.min.js"></script>
+      <script src ="js/jquery-ui-1.10.4.custom.min.js"></script>
+      <script src="js/jRating.jquery.js"></script>
+      <script src="js/signin.js"></script>
+      <script src="js/popup.js"></script>
+  </head>
+  <body>
+
+
+
+  <div class="flow">
+      <button id="signin">Sign in</button>
+      <button id="revoke" disabled>Sign out</button>
+      <div id="user_info"></div>
+  </div>
+
+  <div id="domain_trail_info"></div>
+
+  <!--<canvas id="screenCanvas" widht="200" heigh="200"></canvas>-->
+  <div  style="margin: 10px">
+      <div id="star_rating" ></div>
+      <div id="url_rank"></div>
+      <div id="url_rank_text">0 / 10</div>
+  </div>
+
+
+  <div id="domain_extracted_entities"></div>
+
+  <div id="lookahead" style="margin-bottom: 15px; margin-top: 15px;">
+      <h2 style="display: none">Link Lookahead</h2>&nbsp<span id="lookahead_progress"></span>
+      <div id="lookahead_results"></div>
+  </div>
+
+  <div id="all_extracted_entities"></div>
+
+
+<!--
+  <div id="domainsearch" style="margin-bottom: 15px">
+      <h2 style="display: none">Domain Specific Search</h2>&nbsp<span id="domainsearch_progress"></span>
+      <table id="domainsearch_results" border="1"></table>
+  </div>
+
+
+  <div id="main"></div>
+-->
+  </body>
+
+
+
+</html>
+

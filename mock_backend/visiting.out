@@ -1,0 +1,46 @@
+tailing kafka queue at  localhost:9092  topic:  memex-datawake-visited
+waiting for message..
+GOT MESSAGE"
+	timesatmp:  1411669514
+	userId:  0
+	url:  http://www.darpa.mil/NewsEvents/Releases/2014/02/09.aspx
+	website :  7
+SENDING TO KAFKA datawake-lookahead  6  urls
+sent
+	email :  2
+waiting for message..
+GOT MESSAGE"
+	timesatmp:  1411669520
+	userId:  0
+	url:  http://www.darpa.mil/NewsEvents/Releases/2014/02/09.aspx
+	website :  7
+SENDING TO KAFKA datawake-lookahead  6  urls
+sent
+	email :  2
+waiting for message..
+GOT MESSAGE"
+	timesatmp:  1411669529
+	userId:  0
+	url:  http://www.darpa.mil/Our_Work/I2O/Programs/Memex.aspx
+	website :  7
+SENDING TO KAFKA datawake-lookahead  6  urls
+sent
+	email :  2
+waiting for message..
+GOT MESSAGE"
+	timesatmp:  1411669537
+	userId:  0
+	url:  http://www.darpa.mil/Our_Work/I2O/Programs/Memex.aspx
+	website :  7
+SENDING TO KAFKA datawake-lookahead  6  urls
+sent
+	email :  2
+waiting for message..
+GOT MESSAGE"
+	timesatmp:  1411669670
+	userId:  0
+	url:  http://www.darpa.mil/NewsEvents/Releases/2014/02/09.aspx
+	website :  7
+SENDING TO KAFKA datawake-lookahead  6  urls
+sent
+	email :  2
