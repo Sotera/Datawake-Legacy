@@ -1,0 +1,218 @@
+<!--
+
+ Copyright 2014 Sotera Defense Solutions, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
+
+    <title>new tab (datawake)</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap-3.1.1-dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/cover.css" rel="stylesheet">
+    <link href="css/chosen.min.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<style>
+    .chosen-container .chosen-results{
+        max-height: 200px;
+        overflow-y: auto;
+    }
+</style>
+
+<body>
+
+<div class="site-wrapper">
+
+    <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+            <div class="masthead clearfix">
+                <div class="inner">
+                    <h3 class="masthead-brand">DataWake</h3>
+                    <div class="btn-group" data-toggle="buttons" style="display: inline-block;" >
+                        <label id = "recording_on_label" class="btn btn-default">
+                            <input type="radio" name="options" id="recording_on"> On
+                        </label>
+                        <label id = "recording_off_label" class="btn btn-default">
+                            <input type="radio" name="options" id="recording_off"> Off
+                        </label>
+                    </div>
+
+                    <ul class="nav masthead-nav">
+                        <li><button id="signin">Sign in</button></li>
+                        <li><button id="revoke">Sign out</button></li>
+                        <li><div id="user_info"></div></li>
+                    </ul>
+                </div>
+
+
+
+            </div>
+
+
+            <div class="inner cover">
+
+
+            <!--  ORG -->
+            <div style="display: inline-block;">
+                <h4>Org: <span id="org_label"><span> </h4>
+            </div>
+
+                <!-- Alert Banner -->
+                <div id="alert">
+                    <div id="alert_no_domain" class="alert alert-danger" style="display: none">
+                        <span class="lead">No Domain Selected</span>
+                        <p>Select a Domain
+                    </div>
+
+                    <div id="alert_selected" class="alert alert-success" style="display: none">
+                        <span id="selected_trail" class="lead">Some Trail</span>
+                        <p>Continue browsing or select a different trail.
+                    </div>
+                    <div id="alert_none" class="alert alert-danger" style="display: none">
+                        <span class="lead">No Trail Selected</span>
+                        <p>Please select a trail before you continue.
+                    </div>
+                    <div id="alert_processing" class="alert alert-warning" style="display: none">
+                        <span class="lead">Creating new Trail</span>
+                        <p>Your new trail is being created, please wait.</p>
+                    </div>
+                    <div id="alert_failed" class="alert alert-danger" style="display: none">
+                        <span class="lead">Failed to create Trail</span>
+                        <p>Ensure you have selected a domain and that your trail name contains alpha-numberic characters only.</p>
+                    </div>
+                    <div id="alert_not_changed" class="alert alert-warning" style="display: none">
+                        <span id="selected_trail_warn" class="lead">No Trail Selected</span>
+                        <p>Warning!  Your trail has not yet been changed, please continue to select a new trail below.</p>
+                    </div>
+
+                </div>
+                <!-- End Alert Banner -->
+
+
+            <!-- DOMAIN  -->
+            <div style="padding-top: 10px; padding-bottom: 10px;">
+                <h4>Domain: <span id="domain_label"><span> </h4>
+                <div style="color: #000">
+                    <select id="domain_select"  data-placeholder="Select a Domain " ></select>
+                </div>
+            </div>
+
+
+
+
+
+                <!-- trail select -->
+                <div style="padding-top: 10px; padding-bottom: 10px;">
+                  <h4> Select an existing trail</h4>
+                    <div style="color: #000">
+                        <select id="trail_select"  data-placeholder="Select a Trail " ></select>
+                  </div>
+                </div>
+                 <!-- end trail select -->
+
+
+                <!-- create a new trail -->
+                <div id="create_new_trail">
+                    <h4> Create New Trail</h4>
+                                <table width="100%" >
+                                    <tr>
+                                        <td>
+                                            <div class="input-group">
+                                                <span  class="input-group-addon">Name</span>
+                                                <input id="new_trail_name" type="text" class="form-control" placeholder="Enter an alphanumeric trail name">
+                                                <span class="input-group-btn">
+                                                    <button id="new_trail_create_btn" class="btn btn-default" type="button">Create</button>
+                                                </span>
+                                            </div>
+
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon">Description</span>
+                                                <input id="new_trail_description" type="text" class="form-control" placeholder="Enter a description (optional)">
+
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                </table>
+
+                </div>
+                <!-- end create a new trail -->
+
+                <!-- select an existing trail -->
+                <div id="search_results" style=" display: none">
+                <h4> Click to select an existing Trail</h4>
+                <div id="search_results_table" style="max-height: 200px; overflow-y: scroll; ">
+                    <table id="search_results_inner_table" width="100%" ></table>
+                </div>
+                </div>
+                <!-- select an existing trail -->
+
+
+            </div>
+
+
+                <div class="mastfoot ">
+                    <p>
+                        Trails collect your browsing informaiton for a specific task or investigation so its easy to explore and make use of your findings.  To remain on your current trail just continue browsing.  You can also create a new trail or pick an existing one.
+                    </p>
+                    <p>
+                        Trails can be contributed to by multiple users. Please sign in to use trails.
+                    </p>
+                </div>
+
+
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="js/d3.min.js"></script>
+<script src="js/jquery-1.11.0.min.js"></script>
+<script src="bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
+<script src="js/signin.js"></script>
+<script src="js/newTab.js"></script>
+<script src="js/chosen.jquery.min.js"></script>
+
+
+</body>
+</html>
