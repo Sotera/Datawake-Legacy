@@ -320,6 +320,28 @@ class ClusterEntityDataConnector:
         return map(lambda x: x[0], rows)
 
 
+
+
+
+    def inDomain(self, domain, type, value):
+        self._checkConn()
+        cursor = self.cnx.cursor()
+        params = {'rowkey': domain + '\0' + type + '\0' + value}
+        sql = "select rowkey from datawake_domain_entities where rowkey = %(rowkey)s"
+        try:
+            cursor.execute(sql, params)
+            rows = cursor.fetchall()
+            cursor.close()
+            return len(rows) > 0
+        except:
+            self.close()
+            raise
+
+
+
+
+
+
     ## DOMAINS  ####
     def get_domain_items(self, name, limit):
         self._checkConn()

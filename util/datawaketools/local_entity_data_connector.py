@@ -287,6 +287,23 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
+    def inDomain(self, domain, type, value):
+        self._checkConn()
+        cursor = self.cnx.cursor()
+        sql = ""
+        params = [domain + '\0' + type + '\0' + value]
+        sql = sql + "select rowkey from datawake_domain_entities where rowkey = %s"
+        try:
+            cursor.execute(sql, params)
+            rows = cursor.fetchall()
+            cursor.close()
+            return len(rows) > 0
+        except:
+            self.close()
+            raise
+
+
+
     # # DOMAINS  ####
 
 
