@@ -91,7 +91,7 @@
                options
                { "website-bolt" ["value"] }
                "bolts.crawler_bolt.CrawlerBolt"
-               []
+               ["url", "status", "headers", "flags", "body", "timestamp", "source","context"]
                )
 
     "email-bolt" (python-bolt-spec
