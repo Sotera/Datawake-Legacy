@@ -33,11 +33,11 @@ class ExtractorBolt(Bolt):
             t.append(context)
         if len(tuples) > 0:
             self.emit_many(tuples)
-        for t in tuples:
-            try:
-                self.log(self.name+" "+t[1])
-            except UnicodeEncodeError:
-                self.log(self.name+" ascii codec can't encode character")
+        #for t in tuples:
+        #    try:
+        #        self.log(self.name+" "+t[1])
+        #    except UnicodeEncodeError:
+        #        self.log(self.name+" ascii codec can't encode character")
 
     def ack(self, tup):
         #self.log("\n"+self.name+" acked tuple")

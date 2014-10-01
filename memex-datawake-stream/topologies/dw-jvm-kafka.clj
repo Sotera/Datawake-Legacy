@@ -5,6 +5,9 @@
          KafkaSpout
          StringScheme
          ZkHosts]
+;;    [storm.kafka.bolt.selector DefaultTopicSelector ]
+;;    [storm.kafka.bolt.mapper FieldNameBasedTupleToKafkaMapper]
+    [storm.kafka.bolt KafkaBolt]
     [backtype.storm.spout SchemeAsMultiScheme])
     (:gen-class)
 )
@@ -19,9 +22,22 @@
         (set! (.scheme config) (SchemeAsMultiScheme. (StringScheme.)))
         (KafkaSpout. config)))
 
+;; Java Interop code that creates a JVM KafkaBolt
+;;(defn kafka-bolt [topic]
+;;    (let [selector (new DefaultTopicSelector topic)
+;;        mapper (FieldNameBasedTupleToKafkaMapper.)
+;;         bolt (KafkaBolt.)
+;;        selected-bolt (.withKafkaTopicSelector bolt selector)
+;;        mapped-bolt (.withTupleToKafkaMapper selected mapper)]
+;;    mapped-bolt))
+
+
 
 (def incoming-dw-visited-spout
     (kafka-spout "memex-datawake-visited" "memex-datawake-visited-consumer"))
+
+;;(def outgoing-dw-lookahead-urls-bolt
+ ;;   (new KafkaBolt))
 
 
 
@@ -61,7 +77,24 @@
           :p 1
       )
 
-     "email-bolt" (python-bolt-spec
+
+    "website-bolt" (python-bolt-spec
+               options
+               {"kafka-bolt" :shuffle }
+               "bolts.extractors.website_bolt.WebsiteBolt"
+                ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+
+
+               )
+
+    "crawler-bolt" ( python-bolt-spec
+               options
+               { "website-bolt" ["value"] }
+               "bolts.crawler_bolt.CrawlerBolt"
+               []
+               )
+
+    "email-bolt" (python-bolt-spec
              options
              {"kafka-bolt" :shuffle }
              "bolts.extractors.email_bolt.EmailBolt"
@@ -74,16 +107,9 @@
              {"kafka-bolt" :shuffle }
              "bolts.extractors.phone_bolt.PhoneBolt"
              ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
-
              )
 
-    "website-bolt" (python-bolt-spec
-               options
-               {"kafka-bolt" :shuffle }
-               "bolts.extractors.website_bolt.WebsiteBolt"
-               ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
 
-               )
 
 
     "writer-bolt" (python-bolt-spec
@@ -95,6 +121,13 @@
               []
               :p 2
               )
+
+    ;;"lookahead-kafka-writer-bolt" (bolt-spec
+     ;;                             {"website-bolt" :shuffle }
+      ;;                            outgoing-dw-lookahead-urls-bolt
+       ;;                           :p 1
+        ;;                          )
+
 
 }
 ]
