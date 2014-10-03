@@ -30,7 +30,7 @@ To use sessions you must set the cherrypy configuration.  Currently this is done
 working with kitware to improve for tangelo
 """
 
-MOCK_FORENSIC_AUTH = True
+MOCK_FORENSIC_AUTH = False
 MOCK_USER_ORG = 'MEMEXDEMO'
 
 
