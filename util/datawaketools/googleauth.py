@@ -27,9 +27,9 @@ CLIENT_IDS = constants.CLIENT_IDS
 #
 # Validate token and return user id
 #
-def getUserFromToken(token):
-    (userId,clientId,expires) = validateToken(token)
-    user = getUserInfo(token,userId)
+def getUserFromToken(token,mock=False):
+    (userId,clientId,expires) = validateToken(token,mock)
+    user = getUserInfo(token,userId,mock)
     return user
 
 #
@@ -37,8 +37,8 @@ def getUserFromToken(token):
 #  if valid returns (userId,clientId,expires)
 #  else raises a ValueError
 #
-def validateToken(token):
-    if constants.MOCK_AUTH:
+def validateToken(token,mock=False):
+    if constants.MOCK_AUTH or mock:
         return ('0','0',int(time.time())+300)
     url = (VALIDATE_TOKEN_URL % token)
     h = httplib2.Http()
@@ -62,8 +62,8 @@ def validateToken(token):
 #
 # returns the users google plus profile
 #
-def getProfile(token,userId):
-    if constants.MOCK_AUTH:
+def getProfile(token,userId,mock=False):
+    if constants.MOCK_AUTH or mock:
         return {'displayName':'John Doe','emails':[{'value':'john.doe@nomail.none'}]}
     url = (GET_PROFILE_URL % (userId,token))
     h = httplib2.Http()
@@ -77,9 +77,9 @@ def getProfile(token,userId):
 #
 # get the users display name from their profile
 #
-def getUserInfo(token,userId):
+def getUserInfo(token,userId,mock=False):
     user = {}
-    profile = getProfile(token,userId)
+    profile = getProfile(token,userId,mock)
     user['userName'] = profile.get('displayName')
     user['userId'] = userId
     emails = profile.get('emails')
