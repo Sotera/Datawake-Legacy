@@ -23,7 +23,7 @@
         (KafkaSpout. config)))
 
 ;; Java Interop code that creates a JVM KafkaBolt
-;;(defn kafka-bolt [topic]
+;;(defn dw-visited-incoming [topic]
 ;;    (let [selector (new DefaultTopicSelector topic)
 ;;        mapper (FieldNameBasedTupleToKafkaMapper.)
 ;;         bolt (KafkaBolt.)
@@ -35,6 +35,14 @@
 
 (def incoming-dw-visited-spout
     (kafka-spout "memex-datawake-visited" "memex-datawake-visited-consumer"))
+
+
+(def crawler-in-spout
+    (kafka-spout "crawler-in" "crawler-in-consumer"))
+
+
+(def crawler-out-spout
+    (kafka-spout "crawler-out" "crawler-out"))
 
 ;;(def outgoing-dw-lookahead-urls-bolt
  ;;   (new KafkaBolt))
@@ -51,65 +59,71 @@
 
 (defn kafka-topo [options]
 [
+
      ;;spout configuration
     {
+
+    ;; DATAWAKE VISITED
+    ;; listen for pages visted by the datawake
     "incoming-dw-visited-spout" (spout-spec
-    incoming-dw-visited-spout
+        incoming-dw-visited-spout
         :p 1)
+
+
+    ;; CRAWLER IN
+    ;; listen for urls sent to be crawled
+    "incoming-crawler-spout" (spout-spec
+        crawler-in-spout
+        :p 1)
+
+
+    ;; CRALWER OUT / DATAWAKE LOOKAHEAD
+    ;; listen for pages that have been crawled
+    "outgoing-crawler-spout" (spout-sepc
+        crawler-out-spout
+        :p 1)
+
     }
 
+
+    ;; bolt configuration
     {
-     ;; The kafka-bolt parses incoming tuples from the JVM Spout.
-     ;; It then dispatches them to Storm streams.
-     ;; The name of each stream is equal to the Kafka topic name.
-     ;; A 'default' stream will forward raw messages that could
-     ;; not dispatch successfully. Non-JSON messages will also
-     ;; be fail()'ed automatically.
-    "kafka-bolt" (python-bolt-spec
+
+    ;; DATAWAKE VISITED
+
+    ;; parse and dispatch messages from the datawake visited queue
+    "dw-visited-incoming" (python-bolt-spec
           options
           ;; input
           { "incoming-dw-visited-spout" :shuffle }
-
           ;; Python class
           "bolts.dwvisited.datawake_visited_kafka_bolt.DatawakeVisitedKafkaBolt"
+           ;; output
            ["url", "status", "headers", "flags", "body", "timestamp", "source","context"]
           ;; parallelism
           :p 1
       )
 
-
     "website-bolt" (python-bolt-spec
                options
-               {"kafka-bolt" :shuffle }
+               {"dw-visited-incoming" :shuffle }
                "bolts.extractors.website_bolt.WebsiteBolt"
                 ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
-
-
-               )
-
-    "crawler-bolt" ( python-bolt-spec
-               options
-               { "website-bolt" ["value"] }
-               "bolts.crawler_bolt.CrawlerBolt"
-               ["url", "status", "headers", "flags", "body", "timestamp", "source","context"]
                )
 
     "email-bolt" (python-bolt-spec
              options
-             {"kafka-bolt" :shuffle }
+             {"dw-visited-incoming" :shuffle }
              "bolts.extractors.email_bolt.EmailBolt"
              ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
-
              )
 
     "phone-bolt" (python-bolt-spec
              options
-             {"kafka-bolt" :shuffle }
+             {"dw-visited-incoming" :shuffle }
              "bolts.extractors.phone_bolt.PhoneBolt"
              ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
              )
-
-
 
 
     "writer-bolt" (python-bolt-spec
@@ -119,14 +133,35 @@
               "website-bolt" :shuffle }
               "bolts.dwvisited.datawake_visited_writer_bolt.DatawakeVisitedWriterBolt"
               []
-              :p 2
               )
 
-    ;;"lookahead-kafka-writer-bolt" (bolt-spec
-     ;;                             {"website-bolt" :shuffle }
-      ;;                            outgoing-dw-lookahead-urls-bolt
-       ;;                           :p 1
-        ;;                          )
+     ;;  END DATAWAKE VISITED
+
+
+
+    ;; CRAWLER-IN
+    ;; local stand in for crawling infrastructure
+    "crawler-bolt" ( python-bolt-spec
+             options
+             { "incoming-crawler-spout" :shuffle }
+             "bolts.crawler_bolt.CrawlerBolt"
+             ["url", "status", "headers", "flags", "body", "timestamp", "source","context"]
+             :p 1
+             )
+
+    ;; END CRALWER -IN
+
+
+
+    ;; CRAWLER-OUT / DATAWAKE LOOKAHEAD
+
+    ;; note - almost a duplicate of dw-visited, but is seperated
+    ;; to keep visted latency down
+
+
+
+
+    ;; END CRAWLER-OUT / DATAWAKE LOOKAHEAD
 
 
 }
