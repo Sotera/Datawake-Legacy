@@ -19,11 +19,13 @@ dwConfig = function () {
     var pubs = {};
 
     var emptyDefaults = {
-        datawake_serviceUrl: ""
+        datawake_serviceUrl: "",
+        datawake_imageServiceUrl: ""
     };
 
     var localHostDefaults = {
-        datawake_serviceUrl: "http://localhost:8088/datawake-plugin-server"
+        datawake_serviceUrl: "http://localhost:8088/datawake-plugin-server",
+        datawake_imageServiceUrl: ""
     }
     pubs.localHostDefaults = localHostDefaults
 

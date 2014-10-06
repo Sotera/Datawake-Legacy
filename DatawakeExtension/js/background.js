@@ -158,6 +158,11 @@ chrome.runtime.onMessage.addListener(
             chrome.browserAction.setBadgeText({text: ""});
         }
 
+        // return the image service url
+        else if (request.operation == "get-image-service"){
+            sendResponse({service:config.datawake_imageServiceUrl})
+        }
+
 
         return true;
     });
@@ -232,8 +237,19 @@ function getSelections(info, tab) {
 }
 
 
-chrome.contextMenus.create({title: "Data Wake - capture selection", contexts: ["all"], "onclick": captureSelectedText});
+function launchImageService(info,tab){
+    chrome.tabs.sendMessage(tab.id, {operation: 'enable-image-service'}, function (response) {
+        if (response != "ok"){
+            console.error("Error starting image service on tab: "+tab.id)
+        }
+
+    })
+
+}
+
+chrome.contextMenus.create({title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
 chrome.contextMenus.create({title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+chrome.contextMenus.create({title: "Image Service", contexts: ["all"], "onclick": launchImageService});
 
 
 /*
