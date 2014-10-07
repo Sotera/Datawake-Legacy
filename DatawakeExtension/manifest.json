@@ -11,7 +11,7 @@
         {
             "matches": ["<all_urls>"],
             "js": ["js/jquery-1.11.0.min.js","js/jquery.highlight-4.js","js/jquery.tooltipster.min.js","js/d3.min.js", "js/jquery-ui.js", "js/poster.js", "js/jquery.urlive.js", "js/image-service.js"],
-            "css" :["css/highlight.css","css/tooltipster.css","css/tooltipster-noir.css","css/jquery.urlive.css","css/jquery-ui.css","css/highlight-img.css"]
+            "css" :["css/highlight.css","css/tooltipster.css","css/tooltipster-noir.css","css/jquery.urlive.css","css/jquery-ui.css"]
         }
     ],
     "background": {
