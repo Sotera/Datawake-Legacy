@@ -159,21 +159,25 @@ python datawake_db.py create-db
 python domainLoader.py memex_program "emails asscoiated with the memex program" ../../etc/default_domain.csv 
 cd ~
 
-echo "installing MITE"
-git clone https://github.com/mitll/MITIE.git
-cd MITIE
-make MITIE-models
+echo "installing libopenblas-dev and liblapack-dev"
+apt-get -y install libopenblas-dev liblapack-dev &> /dev/null
+
+echo "install MITIE"
+cd /home/vagrant
+git clone https://github.com/mitll/MITIE.git 
+cd MITIE 
+make MITIE-models 
 cd tools/ner_stream
 mkdir build
 cd build
-cmake ..
+cmake .. 
 cmake --build . --config Release
 cd ../../../mitielib
-make
+make &> /dev/null
 cd ~
 
 echo "installing Beautiful Soup"
-apt-get install -y python-bs4
+apt-get install -y python-bs4 &> /dev/null
 
 # start kafka and create topics
 

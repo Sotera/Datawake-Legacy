@@ -147,7 +147,7 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
         for entityObj in entityObjList:
             key = (entityObj['type'],entityObj['value'])
             if entityObj['type'] == 'info':
-                key = (entityObj['type'],entityObj['value'].split(' -> ')[1])
+                key = (entityObj['type'],'->'.join(entityObj['value'].split(' -> ')[:2]))
             if key not in entity_to_urls:
                 entity_to_urls[key] = {'indomain':'n','urls':set([])}
             entity_to_urls[key]['urls'].add(url)

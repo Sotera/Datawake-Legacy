@@ -21,7 +21,8 @@
     <head>
     <title>Chrome Data Wake Popup</title>
     <link href=css/jquery-ui-1.10.4.custom.min.css rel=stylesheet>
-        <link href=css/jRating.jquery.css rel=stylesheet>
+    <link href=css/jRating.jquery.css rel=stylesheet>
+    <link href="bootstrap-3.1.1-dist/css/bootstrap.min.css" rel =stylesheet>
     <style>
       body {
         min-width: 357px;
@@ -50,6 +51,7 @@
       <script src="js/jRating.jquery.js"></script>
       <script src="js/signin.js"></script>
       <script src="js/popup.js"></script>
+      <script src="bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
   </head>
   <body>
 
@@ -70,26 +72,39 @@
       <div id="url_rank_text">0 / 10</div>
   </div>
 
+  <ul id="myTab" class="nav nav-tabs" role="tablist">
+      <li class="active"><a href="#features" role="tab" data-toggle="tab">Features</a></li>
+      <li><a href="#linklookahead" role="tab" data-toggle="tab">Lookahead</a></li>
+      <li><a href="#info" role="tab" data-toggle="tab">Info</a></li>
+  </ul>
 
-  <div id="domain_extracted_entities"></div>
+  <div class="tab-content">
 
-  <div id="lookahead" style="margin-bottom: 15px; margin-top: 15px;">
-      <h2 style="display: none">Link Lookahead</h2>&nbsp<span id="lookahead_progress"></span>
-      <div id="lookahead_results"></div>
+      <!-- main tab -->
+      <div class="tab-pane active" id="features">
+          <div id="domain_extracted_entities"></div>
+
+          <div id="all_extracted_entities"></div>
+      </div>
+
+      <div class="tab-pane" id="linklookahead">
+          <div id="lookahead">
+              <h2 style="display: none">Link Lookahead</h2>&nbsp<span id="lookahead_progress"></span>
+              <div id="lookahead_results"></div>
+          </div>
+      </div>
+
+      <div class="tab-pane" id="info">
+          <div id="mitie-info-div">
+          </div>
+      </div>
+
+
   </div>
 
-  <div id="all_extracted_entities"></div>
 
 
-<!--
-  <div id="domainsearch" style="margin-bottom: 15px">
-      <h2 style="display: none">Domain Specific Search</h2>&nbsp<span id="domainsearch_progress"></span>
-      <table id="domainsearch_results" border="1"></table>
-  </div>
 
-
-  <div id="main"></div>
--->
   </body>
 
 

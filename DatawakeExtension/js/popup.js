@@ -384,11 +384,15 @@ var dwUI = function () {
 
 
 
-                    // All Extracted entities
+                    // All Extracted entities (NON-MITIE)
                     var mdiv = d3.select("#all_extracted_entities").append("div");
                     mdiv.append("h2").text("Extracted Entities");
 
-                    var types = mdiv.selectAll("div").data(Object.keys(extracted_entities_dict)).enter().append("div");
+                    var keys = Object.keys(extracted_entities_dict)
+                    if (keys.indexOf("info") != -1){
+                        keys.splice(keys.indexOf("info"),1)
+                    }
+                    var types = mdiv.selectAll("div").data(keys).enter().append("div");
 
                     types.each(function (d) {
                         var div = d3.select(this);
@@ -397,18 +401,7 @@ var dwUI = function () {
                         div.append("table").selectAll("tr")
                             .data(values).enter().append("tr")
                             .html(function (j) {
-                                if (d != 'info'){ return j; }
-                                else { 
-                                var color = 'black';
-                                var etype = j.split(' -> ')[0];
-                                var term =  j.split(' -> ')[1];
-                                var size = j.split(' -> ')[2];
-                                if ( etype == 'PERSON' ) { color = 'purple';}
-                                if ( etype == 'LOCATION' ) { color = 'lime';}
-                                if ( etype == 'ORGANIZATION' ) { color = 'orange';}
-                                if ( etype == 'MISC' ) { color = 'maroon';}
-                                return "<font size='" + size + "' color='" + color + "'>" + term + "</font>"; 
-                                }
+                               return j;
                             })
                             .style("font-weight", function (j) {
                                 //console.log(extracted_entities_dict[d][j])
@@ -421,6 +414,62 @@ var dwUI = function () {
                             });
 
                     });
+
+
+                    // MITIE extracted entities
+                    if ("info" in extracted_entities_dict){
+                        d3.select("#mitie-info-div").selectAll("div").remove()
+                        var mdiv = d3.select("#mitie-info-div").append("div");
+                        mdiv.append("h2").text("Extracted Info");
+
+                        var legend = mdiv.append("div")
+                        legend.append("hr")
+                        legend.append("h3").text("Legend:")
+                        legend.append("div").html("<font size=3 weight=bold color=purple>PERSON</font>")
+                        legend.append("div").html("<font size=3 weight=bold color=lime>LOCATION</font>")
+                        legend.append("div").html("<font size=3 weight=bold color=orange>ORGANIZATION</font>")
+                        legend.append("div").html("<font size=3 weight=bold color=maroon>MISC</font>")
+                        legend.append("hr")
+
+                        var types = mdiv.append("div").selectAll("div").data(["info"]).enter().append("div");
+
+                        types.each(function (d) {
+                            var div = d3.select(this);
+                            var values = Object.keys(extracted_entities_dict[d]);
+                            div.append("table")
+                                .selectAll("tr")
+                                .data(values).enter().append("tr")
+                                .html(function (j) {
+                                    if (d != 'info'){ return j; }
+                                    else {
+                                        var color = 'black';
+                                        var etype = j.split(' -> ')[0];
+                                        var term =  j.split(' -> ')[1];
+                                        var size = j.split(' -> ')[2];
+                                        if ( etype == 'PERSON' ) { color = 'purple';}
+                                        if ( etype == 'LOCATION' ) { color = 'lime';}
+                                        if ( etype == 'ORGANIZATION' ) { color = 'orange';}
+                                        if ( etype == 'MISC' ) { color = 'maroon';}
+                                        return "<font size='" + size + "' color='" + color + "'>" + term + "</font>";
+                                    }
+                                })
+                                .attr("title",function(k) {return k})
+                                .style("font-weight", function (j) {
+                                    //console.log(extracted_entities_dict[d][j])
+                                    if (extracted_entities_dict[d][j] == "y") {
+                                        return 'bold';
+                                    }
+                                    else {
+                                        return 'normal';
+                                    }
+                                });
+
+                        });
+                    }
+
+
+
+
 
                     // poll for awhile.. stop after the interval is more than 5 minutes
                     if (delay <= 5 * 60 * 1000) {
