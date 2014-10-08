@@ -146,6 +146,8 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
         #tangelo.log("\nurl: "+url+"\n\nresult: "+str(entityObjList)+"\n\n")
         for entityObj in entityObjList:
             key = (entityObj['type'],entityObj['value'])
+            if entityObj['type'] == 'info':
+                key = (entityObj['type'],entityObj['value'].split(' -> ')[1])
             if key not in entity_to_urls:
                 entity_to_urls[key] = {'indomain':'n','urls':set([])}
             entity_to_urls[key]['urls'].add(url)
@@ -191,7 +193,8 @@ def getBrowsePathAndAdjacentPhoneEdgesWithLimit(org,startdate,enddate,limit,user
 def getBrowsePathAndAdjacentEmailEdgesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['email'],limit,userlist,trail,domain)
 
-
+def getBrowsePathAndAdjacentInfoEdges(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
+    return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['info'],limit,userlist,trail,domain)
 
 
 

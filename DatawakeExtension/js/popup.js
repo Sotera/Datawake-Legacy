@@ -392,12 +392,23 @@ var dwUI = function () {
 
                     types.each(function (d) {
                         var div = d3.select(this);
-                        div.append("h3").text(d);
+                        div.append("h3").html('<u>' + d + '</u>');
                         var values = Object.keys(extracted_entities_dict[d]);
                         div.append("table").selectAll("tr")
                             .data(values).enter().append("tr")
-                            .text(function (j) {
-                                return j
+                            .html(function (j) {
+                                if (d != 'info'){ return j; }
+                                else { 
+                                var color = 'black';
+                                var etype = j.split(' -> ')[0];
+                                var term =  j.split(' -> ')[1];
+                                var size = j.split(' -> ')[2];
+                                if ( etype == 'PERSON' ) { color = 'purple';}
+                                if ( etype == 'LOCATION' ) { color = 'lime';}
+                                if ( etype == 'ORGANIZATION' ) { color = 'orange';}
+                                if ( etype == 'MISC' ) { color = 'maroon';}
+                                return "<font size='" + size + "' color='" + color + "'>" + term + "</font>"; 
+                                }
                             })
                             .style("font-weight", function (j) {
                                 //console.log(extracted_entities_dict[d][j])

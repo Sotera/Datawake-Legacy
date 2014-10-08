@@ -51,6 +51,7 @@ def listGraphs():
                                    'browse path - with adjacent phone #\'s',
                                    'browse path - with adjacent email #\'s',
                                    'browse path - with text selections',
+                                   'browse path - with adjacent info',
                                    'browse path- with look ahead']))
 
 
@@ -94,7 +95,7 @@ def listUsers():
 #
 def deleteUser(users, startdate, enddate):
     user, org = getUserData()
-    tangelo.log('deleteUser(' + users + ',' + startdate + ',' + enddate + ')')
+    tangelo.log('deleteUser(' + str(users) + ',' + str(startdate) + ',' + str(enddate) + ')')
     datawake_db.deleteUserData(org, users, startdate, enddate)
     return json.dumps(dict(success=True))
 
@@ -131,6 +132,10 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
     if name == 'browse path - with text selections':
         graph = graphs.getBrowsePathWithTextSelections(org, startdate, enddate, userlist, trail, domain)
         return json.dumps(graphs.processEdges(graph['edges'], graph['nodes']))
+        
+    if name == 'browse path - with adjacent info':
+        graph = graphs.getBrowsePathAndAdjacentInfoEdges(org, startdate, enddate, 1, userlist, trail, domain)
+        return json.dumps(graphs.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path- with look ahead':
         graph = graphs.getBrowsePathWithLookAhead(org, startdate, enddate, userlist, trail, domain)
@@ -148,7 +153,8 @@ get_actions = {
 
 post_actions = {
     'timewindow': getTimeWindow,
-    'get': getGraph
+    'get': getGraph,
+    'deleteUser': deleteUser
 }
 
 delete_actions = {

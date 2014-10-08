@@ -159,6 +159,21 @@ python datawake_db.py create-db
 python domainLoader.py memex_program "emails asscoiated with the memex program" ../../etc/default_domain.csv 
 cd ~
 
+echo "installing MITE"
+git clone https://github.com/mitll/MITIE.git
+cd MITIE
+make MITIE-models
+cd tools/ner_stream
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+cd ../../../mitielib
+make
+cd ~
+
+echo "installing Beautiful Soup"
+apt-get install -y python-bs4
 
 # start kafka and create topics
 

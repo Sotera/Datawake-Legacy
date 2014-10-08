@@ -22,6 +22,7 @@ from datawaketools.kafka_producer import KafkaProducer
 from extract_phonenumber import ExtractPhoneNumber
 from extract_website import ExtractWebsite
 from extract_email import ExtractEmail
+from extract_info import ExtractInfo
 import datawaketools.entity_data_connector_factory as factory
 
 from datetime import datetime
@@ -85,6 +86,7 @@ def extract(type,extractor,userId,url,html,org,domain):
     #print 'check domain ',domain
     #print values
     (in_domain,not_in_domain) = checkDomain(domain,type,values)
+        
     #print 'in_domain ',in_domain
 
 
@@ -102,7 +104,7 @@ if __name__ == '__main__':
     extractEmail = ExtractEmail()
     extractPhone = ExtractPhoneNumber()
     extractWebsite = ExtractWebsite()
-
+    extractInfo = ExtractInfo()
 
     while True:
         sys.stdout.flush()
@@ -132,6 +134,8 @@ if __name__ == '__main__':
             # PHONES
             extract('phone',extractPhone,userId,url,html,org,domain)
 
+            # INFO
+            extract('info',extractInfo,userId,url,html,org,domain)
 
             entityDataConnector.close()
 

@@ -141,7 +141,7 @@ $(function () {
             enddate: enddate
         });
         $.ajax({
-            type: 'DELETE',
+            type: 'POST',
             url: 'graphservice/deleteUser',
             data: jsonData,
             dataType: 'json',
@@ -588,6 +588,40 @@ function change_highlight() {
 
         SWG.show_legend(Object.keys(trailMap), function (d) {
             return SWG.color(trailMap[d])
+        })
+
+    }
+    
+    else if (index == 8) { // color by info type
+        SWG.clear_legend();
+        
+        var typeMap = {};
+        var i = 0;
+
+        d3.selectAll("svg circle").each(function (d) {
+            //console.log(d);
+                if( !d.trails)
+                {
+                var ent_type = d.name.split(' -> ')[0].split(':')[1];
+                if (!(ent_type in typeMap)) {
+                    typeMap[ent_type] = i;
+                    i = i + 1;
+                }
+                }
+        });
+
+
+        d3.selectAll("svg circle")
+            .style("fill", function (d) {
+                if (!d.trails) {
+                    var ent_type = d.name.split(' -> ')[0].split(':')[1];
+                    return SWG.color(typeMap[ent_type]);
+                }
+                return "black"
+            });
+
+        SWG.show_legend(Object.keys(typeMap), function (d) {
+            return SWG.color(typeMap[d])
         })
 
     }
