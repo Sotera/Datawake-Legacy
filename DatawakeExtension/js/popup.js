@@ -386,7 +386,7 @@ var dwUI = function () {
 
                     // All Extracted entities (NON-MITIE)
                     var mdiv = d3.select("#all_extracted_entities").append("div");
-                    mdiv.append("h2").text("Extracted Entities");
+                    //mdiv.append("h2").text("Extracted Entities");
 
                     var keys = Object.keys(extracted_entities_dict)
                     if (keys.indexOf("info") != -1){
@@ -420,7 +420,7 @@ var dwUI = function () {
                     if ("info" in extracted_entities_dict){
                         d3.select("#mitie-info-div").selectAll("div").remove()
                         var mdiv = d3.select("#mitie-info-div").append("div");
-                        mdiv.append("h2").text("Extracted Info");
+                        //mdiv.append("h2").text("Extracted Info");
 
                         var legend = mdiv.append("div")
                         legend.append("hr")
