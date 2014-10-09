@@ -38,7 +38,7 @@
 
 
 (def crawler-in-spout
-    (kafka-spout "crawler-in" "crawler-in-consumer"))
+    (kafka-spout "crawler-in" "crawler-in"))
 
 
 (def crawler-out-spout
