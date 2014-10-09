@@ -33,6 +33,18 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
 });
 dwConfig.getOptions(function (options) {
     config = options
+
+
+    // once options are loaded load the context menus
+    chrome.contextMenus.create({title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
+    chrome.contextMenus.create({title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+
+    // load the image service context menu if it is available
+    if (config.datawake_imageServiceUrl && config.datawake_imageServiceUrl.length >0 ){
+        chrome.contextMenus.create({title: "Image Service", contexts: ["all"], "onclick": launchImageService});
+    }
+
+
 });
 
 
@@ -158,6 +170,11 @@ chrome.runtime.onMessage.addListener(
             chrome.browserAction.setBadgeText({text: ""});
         }
 
+        // return the image service url
+        else if (request.operation == "get-image-service"){
+            sendResponse({service:config.datawake_imageServiceUrl})
+        }
+
 
         return true;
     });
@@ -232,8 +249,16 @@ function getSelections(info, tab) {
 }
 
 
-chrome.contextMenus.create({title: "Data Wake - capture selection", contexts: ["all"], "onclick": captureSelectedText});
-chrome.contextMenus.create({title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+function launchImageService(info,tab){
+    chrome.tabs.sendMessage(tab.id, {operation: 'enable-image-service'}, function (response) {
+        if (response != "ok"){
+            console.error("Error starting image service on tab: "+tab.id)
+        }
+
+    })
+
+}
+
 
 
 /*

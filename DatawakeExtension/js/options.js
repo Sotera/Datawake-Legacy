@@ -5,6 +5,7 @@ window.onload = function() {
     // define a call back to set option values on UI
     var optionsCallback = function(options){
         $("#service_url").val(options.datawake_serviceUrl);
+        $("#image_service_url").val(options.datawake_imageServiceUrl)
     };
 
 
@@ -40,7 +41,8 @@ window.onload = function() {
     // set save button action
     $("#save").click(function(){
         var options = {
-            datawake_serviceUrl:  $("#service_url").val()
+            datawake_serviceUrl:  $("#service_url").val(),
+            datawake_imageServiceUrl : $("#image_service_url").val()
         };
         dwConfig.saveOptions(options);
     })

@@ -30,12 +30,18 @@ To use sessions you must set the cherrypy configuration.  Currently this is done
 working with kitware to improve for tangelo
 """
 
+MOCK_FORENSIC_AUTH = False
+MOCK_USER_ORG = 'MEMEXDEMO'
+
 
 @tangelo.restful
 def get():
     if 'user' in cherrypy.session:
         return json.dumps(dict(user=cherrypy.session['user'], hasSession=True))
     return json.dumps(dict(hasSession=False))
+
+
+
 
 
 @tangelo.restful
@@ -45,14 +51,14 @@ def post(token=u''):
         tangelo.log('plugin-sever.session tokens matched using existing session.')
         user = cherrypy.session['user']
     else:
-        user = googleauth.getUserFromToken(token)
+        user = googleauth.getUserFromToken(token,mock = MOCK_FORENSIC_AUTH)
         tangelo.log('session.post verified user: '+str(user))
-    if not datawakeconfig.MOCK_AUTH:
+    if not datawakeconfig.MOCK_AUTH and not MOCK_FORENSIC_AUTH:
         orgs = datawake_db.getOrgLinks(user['email'])
         assert(len(orgs) == 1)
         user['org'] = orgs[0]
     else:
-        user['org'] = 'MEMEXDEMO'
+        user['org'] = MOCK_USER_ORG
 
 
     cherrypy.session['user'] = user
