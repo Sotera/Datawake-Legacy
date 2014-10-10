@@ -1,0 +1,21 @@
+{
+    "name": "datawakefirefoxaddon",
+    "fullName": "DatawakeFirefoxAddon",
+    "id": "jid1-NKjAjAgAESlIAg",
+    "description": "a basic add-on",
+    "author": "",
+    "license": "MPL 2.0",
+    "version": "0.1",
+    "permissions": {
+        "private-browsing": true
+    },
+    "preferences": [
+        {
+            "name": "datawakeDeploymentUrl",
+            "title": "Datawake Deployment Address",
+            "description": "Sets the current Datawake instance address.",
+            "type": "string",
+            "value": "http://localhost:8088/datawake-plugin-server"
+        }
+    ]
+}
