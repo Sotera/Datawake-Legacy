@@ -21,8 +21,14 @@ widgetApp.controller("WidgetCtrl", function ($scope) {
         $scope.$apply();
     });
 
-    addon.port.on("resetBadgeColor", function(){
+    addon.port.on("resetBadgeColor", function () {
         $scope.badgeBackground = $scope.defaultBadgeColor;
+        $scope.$apply();
+    });
+
+    addon.port.on("resetWidget", function () {
+        $scope.badgeBackground = $scope.defaultBadgeColor;
+        $scope.badgeText = null;
         $scope.$apply();
     });
 
