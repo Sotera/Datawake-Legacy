@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-extraction of emails from ads
+extraction of emails
 """
 #from extract import Extract
 import re

@@ -13,9 +13,6 @@ MOCK_AUTH = True
 ### DATABASE SETTINGS
 
 
-
-# database files for mysql_roxy_web_tool.py
-# used to store a mapping of vertices to their connected component.
 DATAWAKE_CORE_DB = {
     'database': 'memex_sotera',
     'user': 'root',

@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 
+*.out
+
 # ide files
 *.idea
 .DS_Store

@@ -3,8 +3,8 @@ from distutils.core import setup
 setup(
     name='DataWakeTools',
     version='0.0.1',
-    author='Eric Kimbrel',
-    author_email='eric.kimbrel@soteradefense.com',
+    author='Sotera Defense Solutions',
+    author_email='',
     packages=['datawaketools'],
     scripts=[],
     license='LICENSE.txt',

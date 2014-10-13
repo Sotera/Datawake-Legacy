@@ -112,7 +112,7 @@ def delete_domain(*args, **kwargs):
     domain_name = kwargs.get("domain_name")
     for key in kwargs.keys():
         tangelo.log(key)
-    if db.domain_exists(domain_name) and domain_name is not "memex_ht":
+    if db.domain_exists(domain_name):
         domain_content_connector = factory.getEntityDataConnector()
         db.remove_domain(domain_name)
         domain_content_connector.delete_domain_items(domain_name)

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-extraction of any link URLs from ads
+extraction of any link URLs
 """
 #from extract import Extract
 import re

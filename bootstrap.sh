@@ -37,6 +37,8 @@ apt-get -y install python-pip &> /dev/null
 apt-get -y install python-dev &> /dev/null
 
 
+# install happybase for hbase connections
+pip install happybase &> /dev/null
 
 # install httplib2
 echo "installing httplib2"
