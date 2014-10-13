@@ -4,6 +4,7 @@ var widgetApp = angular.module('widgetApp', []);
 
 widgetApp.controller("WidgetCtrl", function ($scope) {
 
+    $scope.defaultBadgeColor = {"background-color": "#20b2aa"};
     $scope.badgeBackground = {"background-color": "#20b2aa"};
 
     addon.port.on("setBadgeText", function (text) {
@@ -17,6 +18,11 @@ widgetApp.controller("WidgetCtrl", function ($scope) {
 
     addon.port.on("disableBadge", function () {
         $scope.badgeText = null;
+        $scope.$apply();
+    });
+
+    addon.port.on("resetBadgeColor", function(){
+        $scope.badgeBackground = $scope.defaultBadgeColor;
         $scope.$apply();
     });
 

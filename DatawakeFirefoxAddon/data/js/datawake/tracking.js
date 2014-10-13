@@ -18,32 +18,32 @@ function scrapePage() {
         console.info("Emitting page contents....");
         addon.port.emit("contents", data);
     }
-    catch(e){
-        console.info("Unable to Scrape Page: " + e);
+    catch (e) {
+        console.error("Unable to Scrape Page: " + e);
     }
 }
 
 addon.port.on("getContents", scrapePage);
 
 addon.port.on("loadToolTips", function (urls) {
-    try{
-    var $ = document; // shortcut
-    for (var index in urls) {
-        var cssId = 'myCss' + index;  // you could encode the css path itself to generate id..
-        if (!$.getElementById(cssId)) {
-            var head = $.getElementsByTagName('head')[0];
-            var link = $.createElement('link');
-            link.id = cssId;
-            link.rel = 'stylesheet';
-            link.type = 'text/css';
-            link.href = urls[index];
-            link.media = 'all';
-            head.appendChild(link);
+    try {
+        var $ = document; // shortcut
+        for (var index in urls) {
+            var cssId = 'myCss' + index;  // you could encode the css path itself to generate id..
+            if (!$.getElementById(cssId)) {
+                var head = $.getElementsByTagName('head')[0];
+                var link = $.createElement('link');
+                link.id = cssId;
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                link.href = urls[index];
+                link.media = 'all';
+                head.appendChild(link);
+            }
         }
     }
-    }
-    catch(e){
-        console.info("Do not have access to the document.");
+    catch (e) {
+        console.error("Do not have access to the document.");
     }
 });
 

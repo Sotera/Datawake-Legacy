@@ -50,7 +50,6 @@ panelApp.controller("PanelCtrl", function ($scope) {
         }
         console.info("Parsing Extracted Entities...");
         parseExtractedEntities(extracted_entities_dict);
-        console.info("Setting the extracted entities dictionary..");
     });
 
     addon.port.on("lookaheadTimerResults", function (lookahead) {
@@ -127,24 +126,25 @@ panelApp.controller("PanelCtrl", function ($scope) {
         $scope.$apply();
     }
 
-
 });
 
 
 $(document).ready(function () {
-
     $('#domain_extracted_entities a').click(function (e) {
         e.preventDefault()
         $(this).tab('show')
     });
+
     $('#lookahead a').click(function (e) {
         e.preventDefault()
         $(this).tab('show')
     });
+
     $('#all_extracted_entities a').click(function (e) {
         e.preventDefault()
         $(this).tab('show')
     });
+
     $('#domain_extracted_entities a').trigger('click');
 });
 
