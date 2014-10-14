@@ -7,9 +7,6 @@ var requestHelper = require("./request-helper");
 var storage = require("./storage");
 var tracking = require("./tracking");
 
-
-//TODO: Fix bug of two tabs with the same URL.
-
 exports.useContextMenu = useContextMenu;
 exports.cleanUpTab = cleanUpTab;
 

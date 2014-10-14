@@ -5,7 +5,7 @@ var widget = require("sdk/widget");
 var tabs = require("sdk/tabs");
 var timer = require("sdk/timers");
 
-var externalLinkHelper = require("./externallinks");
+var externalLinkHelper = require("./external-links");
 var storage = require("./storage");
 var constants = require("./constants");
 var requestHelper = require("./request-helper");
@@ -20,9 +20,6 @@ var datawakeWidget;
 var lookaheadTimerId;
 var advanceSearchTimerId;
 var badgeForTab = {};
-
-//TODO: Manage the timeout interval. May not need to do this.
-//TODO: Clear the interval when a tab switches or something is reloaded.
 
 /**
  * Emits the datawakeInfo to the panel attached to the widget
