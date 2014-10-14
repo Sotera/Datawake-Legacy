@@ -1,5 +1,5 @@
-from bolts.extractors.extract_website import ExtractWebsite
-from bolts.extractors.extractor_bolt import ExtractorBolt
+from extractors.extract_website import ExtractWebsite
+from datawakestreams.extractors.extractor_bolt import ExtractorBolt
 
 class WebsiteBolt(ExtractorBolt):
 

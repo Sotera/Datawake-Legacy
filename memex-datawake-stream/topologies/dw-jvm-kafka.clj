@@ -89,81 +89,9 @@
     ;; bolt configuration
     {
 
-    ;; DATAWAKE VISITED
-
-    ;; parse and dispatch messages from the datawake visited queue
-    "dw-visited-incoming" (python-bolt-spec
-          options
-          ;; input
-          { "incoming-dw-visited-spout" :shuffle }
-          ;; Python class
-          "bolts.dwvisited.datawake_visited_kafka_bolt.DatawakeVisitedKafkaBolt"
-           ;; output
-           ["url", "status", "headers", "flags", "body", "timestamp", "source","context"]
-          ;; parallelism
-          :p 1
-      )
-
-    "website-bolt" (python-bolt-spec
-               options
-               {"dw-visited-incoming" :shuffle }
-               "bolts.extractors.website_bolt.WebsiteBolt"
-                ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
-               )
-
-    "email-bolt" (python-bolt-spec
-             options
-             {"dw-visited-incoming" :shuffle }
-             "bolts.extractors.email_bolt.EmailBolt"
-             ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
-             )
-
-    "phone-bolt" (python-bolt-spec
-             options
-             {"dw-visited-incoming" :shuffle }
-             "bolts.extractors.phone_bolt.PhoneBolt"
-             ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
-             )
-
-
-    "writer-bolt" (python-bolt-spec
-              options
-              {"email-bolt" :shuffle
-              "phone-bolt" :shuffle
-              "website-bolt" :shuffle }
-              "bolts.dwvisited.datawake_visited_writer_bolt.DatawakeVisitedWriterBolt"
-              []
-              )
-
-     ;;  END DATAWAKE VISITED
 
 
 
-    ;; CRAWLER-IN
-    ;; local stand in for crawling infrastructure
-    "crawler-bolt" ( python-bolt-spec
-             options
-             { "incoming-crawler-spout" :shuffle }
-             "bolts.crawler_bolt.CrawlerBolt"
-             ["url", "status", "headers", "flags", "body", "timestamp", "source","context"]
-             :p 1
-             )
-
-    ;; END CRALWER -IN
-
-
-
-    ;; CRAWLER-OUT / DATAWAKE LOOKAHEAD
-
-    ;; note - almost a duplicate of dw-visited, but is seperated
-    ;; to keep visted latency down
-
-
-
-
-    ;; END CRAWLER-OUT / DATAWAKE LOOKAHEAD
-
-
-}
+    }
 ]
 )

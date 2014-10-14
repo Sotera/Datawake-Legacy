@@ -1,5 +1,5 @@
-from bolts.extractors.extract_phonenumber import ExtractPhoneNumber
-from bolts.extractors.extractor_bolt import ExtractorBolt
+from extractors.extract_phonenumber import ExtractPhoneNumber
+from datawakestreams.extractors.extractor_bolt import ExtractorBolt
 
 class PhoneBolt(ExtractorBolt):
 

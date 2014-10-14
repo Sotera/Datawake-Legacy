@@ -1,5 +1,5 @@
-from bolts.extractors.extract_email import ExtractEmail
-from bolts.extractors.extractor_bolt import ExtractorBolt
+from extractors.extract_email import ExtractEmail
+from datawakestreams.extractors.extractor_bolt import ExtractorBolt
 
 class EmailBolt(ExtractorBolt):
 

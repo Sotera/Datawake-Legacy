@@ -6,7 +6,7 @@ from streamparse.bolt import Bolt
 class ExtractorBolt(Bolt):
     """
     ExtractorBolt
-    General purprose bot to be used with an python extractor.  to over ride
+    General purpose bolt to be used with an python extractor.  to override
 
     class MyBolt(ExtractorBolt):
 
@@ -33,16 +33,15 @@ class ExtractorBolt(Bolt):
             t.append(context)
         if len(tuples) > 0:
             self.emit_many(tuples)
-        for t in tuples:
-            try:
-                self.log(self.name+" "+t[1])
-            except UnicodeEncodeError:
-                self.log(self.name+" ascii codec can't encode character")
+            self.log(self.name+" emited "+str(len(tuples))+" from url: "+url.encode('utf-8'),level='debug')
+            #for tuple in tuples:
+            #    self.log(self.name+" emited "+str(tuple[0])+":"+str(tuple[1])+" from url: "+url.encode('utf-8'),level='trace')
+
 
     def ack(self, tup):
         #self.log("\n"+self.name+" acked tuple")
         Bolt.ack(self,tup)
 
     def fail(self, tup):
-        #self.log("\n"+self.name+" FAILED TUPLE\n")
+        self.log("\n"+self.name+" FAILED TUPLE\n",level='error')
         Bolt.fail(self,tup)

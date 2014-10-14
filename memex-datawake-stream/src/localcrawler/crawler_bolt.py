@@ -1,11 +1,15 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
+from extractors.extract_website import ExtractWebsite
+from kafka.client import KafkaClient
+from kafka.producer import SimpleProducer
 import datetime
 import operator
 import time
 import urllib2
 import traceback
 import json
+from datawakestreams import all_settings
 
 class CrawlerBolt(Bolt):
     """
@@ -21,7 +25,22 @@ class CrawlerBolt(Bolt):
         Bolt.__init__(self)
         self.seen = {}
         self.lastfetch = datetime.datetime.now()
+        self.linkExtractor = ExtractWebsite()
 
+
+    def initialize(self,storm_conf, context):
+        try:
+            self.log("CrawlerBolt INIT")
+            settings = all_settings.get_settings(storm_conf['topology.deployment'])
+            self.topic = settings['crawler-out-topic'].encode()
+            self.conn_pool = settings['conn_pool'].encode()
+            self.log('CrawlerQueueWriter initialized with topic ='+self.topic+' conn_pool='+self.conn_pool)
+            self.kafka = KafkaClient(self.conn_pool)
+            self.producer = SimpleProducer(self.kafka, async=False)
+        except:
+            self.log("CrawlerBolt initialize error",level='error')
+            self.log(traceback.format_exc(),level='error')
+            raise
 
 
     def process(self, tup):
@@ -60,7 +79,7 @@ class CrawlerBolt(Bolt):
 
         """
 
-        input = json.loads(tup.values[0])
+        input = tup.values[0]
 
         url = input['url']
 
@@ -76,11 +95,11 @@ class CrawlerBolt(Bolt):
 
         delta = now - self.lastfetch
         if delta.total_seconds < 0.25:
-            self.log("CrawlerBolt sleeping")
+            #self.log("CrawlerBolt sleeping")
             time.sleep(.25)
 
 
-        self.log("CrawlerBolt fetching: "+url)
+        #self.log("CrawlerBolt fetching: "+url)
         opener = urllib2.build_opener()
         headers = [("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0")]
         opener.addheaders = headers
@@ -88,28 +107,36 @@ class CrawlerBolt(Bolt):
             response = opener.open(url)
             html = response.read()#.encode('ascii', 'ignore')
 
-            output = {
-                'id': input['id'],
-                'url': url,
-                'status_code': response.getcode(),
-                'status_msg': 'Success',
-                "timestamp": response.info()['date'],
-                "links_found": [], # TODO
-                "raw_html" : html,
-                "attrs": input['attrs']
-            }
+            links = self.linkExtractor.extract(url, response.getcode(), '', '', html, response.info()['date'], 'datawake-local-crawler')
+            links = map(lambda x: x.value,links)
+            links = filter(lambda x: x is not None and len(x) >0, links)
+            #self.log("CrawlerBolt extracted links: "+str(links))
 
-            self.emit([json.dumps(output)])
+            output = dict(
+                 id = input['id'],
+                 appid = input['appid'],
+                 url = url,
+                 status_code = response.getcode(),
+                 status_msg = 'Success',
+                 timestamp = response.info()['date'],
+                 links_found = links,
+                 raw_html =  html,
+                 attrs = input['attrs']
+            )
 
-            self.log("CrawlerBolt fetched: "+url+" status: "+str(response.getcode()))
+
+            #self.emit([json.dumps(output)])
+            self.producer.send_messages(self.topic, json.dumps(output))
+
+            self.log("CrawlerBolt fetched: "+url+" status: "+str(response.getcode()),level='debug')
             self.lastfetch = datetime.datetime.now()
         except:
-            self.log("error fetching url: "+value)
+            self.log("error fetching url: "+url,level='error')
             self.log(traceback.format_exc())
 
 
         if len(self.seen) > self.MAX_LRU_SIZE:
-            self.log("CrawlerBolt truncating LRU cache")
+            self.log("CrawlerBolt truncating LRU cache",level='trace')
             sorted_x = sorted(self.seen.items(), key=operator.itemgetter(1))[0:self.TRUNCATE]
             self.seen = dict(sorted_x)
 

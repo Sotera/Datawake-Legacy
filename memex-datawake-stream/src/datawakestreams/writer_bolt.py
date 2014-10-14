@@ -8,6 +8,8 @@ class FileWriterBolt(Bolt):
     """
     WriterBolt
 
+    For local testing only, write output to a local file
+
     """
 
     def __init__(self):
@@ -32,6 +34,7 @@ class FileWriterBolt(Bolt):
         """
         (attribute,value,extracted_raw,extracted_metadata,context) = tup.values
         buffer = []
+        buffer.append(context['source'])
         buffer.append(context['org'])
         buffer.append(context['domain'])
         buffer.append(context['url'])
@@ -39,7 +42,5 @@ class FileWriterBolt(Bolt):
         buffer.append(context['userId'])
         buffer.append(value)
         buffer.append(extracted_raw)
-        # dt?
-        self.log(buffer)
         self.fobj.write(','.join(buffer)+'\n')
 
