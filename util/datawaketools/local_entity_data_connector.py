@@ -293,8 +293,8 @@ class MySqlEntityDataConnector(DataConnector):
     def get_domain_items(self, name, limit):
         self._checkConn()
         cursor = self.cnx.cursor()
-        sql = "select rowkey from datawake_domain_entities where rowkey like %s limit %s"
-        params = [name + '\0%', limit]
+        sql = "select rowkey from datawake_domain_entities where rowkey >= %s and rowkey <= %s limit %s"
+        params = [name + '\0',name+"~", limit]
         try:
             cursor.execute(sql, params)
             rows = cursor.fetchall()
