@@ -2,9 +2,10 @@
 
 ## How to make the xpi file
 1. First you need to get setup with the [Firefox SDK](https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation).
-2. After you have the sdk installed, navigate to the FirefoxAddon directory and run the command: `cfx xpi` .
-3. You can now open Firefox/Tor and [install the add-on manually](http://www.accessfirefox.org/Install_Addon_Manually.php).
-4. (Optional) Set up Google Authentication.
+2. Second you need to download [OAuthorizer](https://github.com/mozilla/oauthorizer) and put it in $SDK/packages/.
+3. After you have the SDK and OAuthorizer installed, navigate to the FirefoxAddon directory and run the command: `cfx xpi` .
+4. You can now open Firefox/Tor and [install the add-on manually](http://www.accessfirefox.org/Install_Addon_Manually.php).
+5. (Optional) Set up Google Authentication.
 
 ## Google Authentication
 1. First you need to set up your native application keys on the [Google Developer Console](https://console.developers.google.com/).
@@ -27,3 +28,4 @@
 
 ## Google Permissions
 - We only get your email and full name to authenticate.
+
