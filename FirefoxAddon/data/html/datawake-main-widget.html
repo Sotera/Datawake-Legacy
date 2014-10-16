@@ -1,0 +1,26 @@
+<html ng-app="widgetApp">
+<head>
+    <meta charset="utf-8"/>
+    <style type="text/css">
+        #badgeCSS {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            font: 8px Sans-Serif;
+            color: #FFFFFF;
+            font-weight: bold;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body ng-controller="WidgetCtrl">
+
+<img src="../img/waveicon16.png"/>
+
+<div id="badgeCSS" ng-style="badgeBackground" ng-show="badgeText != null">{{badgeText}}</div>
+<script src="../js/min/jquery-1.11.1.min.js"></script>
+<script src="../js/min/angular.min.js"></script>
+<script src="../js/min/bootstrap.min.js"></script>
+<script src="../js/datawake/widget.js"></script>
+</body>
+</html>
