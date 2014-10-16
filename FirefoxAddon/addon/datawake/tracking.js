@@ -28,9 +28,15 @@ var trackingTabWorkers = {};
 function trackTab(tab, datawakeInfo) {
     destoryTabWorker(tab.id);
     storage.setDatawakeInfo(tab.id, datawakeInfo);
-    tab.on('pageshow', setupTabWorkerAndServices);
-    tab.on('activate', switchTab);
-    tab.on('close', close);
+    if (datawakeInfo.isDatawakeOn) {
+        tab.on('pageshow', setupTabWorkerAndServices);
+        tab.on('activate', switchTab);
+        tab.on('close', close);
+    } else {
+        tab.removeListener('pageshow', setupTabWorkerAndServices);
+        tab.removeListener('activate', switchTab);
+        tab.removeListener('close', close);
+    }
 }
 
 /**
@@ -64,7 +70,7 @@ function setupTabWorkerAndServices(tab) {
         //Posts the scrape contents to the server.
         trackingTabWorker.port.on("contents", function (data) {
             console.info("Scraping Page");
-            var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+            var currentTrackingTabWorker = trackingTabWorkers[tab.id];
             data.url = currentTrackingTabWorker.tab.url;
             var url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/scrape";
             requestHelper.post(url, JSON.stringify(data), function (response) {
@@ -82,7 +88,6 @@ function setupTabWorkerAndServices(tab) {
         //Emits the datawake info object associated with the tab.
         trackingTabWorker.port.emit("datawakeInfo", datawakeInfoForTab);
         //Scrapes the contents of the page
-        //TODO: Figure out a way to detect google url changes when searching.
         trackingTabWorker.port.emit("getContents");
 
     }
@@ -149,7 +154,6 @@ function setTabWorker(tabId, worker) {
  * @param tab Tab to switch.
  */
 function switchTab(tab) {
-    console.info("Tab Active");
     var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
     widgetHelper.switchToTab(tab.id, datawakeInfoForTab);
 }

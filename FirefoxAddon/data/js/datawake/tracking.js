@@ -102,3 +102,6 @@ addon.port.on("highlightWithToolTips", function (helperObject) {
         i = i + 1
     }
 });
+$(document).ready(function () {
+    $(window).on('hashchange', scrapePage);
+});

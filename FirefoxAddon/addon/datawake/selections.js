@@ -52,7 +52,7 @@ function useContextMenu(postId, url) {
  * @param postId The PostId to set.
  * @param tabId The TabId to associate.
  */
-function setPostId(postId, tabId){
+function setPostId(postId, tabId) {
     deletePostId(tabId);
     postIds[tabId] = postId;
 }
@@ -61,8 +61,8 @@ function setPostId(postId, tabId){
  * Deletes the postId associated with a tabId.
  * @param tabId The tabid to delete.
  */
-function deletePostId(tabId){
-    if(tabId in postIds)
+function deletePostId(tabId) {
+    if (tabId in postIds)
         delete postIds[tabId];
 }
 
@@ -118,7 +118,7 @@ function destroyPreviousContextMenu(tabId) {
  * Cleans up and frees all memory associated with a tab.
  * @param tabId The tabId to free.
  */
-function cleanUpTab(tabId){
+function cleanUpTab(tabId) {
     destroyPreviousContextMenu(tabId);
     deletePostId(tabId);
 }

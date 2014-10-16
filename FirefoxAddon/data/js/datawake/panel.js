@@ -10,9 +10,29 @@ panelApp.controller("PanelCtrl", function ($scope) {
 
     addon.port.on("datawakeInfo", function (datawakeInfo) {
         $scope.datawake = datawakeInfo;
+        $scope.hideSignInButton = datawakeInfo.user != null;
         $scope.lookaheadLinks = [];
         $scope.extracted_tools = [];
         $scope.lookaheadTimerStarted = false;
+        $scope.$apply();
+    });
+
+    $scope.signIn = function () {
+        addon.port.emit("signIn");
+    };
+
+    $scope.signOut = function () {
+        addon.port.emit("signOut");
+    };
+
+    addon.port.on("signOutComplete", function () {
+        $scope.hideSignInButton = false;
+        $scope.$apply();
+    });
+
+    addon.port.on("sendUserInfo", function(user){
+        $scope.datawake.user = user;
+        $scope.hideSignInButton = true;
         $scope.$apply();
     });
 
@@ -28,6 +48,13 @@ panelApp.controller("PanelCtrl", function ($scope) {
 
     addon.port.on("invalidTab", function () {
         $scope.invalidTab = true;
+        $scope.$apply();
+    });
+
+    addon.port.on("authType", function(type){
+        var auth = {};
+        auth.type = type;
+        $scope.auth = auth;
         $scope.$apply();
     });
 

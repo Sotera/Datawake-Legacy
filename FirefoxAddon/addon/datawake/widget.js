@@ -10,6 +10,7 @@ var storage = require("./storage");
 var constants = require("./constants");
 var requestHelper = require("./request-helper");
 var tracking = require("./tracking");
+var authHelper = require("./auth-helper");
 
 exports.useWidget = useWidget;
 exports.switchToTab = switchToTab;
@@ -141,6 +142,7 @@ function widgetOnClick(tabWidget) {
         //Get the rank info and listen for someone ranking the page.
         emitRanks(tabWidget, datawakeInfo);
         tabWidget.panel.port.on("setUrlRank", setUrlRank);
+        attachAuthListeners(tabWidget);
 
     }
     else {
@@ -148,6 +150,27 @@ function widgetOnClick(tabWidget) {
         tabWidget.panel.port.emit("invalidTab");
         console.info("Invalid Tab");
     }
+}
+
+/**
+ * Attaches auth listeners to the widget panel.
+ * @param tabWidget Widget with attached panel.
+ */
+function attachAuthListeners(tabWidget){
+
+    tabWidget.panel.port.emit("authType", authHelper.authType());
+
+    tabWidget.panel.port.on("signIn", function () {
+        authHelper.signIn(function (response) {
+            tabWidget.panel.port.emit("sendUserInfo", response.json);
+        });
+    });
+
+    tabWidget.panel.port.on("signOut", function(){
+        authHelper.signOut(function(response){
+            tabWidget.panel.port.emit("signOutComplete");
+        });
+    });
 }
 
 /**
@@ -275,10 +298,10 @@ function switchToTab(tabId, datawakeInfo, badgeCount) {
     clearTimers();
     if (badgeCount != undefined) {
         deleteBadgeForTab(tabId);
-        badgeForTab[tabId] = badgeCount
+        badgeForTab[tabId] = badgeCount;
+        setBadge(badgeForTab[tabId]);
     }
     datawakeWidget.port.emit("resetBadgeColor");
-    setBadge(badgeForTab[tabId]);
     addValidTabAndData(datawakeInfo);
     advancedSearch(1000);
 }

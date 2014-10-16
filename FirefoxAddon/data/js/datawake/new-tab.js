@@ -2,6 +2,8 @@ var addon = self;
 var newTabApp = angular.module('newTabApp', []);
 newTabApp.controller("NewTabCtrl", function ($scope) {
 
+    $scope.isDatawakeOn = false;
+
     addon.port.on("sendDomains", function (domains) {
         domains.shift();
         $scope.domains = domains;
@@ -15,9 +17,32 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     });
 
     addon.port.on("sendUserInfo", function (user) {
-        $scope.user = user;
+        if(!user.hasOwnProperty("session")){
+            $scope.user = user;
+            $scope.hideSignInButton = true;
+            $scope.$apply();
+        }
+    });
+
+    addon.port.on("authType", function (auth) {
+        $scope.auth = auth;
+        if (auth.type == 2) {
+            $scope.signIn();
+        }
+    });
+
+    addon.port.on("signOutComplete", function () {
+        $scope.hideSignInButton = false;
         $scope.$apply();
     });
+
+    $scope.signIn = function () {
+        addon.port.emit("signIn");
+    };
+
+    $scope.signOut = function () {
+        addon.port.emit("signOut");
+    };
 
     addon.port.on("newTrail", function (trailObject) {
         $scope.trails.push(trailObject);

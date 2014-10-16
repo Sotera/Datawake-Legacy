@@ -10,12 +10,11 @@
 <body ng-controller="PanelCtrl">
 <div class="container">
     <div class="btn-group-vertical" ng-hide="invalidTab">
-        <!-- TODO: Add Google Auth -->
         <div class="col-lg-4">
             <div class="row">
-                <div class="col-md-6">
-                    <button id="signin">Sign in</button>
-                    <button id="revoke">Sign out</button>
+                <div class="col-md-6" ng-show="auth.type == 1">
+                    <button id="signin" ng-show="!hideSignInButton" ng-click="signIn()">Sign in</button>
+                    <button id="revoke" ng-show="hideSignInButton" ng-click="signOut()">Sign out</button>
                 </div>
                 <div class="col-md-3">
                     <div id="user_info">{{datawake.user.userName}}</div>

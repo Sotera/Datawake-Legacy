@@ -6,13 +6,12 @@ var tabs = require("sdk/tabs");
 var self = require("sdk/self");
 var data = self.data;
 
-var authHelper = require("./mock");
+var authHelper = require("./auth-helper");
 var trackingHelper = require("./tracking");
 var constants = require("./constants");
 var storage = require("./storage");
 var requestHelper = require("./request-helper");
 
-authHelper.useMockAuth();
 
 exports.useDatawake = useDatawake;
 
@@ -59,9 +58,25 @@ function setupNewTabListener(worker) {
             worker.port.emit("sendTrails", response.json.trails);
         });
     });
-    //Handles Authentication.  Currently Mocks it.
-    authHelper.getLoggedInUser(function (response) {
-        worker.port.emit("sendUserInfo", response.json);
+
+    worker.port.on("signIn", function () {
+        authHelper.signIn(function (response) {
+            //Just a work around due to the activeTab issue.
+            //SEE: https://bugzilla.mozilla.org/show_bug.cgi?id=942511
+            if (authHelper.authType() == 1) {
+                tabs.open("about:newtab");
+                worker.tab.close();
+                worker.destroy();
+            } else {
+                worker.port.emit("sendUserInfo", response.json);
+            }
+        });
+    });
+
+    worker.port.on("signOut", function () {
+        authHelper.signOut(function (response) {
+            worker.port.emit("signOutComplete");
+        });
     });
 
     //Handles creating a trail for a domain.
@@ -88,6 +103,13 @@ function setupNewTabListener(worker) {
         trackingHelper.trackTab(worker.tab, datawakeInfo);
     });
 
+    var auth = {};
+    auth.type = authHelper.authType();
+    worker.port.emit("authType", auth);
+
+    authHelper.getLoggedInUser(function (response) {
+        worker.port.emit("sendUserInfo", response.json);
+    });
 
 }
 

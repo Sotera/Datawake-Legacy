@@ -1,3 +1,4 @@
+var addOnPrefs = require("sdk/simple-prefs").prefs;
 var requestHelper = require("./request-helper");
 
 exports.getExternalLinks = getExternalLinks;

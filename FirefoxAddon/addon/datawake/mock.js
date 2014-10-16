@@ -5,8 +5,9 @@ var addOnPrefs = require("sdk/simple-prefs").prefs;
 
 var requestHelper = require("./request-helper");
 
-exports.useMockAuth = useMockAuth;
 exports.getLoggedInUser = getLoggedInUser;
+exports.signIn = signIn;
+exports.signOut = signOut;
 
 var MOCK_TOKEN = "123456";
 var loggedInUser;
@@ -76,13 +77,14 @@ function userLoginComplete(response) {
 /**
  * Triggers Mock Authentication.
  */
-function mockAuth() {
-    mockLogin(userLoginComplete);
+function mockAuth(callback) {
+    mockLogin(callback);
 }
 
-/**
- * Turns on Mock Auth whenever a new tab is opened.
- */
-function useMockAuth() {
-    tabs.on("open", mockAuth);
+function signIn(callback) {
+    mockAuth(callback);
+}
+
+function signOut(callback) {
+    requestHelper.delete(addOnPrefs.datawakeDeploymentUrl + "/session", callback);
 }
