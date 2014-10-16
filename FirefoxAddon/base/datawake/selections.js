@@ -78,7 +78,6 @@ function highlightAllTextOnPage(tabId, datawakeInfo) {
         trail: datawakeInfo.trail.name,
         url: tabUrl
     });
-    console.info(post_data);
     var post_url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/selections";
     requestHelper.post(post_url, post_data, function (response) {
         tracking.emitHighlightTextToTabWorker(tabId, response.json);
@@ -92,7 +91,6 @@ function highlightAllTextOnPage(tabId, datawakeInfo) {
  * @param selectionText The text selected.
  */
 function saveWindowSelection(datawakeInfo, postId, selectionText) {
-    console.info(selectionText);
     var post_data = JSON.stringify({
         postId: postId,
         selection: selectionText,

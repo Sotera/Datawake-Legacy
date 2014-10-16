@@ -22,10 +22,6 @@ function signOut(callback) {
     auth[addOnPrefs.useGoogleAuth].signOut(callback);
 }
 
-function authType() {
-    return auth[addOnPrefs.useGoogleAuth].authType();
-}
-
 function getLoggedInUser(callback) {
     auth[addOnPrefs.useGoogleAuth].getLoggedInUser(callback);
 }

@@ -17,7 +17,7 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     });
 
     addon.port.on("sendUserInfo", function (user) {
-        if(!user.hasOwnProperty("session")){
+        if (!user.hasOwnProperty("session")) {
             $scope.user = user;
             $scope.hideSignInButton = true;
             $scope.$apply();
@@ -58,7 +58,7 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     addon.port.on("hasDatawakeInfo", function (previousDatawakeInfo) {
         $scope.selectedTrail = previousDatawakeInfo.trail;
         $scope.selectedDomain = previousDatawakeInfo.domain;
-        $scope.isDatawakeOn = true;
+        $scope.isDatawakeOn = previousDatawakeInfo.isDatawakeOn;
         $scope.$apply();
     });
 

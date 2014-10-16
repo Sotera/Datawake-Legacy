@@ -20,20 +20,25 @@ function interactiveSignIn(callback) {
         'response_type': 'code',
         'xoauth_displayname': "DataWake Firefox/Tor Extension",
         'scope': "https://www.googleapis.com/auth/plus.login email",
-        'access_type': 'online',
-        "approval_prompt": "force"
+        'access_type': 'online'
     };
 
 
     function tokenCallback(svc) {
         //Google Specific Token Request.
+        console.log(JSON.stringify(svc));
         requestHelper.postCode("https://accounts.google.com/o/oauth2/token", svc, function (response) {
             postUserLogin(response.json["access_token"], callback);
         });
     }
 
     var handler = OAuthConsumer.getAuthorizer(p, tokenCallback);
-    handler.startAuthentication();
+    try {
+        handler.startAuthentication();
+    } catch (e) {
+        console.error("The Google parameters are incorrect.");
+        console.log(e);
+    }
 }
 
 function postUserLogin(token, callback) {

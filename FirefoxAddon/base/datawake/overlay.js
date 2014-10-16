@@ -55,7 +55,11 @@ function setupNewTabListener(worker) {
     worker.port.on("getTrails", function (domain) {
         console.info("Getting trails for " + domain + "!");
         getTrails(domain, function (response) {
-            worker.port.emit("sendTrails", response.json.trails);
+            if (response.status != 501) {
+                worker.port.emit("sendTrails", response.json.trails);
+            } else {
+                console.error("There was an error getting trails: " + response.message);
+            }
         });
     });
 

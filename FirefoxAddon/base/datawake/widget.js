@@ -133,17 +133,14 @@ function setupTimerListeners() {
  * @param tabWidget Tab Widget that was clicked.
  */
 function widgetOnClick(tabWidget) {
-    if (storage.hasDatawakeInfoForTab(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
+    var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
+    if (datawakeInfo != null && datawakeInfo.isDatawakeOn && constants.isValidUrl(tabs.activeTab.url)) {
         //Emit that it is a validTab to Scrape
         console.info("Valid Tab");
         tabWidget.panel.port.emit("validTab");
-        //Get the datawakeInfo associated with this tab.
-        var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
         //Get the rank info and listen for someone ranking the page.
         emitRanks(tabWidget, datawakeInfo);
         tabWidget.panel.port.on("setUrlRank", setUrlRank);
-        attachAuthListeners(tabWidget);
-
     }
     else {
         //Emit that it is not a valid tab.
@@ -152,26 +149,6 @@ function widgetOnClick(tabWidget) {
     }
 }
 
-/**
- * Attaches auth listeners to the widget panel.
- * @param tabWidget Widget with attached panel.
- */
-function attachAuthListeners(tabWidget){
-
-    tabWidget.panel.port.emit("authType", authHelper.authType());
-
-    tabWidget.panel.port.on("signIn", function () {
-        authHelper.signIn(function (response) {
-            tabWidget.panel.port.emit("sendUserInfo", response.json);
-        });
-    });
-
-    tabWidget.panel.port.on("signOut", function(){
-        authHelper.signOut(function(response){
-            tabWidget.panel.port.emit("signOutComplete");
-        });
-    });
-}
 
 /**
  * Resets the widget to an invalid state.
