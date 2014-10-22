@@ -22,7 +22,7 @@ panelApp.controller("PanelCtrl", function ($scope) {
         $scope.$apply();
     });
 
-    addon.port.on("sendUserInfo", function(user){
+    addon.port.on("sendUserInfo", function (user) {
         $scope.datawake.user = user;
         $scope.$apply();
     });
@@ -48,19 +48,24 @@ panelApp.controller("PanelCtrl", function ($scope) {
         $scope.$apply();
     });
 
+    addon.port.on("entitiesInDomain", function (extractedEntities) {
+        $scope.entities_in_domain = extractedEntities;
+        $scope.$apply();
+    });
+
     addon.port.on("entities", function (extracted_entities_dict) {
         if (!$scope.lookaheadTimerStarted) {
-            if ("website" in extracted_entities_dict) {
+            if (extracted_entities_dict.hasOwnProperty("website")) {
                 var lookaheadTimerObject = {};
                 lookaheadTimerObject.links = Object.keys(extracted_entities_dict["website"]);
-                lookaheadTimerObject.datawakeInfo = $scope.datawake;
                 addon.port.emit("startLookaheadTimer", lookaheadTimerObject);
                 $scope.lookaheadTimerStarted = true;
                 $scope.$apply();
             }
         }
-        console.info("Parsing Extracted Entities...");
-        parseExtractedEntities(extracted_entities_dict);
+        console.debug("Parsing Extracted Entities...");
+        $scope.extracted_entities_dict = extracted_entities_dict;
+        $scope.$apply();
     });
 
     addon.port.on("lookaheadTimerResults", function (lookahead) {
@@ -71,10 +76,13 @@ panelApp.controller("PanelCtrl", function ($scope) {
         }
     });
 
-    addon.port.on("fetchEntitiesTimerResults", parseExtractedEntities);
+    addon.port.on("badgeCount", function (badgeCount) {
+        $scope.pageVisits = badgeCount;
+        $scope.$apply();
+    });
 
     addon.port.on("externalLinks", function (links) {
-        console.info("Loading External Entities..");
+        console.debug("Loading External Entities..");
         $scope.extracted_tools = links;
         $scope.$apply();
     });
@@ -119,43 +127,26 @@ panelApp.controller("PanelCtrl", function ($scope) {
         addon.port.emit("setUrlRank", rank_data);
     }
 
-    function parseExtractedEntities(extracted_entities_dict) {
-        var entities_in_domain = [];
-        for (var type in extracted_entities_dict) {
-            for (var name in extracted_entities_dict[type]) {
-                var entity = {};
-                if (extracted_entities_dict[type][name] == "y") {
-                    entity.name = name;
-                    entity.type = type;
-                    entities_in_domain.push(entity);
-                }
-            }
-        }
-
-        $scope.entities_in_domain = entities_in_domain;
-        $scope.extracted_entities_dict = extracted_entities_dict;
-        $scope.$apply();
-    }
-
 });
 
 
 $(document).ready(function () {
-    $('#domain_extracted_entities a').click(function (e) {
-        e.preventDefault()
-        $(this).tab('show')
+    var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
+    domainExtractedEntities.click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
     });
 
-    $('#lookahead a').click(function (e) {
-        e.preventDefault()
-        $(this).tab('show')
+    $('#lookahead').find('a').first().click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
     });
 
-    $('#all_extracted_entities a').click(function (e) {
-        e.preventDefault()
-        $(this).tab('show')
+    $('#all_extracted_entities').find('a').first().click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
     });
 
-    $('#domain_extracted_entities a').trigger('click');
+    domainExtractedEntities.trigger('click');
 });
 

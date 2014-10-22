@@ -1,29 +1,18 @@
 var addon = self;
-var datawakeInfo;
-
-addon.port.on("datawakeInfo", function (info) {
-    console.info("Currently tracking...");
-    datawakeInfo = info;
-});
 
 function scrapePage() {
     try {
-        var data = {
+        var pageContents = {
             cookie: document.cookie,
-            html: $('body').html(),
-            userName: datawakeInfo.userName,
-            domain: datawakeInfo.domain.name,
-            trail: datawakeInfo.trail.name
+            html: encodeURI($('body').html())
         };
-        console.info("Emitting page contents....");
-        addon.port.emit("contents", data);
+        console.debug("Emitting page contents....");
+        addon.port.emit("contents", pageContents);
     }
     catch (e) {
         console.error("Unable to Scrape Page: " + e);
     }
 }
-
-addon.port.on("getContents", scrapePage);
 
 addon.port.on("loadToolTips", function (urls) {
     try {
@@ -55,19 +44,19 @@ addon.port.on("highlight", function (selectionObject) {
 });
 
 addon.port.on("highlightWithToolTips", function (helperObject) {
-    console.info("Highlight with tool tips..");
+    console.debug("Highlight with tool tips..");
     var i = 0;
     var entities = helperObject.entities;
-    var links = helperObject.links;
+    var externalLinks = helperObject.links;
     for (var index in entities) {
         var typeObj = entities[index];
         var value = typeObj.name;
         var key = typeObj.type;
         $('body').highlight(value, 'datawake-highlight-' + i);
-        if (links.length > 0) {
+        if (externalLinks.length > 0) {
             var content = '<div> <h4>' + key + ":" + value + '</h4>';
-            for (var j in links) {
-                var linkObj = links[j];
+            for (var j in externalLinks) {
+                var linkObj = externalLinks[j];
                 var link = linkObj.link;
                 link = link.replace("$ATTR", encodeURI(key));
                 link = link.replace("$VALUE", encodeURI(value));
@@ -99,9 +88,11 @@ addon.port.on("highlightWithToolTips", function (helperObject) {
                 trigger: 'hover'
             });
         }
-        i = i + 1
+        i = i + 1;
     }
 });
 $(document).ready(function () {
+    addon.port.emit("getToolTips");
     $(window).on('hashchange', scrapePage);
+    scrapePage();
 });

@@ -5,7 +5,8 @@
 2. Second you need to download [OAuthorizer](https://github.com/mozilla/oauthorizer) and put it in $SDK/packages/.
 3. After you have the SDK and OAuthorizer installed, navigate to the FirefoxAddon directory and run the command: `cfx xpi` .
 4. You can now open Firefox/Tor and [install the add-on manually](http://www.accessfirefox.org/Install_Addon_Manually.php).
-5. (Optional) Set up Google Authentication.
+5. Before you use the datawake, go to the add-ons and set up the preferences specifically for your instance.
+6. (Optional) Set up Google Authentication.
 
 ## Google Authentication
 1. First you need to set up your native application keys on the [Google Developer Console](https://console.developers.google.com/).

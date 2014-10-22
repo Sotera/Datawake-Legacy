@@ -11,6 +11,7 @@ var trackingHelper = require("./tracking");
 var constants = require("./constants");
 var storage = require("./storage");
 var requestHelper = require("./request-helper");
+var preferenceValidator = require("./preference-validator");
 
 
 exports.useDatawake = useDatawake;
@@ -43,77 +44,88 @@ function getTrails(domain, callback) {
  * @param worker Object for communicating with the new tab content.
  */
 function setupNewTabListener(worker) {
-    if (storage.hasDatawakeInfoForTab(tabs.activeTab.id))
-        worker.port.emit("hasDatawakeInfo", storage.getDatawakeInfo(tabs.activeTab.id));
-    //Sends the domains to the newtab overlay
-    getDomains(function (response) {
-        console.info("Emitting Domains");
-        worker.port.emit("sendDomains", response.json);
-    });
+    if (preferenceValidator.preferencesAreValid()) {
 
-    //Gets the trails for the specific domain and emits them back.
-    worker.port.on("getTrails", function (domain) {
-        console.info("Getting trails for " + domain + "!");
-        getTrails(domain, function (response) {
-            if (response.status != 501) {
-                worker.port.emit("sendTrails", response.json.trails);
-            } else {
-                console.error("There was an error getting trails: " + response.message);
-            }
+        if (storage.hasDatawakeInfoForTab(tabs.activeTab.id))
+            worker.port.emit("hasDatawakeInfo", storage.getDatawakeInfo(tabs.activeTab.id));
+
+        //Gets the trails for the specific domain and emits them back.
+        worker.port.on("getTrails", function (domain) {
+            console.debug("Getting trails for " + domain + "!");
+            getTrails(domain, function (response) {
+                if (response.status != 501) {
+                    worker.port.emit("sendTrails", response.json.trails);
+                } else {
+                    console.error("There was an error getting trails: " + response.message);
+                }
+            });
         });
-    });
 
-    worker.port.on("signIn", function () {
-        authHelper.signIn(function (response) {
-            //Just a work around due to the activeTab issue.
-            //SEE: https://bugzilla.mozilla.org/show_bug.cgi?id=942511
-            if (authHelper.authType() == 1) {
-                tabs.open("about:newtab");
-                worker.tab.close();
-                worker.destroy();
-            } else {
-                worker.port.emit("sendUserInfo", response.json);
-            }
-        });
-    });
-
-    worker.port.on("signOut", function () {
-        authHelper.signOut(function (response) {
-            worker.port.emit("signOutComplete");
-        });
-    });
-
-    //Handles creating a trail for a domain.
-    worker.port.on("createTrail", function (obj) {
-        createTrail(obj.domain, obj.trail_name, obj.trail_description, function (response) {
-            if (response.status == 501) {
-                worker.port.emit("trailFailure");
-            } else {
-                var jsonResponse = response.json;
-                if (jsonResponse.success) {
-                    console.info("Sending successful trail back to worker.");
-                    worker.port.emit("newTrail", {
-                        name: obj.trail_name,
-                        description: obj.trail_description
+        worker.port.on("signIn", function () {
+            authHelper.signIn(function (response) {
+                //Just a work around due to the activeTab issue.
+                //SEE: https://bugzilla.mozilla.org/show_bug.cgi?id=942511
+                if (authHelper.authType() == 1) {
+                    tabs.open("about:newtab");
+                    worker.tab.close();
+                    worker.destroy();
+                } else {
+                    worker.port.emit("sendUserInfo", response.json);
+                    getDomains(function (response) {
+                        console.debug("Emitting Domains");
+                        worker.port.emit("sendDomains", response.json);
                     });
                 }
+            });
+        });
+
+        worker.port.on("signOut", function () {
+            authHelper.signOut(function (response) {
+                worker.port.emit("signOutComplete");
+            });
+        });
+
+        //Handles creating a trail for a domain.
+        worker.port.on("createTrail", function (obj) {
+            createTrail(obj.domain, obj.trail_name, obj.trail_description, function (response) {
+                if (response.status == 501) {
+                    worker.port.emit("trailFailure");
+                } else {
+                    var jsonResponse = response.json;
+                    if (jsonResponse.success) {
+                        console.debug("Sending successful trail back to worker.");
+                        worker.port.emit("newTrail", {
+                            name: obj.trail_name,
+                            description: obj.trail_description
+                        });
+                    }
+                }
+            });
+        });
+
+        //Sets the tracking information for a tab.
+        worker.port.on("trackingInformation", function (datawakeInfo) {
+            console.debug("Datawake tracking process updated.  Tracking is on: " + datawakeInfo.isDatawakeOn);
+            trackingHelper.trackTab(worker.tab, datawakeInfo);
+        });
+
+        var auth = {};
+        auth.type = authHelper.authType();
+        worker.port.emit("authType", auth);
+
+        //Sends the domains to the newtab overlay
+        authHelper.getLoggedInUser(function (user) {
+            if (!user.json.hasOwnProperty("session")) {
+                getDomains(function (response) {
+                    console.debug("Emitting Domains");
+                    worker.port.emit("sendDomains", response.json);
+                });
             }
         });
-    });
+    } else {
+        worker.port.emit("invalidPreferences");
+    }
 
-    //Sets the tracking information for a tab.
-    worker.port.on("trackingInformation", function (datawakeInfo) {
-        console.info("Datawake tracking process updated.  Tracking is on: " + datawakeInfo.isDatawakeOn);
-        trackingHelper.trackTab(worker.tab, datawakeInfo);
-    });
-
-    var auth = {};
-    auth.type = authHelper.authType();
-    worker.port.emit("authType", auth);
-
-    authHelper.getLoggedInUser(function (response) {
-        worker.port.emit("sendUserInfo", response.json);
-    });
 
 }
 

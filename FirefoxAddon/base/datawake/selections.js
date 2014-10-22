@@ -16,10 +16,11 @@ var postIds = {};
 /**
  * Turns on the context menu with the datawake.
  * @param postId The current scrape id.
- * @param url The current tab url.
+ * @param tab The tab to add the context to.
  */
-function useContextMenu(postId, url) {
-    var tabId = tabs.activeTab.id;
+function useContextMenu(postId, tab) {
+    var url = tab.url;
+    var tabId = tab.id;
     setPostId(postId, tabId);
     destroyPreviousContextMenu(tabId);
     var datawakeInfo = storage.getDatawakeInfo(tabId);
@@ -62,7 +63,7 @@ function setPostId(postId, tabId) {
  * @param tabId The tabid to delete.
  */
 function deletePostId(tabId) {
-    if (tabId in postIds)
+    if (postIds.hasOwnProperty(tabId))
         delete postIds[tabId];
 }
 
@@ -99,7 +100,7 @@ function saveWindowSelection(datawakeInfo, postId, selectionText) {
     });
     var post_url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/selection";
     requestHelper.post(post_url, post_data, function (response) {
-        console.info("Selection saved");
+        console.debug("Selection saved");
     });
 }
 
@@ -108,7 +109,7 @@ function saveWindowSelection(datawakeInfo, postId, selectionText) {
  * @param tabId TabId Associated with the menu
  */
 function destroyPreviousContextMenu(tabId) {
-    if (tabId in contextMenus)
+    if (contextMenus.hasOwnProperty(tabId))
         contextMenus[tabId].destroy();
 }
 

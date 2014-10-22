@@ -42,7 +42,7 @@ def get():
 
 @tangelo.restful
 def post():
-    post_data = json.loads(cherrypy.request.body.read())
+    post_data = json.loads(cherrypy.request.body.read(), strict=False)
     token = post_data.get("token", u'')
     tangelo.log("TOKEN: " + token)
     user = None

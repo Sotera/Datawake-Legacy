@@ -1,7 +1,7 @@
 var self = require("sdk/self");
 var data = self.data;
 var addOnPrefs = require("sdk/simple-prefs").prefs;
-var widget = require("sdk/widget");
+var { ToggleButton } = require('sdk/ui/button/toggle');
 var tabs = require("sdk/tabs");
 var timer = require("sdk/timers");
 
@@ -10,14 +10,14 @@ var storage = require("./storage");
 var constants = require("./constants");
 var requestHelper = require("./request-helper");
 var tracking = require("./tracking");
-var authHelper = require("./auth-helper");
 
-exports.useWidget = useWidget;
+exports.useButton = useButton;
 exports.switchToTab = switchToTab;
-exports.resetWidget = resetWidget;
+exports.resetToggleButton = resetToggleButton;
 exports.cleanUpTab = cleanUpTab;
 
-var datawakeWidget;
+var datawakeButton;
+var mainPanel;
 var lookaheadTimerId;
 var advanceSearchTimerId;
 var badgeForTab = {};
@@ -27,7 +27,7 @@ var badgeForTab = {};
  * @param datawakeInfo The datawake information to send.
  */
 function addValidTabAndData(datawakeInfo) {
-    datawakeWidget.panel.port.emit("datawakeInfo", datawakeInfo);
+    mainPanel.port.emit("datawakeInfo", datawakeInfo);
 }
 
 /**
@@ -46,40 +46,19 @@ function advancedSearch(delay) {
             });
             requestHelper.post(entitiesUrl, post_data, function (response) {
                 var extracted_entities_dict = response.json;
-                datawakeWidget.panel.port.emit("entities", extracted_entities_dict);
+                mainPanel.port.emit("entities", extracted_entities_dict);
                 if (Object.keys(extracted_entities_dict).length > 0) {
-                    var domain_matches = false;
-                    var highlightValues = [];
-                    for (var type in extracted_entities_dict) {
-                        for (var name in extracted_entities_dict[type]) {
-                            if (extracted_entities_dict[type][name] == "y") {
-                                var typeObject = {};
-                                typeObject.type = type;
-                                typeObject.name = name;
-                                console.info("Extracted value: " + typeObject.name);
-                                highlightValues.push(typeObject);
-                                domain_matches = true;
-                            }
-                        }
+                    var entitiesInDomain = getEntitiesInDomain(extracted_entities_dict);
+                    mainPanel.port.emit("entitiesInDomain", entitiesInDomain);
+                    highlightExtractedLinks(entitiesInDomain);
+                    if (entitiesInDomain.length > 0) {
+                        console.debug("Domain matches found on url: " + tabUrl + " setting badge RED");
+                        //TODO: When badges get added, change the color here.
+                    } else {
+                        console.debug("no domain matches found on url: " + tabUrl);
                     }
-                    var helperObject = {};
-                    helperObject.entities = highlightValues;
-                    externalLinkHelper.getExternalLinks(function (response) {
-                        datawakeWidget.panel.port.emit("externalLinks", response.json);
-                        helperObject.links = response.json;
-                        console.info("Emitting data to highlight");
-                        tracking.highlightTextWithToolTips(tabs.activeTab.id, helperObject);
-                    });
-                    if (domain_matches) {
-                        console.info("Domain matches found on url: " + tabUrl + " setting badge RED");
-                        datawakeWidget.port.emit("setBadgeColor", {color: "#FF0000"});
-                    }
-                    else {
-                        console.info("no domain matches found on url: " + tabUrl);
-                    }
-                }
-                else {
-                    console.info("advanceSearch, no response for url, setting time to try again.");
+                } else {
+                    console.debug("advanceSearch, no response for url, setting time to try again.");
                 }
                 //Keep Polling
                 if (delay <= 5 * 60 * 1000) { // eventually stop polling
@@ -91,28 +70,76 @@ function advancedSearch(delay) {
             });
         }
     } else {
-        console.error("Tab is null.");
+        console.debug("The Datawake is not on for this tab.");
     }
+}
+
+/**
+ * Gets the external links for this instance and highlights the entities in the array.
+ * @param entitiesInDomain Entities to highlight.
+ */
+function highlightExtractedLinks(entitiesInDomain) {
+    externalLinkHelper.getExternalLinks(function (response) {
+        var highlightObject = {};
+        highlightObject.entities = entitiesInDomain;
+        mainPanel.port.emit("externalLinks", response.json);
+        highlightObject.links = response.json;
+        console.debug("Emitting data to highlight");
+        tracking.highlightTextWithToolTips(tabs.activeTab.id, highlightObject);
+    });
+}
+
+/**
+ * Gets the entities in this domain.
+ * @param extracted_entities_dict The entities that were extracted.
+ * @returns {Array} The entities that are in this domain.
+ */
+function getEntitiesInDomain(extracted_entities_dict) {
+    var entitiesInDomain = [];
+    for (var type in extracted_entities_dict) {
+        for (var name in extracted_entities_dict[type]) {
+            if (extracted_entities_dict[type][name] === "y") {
+                var typeObject = {};
+                typeObject.type = type;
+                typeObject.name = name;
+                console.debug("Extracted value: " + typeObject.name);
+                entitiesInDomain.push(typeObject);
+            }
+        }
+    }
+    return entitiesInDomain;
 }
 
 /**
  * Creates the Datawake Widgets and attaches a panel for the search contents.
  */
-function useWidget() {
+function useButton() {
 
-    var widgetPanel = require("sdk/panel").Panel({
+    mainPanel = require("sdk/panel").Panel({
         width: 800,
         height: 1000,
-        contentURL: data.url("html/datawake-widget-panel.html")
+        contentURL: data.url("html/datawake-widget-panel.html"),
+        onHide: handleHide
     });
-    datawakeWidget = widget.Widget({
+    datawakeButton = ToggleButton({
         id: "datawake-widget",
         label: "Datawake Widget",
-        contentURL: data.url("html/datawake-main-widget.html"),
-        panel: widgetPanel,
-        onClick: widgetOnClick
+        icon: {
+            "16": data.url("img/waveicon16.png"),
+            "32": data.url("img/waveicon19.png"),
+            "64": data.url("img/waveicon38.png")
+        },
+        onChange: onToggle
     });
+
     setupTimerListeners();
+}
+
+/**
+ * Handles the button when the panel's hide even is triggered.
+ */
+function handleHide() {
+    datawakeButton.state('window', {checked: false});
 }
 
 /**
@@ -120,8 +147,10 @@ function useWidget() {
  */
 function setupTimerListeners() {
     try {
-        datawakeWidget.panel.port.on("startLookaheadTimer", function (lookaheadTimerObject) {
-            startLookaheadTimer(datawakeWidget, lookaheadTimerObject.datawakeInfo, lookaheadTimerObject.links, 0, 1000);
+
+        mainPanel.port.on("startLookaheadTimer", function (lookaheadTimerObject) {
+            var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
+            startLookaheadTimer(datawakeInfo, lookaheadTimerObject.links, 0, 1000);
         });
     } catch (e) {
         console.error(e.name + " : " + e.message);
@@ -129,41 +158,41 @@ function setupTimerListeners() {
 }
 
 /**
- * Sets up the required information on the widgetClick.
- * @param tabWidget Tab Widget that was clicked.
+ * Sets up the required information when the ToggleButton is clicked.
+ * @param state The state of the ToggleButton.
  */
-function widgetOnClick(tabWidget) {
+function onToggle(state) {
     var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
     if (datawakeInfo != null && datawakeInfo.isDatawakeOn && constants.isValidUrl(tabs.activeTab.url)) {
         //Emit that it is a validTab to Scrape
-        console.info("Valid Tab");
-        tabWidget.panel.port.emit("validTab");
+        console.debug("Valid Tab");
+        mainPanel.port.emit("validTab");
         //Get the rank info and listen for someone ranking the page.
-        emitRanks(tabWidget, datawakeInfo);
-        tabWidget.panel.port.on("setUrlRank", setUrlRank);
+        emitRanks(datawakeInfo);
+        mainPanel.port.on("setUrlRank", setUrlRank);
     }
     else {
         //Emit that it is not a valid tab.
-        tabWidget.panel.port.emit("invalidTab");
-        console.info("Invalid Tab");
+        resetToggleButton();
+        console.debug("Invalid Tab");
     }
+    mainPanel.show({position: datawakeButton});
 }
 
 
 /**
- * Resets the widget to an invalid state.
+ * Resets the ToggleButton and Panel to an invalid state.
  */
-function resetWidget() {
-    datawakeWidget.port.emit("resetWidget");
-    datawakeWidget.panel.port.emit("invalidTab");
+function resetToggleButton() {
+    //TODO: When badges get added, insert reset here.
+    mainPanel.port.emit("invalidTab");
 }
 
 /**
  * Emits Rank information to the panel attached to the widget.
- * @param tabWidget Widget to emit to.
  * @param datawakeInfo The datawake info associated with the current tab.
  */
-function emitRanks(tabWidget, datawakeInfo) {
+function emitRanks(datawakeInfo) {
     var url = addOnPrefs.datawakeDeploymentUrl + "/datawake_url_ranks/getRank";
     var post_data = JSON.stringify({
         domain: datawakeInfo.domain.name,
@@ -175,7 +204,7 @@ function emitRanks(tabWidget, datawakeInfo) {
         var rankingInfo = {};
         rankingInfo.ranking = rank;
         rankingInfo.starUrl = data.url("css/icons/");
-        tabWidget.panel.port.emit("ranking", rankingInfo);
+        mainPanel.port.emit("ranking", rankingInfo);
     });
 }
 
@@ -186,24 +215,23 @@ function emitRanks(tabWidget, datawakeInfo) {
 function setUrlRank(rank_data) {
     rank_data.url = tabs.activeTab.url;
     var url = addOnPrefs.datawakeDeploymentUrl + "/datawake_url_ranks/setRank";
-    console.info("Posting Rank..");
+    console.debug("Posting Rank..");
     requestHelper.post(url, JSON.stringify(rank_data), function (response) {
         if (response.json.success) {
-            console.info("Successfully set rank..");
+            console.debug("Successfully set rank..");
         }
     });
 }
 
 /**
  * Starts the lookahead timer.
- * @param tabWidget The widget to append the badge on.
  * @param datawakeInfo The datawake information associated with the search.
  * @param links The lookahead links to check.
  * @param index The current index of the link.
  * @param delay The delay between requests.
  */
-function startLookaheadTimer(tabWidget, datawakeInfo, links, index, delay) {
-    console.info("Starting lookahead timer...");
+function startLookaheadTimer(datawakeInfo, links, index, delay) {
+    console.debug("Starting lookahead timer...");
     var post_data = {
         url: links[index],
         srcurl: tabs.activeTab.url,
@@ -211,8 +239,8 @@ function startLookaheadTimer(tabWidget, datawakeInfo, links, index, delay) {
     };
     var url = addOnPrefs.datawakeDeploymentUrl + "/lookahead/matches";
     requestHelper.post(url, JSON.stringify(post_data), function (response) {
-        if (response && response != undefined) {
-            tabWidget.panel.port.emit("lookaheadTimerResults", response.json);
+        if (response && response != void(0)) {
+            mainPanel.port.emit("lookaheadTimerResults", response.json);
             //TODO: Fix the index Ugliness
             links.splice(index, 1);
             if (links.length > 0) {
@@ -220,12 +248,12 @@ function startLookaheadTimer(tabWidget, datawakeInfo, links, index, delay) {
                     index = 0;
                     if (delay <= 5 * 60 * 1000) {
                         lookaheadTimerId = timer.setTimeout(function (delayTimesTwo) {
-                            startLookaheadTimer(tabWidget, datawakeInfo, links, index + 1, delayTimesTwo);
+                            startLookaheadTimer(datawakeInfo, links, index + 1, delayTimesTwo);
                         }, 2 * delay);
                     }
                 }
                 else {
-                    startLookaheadTimer(tabWidget, datawakeInfo, links, index, delay);
+                    startLookaheadTimer(datawakeInfo, links, index, delay);
                 }
             }
         } else {
@@ -234,19 +262,17 @@ function startLookaheadTimer(tabWidget, datawakeInfo, links, index, delay) {
                 // pause for the delay at the begining of the list
                 if (delay <= 5 * 60 * 1000) {
                     lookaheadTimerId = timer.setTimeout(function (delayTimesTwo) {
-                        startLookaheadTimer(tabWidget, datawakeInfo, links, index, delayTimesTwo);
+                        startLookaheadTimer(datawakeInfo, links, index, delayTimesTwo);
                     }, delay);
                 }
             }
             else {
                 lookaheadTimerId = timer.setTimeout(function (delayTimesTwo) {
-                    startLookaheadTimer(tabWidget, datawakeInfo, links, index, delayTimesTwo);
+                    startLookaheadTimer(datawakeInfo, links, index, delayTimesTwo);
                 }, 1);
             }
         }
     });
-
-
 }
 
 /**
@@ -254,8 +280,9 @@ function startLookaheadTimer(tabWidget, datawakeInfo, links, index, delay) {
  * @param count The count to set the badge.
  */
 function setBadge(count) {
-    console.info("Setting badge text.." + count);
-    datawakeWidget.port.emit("setBadgeText", count);
+    console.debug("Setting badge text.." + count);
+    mainPanel.port.emit("badgeCount", count);
+    //TODO: Set Badge text here when they get added.
 }
 /**
  * Clears the timers.
@@ -272,22 +299,25 @@ function clearTimers() {
  * @param badgeCount The badge count for the tab.  Can be undefined.
  */
 function switchToTab(tabId, datawakeInfo, badgeCount) {
-    clearTimers();
-    if (badgeCount != undefined) {
-        deleteBadgeForTab(tabId);
-        badgeForTab[tabId] = badgeCount;
+    // Checks to see if they switched tabs really fast.
+    if (tabId === tabs.activeTab.id) {
+        clearTimers();
+        if (badgeCount != undefined) {
+            deleteBadgeForTab(tabId);
+            badgeForTab[tabId] = badgeCount;
+        }
         setBadge(badgeForTab[tabId]);
+        //TODO: Reset Badge Color here.
+        addValidTabAndData(datawakeInfo);
+        advancedSearch(1000);
     }
-    datawakeWidget.port.emit("resetBadgeColor");
-    addValidTabAndData(datawakeInfo);
-    advancedSearch(1000);
 }
 
-function deleteBadgeForTab(tabId){
-    if(tabId in badgeForTab)
+function deleteBadgeForTab(tabId) {
+    if (badgeForTab.hasOwnProperty(tabId))
         delete badgeForTab[tabId];
 }
 
-function cleanUpTab(tabId){
+function cleanUpTab(tabId) {
     deleteBadgeForTab(tabId);
 }

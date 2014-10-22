@@ -3,6 +3,7 @@ var newTabApp = angular.module('newTabApp', []);
 newTabApp.controller("NewTabCtrl", function ($scope) {
 
     $scope.isDatawakeOn = false;
+    $scope.invalidPreferences = false;
 
     addon.port.on("sendDomains", function (domains) {
         domains.shift();
@@ -55,6 +56,11 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
 
     });
 
+    addon.port.on("invalidPreferences", function () {
+        $scope.invalidPreferences = true;
+        $scope.$apply();
+    });
+
     addon.port.on("hasDatawakeInfo", function (previousDatawakeInfo) {
         $scope.selectedTrail = previousDatawakeInfo.trail;
         $scope.selectedDomain = previousDatawakeInfo.domain;
@@ -63,7 +69,7 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     });
 
     $scope.datawakeStatusChanged = function (status) {
-        console.info("On Off Was Toggled: " + status);
+        console.debug("On Off Was Toggled: " + status);
         $scope.isDatawakeOn = status;
         sendDatawakeInformation();
     };
@@ -90,20 +96,19 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     $scope.createNewTrail = function () {
         $("#alert_processing").show();
         $scope.processingNewTrail = true;
-        console.info("Creating New Trail: " + $scope.newTrail.name + " For Domain: " + $scope.selectedDomain.name + " With Description: " + $scope.newTrail.description);
+        console.debug("Creating New Trail: " + $scope.newTrail.name + " For Domain: " + $scope.selectedDomain.name + " With Description: " + $scope.newTrail.description);
         addon.port.emit("createTrail", {domain: $scope.selectedDomain.name, trail_name: $scope.newTrail.name, trail_description: $scope.newTrail.description});
     };
 
     function sendDatawakeInformation() {
-        if ($scope.selectedDomain != null && $scope.selectedDomain.name != "") {
-            if ($scope.selectedTrail != null && $scope.selectedTrail.name != "") {
-                var dataWake = {};
-                dataWake.user = $scope.user;
-                dataWake.domain = $scope.selectedDomain;
-                dataWake.trail = $scope.selectedTrail;
-                dataWake.isDatawakeOn = $scope.isDatawakeOn;
-                addon.port.emit("trackingInformation", dataWake);
-            }
+        if ($scope.selectedDomain != null && $scope.selectedDomain.name != ""
+            && $scope.selectedTrail != null && $scope.selectedTrail.name != "") {
+            var dataWake = {};
+            dataWake.user = $scope.user;
+            dataWake.domain = $scope.selectedDomain;
+            dataWake.trail = $scope.selectedTrail;
+            dataWake.isDatawakeOn = $scope.isDatawakeOn;
+            addon.port.emit("trackingInformation", dataWake);
         }
     }
 

@@ -26,7 +26,6 @@ function interactiveSignIn(callback) {
 
     function tokenCallback(svc) {
         //Google Specific Token Request.
-        console.log(JSON.stringify(svc));
         requestHelper.postCode("https://accounts.google.com/o/oauth2/token", svc, function (response) {
             postUserLogin(response.json["access_token"], callback);
         });
@@ -37,7 +36,7 @@ function interactiveSignIn(callback) {
         handler.startAuthentication();
     } catch (e) {
         console.error("The Google parameters are incorrect.");
-        console.log(e);
+        console.error(e);
     }
 }
 

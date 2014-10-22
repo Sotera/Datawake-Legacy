@@ -1,8 +1,6 @@
 //Datawake Components
 var datawakeNewTabHelper = require("./datawake/overlay");
-var widgetHelper = require("./datawake/widget");
-var preferenceHelper = require("./datawake/preferences");
+var buttonHelper = require("./datawake/button");
 
-preferenceHelper.validatePreferences();
-widgetHelper.useWidget();
+buttonHelper.useButton();
 datawakeNewTabHelper.useDatawake();

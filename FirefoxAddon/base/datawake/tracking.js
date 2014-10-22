@@ -6,7 +6,7 @@ var tabs = require("sdk/tabs");
 var requestHelper = require("./request-helper");
 var constants = require("./constants");
 var storage = require("./storage");
-var widgetHelper = require("./widget");
+var widgetHelper = require("./button");
 var selectionHelper = require("./selections");
 
 exports.trackTab = trackTab;
@@ -29,11 +29,11 @@ function trackTab(tab, datawakeInfo) {
     destoryTabWorker(tab.id);
     storage.setDatawakeInfo(tab.id, datawakeInfo);
     if (datawakeInfo.isDatawakeOn) {
-        tab.on('pageshow', setupTabWorkerAndServices);
+        tab.on('ready', setupTabWorkerAndServices);
         tab.on('activate', switchTab);
         tab.on('close', close);
     } else {
-        tab.removeListener('pageshow', setupTabWorkerAndServices);
+        tab.removeListener('ready', setupTabWorkerAndServices);
         tab.removeListener('activate', switchTab);
         tab.removeListener('close', close);
     }
@@ -46,7 +46,7 @@ function trackTab(tab, datawakeInfo) {
 function setupTabWorkerAndServices(tab) {
     var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
     if (datawakeInfoForTab.isDatawakeOn && constants.isValidUrl(tab.url)) {
-        console.info("Tracking is on...");
+        console.debug("Tracking is on...");
         var trackingTabWorker = tab.attach({
             contentScriptFile: [
                 data.url("js/min/jquery-1.11.1.min.js"),
@@ -57,44 +57,45 @@ function setupTabWorkerAndServices(tab) {
             ]
         });
         //Loads CSS files in jQuery
-        trackingTabWorker.port.emit("loadToolTips", [
-            data.url("css/tooltipster.css"),
-            data.url("css/tooltipster-noir.css"),
-            data.url("css/tooltipster-punk.css"),
-            data.url("css/highlight.css")
-        ]);
+        trackingTabWorker.port.on("getToolTips", function () {
+            trackingTabWorker.port.emit("loadToolTips", [
+                data.url("css/tooltipster.css"),
+                data.url("css/tooltipster-noir.css"),
+                data.url("css/tooltipster-punk.css"),
+                data.url("css/highlight.css")
+            ]);
+        });
 
         setTabWorker(tab.id, trackingTabWorker);
 
-
         //Posts the scrape contents to the server.
-        trackingTabWorker.port.on("contents", function (data) {
-            console.info("Scraping Page");
+        trackingTabWorker.port.on("contents", function (pageContents) {
+            console.debug("Scraping Page");
             var currentTrackingTabWorker = trackingTabWorkers[tab.id];
-            data.url = currentTrackingTabWorker.tab.url;
+            var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
+            pageContents.url = currentTrackingTabWorker.tab.url;
+            pageContents.domain = datawakeInfoForTab.domain.name;
+            pageContents.trail = datawakeInfoForTab.trail.name;
+            pageContents.userName = datawakeInfoForTab.user.userName;
             var url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/scrape";
-            requestHelper.post(url, JSON.stringify(data), function (response) {
-                console.info("Setting up selections and advanced search");
+            requestHelper.post(url, JSON.stringify(pageContents), function (response) {
+                console.debug("Setting up selections and advanced search");
                 var scrapeObject = response.json;
                 var postId = scrapeObject.id;
                 //Sets up the context menu objects for this tab.
                 if (currentTrackingTabWorker.tab != null) {
-                    selectionHelper.useContextMenu(postId, currentTrackingTabWorker.tab.url);
-                    widgetHelper.switchToTab(currentTrackingTabWorker, datawakeInfoForTab, scrapeObject.count);
+                    selectionHelper.useContextMenu(postId, currentTrackingTabWorker.tab);
+                    widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, datawakeInfoForTab, scrapeObject.count);
                 }
             });
 
         });
-        //Emits the datawake info object associated with the tab.
-        trackingTabWorker.port.emit("datawakeInfo", datawakeInfoForTab);
-        //Scrapes the contents of the page
-        trackingTabWorker.port.emit("getContents");
 
     }
     else {
-        console.info("Tracking is off for this page...");
+        console.debug("Tracking is off for this page...");
         destoryTabWorker(tab.id);
-        widgetHelper.resetWidget();
+        widgetHelper.resetToggleButton();
     }
 }
 
@@ -114,7 +115,7 @@ function emitHighlightTextToTabWorker(tabId, highlightList) {
  * @param helperObject The helper object to forward to the worker.
  */
 function highlightTextWithToolTips(tabId, helperObject) {
-    if (tabId in trackingTabWorkers) {
+    if (trackingTabWorkers.hasOwnProperty(tabId)) {
         var tabWorker = trackingTabWorkers[tabId];
         tabWorker.port.emit("highlightWithToolTips", helperObject);
     }
@@ -126,7 +127,7 @@ function highlightTextWithToolTips(tabId, helperObject) {
  * @returns {boolean} True if the worker exists and there is a tab associated with it.
  */
 function isTabWorkerAttached(tabId) {
-    return tabId in trackingTabWorkers && trackingTabWorkers[tabId].tab != null;
+    return trackingTabWorkers.hasOwnProperty(tabId) && trackingTabWorkers[tabId].tab != null;
 }
 
 /**
@@ -134,7 +135,7 @@ function isTabWorkerAttached(tabId) {
  * @param tabId The tab id of the worker to destory.
  */
 function destoryTabWorker(tabId) {
-    if (tabId in trackingTabWorkers) {
+    if (trackingTabWorkers.hasOwnProperty(tabId)) {
         trackingTabWorkers[tabId].destroy();
     }
 }
