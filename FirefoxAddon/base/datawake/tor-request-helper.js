@@ -119,7 +119,7 @@ DatawakeHTTPHelper.HttpStreamListener.prototype = {
                 status: context.responseStatus
             };
             if (components.isSuccessCode(status)) {
-                resp.body = this.body;
+                resp.body = this.body.join(" ");
             } else {
                 var err = DatawakeHTTPHelper.lookupStatus(status);
                 if (err !== null)

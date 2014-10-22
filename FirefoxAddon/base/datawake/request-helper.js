@@ -69,7 +69,7 @@ function sidePost(url, post_data, callback) {
     requestWrapper.postRequest(url, post_data, function (resp) {
         if (resp.status === 200) {
             var response = {};
-            response.json = JSON.parse(resp.body[0]);
+            response.json = JSON.parse(resp.body);
             response.status = resp.status;
             callback(response);
         } else {
@@ -84,7 +84,7 @@ function sideGet(url, callback) {
         var response = {};
         if (resp.status === 200) {
             response.status = resp.status;
-            response.json = JSON.parse(resp.body[0]);
+            response.json = JSON.parse(resp.body);
             callback(response);
         } else {
             console.error("There is an error on the server side.");
