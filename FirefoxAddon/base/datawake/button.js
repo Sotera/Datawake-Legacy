@@ -263,6 +263,7 @@ function startLookaheadTimer(datawakeInfo, links, index, delay) {
  */
 function setBadge(count) {
     console.debug("Setting badge text.." + count);
+    mainPanel.port.emit("badgeCount", count);
     //TODO: Set Badge text here when they get added.
 }
 /**

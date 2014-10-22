@@ -114,19 +114,24 @@ DatawakeHTTPHelper.HttpStreamListener.prototype = {
     },
 
     onStopRequest: function (req, context, status) {
-        var resp = {
-            status: context.responseStatus
-        };
-        if (components.isSuccessCode(status)) {
-            resp.body = this.body;
-        } else {
-            var err = DatawakeHTTPHelper.lookupStatus(status);
-            if (err !== null)
-                resp.error = err;
-            else
-                resp.error = "error " + String(status);
+        try {
+            var resp = {
+                status: context.responseStatus
+            };
+            if (components.isSuccessCode(status)) {
+                resp.body = this.body;
+            } else {
+                var err = DatawakeHTTPHelper.lookupStatus(status);
+                if (err !== null)
+                    resp.error = err;
+                else
+                    resp.error = "error " + String(status);
+            }
+            this.callback(resp);
+
+        } catch(e){
+            console.error("Context Closed");
         }
-        this.callback(resp);
     },
 
     // https://developer.mozilla.org/en-US/docs/XPCOM_Interface_Reference/nsIStreamListener

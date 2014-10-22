@@ -22,7 +22,7 @@ panelApp.controller("PanelCtrl", function ($scope) {
         $scope.$apply();
     });
 
-    addon.port.on("sendUserInfo", function(user){
+    addon.port.on("sendUserInfo", function (user) {
         $scope.datawake.user = user;
         $scope.$apply();
     });
@@ -68,6 +68,11 @@ panelApp.controller("PanelCtrl", function ($scope) {
                 $scope.lookaheadLinks.push(lookahead);
             }
         }
+    });
+
+    addon.port.on("badgeCount", function (badgeCount) {
+        $scope.pageVisits = badgeCount;
+        $scope.$apply();
     });
 
     addon.port.on("fetchEntitiesTimerResults", parseExtractedEntities);
