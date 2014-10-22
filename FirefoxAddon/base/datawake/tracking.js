@@ -95,7 +95,7 @@ function setupTabWorkerAndServices(tab) {
     else {
         console.debug("Tracking is off for this page...");
         destoryTabWorker(tab.id);
-        widgetHelper.resetWidget();
+        widgetHelper.resetToggleButton();
     }
 }
 
@@ -115,7 +115,7 @@ function emitHighlightTextToTabWorker(tabId, highlightList) {
  * @param helperObject The helper object to forward to the worker.
  */
 function highlightTextWithToolTips(tabId, helperObject) {
-    if (tabId in trackingTabWorkers) {
+    if (trackingTabWorkers.hasOwnProperty(tabId)) {
         var tabWorker = trackingTabWorkers[tabId];
         tabWorker.port.emit("highlightWithToolTips", helperObject);
     }
@@ -127,7 +127,7 @@ function highlightTextWithToolTips(tabId, helperObject) {
  * @returns {boolean} True if the worker exists and there is a tab associated with it.
  */
 function isTabWorkerAttached(tabId) {
-    return tabId in trackingTabWorkers && trackingTabWorkers[tabId].tab != null;
+    return trackingTabWorkers.hasOwnProperty(tabId) && trackingTabWorkers[tabId].tab != null;
 }
 
 /**
@@ -135,7 +135,7 @@ function isTabWorkerAttached(tabId) {
  * @param tabId The tab id of the worker to destory.
  */
 function destoryTabWorker(tabId) {
-    if (tabId in trackingTabWorkers) {
+    if (trackingTabWorkers.hasOwnProperty(tabId)) {
         trackingTabWorkers[tabId].destroy();
     }
 }

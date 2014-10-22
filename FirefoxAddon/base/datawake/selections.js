@@ -63,7 +63,7 @@ function setPostId(postId, tabId) {
  * @param tabId The tabid to delete.
  */
 function deletePostId(tabId) {
-    if (tabId in postIds)
+    if (postIds.hasOwnProperty(tabId))
         delete postIds[tabId];
 }
 
@@ -109,7 +109,7 @@ function saveWindowSelection(datawakeInfo, postId, selectionText) {
  * @param tabId TabId Associated with the menu
  */
 function destroyPreviousContextMenu(tabId) {
-    if (tabId in contextMenus)
+    if (contextMenus.hasOwnProperty(tabId))
         contextMenus[tabId].destroy();
 }
 

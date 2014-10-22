@@ -13,7 +13,7 @@ var tracking = require("./tracking");
 
 exports.useButton = useButton;
 exports.switchToTab = switchToTab;
-exports.resetWidget = resetWidget;
+exports.resetToggleButton = resetToggleButton;
 exports.cleanUpTab = cleanUpTab;
 
 var datawakeButton;
@@ -48,38 +48,16 @@ function advancedSearch(delay) {
                 var extracted_entities_dict = response.json;
                 mainPanel.port.emit("entities", extracted_entities_dict);
                 if (Object.keys(extracted_entities_dict).length > 0) {
-                    var domain_matches = false;
-                    var extractedEntities = [];
-                    for (var type in extracted_entities_dict) {
-                        for (var name in extracted_entities_dict[type]) {
-                            if (extracted_entities_dict[type][name] === "y") {
-                                var typeObject = {};
-                                typeObject.type = type;
-                                typeObject.name = name;
-                                console.debug("Extracted value: " + typeObject.name);
-                                extractedEntities.push(typeObject);
-                                domain_matches = true;
-                            }
-                        }
-                    }
-                    mainPanel.port.emit("extractedEntities", extractedEntities);
-                    var helperObject = {};
-                    helperObject.entities = extractedEntities;
-                    externalLinkHelper.getExternalLinks(function (response) {
-                        mainPanel.port.emit("externalLinks", response.json);
-                        helperObject.links = response.json;
-                        console.debug("Emitting data to highlight");
-                        tracking.highlightTextWithToolTips(tabs.activeTab.id, helperObject);
-                    });
-                    if (domain_matches) {
+                    var entitiesInDomain = getEntitiesInDomain(extracted_entities_dict);
+                    mainPanel.port.emit("entitiesInDomain", entitiesInDomain);
+                    highlightExtractedLinks(entitiesInDomain);
+                    if (entitiesInDomain.length > 0) {
                         console.debug("Domain matches found on url: " + tabUrl + " setting badge RED");
                         //TODO: When badges get added, change the color here.
-                    }
-                    else {
+                    } else {
                         console.debug("no domain matches found on url: " + tabUrl);
                     }
-                }
-                else {
+                } else {
                     console.debug("advanceSearch, no response for url, setting time to try again.");
                 }
                 //Keep Polling
@@ -94,6 +72,42 @@ function advancedSearch(delay) {
     } else {
         console.debug("The Datawake is not on for this tab.");
     }
+}
+
+/**
+ * Gets the external links for this instance and highlights the entities in the array.
+ * @param entitiesInDomain Entities to highlight.
+ */
+function highlightExtractedLinks(entitiesInDomain) {
+    externalLinkHelper.getExternalLinks(function (response) {
+        var highlightObject = {};
+        highlightObject.entities = entitiesInDomain;
+        mainPanel.port.emit("externalLinks", response.json);
+        highlightObject.links = response.json;
+        console.debug("Emitting data to highlight");
+        tracking.highlightTextWithToolTips(tabs.activeTab.id, highlightObject);
+    });
+}
+
+/**
+ * Gets the entities in this domain.
+ * @param extracted_entities_dict The entities that were extracted.
+ * @returns {Array} The entities that are in this domain.
+ */
+function getEntitiesInDomain(extracted_entities_dict) {
+    var entitiesInDomain = [];
+    for (var type in extracted_entities_dict) {
+        for (var name in extracted_entities_dict[type]) {
+            if (extracted_entities_dict[type][name] === "y") {
+                var typeObject = {};
+                typeObject.type = type;
+                typeObject.name = name;
+                console.debug("Extracted value: " + typeObject.name);
+                entitiesInDomain.push(typeObject);
+            }
+        }
+    }
+    return entitiesInDomain;
 }
 
 /**
@@ -115,12 +129,15 @@ function useButton() {
             "32": data.url("img/waveicon19.png"),
             "64": data.url("img/waveicon38.png")
         },
-        onChange: widgetOnClick
+        onChange: onToggle
     });
 
     setupTimerListeners();
 }
 
+/**
+ * Handles the button when the panel's hide even is triggered.
+ */
 function handleHide() {
     datawakeButton.state('window', {checked: false});
 }
@@ -141,11 +158,10 @@ function setupTimerListeners() {
 }
 
 /**
- * Sets up the required information on the widgetClick.
- * @param state Tab Widget that was clicked.
+ * Sets up the required information when the ToggleButton is clicked.
+ * @param state The state of the ToggleButton.
  */
-function widgetOnClick(state) {
-    mainPanel.show({position: datawakeButton});
+function onToggle(state) {
     var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
     if (datawakeInfo != null && datawakeInfo.isDatawakeOn && constants.isValidUrl(tabs.activeTab.url)) {
         //Emit that it is a validTab to Scrape
@@ -157,17 +173,18 @@ function widgetOnClick(state) {
     }
     else {
         //Emit that it is not a valid tab.
-        mainPanel.port.emit("invalidTab");
+        resetToggleButton();
         console.debug("Invalid Tab");
     }
+    mainPanel.show({position: datawakeButton});
 }
 
 
 /**
- * Resets the widget to an invalid state.
+ * Resets the ToggleButton and Panel to an invalid state.
  */
-function resetWidget() {
-//TODO: When badges get added, insert reset here.
+function resetToggleButton() {
+    //TODO: When badges get added, insert reset here.
     mainPanel.port.emit("invalidTab");
 }
 
@@ -283,13 +300,13 @@ function clearTimers() {
  */
 function switchToTab(tabId, datawakeInfo, badgeCount) {
     // Checks to see if they switched tabs really fast.
-    if (tabId == tabs.activeTab.id) {
+    if (tabId === tabs.activeTab.id) {
         clearTimers();
         if (badgeCount != undefined) {
             deleteBadgeForTab(tabId);
             badgeForTab[tabId] = badgeCount;
-            setBadge(badgeForTab[tabId]);
         }
+        setBadge(badgeForTab[tabId]);
         //TODO: Reset Badge Color here.
         addValidTabAndData(datawakeInfo);
         advancedSearch(1000);
@@ -297,7 +314,7 @@ function switchToTab(tabId, datawakeInfo, badgeCount) {
 }
 
 function deleteBadgeForTab(tabId) {
-    if (tabId in badgeForTab)
+    if (badgeForTab.hasOwnProperty(tabId))
         delete badgeForTab[tabId];
 }
 

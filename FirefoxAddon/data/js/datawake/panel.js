@@ -48,7 +48,7 @@ panelApp.controller("PanelCtrl", function ($scope) {
         $scope.$apply();
     });
 
-    addon.port.on("extractedEntities", function (extractedEntities) {
+    addon.port.on("entitiesInDomain", function (extractedEntities) {
         $scope.entities_in_domain = extractedEntities;
         $scope.$apply();
     });

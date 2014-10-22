@@ -11,7 +11,7 @@ var datawakeInfoStorage = {};
  * @returns {*} Datawake Info Object.
  */
 function getDatawakeInfo(tabId) {
-    if (datawakeInfoStorage.hasOwnProperty(tabId))
+    if (hasDatawakeInfoForTab(tabId))
         return datawakeInfoStorage[tabId];
     return null;
 }
@@ -31,7 +31,7 @@ function setDatawakeInfo(tabId, datawakeInfo) {
  * @param tabId The tab id's data to destory.
  */
 function deleteDatawakeInfo(tabId) {
-    if (datawakeInfoStorage.hasOwnProperty(tabId))
+    if (hasDatawakeInfoForTab(tabId))
         delete datawakeInfoStorage[tabId];
 }
 
@@ -41,5 +41,5 @@ function deleteDatawakeInfo(tabId) {
  * @returns {boolean} True if it has data in storage.
  */
 function hasDatawakeInfoForTab(tabId){
-    return tabId in datawakeInfoStorage;
+    return datawakeInfoStorage.hasOwnProperty(tabId);
 }
