@@ -56,8 +56,8 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
 
     });
 
-    addon.port.on("invalidPreferences", function(){
-       $scope.invalidPreferences = true;
+    addon.port.on("invalidPreferences", function () {
+        $scope.invalidPreferences = true;
         $scope.$apply();
     });
 
@@ -101,15 +101,14 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     };
 
     function sendDatawakeInformation() {
-        if ($scope.selectedDomain != null && $scope.selectedDomain.name != "") {
-            if ($scope.selectedTrail != null && $scope.selectedTrail.name != "") {
-                var dataWake = {};
-                dataWake.user = $scope.user;
-                dataWake.domain = $scope.selectedDomain;
-                dataWake.trail = $scope.selectedTrail;
-                dataWake.isDatawakeOn = $scope.isDatawakeOn;
-                addon.port.emit("trackingInformation", dataWake);
-            }
+        if ($scope.selectedDomain != null && $scope.selectedDomain.name != ""
+            && $scope.selectedTrail != null && $scope.selectedTrail.name != "") {
+            var dataWake = {};
+            dataWake.user = $scope.user;
+            dataWake.domain = $scope.selectedDomain;
+            dataWake.trail = $scope.selectedTrail;
+            dataWake.isDatawakeOn = $scope.isDatawakeOn;
+            addon.port.emit("trackingInformation", dataWake);
         }
     }
 

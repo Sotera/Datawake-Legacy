@@ -49,21 +49,22 @@ function advancedSearch(delay) {
                 mainPanel.port.emit("entities", extracted_entities_dict);
                 if (Object.keys(extracted_entities_dict).length > 0) {
                     var domain_matches = false;
-                    var highlightValues = [];
+                    var extractedEntities = [];
                     for (var type in extracted_entities_dict) {
                         for (var name in extracted_entities_dict[type]) {
-                            if (extracted_entities_dict[type][name] == "y") {
+                            if (extracted_entities_dict[type][name] === "y") {
                                 var typeObject = {};
                                 typeObject.type = type;
                                 typeObject.name = name;
                                 console.debug("Extracted value: " + typeObject.name);
-                                highlightValues.push(typeObject);
+                                extractedEntities.push(typeObject);
                                 domain_matches = true;
                             }
                         }
                     }
+                    mainPanel.port.emit("extractedEntities", extractedEntities);
                     var helperObject = {};
-                    helperObject.entities = highlightValues;
+                    helperObject.entities = extractedEntities;
                     externalLinkHelper.getExternalLinks(function (response) {
                         mainPanel.port.emit("externalLinks", response.json);
                         helperObject.links = response.json;

@@ -1,8 +1,8 @@
-self.on("click", function (node, data) {
-    var message = {};
-    if (data == "selection") {
-        message.text = window.getSelection().toString();
+self.on("click", function (node, contextItemDataProperty) {
+    var messageWrapper = {};
+    if (contextItemDataProperty == "selection") {
+        messageWrapper.text = window.getSelection().toString();
     }
-    message.intent = data;
-    self.postMessage(message);
+    messageWrapper.intent = contextItemDataProperty;
+    self.postMessage(messageWrapper);
 });
