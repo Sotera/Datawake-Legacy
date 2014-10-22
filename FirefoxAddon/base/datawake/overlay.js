@@ -45,15 +45,10 @@ function getTrails(domain, callback) {
 function setupNewTabListener(worker) {
     if (storage.hasDatawakeInfoForTab(tabs.activeTab.id))
         worker.port.emit("hasDatawakeInfo", storage.getDatawakeInfo(tabs.activeTab.id));
-    //Sends the domains to the newtab overlay
-    getDomains(function (response) {
-        console.info("Emitting Domains");
-        worker.port.emit("sendDomains", response.json);
-    });
 
     //Gets the trails for the specific domain and emits them back.
     worker.port.on("getTrails", function (domain) {
-        console.info("Getting trails for " + domain + "!");
+        console.debug("Getting trails for " + domain + "!");
         getTrails(domain, function (response) {
             if (response.status != 501) {
                 worker.port.emit("sendTrails", response.json.trails);
@@ -73,6 +68,10 @@ function setupNewTabListener(worker) {
                 worker.destroy();
             } else {
                 worker.port.emit("sendUserInfo", response.json);
+                getDomains(function (response) {
+                    console.debug("Emitting Domains");
+                    worker.port.emit("sendDomains", response.json);
+                });
             }
         });
     });
@@ -91,7 +90,7 @@ function setupNewTabListener(worker) {
             } else {
                 var jsonResponse = response.json;
                 if (jsonResponse.success) {
-                    console.info("Sending successful trail back to worker.");
+                    console.debug("Sending successful trail back to worker.");
                     worker.port.emit("newTrail", {
                         name: obj.trail_name,
                         description: obj.trail_description
@@ -103,7 +102,7 @@ function setupNewTabListener(worker) {
 
     //Sets the tracking information for a tab.
     worker.port.on("trackingInformation", function (datawakeInfo) {
-        console.info("Datawake tracking process updated.  Tracking is on: " + datawakeInfo.isDatawakeOn);
+        console.debug("Datawake tracking process updated.  Tracking is on: " + datawakeInfo.isDatawakeOn);
         trackingHelper.trackTab(worker.tab, datawakeInfo);
     });
 
@@ -111,9 +110,16 @@ function setupNewTabListener(worker) {
     auth.type = authHelper.authType();
     worker.port.emit("authType", auth);
 
-    authHelper.getLoggedInUser(function (response) {
-        worker.port.emit("sendUserInfo", response.json);
+    //Sends the domains to the newtab overlay
+    authHelper.getLoggedInUser(function (user) {
+        if (!user.json.hasOwnProperty("session")) {
+            getDomains(function (response) {
+                console.debug("Emitting Domains");
+                worker.port.emit("sendDomains", response.json);
+            });
+        }
     });
+
 
 }
 
@@ -161,6 +167,9 @@ function useDatawake() {
         onAttach: setupNewTabListener
     });
     //Sets the override for a new tab.
+    //Handles when a new tab is open.
+//    tabs.on("open", overrideNewTab);
+    //Handles when a user goes back to about:newtab
     tabs.on("ready", overrideNewTab);
 }
 

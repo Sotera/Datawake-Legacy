@@ -53,13 +53,12 @@ panelApp.controller("PanelCtrl", function ($scope) {
             if ("website" in extracted_entities_dict) {
                 var lookaheadTimerObject = {};
                 lookaheadTimerObject.links = Object.keys(extracted_entities_dict["website"]);
-                lookaheadTimerObject.datawakeInfo = $scope.datawake;
                 addon.port.emit("startLookaheadTimer", lookaheadTimerObject);
                 $scope.lookaheadTimerStarted = true;
                 $scope.$apply();
             }
         }
-        console.info("Parsing Extracted Entities...");
+        console.debug("Parsing Extracted Entities...");
         parseExtractedEntities(extracted_entities_dict);
     });
 
@@ -74,7 +73,7 @@ panelApp.controller("PanelCtrl", function ($scope) {
     addon.port.on("fetchEntitiesTimerResults", parseExtractedEntities);
 
     addon.port.on("externalLinks", function (links) {
-        console.info("Loading External Entities..");
+        console.debug("Loading External Entities..");
         $scope.extracted_tools = links;
         $scope.$apply();
     });

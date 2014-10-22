@@ -1,9 +1,13 @@
 var Request = require("sdk/request").Request;
+var requestWrapper = require("./request-wrapper");
+
+//exports.post = postRequest;
+//exports.get = getRequest;
 
 
-exports.post = postRequest;
+exports.post = sidePost;
+exports.get = sideGet;
 exports.postCode = postCode;
-exports.get = getRequest;
 exports.delete = deleteRequest;
 
 /**
@@ -56,7 +60,36 @@ function postCode(url, svc, callback) {
     var postObj = Request({
         url: url,
         onComplete: callback,
-        content:data
+        content: data
     });
     postObj.post();
+}
+
+function sidePost(url, post_data, callback) {
+    requestWrapper.postRequest(url, post_data, function (resp) {
+        if (resp.status === 200) {
+            var response = {};
+            response.json = JSON.parse(resp.body[0]);
+            response.status = resp.status;
+            callback(response);
+        } else {
+            console.error("There is an error on the server side.");
+            console.error(resp);
+        }
+    })
+}
+
+function sideGet(url, callback) {
+    requestWrapper.getRequest(url, function (resp) {
+        var response = {};
+        if (resp.status === 200) {
+            response.status = resp.status;
+            response.json = JSON.parse(resp.body[0]);
+            callback(response);
+        } else {
+            console.error("There is an error on the server side.");
+            console.error(resp);
+        }
+
+    });
 }

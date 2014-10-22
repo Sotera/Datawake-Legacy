@@ -63,7 +63,7 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     });
 
     $scope.datawakeStatusChanged = function (status) {
-        console.info("On Off Was Toggled: " + status);
+        console.debug("On Off Was Toggled: " + status);
         $scope.isDatawakeOn = status;
         sendDatawakeInformation();
     };
@@ -90,7 +90,7 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     $scope.createNewTrail = function () {
         $("#alert_processing").show();
         $scope.processingNewTrail = true;
-        console.info("Creating New Trail: " + $scope.newTrail.name + " For Domain: " + $scope.selectedDomain.name + " With Description: " + $scope.newTrail.description);
+        console.debug("Creating New Trail: " + $scope.newTrail.name + " For Domain: " + $scope.selectedDomain.name + " With Description: " + $scope.newTrail.description);
         addon.port.emit("createTrail", {domain: $scope.selectedDomain.name, trail_name: $scope.newTrail.name, trail_description: $scope.newTrail.description});
     };
 

@@ -53,7 +53,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    post_data = json.loads(cherrypy.request.body.read())
+    post_data = json.loads(cherrypy.request.body.read(), strict=False)
 
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(404, "unknown service call")

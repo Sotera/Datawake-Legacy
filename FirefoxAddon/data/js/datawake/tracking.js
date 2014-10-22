@@ -1,29 +1,18 @@
 var addon = self;
-var datawakeInfo;
-
-addon.port.on("datawakeInfo", function (info) {
-    console.info("Currently tracking...");
-    datawakeInfo = info;
-});
 
 function scrapePage() {
     try {
         var data = {
             cookie: document.cookie,
-            html: $('body').html(),
-            userName: datawakeInfo.userName,
-            domain: datawakeInfo.domain.name,
-            trail: datawakeInfo.trail.name
+            html: encodeURI($('body').html())
         };
-        console.info("Emitting page contents....");
+        console.debug("Emitting page contents....");
         addon.port.emit("contents", data);
     }
     catch (e) {
         console.error("Unable to Scrape Page: " + e);
     }
 }
-
-addon.port.on("getContents", scrapePage);
 
 addon.port.on("loadToolTips", function (urls) {
     try {
@@ -55,7 +44,7 @@ addon.port.on("highlight", function (selectionObject) {
 });
 
 addon.port.on("highlightWithToolTips", function (helperObject) {
-    console.info("Highlight with tool tips..");
+    console.debug("Highlight with tool tips..");
     var i = 0;
     var entities = helperObject.entities;
     var links = helperObject.links;
@@ -103,5 +92,7 @@ addon.port.on("highlightWithToolTips", function (helperObject) {
     }
 });
 $(document).ready(function () {
+    addon.port.emit("getToolTips");
     $(window).on('hashchange', scrapePage);
+    scrapePage();
 });

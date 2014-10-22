@@ -48,7 +48,7 @@ var MOCK_USER = {
  * @param callback Request response callback.
  */
 function mockLogin(callback) {
-    console.info("I HAVE AN AUTH TOKEN. Ready to start a server session " + MOCK_TOKEN);
+    console.debug("I HAVE AN AUTH TOKEN. Ready to start a server session " + MOCK_TOKEN);
     var post_data = JSON.stringify({token: MOCK_TOKEN});
     requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/session", post_data, callback);
 }
@@ -71,7 +71,7 @@ function getLoggedInUser(callback) {
  */
 function userLoginComplete(response) {
     loggedInUser = response;
-    console.info("datawake-plugin-server session established: " + loggedInUser.json.email);
+    console.debug("datawake-plugin-server session established: " + loggedInUser.json.email);
 }
 
 /**

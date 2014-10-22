@@ -8,7 +8,8 @@
     "lib": "base",
     "version": "0.1",
     "permissions": {
-        "private-browsing": true
+        "private-browsing": true,
+        "cross-domain-content": ["http://localhost:8088"]
     },
     "preferences": [
         {
@@ -17,6 +18,20 @@
             "description": "Sets the current Datawake instance address.",
             "type": "string",
             "value": "http://localhost:8088/datawake-plugin-server"
+        },
+        {
+            "name": "proxyHost",
+            "title": "Datawake Deployment Address IP",
+            "description": "Sets the proxy ip address for sending side requests through Tor.",
+            "type": "string",
+            "value": ""
+        },
+        {
+            "name": "proxyPort",
+            "title": "Datawake Deployment Address PORT",
+            "description": "Sets the proxy port for sending side requests through Tor.",
+            "type": "integer",
+            "value": "8088"
         },
         {
             "name": "googleClientId",
@@ -42,5 +57,6 @@
             "value": 2
         }
     ],
+    "icon":"./data/img/waveicon38.png",
     "dependencies": ["oauthorizer"]
 }
