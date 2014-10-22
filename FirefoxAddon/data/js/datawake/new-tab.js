@@ -3,6 +3,7 @@ var newTabApp = angular.module('newTabApp', []);
 newTabApp.controller("NewTabCtrl", function ($scope) {
 
     $scope.isDatawakeOn = false;
+    $scope.invalidPreferences = false;
 
     addon.port.on("sendDomains", function (domains) {
         domains.shift();
@@ -53,6 +54,11 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
         $scope.$apply();
         $scope.trailChanged($scope.selectedTrail);
 
+    });
+
+    addon.port.on("invalidPreferences", function(){
+       $scope.invalidPreferences = true;
+        $scope.$apply();
     });
 
     addon.port.on("hasDatawakeInfo", function (previousDatawakeInfo) {

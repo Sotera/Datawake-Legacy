@@ -9,7 +9,7 @@
 
 </head>
 <body ng-controller="NewTabCtrl">
-<div class="container">
+<div class="container" ng-hide="invalidPreferences">
     <div class="page-header">
         <div class="row">
             <div class="col-lg-4">
@@ -42,7 +42,7 @@
 
                     </div>
                     <div class="col-md-2">
-                        <img ng-show="user != null" src="../img/photo.png" />
+                        <img ng-show="user != null" src="../img/photo.png"/>
                     </div>
                 </div>
             </div>
@@ -133,6 +133,12 @@
                 Trails can be contributed to by multiple users. Please sign in to use trails.
             </div>
         </div>
+    </div>
+</div>
+<div class="container" ng-hide="!invalidPreferences">
+    <div class="jumbotron alert alert-danger">
+        <h3>Preferences Invalid</h3>
+        <p>Some of your preferences are invalid or incomplete.  Go to about:addons to set the required preferences, so you can start using the Datawake.</p>
     </div>
 </div>
 </body>
