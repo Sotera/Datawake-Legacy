@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html ng-app="datawakePopUpApp" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
+    <link href="css/chosen.min.css" rel="stylesheet">
+    <link href="css/jRating.jquery.css" rel="stylesheet">
+    <style type="text/css">
+        body {
+            min-width: 500px;
+            overflow-x: hidden;
+            height: 300px;
+        }
+
+        img {
+            margin: 5px;
+            border: 2px solid black;
+            vertical-align: middle;
+            width: 75px;
+            height: 75px;
+        }
+    </style>
+</head>
+<body ng-controller="PopUpCtrl">
+<div class="container">
+    <div ng-hide="invalidTab">
+        <table class="table table-bordered">
+            <tbody>
+            <tr>
+                <td>
+                    <b>User:</b> {{user.displayName}}
+                </td>
+                <td>
+                    <b>Org:</b> {{org}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Domain:</b> {{domain}}
+                </td>
+                <td>
+                    <b>Trail:</b> {{trail}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="row" style="margin: 10px">
+            <div id="star_rating" data-average="{{ranking}}"></div>
+            <div id="url_rank">{{ranking}}</div>
+            <div id="url_rank_text">{{ranking}} / 10</div>
+        </div>
+        <div class="row">
+            <ul class="nav nav-tabs nav-pills" role="tablist">
+                <li class="active"><a href="#domain_extracted_entities" role="tab" data-toggle="tab">Domain Extracted Entities</a></li>
+                <li><a href="#lookahead" role="tab" data-toggle="tab">Lookahead</a></li>
+                <li><a href="#all_extracted_entities" role="tab" data-toggle="tab">All Extracted Entities</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="domain_extracted_entities">
+                    <div>
+                        <h3>Extracted Entities found in Domain</h3>
+                        <table class="table table-bordered">
+                            <tr ng-repeat="entities in entities_in_domain">
+                                <td>
+                            <span>
+                                {{entities.type}} : {{entities.name}}
+                            </span>
+                                </td>
+                                <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
+                                    <a ng-href="tools.link.replace('$ATTR',entities.type).replace('$VALUE',entities.name)">{{tools.display}}</a>
+                                </td>
+                                <td ng-show="extracted_tools.length == 0">
+                                    <span>No External Tools Available</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane" id="lookahead" style="margin-bottom: 15px; margin-top: 15px;">
+                    <h2>Link Lookahead</h2>&nbsp<span id="lookahead_progress"></span>
+
+                    <div id="lookahead_results">
+                        <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matchCount', 'domain_search_hits', 'hitlist.length']">
+                            <a ng-href="{{lookaheadObj.url}}">{{lookaheadObj.url}}</a>
+
+                            <div id="hitlistcontainer" ng-if="lookaheadObj.hitlist.length > 0">
+                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="hitListToggle(lookaheadObj);">hit list: {{lookaheadObj.hitlist.length}}</button>
+                                <table class="table-bordered" ng-show="lookaheadObj.hitListShow">
+                                    <tr ng-repeat="hitlistObj in lookaheadObj.hitlist">
+                                        <td>
+                                            <span>{{hitlistObj}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="domain_search_hits_container" ng-if="lookaheadObj.domain_search_matches.length > 0">
+                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="searchHitsToggle(lookaheadObj);">domain search hits: {{lookaheadObj.domain_search_hits}}
+                                </button>
+                                <table class="table table-bordered" ng-show="lookaheadObj.searchHitsShow">
+                                    <tr ng-repeat="searchMatches in lookaheadObj.domain_search_matches">
+                                        <td>
+                                            <span>{{searchMatches}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="lookahead_matches" ng-if="lookaheadObj.matches.length > 0">
+                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="matchesToggle(lookaheadObj);">shared entities: {{lookaheadObj.matchCount}}</button>
+                                <table class="table table-bordered" ng-show="lookaheadObj.matchesShow">
+                                    <tr ng-repeat="matches in lookaheadObj.matches">
+                                        <td>
+                                            <span>{{matches}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="tab-pane" id="all_extracted_entities">
+                    <div>
+                        <h2>Extracted Entities</h2>
+
+                        <div ng-repeat="(entityType, entityDict) in extracted_entities_dict">
+                            <h3>{{entityType}}</h3>
+                            <table class="table table-bordered">
+                                <tr ng-repeat="(name, extracted) in entityDict">
+                                    <td>
+                            <span ng-switch on="extracted">
+                                <span ng-switch-when="y" style="font-weight: bold">{{name}}</span>
+                                <span ng-switch-default style="font-weight: normal">{{name}}</span>
+                            </span>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="alert alert-danger" ng-hide="!invalidTab">
+        <h3>The Datawake is not enabled with this tab.</h3>
+    </div>
+</div>
+<script src="js/jquery-1.11.0.min.js"></script>
+<script src="js/jRating.jquery.js"></script>
+<script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+<script src="js/angular.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/signin.js"></script>
+<script src="js/datawake-service.js"></script>
+<script src="js/popup-angular.js"></script>
+</body>
+</html>
