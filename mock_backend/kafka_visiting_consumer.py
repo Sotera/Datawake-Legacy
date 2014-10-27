@@ -38,16 +38,13 @@ def checkDomain(domain,type,entities):
     if len(entities) == 0:
         return []
     start = datetime.now()
-    hits = entityDataConnector.getEntityMatches(domain,type,entities)
+    hits = entityDataConnector.get_domain_entity_matches(domain,type,entities)
     end = datetime.now()
     duration = str(end-start)
     #print '\tdomain hits: ',len(hits),' ',duration
 
-    indomain = hits
-    not_in_domain = filter(lambda x: x not in hits,entities)
-    #print 'in_domain: ',indomain
-    #print 'not_in_domain: ',not_in_domain
-    return (indomain,not_in_domain)
+    return hits
+
 
 
 def extract(type,extractor,userId,url,html,org,domain):
@@ -80,17 +77,11 @@ def extract(type,extractor,userId,url,html,org,domain):
             print 'sent'
 
 
-
-    # add a type prefix
-    #print 'check domain ',domain
-    #print values
-    (in_domain,not_in_domain) = checkDomain(domain,type,values)
-    #print 'in_domain ',in_domain
-
-
-    # remove tye type prefix
-    if len(in_domain) > 0: entityDataConnector.insertVisitedEntities(userId,url,type,in_domain,'y',domain=domain,org=org)
-    if len(not_in_domain) > 0: entityDataConnector.insertVisitedEntities(userId,url,type,not_in_domain,'n',domain=domain,org=org)
+    if len(values) > 0:
+        entityDataConnector.insertEntities(url, type, values)
+        domainHits = checkDomain(domain,type,values)
+        if len(domainHits) > 0:
+            entityDataConnector.insertDomainEntities(domain,url, type, domainHits)
 
 
 if __name__ == '__main__':

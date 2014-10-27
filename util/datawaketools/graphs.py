@@ -133,7 +133,7 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
     #tangelo.log("urls: "+str(urls))
 
     # for every url in the browse path get all extracted entities
-    results = entityDataConnector.getVisitedEntitiesByUsersAndTypes(userlist,urls,adjTypes,org,domain=domain)
+    results = entityDataConnector.getExtractedEntitiesWithDomainCheck(urls,adjTypes,domain=domain)
 
 
     nodes = browsePathGraph['nodes']
@@ -142,14 +142,15 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
 
     # pivot on entity->urls
     entity_to_urls = {}
-    for url,entityObjList in results.iteritems():
+    for url,entityObjDict in results.iteritems():
         #tangelo.log("\nurl: "+url+"\n\nresult: "+str(entityObjList)+"\n\n")
-        for entityObj in entityObjList:
-            key = (entityObj['type'],entityObj['value'])
-            if key not in entity_to_urls:
-                entity_to_urls[key] = {'indomain':'n','urls':set([])}
-            entity_to_urls[key]['urls'].add(url)
-            if (entityObj['indomain'] == 'y'): entity_to_urls[key]['indomain'] = 'y'
+        for type,valueDict in entityObjDict.iteritems():
+            for value,in_domain in valueDict.iteritems():
+                key = (type,value)
+                if key not in entity_to_urls:
+                    entity_to_urls[key] = {'indomain':'n','urls':set([])}
+                entity_to_urls[key]['urls'].add(url)
+                if (in_domain == 'y'): entity_to_urls[key]['indomain'] = 'y'
 
     # add entities with at least <limit> urls
     for key,value in entity_to_urls.iteritems():
@@ -346,38 +347,54 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
     urls = browsePathGraph['nodes'].keys()
 
 
-    # for every url in the browse path get all extracted entities
-    results = entityDataConnector.getVisitedEntitiesByUsersAndTypes(userlist,urls,['email','phone'],org,domain=domain)
+    # for every url in the browse path get all extracted entities and collect all adjacent urls in a set + url-> link map
+    visitedEntities = entityDataConnector.getExtractedEntitiesFromUrls(urls)
     entity_set = set([])
-    for url,entityObjectList in results.iteritems():
-        for entityObject in entityObjectList:
-            entity_set.add(entityObject['type']+":"+entityObject['value'])
-
-
-    # get the urls adjacent to the browse path
-    results = entityDataConnector.getVisitedEntitiesByUsersAndTypes(userlist,urls,['website'],org,domain=domain)
     adj_urls = set([])
     link_map = {}
-    for url,entityObjectList in results.iteritems():
-        for entityObject in entityObjectList:
-            adj_urls.add(entityObject['value'])
-            if entityObject['value'] not in link_map:
-                link_map[entityObject['value']] = []
-            link_map[entityObject['value']].append(url)
+    for url,resultObj in visitedEntities.iteritems():
+        for type,values in resultObj.iteritems():
+            for value in values:
+                entity_set.add(type+":"+value)
+                if 'website' == type:
+                    if value not in link_map:
+                        link_map[value] = set([url])
+                    else:
+                        link_map[value].add(url)
+                    adj_urls.add(value)
 
 
-    results = entityDataConnector.getLookaheadEntityMatches(adj_urls,entity_set,org,domain=domain)
+    del visitedEntities
 
 
-    for link,resultObj in results.iteritems():
+    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls(adj_urls)
+    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,adj_urls)
+
+
+
+    for link,resultObj in lookaheadFeatures.iteritems():
         webdomain = 'n/a'
         if '//' in link:  webdomain =  link.split('/')[2]
+
+        all_matches = []
+        for type,values in resultObj.iteritems():
+            for value in values:
+                if type+':'+value in entity_set:
+                    all_matches.append(type+':'+value)
+
+        domain_matches = []
+        if link in domainLookaheadFeatures:
+            for type,values in domainLookaheadFeatures[link].iteritems():
+                for value in values:
+                    domain_matches.append(type+':'+value)
+
+
         node = {'id':link,
                 'type':'lookahead',
                 'size':5,
                 'groupName':webdomain,
-                'entity_matches': map(lambda x: x.encode(),resultObj['all_matches']),
-                'domain_entity_matches':map( lambda x: x.encode(),resultObj['domain_matches'])
+                'entity_matches': all_matches,
+                'domain_entity_matches': domain_matches,
                 }
         if link not in nodes:
             nodes[link] = node
