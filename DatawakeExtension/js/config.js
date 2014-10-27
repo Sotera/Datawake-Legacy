@@ -26,34 +26,31 @@ dwConfig = function () {
     var localHostDefaults = {
         datawake_serviceUrl: "http://localhost:8088/datawake-plugin-server",
         datawake_imageServiceUrl: ""
-    }
-    pubs.localHostDefaults = localHostDefaults
+    };
+    pubs.localHostDefaults = localHostDefaults;
 
-    var deployments = {"":emptyDefaults,"localhost":localHostDefaults}
-    pubs.deployments = deployments
-    var defaultDeployment = localHostDefaults
+    pubs.deployments = {"Empty":emptyDefaults,"localhost":localHostDefaults};
+    var defaultDeployment = localHostDefaults;
 
 
     /*
      save an options dictionary to chrome storage
      */
-    var saveOptions = function (optionsObj) {
+    pubs.saveOptions = function (optionsObj) {
         chrome.storage.local.set(optionsObj, function () {
             console.log("datawake options saved");
         });
     };
-    pubs.saveOptions = saveOptions;
 
     /*
      Get the set options
      */
-    var getOptions = function (callback) {
+    pubs.getOptions = function (callback) {
         chrome.storage.local.get(defaultDeployment, function (options) {
             pubs.currentOptions = options;
             callback(options);
         })
     };
-    pubs.getOptions = getOptions;
 
 
     return pubs;

@@ -36,12 +36,11 @@
             "38": "images/waveicon38.png"
         },
         "default_title": "Data Wake",
-        "default_popup": "popup-angular.html"
+        "default_popup": "popup.html"
     },
 
     "chrome_url_overrides" : {
         "newtab": "newTab.html"
-//        "newtab": "newTab-angular.html"
     },
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
