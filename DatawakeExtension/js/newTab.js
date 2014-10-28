@@ -32,7 +32,9 @@ newTabApp.controller("NewTabCtrl", function ($scope, $timeout, requestService) {
     $scope.createNewTrail = function () {
         var trail_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/datawake_trails/createTrail";
         //Persists the object
-        var newTrail = $scope.newTrail;
+        var newTrail = {};
+        newTrail.name = $scope.newTrail.name;
+        newTrail.description = $scope.newTrail.description;
         var new_trail = JSON.stringify({
             trailname: newTrail.name,
             traildescription: newTrail.description,
@@ -44,11 +46,11 @@ newTabApp.controller("NewTabCtrl", function ($scope, $timeout, requestService) {
             $scope.trails.push(newTrail);
             $scope.selectedTrail = newTrail;
             $scope.trailChanged($scope.selectedTrail);
-            resetNewTrailInput();
         }, function(error){
             $scope.processingNewTrailFailed = true;
             $scope.processingNewTrail = false;
         });
+        resetNewTrailInput();
     };
 
     $scope.tracking = function (isDatawakeOn) {
