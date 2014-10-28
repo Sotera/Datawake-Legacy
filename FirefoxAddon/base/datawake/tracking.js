@@ -26,12 +26,15 @@ var trackingTabWorkers = {};
  * @param datawakeInfo The datawake info associated with the tab.
  */
 function trackTab(tab, datawakeInfo) {
-    destoryTabWorker(tab.id);
-    storage.setDatawakeInfo(tab.id, datawakeInfo);
+    var tabId = tab.id;
+    destoryTabWorker(tabId);
+    storage.setDatawakeInfo(tabId, datawakeInfo);
     if (datawakeInfo.isDatawakeOn) {
         tab.on('ready', setupTabWorkerAndServices);
         tab.on('activate', switchTab);
-        tab.on('close', close);
+        tab.on('close', function(other){
+            close(tabId);
+        });
     } else {
         tab.removeListener('ready', setupTabWorkerAndServices);
         tab.removeListener('activate', switchTab);
@@ -161,11 +164,12 @@ function switchTab(tab) {
 
 /**
  * The on close event for a tab.
- * @param tab Tab being closed.
+ * @param tabId Tab Id being closed.
  */
-function close(tab) {
-    destoryTabWorker(tab.id);
-    selectionHelper.cleanUpTab(tab.id);
-    widgetHelper.cleanUpTab(tab.id);
-    storage.deleteDatawakeInfo(tab.id);
+function close(tabId) {
+    console.log("TABID: " + tabId);
+    destoryTabWorker(tabId);
+    selectionHelper.cleanUpTab(tabId);
+    widgetHelper.cleanUpTab(tabId);
+    storage.deleteDatawakeInfo(tabId);
 }
