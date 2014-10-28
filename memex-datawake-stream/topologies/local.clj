@@ -126,7 +126,7 @@
               "lookahead-email-bolt" :shuffle
               "lookahead-phone-bolt" :shuffle
               ["datawake-lookahead-spout" "links"] :shuffle}
-              "datawakestreams.writer_bolt.FileWriterBolt"
+              "datawakestreams.writer_bolt.WriterBolt"
               []
               :p 1
               )

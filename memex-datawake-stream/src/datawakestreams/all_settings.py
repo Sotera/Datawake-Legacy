@@ -16,11 +16,17 @@ ALL_SETTINGS = {}
 
 
 ALL_SETTINGS['local'] = {
+    'topology':'local',
     'appid': 'datawake',
     'crawler-in-topic' : 'crawler-in',
     'crawler-out-topic' : 'crawler-out',
     'visited-topic': 'memex-datawake-visited',
-    'conn_pool' : "localhost:9092"
+    'conn_pool' : "localhost:9092",
+
+    'user':'root',
+    'database':'memex_sotera',
+    'password':'root',
+    'host':'localhost'
 }
 
 
