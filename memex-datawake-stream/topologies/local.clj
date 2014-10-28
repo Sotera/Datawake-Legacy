@@ -30,8 +30,7 @@
         "datawake-lookahead-spout" (python-spout-spec
             options
             "datawakestreams.kafka_spouts.KafkaDatawakeLookaheadSpout"
-            { "raw" ["url", "status", "headers", "flags", "body", "timestamp", "source","context"]
-              "links"  ["attribute", "value", "extracted_raw", "extracted_metadata","context"] }
+            ["url", "status", "headers", "flags", "body", "timestamp", "source","context"]
             :p 1
         )
 
@@ -76,6 +75,16 @@
             :p 1
         )
 
+        "domain-writer-bolt" (python-bolt-spec
+            options
+            {"email-bolt" :shuffle
+            "phone-bolt" :shuffle
+            "website-bolt" :shuffle}
+            "datawakestreams.domain_writer_bolt.DomainWriterBolt"
+            []
+            :p 1
+         )
+
 
 
 
@@ -100,7 +109,7 @@
 
          "lookahead-email-bolt" (python-bolt-spec
             options
-            {["datawake-lookahead-spout" "raw"] :shuffle }
+            {"datawake-lookahead-spout"  :shuffle }
             "datawakestreams.extractors.email_bolt.EmailBolt"
             ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
          )
@@ -108,25 +117,27 @@
 
          "lookahead-phone-bolt" (python-bolt-spec
              options
-             {["datawake-lookahead-spout" "raw"] :shuffle }
+             {"datawake-lookahead-spout"  :shuffle }
              "datawakestreams.extractors.phone_bolt.PhoneBolt"
              ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
          )
 
 
+         "lookahead-website-bolt" (python-bolt-spec
+             options
+             {"datawake-lookahead-spout" :shuffle }
+             "datawakestreams.extractors.website_bolt.WebsiteBolt"
+             ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+          )
 
 
 
-        ;; WRITER BOLT - FOR TESTING ONLY.  To be replaced by data store writers
-        "writer-bolt" (python-bolt-spec
+        "lookahaed-domain-writer-bolt" (python-bolt-spec
               options
-              {"email-bolt" :shuffle
-              "phone-bolt" :shuffle
-              "website-bolt" :shuffle
-              "lookahead-email-bolt" :shuffle
+              {"lookahead-email-bolt" :shuffle
               "lookahead-phone-bolt" :shuffle
-              ["datawake-lookahead-spout" "links"] :shuffle}
-              "datawakestreams.writer_bolt.WriterBolt"
+              "lookahead-website-bolt" :shuffle}
+              "datawakestreams.domain_writer_bolt.DomainWriterBolt"
               []
               :p 1
               )

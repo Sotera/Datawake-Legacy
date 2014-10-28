@@ -7,7 +7,7 @@ import traceback
 
 FILENAME = '/vagrant/memex-datawake-stream/testout.csv'
 
-class WriterBolt(Bolt):
+class DomainWriterBolt(Bolt):
     """
     WriterBolt
 
@@ -47,8 +47,6 @@ class WriterBolt(Bolt):
 
         """
         (attribute,value,extracted_raw,extracted_metadata,context) = tup.values
-        self.connector.insertEntities(context['url'], attribute, [value])
-        self.log("WROTE attribute: "+attribute+" value: "+value)
         domainValues = self.connector.get_domain_entity_matches( context['domain'], attribute, [value])
         if len(domainValues) > 0:
             self.connector.insertDomainEntities( context['domain'],context['url'],attribute,domainValues)

@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
-
-
+from datawakestreams import all_settings
+from datawakeio import extracted_data_connector_factory as factory
 
 class ExtractorBolt(Bolt):
     """
@@ -20,6 +20,18 @@ class ExtractorBolt(Bolt):
 
     auto_anchor = False
 
+
+    def initialize(self,storm_conf, context):
+        try:
+
+            settings = all_settings.get_settings(storm_conf['topology.deployment'])
+            self.conf = settings
+            self.connector = factory.getEntityDataConnector(self.conf)
+        except:
+            self.log(traceback.format_exc(),level='error')
+            raise
+
+
     def process(self, tup):
         """
         Process the input using a standard feature extractor  see extractor.py
@@ -34,8 +46,15 @@ class ExtractorBolt(Bolt):
         if len(tuples) > 0:
             self.emit_many(tuples)
             self.log(self.name+" emited "+str(len(tuples))+" from url: "+url.encode('utf-8'),level='debug')
-            #for tuple in tuples:
-            #    self.log(self.name+" emited "+str(tuple[0])+":"+str(tuple[1])+" from url: "+url.encode('utf-8'),level='trace')
+
+            values = map(lambda x: x[1],tuples)
+            type = tuples[0][0]
+            self.connector.insertEntities(context['url'], type, values)
+            self.log("WROTE attribute: "+type+" values: "+str(values))
+
+
+
+
 
 
     def ack(self, tup):
