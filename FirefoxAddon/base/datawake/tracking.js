@@ -167,7 +167,6 @@ function switchTab(tab) {
  * @param tabId Tab Id being closed.
  */
 function close(tabId) {
-    console.log("TABID: " + tabId);
     destoryTabWorker(tabId);
     selectionHelper.cleanUpTab(tabId);
     widgetHelper.cleanUpTab(tabId);
