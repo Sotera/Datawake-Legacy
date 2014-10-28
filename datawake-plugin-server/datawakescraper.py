@@ -103,14 +103,6 @@ def scrape_page(cookie, html, url, userId, userName, trail, domain):
 def get_selections(domain, trail, url):
     user = getUser()
     org = user['org']
-    # domain = domain.encode(encoding='ascii', errors='ignore')
-    # domain = domain.decode(encoding='ascii', errors='ignore')
-    # trail = trail.encode(encoding='ascii', errors='ignore')
-    # trail = trail.decode(encoding='ascii', errors='ignore')
-    # url = url.encode(encoding='ascii', errors='ignore')
-    # url = url.decode(encoding='ascii', errors='ignore')
-    # org = org.encode(encoding='ascii', errors='ignore')
-    # org = org.decode(encoding='ascii', errors='ignore')
     return json.dumps(dict(selections=db.getSelections(domain, trail, url, org)))
 
 
