@@ -1,7 +1,7 @@
 var addon = self;
 var panelApp = angular.module('panelApp', []);
 
-panelApp.controller("PanelCtrl", function ($scope) {
+panelApp.controller("PanelCtrl", function ($scope, $document) {
 
     $scope.invalidTab = true;
     $scope.lookaheadLinks = [];
@@ -14,6 +14,9 @@ panelApp.controller("PanelCtrl", function ($scope) {
         $scope.lookaheadLinks = [];
         $scope.extracted_tools = [];
         $scope.lookaheadTimerStarted = false;
+        //Trigger the starting tab.
+        var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
+        domainExtractedEntities.trigger('click');
         $scope.$apply();
     });
 
@@ -37,14 +40,12 @@ panelApp.controller("PanelCtrl", function ($scope) {
         $scope.$apply();
     });
 
-    addon.port.on("invalidTab", function () {
-        $scope.invalidTab = true;
-        $scope.$apply();
-    });
-
     addon.port.on("ranking", function (rankingInfo) {
         $scope.ranking = rankingInfo.ranking;
-        createStarRating(rankingInfo.starUrl);
+        var starRating = $("#star_rating");
+        starRating.attr("data-average", rankingInfo.ranking);
+        //Create this only once.
+        createStarRating(addon.options.starUrl);
         $scope.$apply();
     });
 
@@ -70,7 +71,7 @@ panelApp.controller("PanelCtrl", function ($scope) {
 
     addon.port.on("lookaheadTimerResults", function (lookahead) {
         if (lookahead != null) {
-            if (lookahead.matchCount > 0 || lookahead.domain_search_hits > 0 || lookahead.hitlist.length > 0) {
+            if (lookahead.matchCount > 0 || lookahead.domain_search_hits > 0) {
                 $scope.lookaheadLinks.push(lookahead);
             }
         }
@@ -87,10 +88,6 @@ panelApp.controller("PanelCtrl", function ($scope) {
         $scope.$apply();
     });
 
-    $scope.hitListToggle = function (lookaheadObj) {
-        lookaheadObj.hitListShow = !lookaheadObj.hitListShow;
-    };
-
     $scope.searchHitsToggle = function (lookaheadObj) {
         lookaheadObj.searchHitsShow = !lookaheadObj.searchHitsShow;
     };
@@ -99,8 +96,14 @@ panelApp.controller("PanelCtrl", function ($scope) {
         lookaheadObj.matchesShow = !lookaheadObj.matchesShow;
     };
 
+    $scope.openExternalLink = function (externalUrl) {
+        addon.port.emit("openExternalLink", {externalUrl: externalUrl});
+    };
+
     function createStarRating(starUrl) {
-        $("#star_rating").jRating({
+        var starRating = $("#star_rating");
+        starRating.html("");
+        starRating.jRating({
             type: 'big', // type of the rate.. can be set to 'small' or 'big'
             length: 10, // nb of stars
             rateMax: 10,
@@ -127,26 +130,22 @@ panelApp.controller("PanelCtrl", function ($scope) {
         addon.port.emit("setUrlRank", rank_data);
     }
 
+    $document.ready(function () {
+        var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
+        domainExtractedEntities.click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+
+        $('#lookahead').find('a').first().click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+
+        $('#all_extracted_entities').find('a').first().click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+    });
+
 });
-
-
-$(document).ready(function () {
-    var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
-    domainExtractedEntities.click(function (e) {
-        e.preventDefault();
-        $(this).tab('show');
-    });
-
-    $('#lookahead').find('a').first().click(function (e) {
-        e.preventDefault();
-        $(this).tab('show');
-    });
-
-    $('#all_extracted_entities').find('a').first().click(function (e) {
-        e.preventDefault();
-        $(this).tab('show');
-    });
-
-    domainExtractedEntities.trigger('click');
-});
-

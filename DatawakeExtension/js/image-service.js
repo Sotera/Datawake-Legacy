@@ -213,6 +213,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse){
 
 
         setupImageService(SERVICE_ON);
-        sendResponse({result: "ok"});
+        sendResponse({success: true});
     }
 });

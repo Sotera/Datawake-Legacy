@@ -46,11 +46,11 @@ var googlePlusUserLoader = (function() {
 
     function getUserInfo(interactive,callback) {
         // bind the user callback function into the onUserINfoFetched function
-        var user_info = MOCK_USER
-        user_info_div.innerHTML = user_info.displayName;
-        var imgElem = document.createElement('img');
-        imgElem.src = "images/photo.png"
-        user_info_div.insertAdjacentElement("afterbegin", imgElem);
+        var user_info = MOCK_USER;
+//        user_info_div.innerHTML = user_info.displayName;
+//        var imgElem = document.createElement('img');
+//        imgElem.src = "images/photo.png"
+//        user_info_div.insertAdjacentElement("afterbegin", imgElem);
         callback(user_info)
     }
 

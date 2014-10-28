@@ -22,12 +22,10 @@
             <div class="col-lg-4">
                 <div class="col-md-6" style="margin-top: 1.5em">
                     <div class="btn-group" data-toggle="buttons" style="display: inline-block;">
-                        <label id="recording_on_label" ng-class="{'btn btn-success' : isDatawakeOn, 'btn btn-default': !isDatawakeOn}" class="btn btn-default">
-                            <input type="radio" name="options" ng-click="datawakeStatusChanged(true);"> On
-                        </label>
-                        <label id="recording_off_label" ng-class="{'btn btn-danger' : !isDatawakeOn, 'btn btn-default': isDatawakeOn}" class="btn btn-default">
-                            <input type="radio" name="options" id="recording_off" ng-click="datawakeStatusChanged(false);"> Off
-                        </label>
+                        <button id="recording_on_label" ng-class="{'btn btn-success' : isDatawakeOn, 'btn btn-default': !isDatawakeOn}" ng-click="datawakeStatusChanged(true);" class="btn btn-default">On
+                        </button>
+                        <button id="recording_off_label" ng-class="{'btn btn-danger' : !isDatawakeOn, 'btn btn-default': isDatawakeOn}" ng-click="datawakeStatusChanged(false);" class="btn btn-default">Off
+                        </button>
                     </div>
                 </div>
             </div>
@@ -94,7 +92,8 @@
 
         <div id="trail-container" class="ng-hide" ng-model="selectedDomain" ng-show="selectedDomain != null && selectedDomain.name != ''">
             <h4> Select an existing trail: </h4>
-            <select id="trail_select" class="form-control" ng-model="selectedTrail" ng-change="trailChanged(selectedTrail);" ng-options="tail.name for tail in trails" data-placeholder="Select a Trail ">
+            <select id="trail_select" class="form-control" ng-model="selectedTrail" ng-change="trailChanged(selectedTrail);" ng-options="tail.name for tail in trails | orderBy:'name'"
+                    data-placeholder="Select a Trail ">
             </select>
 
             <div id="create_new_trail">
@@ -104,14 +103,15 @@
                         <td>
                             <div id="trail-name-option-group" class="input-group">
                                 <span class="input-group-addon">Name</span>
-                                <input id="new_trail_name" ng-model="newTrail.name" type="text" class="form-control" placeholder="Enter an alphanumeric trail name"/>
+                                <input id="new_trail_name" ng-model="newTrail.name" type="text" ng-keypress="enterKeyEvent($event);" class="form-control" placeholder="Enter an alphanumeric trail name"/>
                         <span class="input-group-btn">
                             <button id="new_trail_create_btn" ng-click="createNewTrail();" class="btn btn-default" type="button">Create</button>
                         </span>
                             </div>
                             <div class="input-group">
                                 <span class="input-group-addon">Description</span>
-                                <input id="new_trail_description" ng-model="newTrail.description" type="text" class="form-control" placeholder="Enter a description (optional)"/>
+                                <input id="new_trail_description" ng-model="newTrail.description" ng-keypress="enterKeyEvent($event);" type="text" class="form-control"
+                                       placeholder="Enter a description (optional)"/>
                             </div>
                         </td>
                     </tr>
@@ -138,7 +138,8 @@
 <div class="container" ng-hide="!invalidPreferences">
     <div class="jumbotron alert alert-danger">
         <h3>Preferences Invalid</h3>
-        <p>Some of your preferences are invalid or incomplete.  Go to the add-on page to set the required preferences, so you can start using the Datawake.</p>
+
+        <p>Some of your preferences are invalid or incomplete. Go to the add-on page to set the required preferences, so you can start using the Datawake.</p>
     </div>
 </div>
 </body>
