@@ -91,6 +91,17 @@ TABLES['datawake_trails'] = """
 
 """
 
+TABLES['starred_features'] = """
+    CREATE TABLE starred_features (
+      org VARCHAR(300),
+      trail VARCHAR(100) NOT NULL,
+      type VARCHAR(100),
+      value VARCHAR(1024),
+      INDEX(org,trail)
+    )
+"""
+
+
 TABLES['datawake_url_rank'] = """
    CREATE TABLE datawake_url_rank (
     id INT NOT NULL AUTO_INCREMENT,
@@ -105,37 +116,6 @@ TABLES['datawake_url_rank'] = """
 )
 """
 
-TABLES['datawake_lookahead'] = """
-    CREATE TABLE datawake_lookahead (
-      org VARCHAR(300),
-      domain VARCHAR(300),
-      url varchar(1024),
-      entity_type varchar(100),
-      entity_value varchar(1024),
-      ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      indomain varchar(1),
-      INDEX(domain(300),url(100)),
-      INDEX(org(300),domain(300),url(100)),
-      INDEX(org(300),domain(300),url(100),entity_type(100)),
-      INDEX(org(300),domain(300),url(100),entity_type(100),entity_value(100))
-    )
-"""
-
-TABLES['datawake_visited'] = """
-    CREATE TABLE datawake_visited (
-      org VARCHAR(300),
-      domain VARCHAR(300),
-      userId varchar(1024),
-      url varchar(1024),
-      entity_type varchar(100),
-      entity_value varchar(1024),
-      ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      indomain varchar(1),
-      INDEX(org(300),domain(300),userId(100),url(100)),
-      INDEX(org(300),domain(300),userId(100),url(100),entity_type(100)),
-      INDEX(org(300),domain(300),userId(100),url(100),entity_type(100),entity_value(100))
-    )
-"""
 
 TABLES['datawake_domain_entities'] = """
     CREATE TABLE datawake_domain_entities (
@@ -144,6 +124,39 @@ TABLES['datawake_domain_entities'] = """
     )
 
 """
+
+
+TABLES['general_extractor_web_index'] = """
+    CREATE TABLE general_extractor_web_index (
+      url varchar(1024),
+      entity_type varchar(100),
+      entity_value varchar(1024),
+      ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      index(url(300))
+    )
+"""
+
+TABLES['domain_extractor_web_index'] = """
+  CREATE TABLE domain_extractor_web_index (
+      domain VARCHAR(300),
+      url varchar(1024),
+      entity_type varchar(100),
+      entity_value varchar(1024),
+      ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      index(domain(300),url(300))
+    )
+"""
+
+TABLES['domain_extractor_runtimes'] = """
+  CREATE TABLE domain_extractor_runtimes (
+      domain VARCHAR(300),
+      url varchar(1024),
+      entity_type varchar(100),
+       ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      index(domain(300),url(300))
+    )
+"""
+
 #
 
 # ##  GENERIC DB FUNCTIONS ###
@@ -436,6 +449,45 @@ def getTrailsWithUserCounts(org):
     return map(lambda x: {'domain': x[0], 'trail': x[1], 'userCount': x[2], 'records': x[3]}, rows)
 
 
+
+
+#
+# Star a feature for a given trail
+#
+def starFeatureForTrail(org,trail,type,value):
+    sql = "INSERT INTO starred_features (org,trail,type,value) VALUES(%s,%s,%s,%s)"
+    params = [org,trail,type,value]
+    dbCommitSQL(sql,params)
+
+
+#
+# un star a feature for a given trail
+#
+def unStarFeatureForTrail(org,trail,type,value):
+    sql = "DELETE FROM starred_features WHERE org = %s and trail = %s and type = %s and value = %s"
+    params = [org,trail,type,value]
+    dbCommitSQL(sql,params)
+
+
+#
+# Return list of starred features for a trail
+#
+def getStarredFeaturesForTrail(org,trail):
+    sql = "SELECT type,value FROM starred_features WHERE trail = %s and org = %s"
+    params = [trail,org]
+    rows = dbGetRows(sql,params)
+    tangelo.log(sql)
+    tangelo.log(str(params))
+    if len(rows) == 0:
+        return []
+    else:
+        return map(lambda x: {'type':x[0],'value':x[1]}, rows)
+
+
+
+
+
+
 ####   URL RANKS   ####
 
 
@@ -568,25 +620,29 @@ def drop_and_create_tables():
         for name in [
             'datawake_domain_entities',
             'datawake_domains',
-            'datawake_visited',
-            'datawake_lookahead',
             'datawake_org',
             'datawake_url_rank',
             'datawake_trails',
             'datawake_selections',
-            'datawake_data'
+            'datawake_data',
+            'starred_features',
+            'general_extractor_web_index',
+            'domain_extractor_web_index',
+            'domain_extractor_runtimes'
         ]:
             print 'DROP TABLE ', name
             cursor.execute('DROP TABLE IF EXISTS `' + name + '`')
         for name in [
             'datawake_domain_entities',
             'datawake_domains',
-            'datawake_visited',
-            'datawake_lookahead',
             'datawake_org', 'datawake_data',
             'datawake_url_rank',
             'datawake_trails',
-            'datawake_selections'
+            'datawake_selections',
+            'starred_features',
+            'general_extractor_web_index',
+            'domain_extractor_web_index',
+            'domain_extractor_runtimes'
         ]:
             ddl = TABLES[name]
             print("Creating table {}: ".format(name))

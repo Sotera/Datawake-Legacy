@@ -81,19 +81,9 @@
                     <h2>Link Lookahead</h2>&nbsp<span id="lookahead_progress"></span>
 
                     <div id="lookahead_results">
-                        <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matchCount', 'domain_search_hits', 'hitlist.length']">
+                        <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matchCount', 'domain_search_hits']">
                             <a target="_blank" ng-href="{{lookaheadObj.url}}">{{lookaheadObj.url}}</a>
 
-                            <div id="hitlistcontainer" ng-if="lookaheadObj.hitlist.length > 0">
-                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="hitListToggle(lookaheadObj);">hit list: {{lookaheadObj.hitlist.length}}</button>
-                                <table class="table-bordered" ng-show="lookaheadObj.hitListShow">
-                                    <tr ng-repeat="hitlistObj in lookaheadObj.hitlist">
-                                        <td>
-                                            <span>{{hitlistObj}}</span>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
                             <div id="domain_search_hits_container" ng-if="lookaheadObj.domain_search_matches.length > 0">
                                 <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="searchHitsToggle(lookaheadObj);">domain search hits: {{lookaheadObj.domain_search_hits}}
                                 </button>

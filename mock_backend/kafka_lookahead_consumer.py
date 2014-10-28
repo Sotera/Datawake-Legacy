@@ -67,16 +67,12 @@ def checkDoamin(domain,type,entities):
     if len(entities) == 0:
         return []
     start = datetime.now()
-    hits = entityDataConnector.getEntityMatches(domain,type,entities)
+    hits = entityDataConnector.get_domain_entity_matches(domain,type,entities)
     end = datetime.now()
     duration = str(end-start)
     print '\tdomain hits: ',len(hits),' ',duration
+    return hits
 
-    indomain = hits
-    not_in_domain = filter(lambda x: x not in hits,entities)
-
-
-    return (indomain,not_in_domain)
 
 
 
@@ -90,10 +86,12 @@ def extract(type,extractor,url,html,org,domain):
     else:
         print '\t',type,': ',len(values)
 
-    (in_domain,not_in_domain) = checkDoamin(domain,type,values)
+    entityDataConnector.insertEntities(url, type, values)
 
-    entityDataConnector.insertLookaheadEntities(url,type,in_domain,'y',org,domain=domain)
-    entityDataConnector.insertLookaheadEntities(url,type,not_in_domain,'n',org,domain=domain)
+    hits = checkDoamin(domain,type,values)
+    if len(hits) > 0: entityDataConnector.insertDomainEntities(domain,url, type, hits)
+
+
 
 
 

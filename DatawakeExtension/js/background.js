@@ -174,7 +174,7 @@ function getExternalLinks(request, sender, sendResponse) {
         sendResponse({links:response});
     }
     var url = config.datawake_serviceUrl + "/external_links/get";
-    getRequest(url, onSuccess, logError);
+    getContents(url, onSuccess, logError);
 }
 
 var messageOperations = {

@@ -16,13 +16,16 @@ limitations under the License.
 
 """
 
+
+#TODO Bring up to speed with data_connector interface.
+
+from datawaketools.data_connector import DataConnector
 from impala.dbapi import connect
 import random
 import threading
 from Queue import Queue
 from Queue import Empty
 import datawakeconfig
-
 import happybase
 
 
@@ -55,7 +58,7 @@ class ImpalaQueryThread (threading.Thread):
 
 
 
-class ClusterEntityDataConnector:
+class ClusterEntityDataConnector(DataConnector):
 
     """Provides connection to local mysql database for extracted entity data"""
 

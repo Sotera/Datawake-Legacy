@@ -15,7 +15,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         var jsonData = JSON.stringify({url: extractedLinks[index], srcurl: tabUrl, domain: domain });
         popUpService.post(post_url, jsonData).then(function (response) {
             if (response != "null" && response != undefined) {
-                if (response.matchCount > 0 || response.domain_search_hits > 0 || response.hitlist.length > 0) {
+                if (response.matchCount > 0 || response.domain_search_hits > 0) {
                     $scope.lookaheadLinks.push(response);
                 }
                 extractedLinks.splice(index, 1);

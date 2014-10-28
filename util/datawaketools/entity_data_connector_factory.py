@@ -33,9 +33,6 @@ def getEntityDataConnector():
         return ClusterEntityDataConnector(config)
     elif datawakeconfig.ENTITY_CONNECTION == 'mysql':
         config = datawakeconfig.DATAWAKE_CORE_DB
-        config['lookahead_table'] = datawakeconfig.LOOKAHEAD_ENTITY_TABLENAME
-        config['visited_table'] = datawakeconfig.VISITED_ENTITY_TABLENAME
-        config['values_table'] = datawakeconfig.DOMAIN_VALUES_TABLE
         return MySqlEntityDataConnector(config)
     else:
         raise ValueError("ENTITY_CONNECTION must be 'mysql' or 'cluster', not "+datawakeconfig.ENTITY_CONNECTION)
