@@ -50,60 +50,51 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 function highlightText(request, sender, sendResponse) {
     var entities_in_domain = request.entities_in_domain;
-
     if (entities_in_domain.length > 0) {
-        $.ajax({
-            type: "GET",
-            url: request.serviceUrl + "/external_links/get",
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function (links) {
-                $.each(entities_in_domain, function (index, entity) {
-                    var i = index;
-                    $('body').highlight(entity.name, 'datawake-highlight-' + i);
+        chrome.runtime.sendMessage({operation: "get-external-links"}, function (links) {
+            $.each(entities_in_domain, function (index, entity) {
+                var i = index;
+                $('body').highlight(entity.name, 'datawake-highlight-' + i);
 
-                    if (links.length > 0) {
-                        var content = '<div> <h4>' + key + ":" + entity.type + '</h4>';
-                        $.each(links, function (index, linkObj) {
-                            var link = linkObj.link;
-                            link = link.replace("$ATTR", encodeURI(entity.type));
-                            link = link.replace("$VALUE", encodeURI(entity.name));
-                            content = content + '<a href="' + link + '" target="_blank">' + linkObj.display + '</a><br>';
-                        });
-                        content = content + '</div>';
-                        $('.datawake-highlight-' + i).tooltipster({
-                            content: $(content),
-                            animation: 'fade',
-                            interactive: true,
-                            delapy: 200,
-                            theme: 'tooltipster-noir',
-                            trigger: 'hover'
-                        });
+                if (links.length > 0) {
+                    var content = '<div> <h4>' + entity.type + ":" + entity.name + '</h4>';
+                    $.each(links, function (index, linkObj) {
+                        var link = linkObj.link;
+                        link = link.replace("$ATTR", encodeURI(entity.type));
+                        link = link.replace("$VALUE", encodeURI(entity.name));
+                        content = content + '<a href="' + link + '" target="_blank">' + linkObj.display + '</a><br>';
+                    });
+                    content = content + '</div>';
+                    $('.datawake-highlight-' + i).tooltipster({
+                        content: $(content),
+                        animation: 'fade',
+                        interactive: true,
+                        delapy: 200,
+                        theme: 'tooltipster-noir',
+                        trigger: 'hover'
+                    });
 
-                    }
-                    else {
-                        $('.datawake-highlight-' + i).tooltipster({
-                            content: $('<div>' +
-                                    '<h4>' + entity.type + ":" + entity.name + '</h4>' +
-                                    'no external tools available' +
-                                    '</div>'
-                            ),
-                            animation: 'fade',
-                            interactive: true,
-                            delapy: 200,
-                            theme: 'tooltipster-noir',
-                            trigger: 'hover'
-                        });
-                    }
+                }
+                else {
+                    $('.datawake-highlight-' + i).tooltipster({
+                        content: $('<div>' +
+                                '<h4>' + entity.type + ":" + entity.name + '</h4>' +
+                                'no external tools available' +
+                                '</div>'
+                        ),
+                        animation: 'fade',
+                        interactive: true,
+                        delapy: 200,
+                        theme: 'tooltipster-noir',
+                        trigger: 'hover'
+                    });
+                }
 
-                });
-                sendResponse({success: true});
-            },
-            error: function (jqxhr, textStatus, reason) {
-                console.log("external link error " + textStatus + " " + reason);
-                sendResponse({success: false, error: reason});
-            }
-        })
+            });
+            sendResponse({success: true});
+        });
+    } else {
+        sendResponse({success: false});
     }
 }
 
@@ -115,7 +106,7 @@ function highlightSelections(request, sender, sendResponse) {
         });
         sendResponse({success: true});
     } catch (e) {
-        sendResponse({success:false, error: e.message})
+        sendResponse({success: false, error: e.message})
     }
 
 }

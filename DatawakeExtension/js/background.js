@@ -169,6 +169,14 @@ function setCurrentOrg(request, sender, sendResponse) {
     dwState.currentOrg = request.org;
 }
 
+function getExternalLinks(request, sender, sendResponse) {
+    function onSuccess(response){
+        sendResponse({links:response});
+    }
+    var url = config.datawake_serviceUrl + "/external_links/get";
+    getRequest(url, onSuccess, logError);
+}
+
 var messageOperations = {
     "get-poster-data": getPosterData,
     "last-id": lastId,
@@ -179,7 +187,8 @@ var messageOperations = {
     "toggle-tracking": toggleTracking,
     "get-image-service": getImageService,
     "post-page-contents": postPageContents,
-    "current-org": setCurrentOrg
+    "current-org": setCurrentOrg,
+    "get-external-links": getExternalLinks
 };
 
 /*
@@ -291,7 +300,7 @@ function advanceSearch(postId, tabId, url, delay) {
                 }
             });
         });
-        var highlightMessage = {operation: 'highlighttext', entities_in_domain: entities_in_domain, serviceUrl: config.datawake_serviceUrl};
+        var highlightMessage = {operation: 'highlighttext', entities_in_domain: entities_in_domain};
         chrome.tabs.sendMessage(tabId, highlightMessage, function (response) {
             if (response.success) {
                 console.log("highlight message to %s recv.", tabId);
@@ -372,6 +381,17 @@ function postContents(url, post_data, successCallback, errorCallback) {
         type: "POST",
         url: url,
         data: post_data,
+        contentType: "application/json",
+        dataType: "json",
+        success: successCallback,
+        error: errorCallback
+    });
+}
+
+function getContents(url, successCallback, errorCallback) {
+    $.ajax({
+        type: "GET",
+        url: url,
         contentType: "application/json",
         dataType: "json",
         success: successCallback,

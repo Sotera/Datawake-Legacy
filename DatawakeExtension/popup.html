@@ -68,7 +68,7 @@
                             </span>
                                 </td>
                                 <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
-                                    <a ng-href="tools.link.replace('$ATTR',entities.type).replace('$VALUE',entities.name)">{{tools.display}}</a>
+                                    <a ng-href="{{tools.link.replace('$ATTR',entities.type).replace('$VALUE',entities.name)}}">{{tools.display}}</a>
                                 </td>
                                 <td ng-show="extracted_tools.length == 0">
                                     <span>No External Tools Available</span>
@@ -82,7 +82,7 @@
 
                     <div id="lookahead_results">
                         <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matchCount', 'domain_search_hits', 'hitlist.length']">
-                            <a ng-href="{{lookaheadObj.url}}">{{lookaheadObj.url}}</a>
+                            <a target="_blank" ng-href="{{lookaheadObj.url}}">{{lookaheadObj.url}}</a>
 
                             <div id="hitlistcontainer" ng-if="lookaheadObj.hitlist.length > 0">
                                 <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="hitListToggle(lookaheadObj);">hit list: {{lookaheadObj.hitlist.length}}</button>

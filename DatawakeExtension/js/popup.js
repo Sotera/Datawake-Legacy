@@ -165,6 +165,18 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         getUrlRank();
     }
 
+    $scope.hitListToggle = function (lookaheadObj) {
+        lookaheadObj.hitListShow = !lookaheadObj.hitListShow;
+    };
+
+    $scope.searchHitsToggle = function (lookaheadObj) {
+        lookaheadObj.searchHitsShow = !lookaheadObj.searchHitsShow;
+    };
+
+    $scope.matchesToggle = function (lookaheadObj) {
+        lookaheadObj.matchesShow = !lookaheadObj.matchesShow;
+    };
+
     googlePlusUserLoader.onload(setUser);
     getDomainAndTrail();
     fetchEntities(500);
