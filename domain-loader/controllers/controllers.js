@@ -227,7 +227,6 @@ domainLoaderApp.service("domainService", function ($http, $q) {
     }
 
     function handleSuccess(response) {
-        console.log(response.data);
         return( response.data );
 
     }

@@ -1,19 +1,14 @@
 var dwPoster = function () {
-    var pub = {};
+    var publicMethods = {};
 
-    pub.resp = null;
-
-
-    function do_post() {
+    publicMethods.scrapePage = function scrapePage() {
         chrome.runtime.sendMessage({operation: "get-poster-data"}, function (response) {
-            console.log("dwPoster-DO POST");
 
+            console.log("Sending Page Contents..");
             if (!response.tracking) {
                 console.log("Datawake - tracking disabled. Not posting data.");
-                return
+                return;
             }
-            console.log('POSTER DATA');
-            console.log(response);
             var data = JSON.stringify({
                 cookie: document.cookie,
                 html: $('body').html(),
@@ -22,129 +17,96 @@ var dwPoster = function () {
                 domain: response.domain,
                 trail: response.trail
             });
-
-            console.log("datawake - poster: submit post. trail:  " + response.trail + " service: " + response.serviceUrl);
-            $.ajax({
-                type: "POST",
-                url: response.serviceUrl + "/scrape",
-                data: data,
-                contentType: 'application/json',
-                dataType: 'json',
-                success: function (response) {
-                    console.log("datawake poster - " + JSON.stringify(response));
-                    chrome.runtime.sendMessage({operation: "last-id", id: response.id, count: response.count}, null);
-                },
-                error: function (jqxhr, textStatus, reason) {
-                    console.log("POST-scrape error " + textStatus + " " + reason);
+            chrome.runtime.sendMessage({operation: "post-page-contents", contents: data}, function (response) {
+                if (response.success) {
+                    var contents = response.contents;
+                    chrome.runtime.sendMessage({operation: "last-id", id: contents.id, count: contents.count}, null);
                 }
-            })
-        })
-    }
-
-    pub.do_post = do_post;
+            });
+        });
+    };
 
 
-    return pub;
+    return publicMethods;
 
 }();
 
-
 // delay the post to get slow loading content
 window.setTimeout(function () {
-    dwPoster.do_post()
+    dwPoster.scrapePage();
 }, 1000);
 
+var messageListenerMethods = {
+    "highlighttext": highlightText,
+    "selections": highlightSelections
+};
 
-chrome.runtime.onMessage.addListener(
-    function (request, sender, sendResponse) {
-        if (request.operation == "highlighttext") {
-            var extracted_entities_dict = request.extracted_entities_dict;
-            //console.log(extracted_entities_dict);
-            var i = 1;
-
-            if (Object.keys(extracted_entities_dict).length > 0){
-                $.ajax({
-                    type: "GET",
-                    url: request.serviceUrl + "/external_links/get",
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    success: function (links) {
-                        console.log("LINKS")
-                        console.log(links)
-
-                        for (key in extracted_entities_dict) {
-                            for (value in extracted_entities_dict[key]) {
-
-                                if ("y" == extracted_entities_dict[key][value]) {
-
-                                    $('body').highlight(value, 'datawake-highlight-' + i);
-
-                                    if (links.length > 0) {
-
-                                        var content = '<div> <h4>' + key + ":" + value + '</h4>'
-                                        for (j in links) {
-                                            var linkObj = links[j]
-                                            var link = linkObj.link
-                                            link = link.replace("$ATTR", encodeURI(key))
-                                            link = link.replace("$VALUE", encodeURI(value))
-                                            content = content + '<a href="' + link + '" target="_blank">'+linkObj.display+'</a><br>'
-                                        }
-                                        content = content + '</div>'
-                                        $('.datawake-highlight-' + i).tooltipster({
-                                            content: $(content),
-                                            animation: 'fade',
-                                            interactive: true,
-                                            delapy: 200,
-                                            theme: 'tooltipster-noir',
-                                            trigger: 'hover'
-                                        });
-
-                                    }
-
-
-                                    else {
-                                        $('.datawake-highlight-' + i).tooltipster({
-                                            content: $('<div>' +
-                                                    '<h4>' + key + ":" + value + '</h4>' +
-                                                    'no external tools available'+
-                                                    '</div>'
-                                            ),
-                                            animation: 'fade',
-                                            interactive: true,
-                                            delapy: 200,
-                                            theme: 'tooltipster-noir',
-                                            trigger: 'hover'
-                                        });
-                                    }
-
-
-
-
-                                    i = i + 1
-                                }
-                            }
-                        }
-                        sendResponse({result: "ok"});
-                    },
-                    error: function (jqxhr, textStatus, reason) {
-                        console.log("external link error " + textStatus + " " + reason);
-                        sendResponse({result: "error"});
-                    }
-                })
-            }
-
-
-
-        }
-    });
-
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse){
-    if(request.operation == "selections"){
-        var selections = request.selections;
-        console.log(selections);
-        for(item in selections){
-            $('body').highlight(selections[item]);
-        }
-        sendResponse({result: "ok"});
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (messageListenerMethods.hasOwnProperty(request.operation)) {
+        var callMethod = messageListenerMethods[request.operation];
+        callMethod(request, sender, sendResponse);
     }
 });
+
+function highlightText(request, sender, sendResponse) {
+    var entities_in_domain = request.entities_in_domain;
+    if (entities_in_domain.length > 0) {
+        chrome.runtime.sendMessage({operation: "get-external-links"}, function (links) {
+            $.each(entities_in_domain, function (index, entity) {
+                var i = index;
+                $('body').highlight(entity.name, 'datawake-highlight-' + i);
+
+                if (links.length > 0) {
+                    var content = '<div> <h4>' + entity.type + ":" + entity.name + '</h4>';
+                    $.each(links, function (index, linkObj) {
+                        var link = linkObj.link;
+                        link = link.replace("$ATTR", encodeURI(entity.type));
+                        link = link.replace("$VALUE", encodeURI(entity.name));
+                        content = content + '<a href="' + link + '" target="_blank">' + linkObj.display + '</a><br>';
+                    });
+                    content = content + '</div>';
+                    $('.datawake-highlight-' + i).tooltipster({
+                        content: $(content),
+                        animation: 'fade',
+                        interactive: true,
+                        delapy: 200,
+                        theme: 'tooltipster-noir',
+                        trigger: 'hover'
+                    });
+
+                }
+                else {
+                    $('.datawake-highlight-' + i).tooltipster({
+                        content: $('<div>' +
+                                '<h4>' + entity.type + ":" + entity.name + '</h4>' +
+                                'no external tools available' +
+                                '</div>'
+                        ),
+                        animation: 'fade',
+                        interactive: true,
+                        delapy: 200,
+                        theme: 'tooltipster-noir',
+                        trigger: 'hover'
+                    });
+                }
+
+            });
+            sendResponse({success: true});
+        });
+    } else {
+        sendResponse({success: false});
+    }
+}
+
+function highlightSelections(request, sender, sendResponse) {
+    try {
+        var selections = request.selections;
+        $.each(selections, function (index, selection) {
+            $('body').highlight(selection);
+        });
+        sendResponse({success: true});
+    } catch (e) {
+        sendResponse({success: false, error: e.message})
+    }
+
+}

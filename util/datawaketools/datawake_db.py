@@ -312,7 +312,7 @@ def deleteUserData(org, user, startdate, enddate, domain='default'):
               unix_timestamp(ts) <= %s
            """
     params = [org.upper(), domain, user, startdate, enddate]
-    dbCommitSQL(sql, params)
+    return dbCommitSQL(sql, params)
 
 
 #
@@ -321,7 +321,7 @@ def deleteUserData(org, user, startdate, enddate, domain='default'):
 #
 def addSelection(postId, selection):
     sql = " INSERT INTO datawake_selections (postId,selection) VALUES (%s,%s) "
-    dbCommitSQL(sql, [postId, selection])
+    return dbCommitSQL(sql, [postId, selection])
 
 
 def getSelections(domain, trail, url, org):
@@ -393,7 +393,7 @@ def getActiveUsers(org):
 def addTrail(org, name, description, userId, domain='default'):
     org = org.upper()
     sql = "INSERT INTO datawake_trails (name,description,created_by,org,domain) values (%s,%s,%s,%s,%s)"
-    dbCommitSQL(sql, [name, description, userId, org, domain])
+    return dbCommitSQL(sql, [name, description, userId, org, domain])
 
 
 #
