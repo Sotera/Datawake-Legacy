@@ -110,8 +110,10 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function setRankAndCreateStarRating(rankObject) {
+        var starRating = $("#star_rating");
+        starRating.attr("data-average", rankObject.rank);
         $scope.ranking = rankObject.rank;
-        $("#star_rating").jRating({
+        starRating.jRating({
             type: 'big', // type of the rate.. can be set to 'small' or 'big'
             length: 10, // nb of stars
             rateMax: 10,
@@ -126,7 +128,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         });
     }
 
-    function setUrlRank(rank){
+    function setUrlRank(rank) {
         chrome.tabs.query({active: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (response) {
                 var data = JSON.stringify({
@@ -137,7 +139,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
                 });
                 var rankUrl = response.rankUrl + "/setRank";
                 console.log("datawake-popup setUrlRank submit reguest for: " + data);
-                popUpService.post(rankUrl, data).then(function(response){
+                popUpService.post(rankUrl, data).then(function (response) {
                     if (response.success) {
                         console.log("datawake-popup setUrlRank -> " + response);
                     }
