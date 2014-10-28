@@ -89,7 +89,7 @@
                     <h4> Select an existing trail: </h4>
 
                     <div style="color: #000;">
-                        <select class="form-control" ng-model="selectedTrail" ng-change="trailChanged(selectedTrail);" ng-options="trail.name for trail in trails"
+                        <select class="form-control" ng-model="selectedTrail" ng-change="trailChanged(selectedTrail);" ng-options="trail.name for trail in trails | orderBy:'name'"
                                 data-placeholder="Select a Trail"></select>
                     </div>
                     <div id="create_new_trail">

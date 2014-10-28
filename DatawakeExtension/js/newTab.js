@@ -31,16 +31,18 @@ newTabApp.controller("NewTabCtrl", function ($scope, $timeout, requestService) {
 
     $scope.createNewTrail = function () {
         var trail_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/datawake_trails/createTrail";
+        //Persists the object
+        var newTrail = $scope.newTrail;
         var new_trail = JSON.stringify({
-            trailname: $scope.newTrail.name,
-            traildescription: $scope.newTrail.description,
-            domain: $scope.selectedDomain
+            trailname: newTrail.name,
+            traildescription: newTrail.description,
+            domain: $scope.selectedDomain.name
         });
         $scope.processingNewTrail = true;
         requestService.post(trail_url, new_trail).then(function (response) {
             $scope.processingNewTrail = false;
-            $scope.trails.push($scope.newTrail);
-            $scope.selectedTrail = $scope.newTrail;
+            $scope.trails.push(newTrail);
+            $scope.selectedTrail = newTrail;
             $scope.trailChanged($scope.selectedTrail);
             resetNewTrailInput();
         }, function(error){
