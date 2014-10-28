@@ -39,55 +39,50 @@ def getUser():
 def get_lookahead(url=u'', srcurl=u'', domain=u''):
     if url == u'' or srcurl == u'' or domain == u'':
         raise ValueError("lookahead - url,srcurl and domain must be specified. url:" + url + " srcurl:" + srcurl + " domain:" + domain)
-
-
-    # tangelo.log('lookahead GET url='+url+'srcurl='+srcurl+' domain='+domain)
+    #tangelo.log('lookahead GET url='+url+'srcurl='+srcurl+' domain='+domain)
     user = getUser()
-    org = user['org']
-
-    #tangelo.log("plugin-server/lookahead: url="+url)
-    results = None
-
     entityDataConnector = factory.getEntityDataConnector()
-    results = entityDataConnector.getLookaheadEntities(url, org, domain=domain)
 
-    if len(results) == 0:
-        #tangelo.log("lookahead - url not found in database")
+
+    # get the features from the lookahead url that are also on the src url
+    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls([url])
+    if len(lookaheadFeatures) > 0:
+        lookaheadFeatures = lookaheadFeatures[lookaheadFeatures.keys()[0]]
+
+
+    if len(lookaheadFeatures) == 0:
+        tangelo.log("lookahead - url not found in database")
         return
+    visitedFeatures = entityDataConnector.getExtractedEntitiesFromUrls([srcurl])
+    if srcurl in visitedFeatures: visitedFeatures = visitedFeatures[srcurl]
+    matches = []
+    all_types = set([])
+    all_types.update(lookaheadFeatures.keys())
+    all_types.update(visitedFeatures.keys())
+    for type in all_types:
+        l = set([]) if type not in lookaheadFeatures else set(lookaheadFeatures[type])
+        v = set([]) if type not in visitedFeatures else set(visitedFeatures[type])
+        matches.extend(list(v & l))
+    del visitedFeatures
+    del lookaheadFeatures
 
-    visitedEntities = entityDataConnector.getVisitedEntities(user['userId'], srcurl, org, domain=domain)
+
+    # get the domain matches from the lookahead url
+    domain_matches = []
+    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,[url])
+    if url in domainLookaheadFeatures: domainLookaheadFeatures = domainLookaheadFeatures[url]
+    for type,value in domainLookaheadFeatures.iteritems():
+        domain_matches.append(value)
+
+    del domainLookaheadFeatures
     entityDataConnector.close()
 
-    emails = visitedEntities['email'].keys() if ('email' in visitedEntities) else []
-    phones = visitedEntities['phone'].keys() if ('phone' in visitedEntities) else []
-    websites = visitedEntities['website'].keys() if ('website' in visitedEntities) else []
-
-    matchCount = 0
-    matches = []
-    for type, values in {'email': emails, 'phone': phones, 'website': websites}.iteritems():
-        for value in values:
-            if type in results and value in results[type]:
-                matchCount += 1
-                matches.append(value)
-
-    domain_search_hits = 0
-    domain_matches = []
-
-    hitlist_matches = []
-    for type, values in results.iteritems():
-        for name, indomain in values.iteritems():
-            if indomain == 'y':
-                domain_search_hits += 1
-                domain_matches.append(name)
-            if type == 'hitlist':
-                hitlist_matches.append(name)
-
     result = dict(url=url,
-                  matchCount=matchCount,
+                  matchCount=len(matches),
                   matches=matches,
-                  domain_search_hits=domain_search_hits,
-                  domain_search_matches=domain_matches,
-                  hitlist=hitlist_matches)
+                  domain_search_hits=len(domain_matches),
+                  domain_search_matches=domain_matches
+    )
     #tangelo.log(str(result))
     return json.dumps(result)
 
@@ -99,7 +94,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    post_data = json.loads(cherrypy.request.body.read())
+    post_data = json.loads(cherrypy.request.body.read(), strict=False)
 
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "unknown service call")

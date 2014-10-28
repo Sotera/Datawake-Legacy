@@ -21,41 +21,50 @@ class DataConnector:
     def __init__(self):
         pass
 
+
     def open(self):
         raise NotImplementedError("Implement open()")
+
 
     def close(self):
         raise NotImplementedError("Implement close()")
 
+
     def _checkConn(self):
         raise NotImplementedError("Implement _checkConn()")
 
-    def getLookaheadEntities(self, url, org, domain='default'):
-        raise NotImplementedError("Implement getLookaheadEntities()")
 
-    def insertLookaheadEntities(self, url, entity_type, entity_values, indomain, org, domain='default'):
-        raise NotImplementedError("Implement insertLookaheadEntities()")
+    def getExtractedEntitiesFromUrls(self,urls,type=None):
+        raise NotImplementedError("Implement getExtractedEntitiesFromUrls()")
 
-    def getLookaheadEntityMatches(self, urls, entity_set, org, domain='default'):
-        raise NotImplementedError("Implement getLookaheadEntityMatches()")
 
-    def insertVisitedEntities(self, userId, url, entity_type, entity_values, indomain, domain='default', org='default'):
-        raise NotImplementedError("Implement insertVisitedEntities()")
+    def getExtractedDomainEntitiesFromUrls(self,domain,urls,type=None):
+        raise NotImplementedError("Implement getExtractedDomainEntitiesFromUrls()")
 
-    def getVisitedEntities(self, userId, url, org, domain='default'):
-        raise NotImplementedError("Implement getVisitedEntities()")
 
-    def getVisitedEntitiesByUsersAndTypes(self, userIds, urls, types, org, domain='default'):
-        raise NotImplementedError("Implement getVisitedEntitiesByUsersAndTypes()")
+    def getExtractedEntitiesWithDomainCheck(self, urls, types=[], domain='default'):
+        raise NotImplementedError("Implement getExtractedEntitiesWithDomainCheck()")
 
-    def getEntityMatches(self, domain, type, values):
+
+    def insertEntities(self, url, entity_type, entity_values):
+        raise NotImplementedError("Implement insertEntities()")
+
+
+    def insertDomainEntities(self, domain,url, entity_type, entity_values):
+        raise NotImplementedError("Implement insertDomainEntities()")
+
+
+    def get_domain_entity_matches(self, domain, type, values):
         raise NotImplementedError("Implement getEntityMatches()")
+
 
     def get_domain_items(self, name, limit):
         raise NotImplementedError("Implement get_domain_items()")
 
+
     def delete_domain_items(self, domain_name):
         raise NotImplementedError("Implement delete_domain_items()")
+
 
     def add_new_domain_items(self, domain_items):
         raise NotImplementedError("Implement add_new_domain_items()")

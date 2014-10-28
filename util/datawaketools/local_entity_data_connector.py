@@ -32,8 +32,6 @@ class MySqlEntityDataConnector(DataConnector):
                     database:...,
                     password:...,
                     host:....,
-                    lookahead_table:...,
-                    visited_table:....,
                 }
             :return:  a new EntityDataConnector for a mysql database
             """
@@ -72,201 +70,212 @@ class MySqlEntityDataConnector(DataConnector):
             self.open()
 
 
-    # ###  LOOK AHEAD  ####
 
 
-    # TODO, update refs
-    def getLookaheadEntities(self, url, org, domain='default'):
+
+    def getExtractedEntitiesFromUrls(self,urls,type=None):
         """
-        Return all lookahead entities extracted from a url
-        :param url:
-        :return: nested dict of extract type -> extracted value -> indomain ('y' or 'n')
+        Returns all extracted attributs for a url
+        :param
+            urls:  list of urls to extract entities from
+            type = None for all types,  specify a type for that type only.
+        :return: {attrType: [value1,value2,..], ... }
         """
-        org = org.upper()
+        self._checkConn()
+        urls_in = "(" + ( ','.join(['%s' for i in range(len(urls))]) ) + ")"
+        params = []
+        params.extend(urls)
+        if type is None:
+            sql = "select url,entity_type,entity_value from general_extractor_web_index where url in  "+urls_in
+        else:
+            sql = "select url,entity_type,entity_value from general_extractor_web_index where url in "+urls_in+"  and entity_type = %s"
+            params.append(type)
+
         self._checkConn()
         try:
             cursor = self.cnx.cursor()
-            sql = "select distinct entity_type, entity_value,indomain from " + self.config['lookahead_table'] + "  where url = %s and domain = %s and org = %s"
-            params = [url, domain, org]
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
+            cursor.execute(sql,params)
             results = {}
-            for row in rows:
-                (entity_type, entity_value, indomain) = row
-                if entity_type not in results:
-                    results[entity_type] = {}
-                results[entity_type][entity_value] = indomain
-            cursor.close()
+            for row in cursor.fetchall():
+                url= row[0]
+                attr = row[1]
+                value = row[2]
+                if url not in results:
+                    results[url] = {}
+                if attr not in results[url]:
+                    results[url][attr] = [value]
+                else:
+                    results[url][attr].append(value)
             return results
         except:
             self.close()
             raise
 
 
-    # TODO, update refs
-    def insertLookaheadEntities(self, url, entity_type, entity_values, indomain, org, domain='default'):
-        """
-        Bulk insertion of extracted lookahead entities
-        :param url: The url entities where extracted from
-        :param entity_type: type of entity i.e 'phone', 'email', or 'website',etc
-        :param entity_values: a list of entity values
-        :param indomain: 'y' or 'n' indicating if the extracted entity exists in the domain specific index
-        :return:
-        """
-        org = org.upper()
-        if indomain != 'y' and indomain != 'n':
-            raise ValueError('indomain must be y or n was: ' + indomain)
-        self._checkConn()
-        cursor = self.cnx.cursor()
 
+    def getExtractedDomainEntitiesFromUrls(self,domain,urls,type=None):
+        """
+        Returns all extracted attributs for a url
+        :param
+            urls:  list of urls to extract entities from
+            type = None for all types,  specify a type for that type only.
+        :return: {attrType: [value1,value2,..], ... }
+        """
+        self._checkConn()
+        urls_in = "(" + ( ','.join(['%s' for i in range(len(urls))]) ) + ")"
+        params = [domain]
+        params.extend(urls)
+        if type is None:
+            sql = "select url,entity_type,entity_value from domain_extractor_web_index where domain = %s and url in  "+urls_in
+        else:
+            sql = "select url,entity_type,entity_value from domain_extractor_web_index where domain = %s and url in "+urls_in+"  and entity_type = %s"
+            params.append(type)
+
+        self._checkConn()
         try:
-            for entity_value in entity_values:
-                sql = "select count(1) from " + self.config['lookahead_table'] + " where url = %s and entity_type = %s and entity_value = %s and domain = %s and org = %s"
-                params = [url, entity_type, entity_value, domain, org]
-                cursor.execute(sql, params)
-                count = cursor.fetchall()[0][0]
-                if count == 0:
-                    sql = "INSERT INTO " + self.config['lookahead_table'] + " (url,entity_type,entity_value,indomain,domain,org) VALUES (%s,%s,%s,%s,%s,%s)"
-                    params = [url, entity_type, entity_value, indomain, domain, org]
-                    cursor.execute(sql, params)
+            cursor = self.cnx.cursor()
+            cursor.execute(sql,params)
+            results = {}
+            for row in cursor.fetchall():
+                url= row[0]
+                attr = row[1]
+                value = row[2]
+                if url not in results:
+                    results[url] = {}
+                if attr not in results[url]:
+                    results[url][attr] = [value]
                 else:
-                    sql = "UPDATE " + self.config['lookahead_table'] + " set ts = NOW(),indomain=%s where url = %s and entity_type = %s and entity_value=%s and domain = %s and org = %s"
-                    params = [indomain, url, entity_type, entity_value, domain, org]
-                    cursor.execute(sql, params)
-            self.cnx.commit()
-            cursor.close()
+                    results[url][attr].append(value)
+            return results
         except:
             self.close()
             raise
 
 
-    # TODO update refs
-    def getLookaheadEntityMatches(self, urls, entity_set, org, domain='default'):
+
+
+
+    def getExtractedEntitiesWithDomainCheck(self, urls, types=[], domain='default'):
         """
-        For a set of urls return extracted entities that match those in the provided set,
-        Also include extracted entities for each url that are memebers of the domain.
-        :param urls: list of urls for which to test extracted entities
-        :param entity_set:  list of entities to match against
-        :return: a dict of url -> {'all_matchies': entities that match the provided set, 'domain_matches': entities found in the domain }
+        Return all entities extracted from a given set of urls, indication which entities were found in the domain
+        :param urls:  list of urls to look up
+        :param types: list of extract_types to filter on.  empty list will search on all types
+        :param domain:  the domain to check for memebership against
+        :return:  dict of results with the form  { url: { extract_type: { extract_value: in_domain, .. }, .. } , ..} where in_domain is 'y' or 'n'
         """
-        org = org.upper()
-        self._checkConn()
-        cursor = self.cnx.cursor()
-        result = {}
-        try:
-            sql = "select entity_type,entity_value,indomain from " + self.config['lookahead_table'] + " where url = %s and domain = %s and org = %s"
-            for url in urls:
-                result[url] = {'all_matches': set([]), 'domain_matches': set([])}
-                params = [url, domain, org]
-                cursor.execute(sql, params)
-                for row in cursor:
-                    entity = row[0] + ":" + row[1]
-                    if entity in entity_set:
-                        result[url]['all_matches'].add(entity)
-                    if row[2] == 'y':
-                        result[url]['domain_matches'].add(entity)
-            cursor.close()
-            return result
-        except:
-            self.close()
-            raise
-
-
-    # ###   VISITED   ####
-
-
-
-    def insertVisitedEntities(self, userId, url, entity_type, entity_values, indomain, domain='default', org='default'):
-        org = org.upper()
-        if indomain != 'y' and indomain != 'n':
-            raise ValueError('insertLookaheadURNS indomain must be y or n was: ' + indomain)
-
+        assert(len(urls) > 0)
         self._checkConn()
         cursor = self.cnx.cursor()
         try:
-            for entity_value in entity_values:
-                sql = "select count(1) from " + self.config['visited_table'] + " where userId = %s and url = %s and entity_type = %s and entity_value = %s and domain = %s and org = %s"
-                params = [userId, url, entity_type, entity_value, domain, org]
-                cursor.execute(sql, params)
-                count = cursor.fetchall()[0][0]
-                if count == 0:
-                    sql = "INSERT INTO " + self.config['visited_table'] + " (userId,url,entity_type,entity_value,indomain,domain,org) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-                    params = [userId, url, entity_type, entity_value, indomain, domain, org]
-                    cursor.execute(sql, params)
-                else:
-                    sql = "UPDATE " + self.config['visited_table'] + " set ts = NOW(),indomain=%s where userId = %s and url = %s and entity_type = %s and entity_value=%s and domain = %s and org = %s"
-                    params = [indomain, userId, url, entity_type, entity_value, domain, org]
-                    cursor.execute(sql, params)
-            self.cnx.commit()
-            cursor.close()
-        except:
-            self.close()
-            raise
-
-
-    # TODO update refs
-    def getVisitedEntities(self, userId, url, org, domain='default'):
-        org = org.upper()
-        self._checkConn()
-        cursor = self.cnx.cursor()
-        sql = "select distinct entity_type,entity_value,indomain from " + self.config['visited_table'] + " where userId = %s and url = %s and domain = %s and org =%s"
-        params = [userId, url, domain, org]
-
-        try:
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-            cursor.close()
-        except:
-            self.close()
-            raise
-
-        results = {}
-        for row in rows:
-            (entity_type, entity_value, indomain) = row
-            if entity_type not in results:
-                results[entity_type] = {}
-            results[entity_type][entity_value] = indomain
-        return results
-
-
-    # TODO update refs
-    def getVisitedEntitiesByUsersAndTypes(self, userIds, urls, types, org, domain='default'):
-        if len(types) == 0:
-            raise ValueError("must specify types")
-
-        self._checkConn()
-        cursor = self.cnx.cursor()
-        results = {}
-
-        sql = "select entity_type,entity_value,indomain from " + self.config['visited_table'] + " "
-        types_in = "(" + ( ','.join(['%s' for i in range(len(types))]) ) + ")"
-        sql = sql + " WHERE entity_type in " + types_in
-        sql = sql + " AND domain = %s AND org =%s "
-        if len(userIds) > 0:
-            user_ids_in = "(" + ( ','.join(['%s' for i in range(len(userIds))]) ) + ")"
-            sql = sql + " AND userId in " + user_ids_in
-        for url in urls:
-            final_sql = sql + " AND url = %s"
             params = []
-            params.extend(types)
-            params.append(domain)
-            params.append(org)
-            params.extend(userIds)
-            params.append(url)
-            try:
-                cursor.execute(final_sql, params)
-                for row in cursor:
-                    (type, value, indomain) = row
-                    if url not in results:
-                        results[url] = []
-                    results[url].append({'type': type, 'value': value, 'indomain': indomain})
-            except:
-                self.close()
-                raise
-        return results
+            params.extend(urls)
+            urls_in = "(" + ( ','.join(['%s' for i in range(len(urls))]) ) + ")"
+            sql = "select url,entity_type,entity_value from general_extractor_web_index where  url in "+urls_in
+            params = []
+            params.extend(urls)
+            if len(types) > 0:
+                params.extend(types)
+                types_in = "(" + ( ','.join(['%s' for i in range(len(types))]) ) + ")"
+                sql = sql + " and entity_type in "+types_in
 
 
-    def getEntityMatches(self, domain, type, values):
+            cursor.execute(sql,params)
+            allEntities = {}
+            for row in cursor.fetchall():
+                url = row[0]
+                attr = row[1]
+                value = row[2]
+                if url not in allEntities:
+                    allEntities[url] = {}
+                if attr not in allEntities[url]:
+                    allEntities[url][attr] = {}
+                allEntities[url][attr][value] = 'n'
+
+
+            params = [domain]
+            params.extend(urls)
+            sql = "select url,entity_type,entity_value from domain_extractor_web_index where  domain = %s and url in "+urls_in
+            if len(types) > 0:
+                params.extend(types)
+                types_in = "(" + ( ','.join(['%s' for i in range(len(types))]) ) + ")"
+                sql = sql + " and entity_type in "+types_in
+
+            cursor.execute(sql,params)
+            for row in cursor.fetchall():
+                url = row[0]
+                attr = row[1]
+                value = row[2]
+                if url not in allEntities:
+                    allEntities[url] = []
+                if attr not in allEntities[url]:
+                    allEntities[url][attr] = {}
+                allEntities[url][attr][value] = 'y'
+
+
+            cursor.close()
+            return allEntities
+
+        except:
+            self.close()
+            raise
+
+
+
+
+
+    def insertEntities(self, url, entity_type, entity_values):
+        self._checkConn()
+        cursor = self.cnx.cursor()
+        try:
+            for entity_value in entity_values:
+                sql = "select count(1) from general_extractor_web_index where url = %s and entity_type = %s and entity_value = %s"
+                params = [url,entity_type,entity_value]
+                cursor.execute(sql,params)
+                count = cursor.fetchall()[0][0]
+                if count == 0:
+                    sql = "INSERT INTO general_extractor_web_index (url,entity_type,entity_value) VALUES (%s,%s,%s)"
+                    cursor.execute(sql,params)
+            self.cnx.commit()
+            cursor.close()
+        except:
+            self.close()
+            raise
+
+
+
+    def insertDomainEntities(self, domain,url, entity_type, entity_values):
+        self._checkConn()
+        cursor = self.cnx.cursor()
+        try:
+            for entity_value in entity_values:
+                sql = "select count(1) from domain_extractor_web_index where domain = %s and url = %s and entity_type = %s and entity_value = %s"
+                params = [domain,url,entity_type,entity_value]
+                cursor.execute(sql,params)
+                count = cursor.fetchall()[0][0]
+                if count == 0:
+                    sql = "INSERT INTO domain_extractor_web_index (domain,url,entity_type,entity_value) VALUES (%s,%s,%s,%s)"
+                    cursor.execute(sql,params)
+            self.cnx.commit()
+            cursor.close()
+        except:
+            self.close()
+            raise
+
+
+
+
+
+
+
+
+
+
+    # # DOMAINS  ####
+
+
+
+
+    def get_domain_entity_matches(self, domain, type, values):
         self._checkConn()
         cursor = self.cnx.cursor()
         sql = ""
@@ -287,31 +296,12 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
-    def inDomain(self, domain, type, value):
-        self._checkConn()
-        cursor = self.cnx.cursor()
-        sql = ""
-        params = [domain + '\0' + type + '\0' + value]
-        sql = sql + "select rowkey from datawake_domain_entities where rowkey = %s"
-        try:
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-            cursor.close()
-            return len(rows) > 0
-        except:
-            self.close()
-            raise
-
-
-
-    # # DOMAINS  ####
-
 
     def get_domain_items(self, name, limit):
         self._checkConn()
         cursor = self.cnx.cursor()
-        sql = "select rowkey from datawake_domain_entities where rowkey like %s limit %s"
-        params = [name + '\0%', limit]
+        sql = "select rowkey from datawake_domain_entities where rowkey >= %s and rowkey <= %s limit %s"
+        params = [name + '\0',name+"~", limit]
         try:
             cursor.execute(sql, params)
             rows = cursor.fetchall()

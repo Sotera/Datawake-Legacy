@@ -130,7 +130,7 @@ post_actions = {
 @tangelo.restful
 def post(action, *args, **kwargs):
     json_obj = cherrypy.request.body.read()
-    post_data = json.loads(json_obj)
+    post_data = json.loads(json_obj, strict=False)
 
     def unknown(*args):
         return tangelo.HTTPStatusCode(400, "invalid service call")

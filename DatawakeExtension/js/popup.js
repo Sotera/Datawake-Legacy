@@ -138,7 +138,7 @@ var dwUI = function () {
                     //console.log("linkLookahead SUCCESS, response: "+response)
 
                     // if there was a match add it to the list
-                    if (responseObj.matchCount > 0 || responseObj.domain_search_hits > 0 || responseObj.hitlist.length > 0) {
+                    if (responseObj.matchCount > 0 || responseObj.domain_search_hits > 0 ) {
                         lookaheadLinks.push(responseObj);
 
                         // re order based on match count
@@ -148,9 +148,7 @@ var dwUI = function () {
                         lookaheadLinks.sort(function (a, b) {
                             return b.domain_search_hits - a.domain_search_hits;
                         });
-                        lookaheadLinks.sort(function (a, b) {
-                            return b.hitlist.length - a.hitlist.length;
-                        });
+
 
                         // append new elements and re order.
                         var selection = d3.select("#lookahead_results").selectAll("div")
@@ -169,31 +167,6 @@ var dwUI = function () {
                                 return d.url
                             });
 
-                        if (responseObj.hitlist.length > 0) {
-                            var hitlist_matches = divs.append("div");
-
-                            hitlist_matches.append("button").text(function (d) {
-                                return "hit list: " + d.hitlist.length
-                            })
-                                .attr("style", "display:block; margin-left: 25px;")
-                                .on("click", function () {
-                                    if (!this.clicked) {
-                                        this.clicked = true
-                                        d3.select(this.parentNode).selectAll("div").attr("style", "display:block; margin-left: 25px;")
-                                    }
-                                    else {
-                                        this.clicked = false
-                                        d3.select(this.parentNode).selectAll("div").attr("style", "display:none;")
-                                    }
-                                });
-                            hitlist_matches.append("div").selectAll("div").data(function (d) {
-                                return d.hitlist
-                            }).enter().append("div")
-                                .text(function (d) {
-                                    return d
-                                })
-                                .attr("style", "display: none;");
-                        }
 
 
                         if (responseObj.domain_search_hits > 0) {
