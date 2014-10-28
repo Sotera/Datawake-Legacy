@@ -24,7 +24,7 @@
             "title": "Datawake Deployment Address IP",
             "description": "(Required) Sets the proxy ip address for sending side requests through Tor.",
             "type": "string",
-            "value": ""
+            "value": "127.0.0.1"
         },
         {
             "name": "proxyPort",

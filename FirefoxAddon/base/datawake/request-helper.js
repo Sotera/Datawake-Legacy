@@ -74,7 +74,7 @@ function sidePost(url, post_data, callback) {
             callback(response);
         } else {
             console.error("There is an error on the server side.");
-            console.error(resp);
+            callback(resp);
         }
     })
 }
@@ -88,7 +88,7 @@ function sideGet(url, callback) {
             callback(response);
         } else {
             console.error("There is an error on the server side.");
-            console.error(resp);
+            callback(resp);
         }
 
     });

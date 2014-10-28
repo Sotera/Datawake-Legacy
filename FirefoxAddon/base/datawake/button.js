@@ -119,7 +119,10 @@ function useButton() {
         width: 800,
         height: 1000,
         contentURL: data.url("html/datawake-widget-panel.html"),
-        onHide: handleHide
+        onHide: handleHide,
+        contentScriptOptions: {
+            starUrl: data.url("css/icons/")
+        }
     });
     datawakeButton = ToggleButton({
         id: "datawake-widget",
@@ -203,7 +206,6 @@ function emitRanks(datawakeInfo) {
         var rank = response.json.rank;
         var rankingInfo = {};
         rankingInfo.ranking = rank;
-        rankingInfo.starUrl = data.url("css/icons/");
         mainPanel.port.emit("ranking", rankingInfo);
     });
 }

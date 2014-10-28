@@ -22,12 +22,10 @@
             <div class="col-lg-4">
                 <div class="col-md-6" style="margin-top: 1.5em">
                     <div class="btn-group" data-toggle="buttons" style="display: inline-block;">
-                        <label id="recording_on_label" ng-class="{'btn btn-success' : isDatawakeOn, 'btn btn-default': !isDatawakeOn}" class="btn btn-default">
-                            <input type="radio" name="options" ng-click="datawakeStatusChanged(true);"> On
-                        </label>
-                        <label id="recording_off_label" ng-class="{'btn btn-danger' : !isDatawakeOn, 'btn btn-default': isDatawakeOn}" class="btn btn-default">
-                            <input type="radio" name="options" id="recording_off" ng-click="datawakeStatusChanged(false);"> Off
-                        </label>
+                        <button id="recording_on_label" ng-class="{'btn btn-success' : isDatawakeOn, 'btn btn-default': !isDatawakeOn}" ng-click="datawakeStatusChanged(true);" class="btn btn-default">On
+                        </button>
+                        <button id="recording_off_label" ng-class="{'btn btn-danger' : !isDatawakeOn, 'btn btn-default': isDatawakeOn}" ng-click="datawakeStatusChanged(false);" class="btn btn-default">Off
+                        </button>
                     </div>
                 </div>
             </div>
@@ -138,7 +136,8 @@
 <div class="container" ng-hide="!invalidPreferences">
     <div class="jumbotron alert alert-danger">
         <h3>Preferences Invalid</h3>
-        <p>Some of your preferences are invalid or incomplete.  Go to the add-on page to set the required preferences, so you can start using the Datawake.</p>
+
+        <p>Some of your preferences are invalid or incomplete. Go to the add-on page to set the required preferences, so you can start using the Datawake.</p>
     </div>
 </div>
 </body>

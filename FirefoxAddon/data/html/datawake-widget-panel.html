@@ -4,7 +4,6 @@
     <meta charset="utf-8"/>
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
-    <link href="../css/chosen.min.css" rel="stylesheet">
     <link href="../css/jRating.jquery.css" rel="stylesheet">
     <style type="text/css">
         .vertical-center {
@@ -64,6 +63,9 @@
                                 </td>
                                 <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
                                     <a ng-href="tools.link.replace('$ATTR',entities.type).replace('$VALUE',entities.name)">{{tools.display}}</a>
+                                </td>
+                                <td ng-show="extracted_tools.length <= 0">
+                                    <span>No External Tools Available</span>
                                 </td>
                             </tr>
                         </table>
