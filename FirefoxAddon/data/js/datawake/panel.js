@@ -72,7 +72,7 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
 
     addon.port.on("lookaheadTimerResults", function (lookahead) {
         if (lookahead != null) {
-            if (lookahead.matchCount > 0 || lookahead.domain_search_hits > 0 || lookahead.hitlist.length > 0) {
+            if (lookahead.matchCount > 0 || lookahead.domain_search_hits > 0) {
                 $scope.lookaheadLinks.push(lookahead);
             }
         }
@@ -88,10 +88,6 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         $scope.extracted_tools = links;
         $scope.$apply();
     });
-
-    $scope.hitListToggle = function (lookaheadObj) {
-        lookaheadObj.hitListShow = !lookaheadObj.hitListShow;
-    };
 
     $scope.searchHitsToggle = function (lookaheadObj) {
         lookaheadObj.searchHitsShow = !lookaheadObj.searchHitsShow;
