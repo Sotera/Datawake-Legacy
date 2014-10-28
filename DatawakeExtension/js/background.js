@@ -126,7 +126,7 @@ function setTrail(request, sender, sendResponse) {
     dwState.lastTrail = name;
     dwState.tabToTrail[tab] = name;
     console.log("Datawake-background set-trail tab: %s trail: %s", tab, name);
-    sendResponse("ok");
+    sendResponse({success: true});
 }
 
 function setDomain(request, sender, sendResponse) {
@@ -135,7 +135,7 @@ function setDomain(request, sender, sendResponse) {
     dwState.lastDomain = name;
     dwState.tabToDomain[tab] = name;
     console.log("Datawake-background set-domain tab: %s domain: %s", tab, name);
-    sendResponse("ok");
+    sendResponse({success: true});
 }
 
 function toggleTracking(request, sender, sendResponse) {
@@ -165,7 +165,7 @@ function postPageContents(request, sender, sendResponse) {
     postContents(config.datawake_serviceUrl + "/datawakescraper/scrape", pageContents, onSuccess, logError);
 }
 
-function setCurrentOrg(request, sender, sendResponse){
+function setCurrentOrg(request, sender, sendResponse) {
     dwState.currentOrg = request.org;
 }
 
@@ -240,11 +240,10 @@ function getSelections(info, tab) {
     function sendSelections(objectResult) {
         console.log("Grabbing other users' selections");
         chrome.tabs.sendMessage(tabId, {operation: 'selections', selections: objectResult.selections}, function (response) {
-            if (response.result == "ok") {
+            if (response.success) {
                 console.log("hightlight message to %s recv.", tabId);
-            }
-            else {
-                console.log("highlight message error %s", response.result);
+            } else {
+                console.log("highlight message error %s", response.error);
             }
         });
     }
@@ -256,7 +255,7 @@ function getSelections(info, tab) {
 
 function launchImageService(info, tab) {
     chrome.tabs.sendMessage(tab.id, {operation: 'enable-image-service'}, function (response) {
-        if (response != "ok") {
+        if (!response.success) {
             console.error("Error starting image service on tab: %s", tab.id)
         }
     });
@@ -294,11 +293,11 @@ function advanceSearch(postId, tabId, url, delay) {
         });
         var highlightMessage = {operation: 'highlighttext', entities_in_domain: entities_in_domain, serviceUrl: config.datawake_serviceUrl};
         chrome.tabs.sendMessage(tabId, highlightMessage, function (response) {
-            if (response.result == "ok") {
+            if (response.success) {
                 console.log("highlight message to %s recv.", tabId);
             }
             else {
-                console.log("highlight message error %s", response.result)
+                console.log("highlight message error %s", response.error)
             }
         });
 

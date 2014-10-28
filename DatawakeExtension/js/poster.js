@@ -97,20 +97,25 @@ function highlightText(request, sender, sendResponse) {
                     }
 
                 });
-                sendResponse({result: "ok"});
+                sendResponse({success: true});
             },
             error: function (jqxhr, textStatus, reason) {
                 console.log("external link error " + textStatus + " " + reason);
-                sendResponse({result: "error"});
+                sendResponse({success: false, error: reason});
             }
         })
     }
 }
 
 function highlightSelections(request, sender, sendResponse) {
-    var selections = request.selections;
-    $.each(selections, function (index, selection) {
-        $('body').highlight(selection);
-    });
-    sendResponse({result: "ok"});
+    try {
+        var selections = request.selections;
+        $.each(selections, function (index, selection) {
+            $('body').highlight(selection);
+        });
+        sendResponse({success: true});
+    } catch (e) {
+        sendResponse({success:false, error: e.message})
+    }
+
 }
