@@ -173,6 +173,7 @@ function onToggle(state) {
         //Get the rank info and listen for someone ranking the page.
         emitRanks(datawakeInfo);
         mainPanel.port.on("setUrlRank", setUrlRank);
+        mainPanel.port.on("openExternalLink", openExternalTool)
     }
     else {
         //Emit that it is not a valid tab.
@@ -189,6 +190,11 @@ function onToggle(state) {
 function resetToggleButton() {
     //TODO: When badges get added, insert reset here.
     mainPanel.port.emit("invalidTab");
+}
+
+function openExternalTool(externalUrlObject){
+    console.log("Opening External Tool");
+    tabs.activeTab.url = externalUrlObject.externalUrl;
 }
 
 /**

@@ -101,6 +101,10 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         lookaheadObj.matchesShow = !lookaheadObj.matchesShow;
     };
 
+    $scope.openExternalLink = function(externalUrl){
+        addon.port.emit("openExternalLink", {externalUrl:externalUrl});
+    };
+
     function createStarRating(starUrl) {
         var starRating = $("#star_rating");
         starRating.jRating({

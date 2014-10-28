@@ -92,7 +92,8 @@
 
         <div id="trail-container" class="ng-hide" ng-model="selectedDomain" ng-show="selectedDomain != null && selectedDomain.name != ''">
             <h4> Select an existing trail: </h4>
-            <select id="trail_select" class="form-control" ng-model="selectedTrail" ng-change="trailChanged(selectedTrail);" ng-options="tail.name for tail in trails" data-placeholder="Select a Trail ">
+            <select id="trail_select" class="form-control" ng-model="selectedTrail" ng-change="trailChanged(selectedTrail);" ng-options="tail.name for tail in trails | orderBy:'name'"
+                    data-placeholder="Select a Trail ">
             </select>
 
             <div id="create_new_trail">
@@ -102,14 +103,15 @@
                         <td>
                             <div id="trail-name-option-group" class="input-group">
                                 <span class="input-group-addon">Name</span>
-                                <input id="new_trail_name" ng-model="newTrail.name" type="text" class="form-control" placeholder="Enter an alphanumeric trail name"/>
+                                <input id="new_trail_name" ng-model="newTrail.name" type="text" ng-keypress="enterKeyEvent($event);" class="form-control" placeholder="Enter an alphanumeric trail name"/>
                         <span class="input-group-btn">
                             <button id="new_trail_create_btn" ng-click="createNewTrail();" class="btn btn-default" type="button">Create</button>
                         </span>
                             </div>
                             <div class="input-group">
                                 <span class="input-group-addon">Description</span>
-                                <input id="new_trail_description" ng-model="newTrail.description" type="text" class="form-control" placeholder="Enter a description (optional)"/>
+                                <input id="new_trail_description" ng-model="newTrail.description" ng-keypress="enterKeyEvent($event);" type="text" class="form-control"
+                                       placeholder="Enter a description (optional)"/>
                             </div>
                         </td>
                     </tr>

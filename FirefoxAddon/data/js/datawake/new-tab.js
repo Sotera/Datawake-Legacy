@@ -52,8 +52,8 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
         $scope.processingNewTrail = false;
         $scope.newTrail.name = "";
         $scope.newTrail.description = "";
-        $scope.$apply();
         $scope.trailChanged($scope.selectedTrail);
+        $scope.$apply();
 
     });
 
@@ -73,6 +73,12 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
         console.debug("On Off Was Toggled: " + status);
         $scope.isDatawakeOn = status;
         sendDatawakeInformation();
+    };
+
+    $scope.enterKeyEvent = function(keyObject){
+      if(keyObject.keyCode == 13){
+          $scope.createNewTrail();
+      }
     };
 
     $scope.domainChanged = function (domain) {
