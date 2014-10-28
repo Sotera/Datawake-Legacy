@@ -4,6 +4,7 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
 
     $scope.isDatawakeOn = false;
     $scope.invalidPreferences = false;
+    $scope.newTrail = {};
 
     addon.port.on("sendDomains", function (domains) {
         domains.shift();
@@ -51,8 +52,8 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
         $scope.processingNewTrail = false;
         $scope.newTrail.name = "";
         $scope.newTrail.description = "";
-        $scope.$apply();
         $scope.trailChanged($scope.selectedTrail);
+        $scope.$apply();
 
     });
 
@@ -74,6 +75,12 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
         sendDatawakeInformation();
     };
 
+    $scope.enterKeyEvent = function(keyObject){
+      if(keyObject.keyCode == 13){
+          $scope.createNewTrail();
+      }
+    };
+
     $scope.domainChanged = function (domain) {
         var selected = domain.name;
         if (selected != null && selected != "") {
@@ -83,6 +90,7 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     };
 
     $scope.trailChanged = function (trail) {
+        $scope.processingNewTrailFailed = false;
         sendDatawakeInformation();
     };
 
@@ -94,9 +102,7 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     });
 
     $scope.createNewTrail = function () {
-        $("#alert_processing").show();
         $scope.processingNewTrail = true;
-        console.debug("Creating New Trail: " + $scope.newTrail.name + " For Domain: " + $scope.selectedDomain.name + " With Description: " + $scope.newTrail.description);
         addon.port.emit("createTrail", {domain: $scope.selectedDomain.name, trail_name: $scope.newTrail.name, trail_description: $scope.newTrail.description});
     };
 

@@ -119,7 +119,10 @@ function useButton() {
         width: 800,
         height: 1000,
         contentURL: data.url("html/datawake-widget-panel.html"),
-        onHide: handleHide
+        onHide: handleHide,
+        contentScriptOptions: {
+            starUrl: data.url("css/icons/")
+        }
     });
     datawakeButton = ToggleButton({
         id: "datawake-widget",
@@ -170,6 +173,7 @@ function onToggle(state) {
         //Get the rank info and listen for someone ranking the page.
         emitRanks(datawakeInfo);
         mainPanel.port.on("setUrlRank", setUrlRank);
+        mainPanel.port.on("openExternalLink", openExternalTool)
     }
     else {
         //Emit that it is not a valid tab.
@@ -188,6 +192,11 @@ function resetToggleButton() {
     mainPanel.port.emit("invalidTab");
 }
 
+function openExternalTool(externalUrlObject){
+    console.log("Opening External Tool");
+    tabs.activeTab.url = externalUrlObject.externalUrl;
+}
+
 /**
  * Emits Rank information to the panel attached to the widget.
  * @param datawakeInfo The datawake info associated with the current tab.
@@ -203,7 +212,6 @@ function emitRanks(datawakeInfo) {
         var rank = response.json.rank;
         var rankingInfo = {};
         rankingInfo.ranking = rank;
-        rankingInfo.starUrl = data.url("css/icons/");
         mainPanel.port.emit("ranking", rankingInfo);
     });
 }
