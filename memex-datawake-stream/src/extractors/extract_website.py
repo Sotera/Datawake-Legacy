@@ -30,8 +30,8 @@ class ExtractWebsite(extractor.Extractor):
         if not body:
             return []
 
-        bodyString = body.lower()
-
+        #bodyString = body.lower()
+        bodyString = body
         websites = self.easyRE.findall(bodyString)
         websites = list(set(websites))
         validUrls = []
