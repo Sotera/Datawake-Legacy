@@ -20,7 +20,7 @@ $KAFKA_HOME/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replicatio
 logfilename="streamparse_$(date +%F_%H:%M:%S,%N)"
 cd /vagrant/memex-datawake-stream
 rm nohup.out
-nohup sparse run -n local -t 9999999 -o "'topology.deployment=\"local\"'" >> /var/log/${logfilename}_stdout.log 2>> /var/log/${logfilename}_stderr.log & 
+nohup sparse run -n local -t 9999999 -o "'topology.deployment=\"local\"'"  >> /var/log/${logfilename}_stdout.log 2>> /var/log/${logfilename}_stderr.log & 
 echo "started local topology"
 
 
