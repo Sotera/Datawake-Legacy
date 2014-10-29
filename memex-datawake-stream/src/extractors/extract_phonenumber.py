@@ -1,18 +1,27 @@
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-extraction of phonenumbers
+Extraction of phone numbers
 """
-#from extract import Extract
 import re
 import itertools
 import math
-import pdb
-class ExtractPhoneNumber():
-    myName = "phone"
+import extractor
+
+class ExtractPhoneNumber(extractor.Extractor):
 
 
-        
+
+    def human_name(self):
+        return "simplephone"
+
+    def name(self):
+        return "phone"
+
+    def version(self):
+        return "0.0"
+
     def clean(self, bodyString):
 
         """
@@ -60,22 +69,19 @@ class ExtractPhoneNumber():
 
         return bodyString
 
-
-
-    def test(self, bodyString):
-        if not bodyString:
+    def extract(self, url, status, headers, flags, body, timestamp, source):
+        if not body:
             return []
-        bodyString = bodyString.lower()
-        bodyString = self.clean(bodyString)
-        
+
+        bodyString = self.clean(body)
         # Finally get the phone numbers
         self.myCompiledRE = re.compile('[0-9]{7,14}')
         # remove whitespace
         bodyString = bodyString.replace('\t','').replace(' ','')
-        return  self.myCompiledRE.findall(bodyString)
+        pn =  self.myCompiledRE.findall(bodyString)
 
-    
+        phone_list = []
+        for i in range(len(pn)):
+            phone_list.append(self.create_attribute(pn[i]))
+        return phone_list
 
-    
-
-    

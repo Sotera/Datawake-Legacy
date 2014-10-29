@@ -20,7 +20,6 @@ import datawake_db
 import igraph
 import traceback
 import datawaketools.entity_data_connector_factory as factory
-#import tangelo
 
 
 """
@@ -125,12 +124,10 @@ def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
 
 def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,userlist=[],trail='*',domain=''):
     entityDataConnector.close()
-    #tangelo.log('getBrowsePathAndAdjacentEdgesWithLimit(org='+org+',startdate='+startdate+',enddate='+enddate+',adjTypes='+str(adjTypes)+',limit='+str(limit)+',userlist='+str(userlist)+',trail='+trail+')')
 
     browsePathGraph = getBrowsePathEdges(org,startdate,enddate,userlist,trail,domain)
     urls = browsePathGraph['nodes'].keys()
 
-    #tangelo.log("urls: "+str(urls))
 
     # for every url in the browse path get all extracted entities
     results = entityDataConnector.getExtractedEntitiesWithDomainCheck(urls,adjTypes,domain=domain)
@@ -143,7 +140,6 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
     # pivot on entity->urls
     entity_to_urls = {}
     for url,entityObjDict in results.iteritems():
-        #tangelo.log("\nurl: "+url+"\n\nresult: "+str(entityObjList)+"\n\n")
         for type,valueDict in entityObjDict.iteritems():
             for value,in_domain in valueDict.iteritems():
                 key = (type,value)
@@ -366,8 +362,13 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
 
     del visitedEntities
 
-
     lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls(adj_urls)
+
+    # add place holders for urls with no extracted data
+    for adj_url in adj_urls:
+        if adj_url not in lookaheadFeatures:
+            lookaheadFeatures[adj_url] = {}
+
     domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,adj_urls)
 
 
@@ -396,10 +397,12 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
                 'entity_matches': all_matches,
                 'domain_entity_matches': domain_matches,
                 }
+
         if link not in nodes:
             nodes[link] = node
             for url in link_map[link]:
               edges.append((url,link))
+
 
 
     entityDataConnector.close()
