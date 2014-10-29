@@ -21,6 +21,8 @@ import cherrypy
 import datawaketools.datawake_db as db
 from datawaketools import kafka_producer
 
+import users
+
 
 """
 
@@ -30,13 +32,6 @@ from datawaketools import kafka_producer
 
 
 """
-
-
-def getUser():
-    assert ('user' in cherrypy.session)
-    user = cherrypy.session['user']
-    assert ('org' in user)
-    return user
 
 
 #
@@ -60,7 +55,7 @@ def getUser():
 
 def savePageSelection(selection, domain, postId=None):
     tangelo.log('savePageSelection postId=' + str(postId) + ' selection=' + selection + ' domain=' + domain)
-    user = getUser()
+    user = users.get_user()
     org = user['org']
 
     row = db.getBrowsePathData(org, postId, domain)
@@ -70,26 +65,17 @@ def savePageSelection(selection, domain, postId=None):
     return json.dumps(dict(id=id))
 
 
-def scrape_page(cookie, html, url, userId, userName, trail, domain):
+def scrape_page(cookie, html, url, userId, userName, trail, domain, org):
     if domain == u'' or trail == u'':
         raise ValueError('datawakescrapper fullPageScrape must provide trail and domain. domain=' + domain + ' trail=' + trail)
-    user = getUser()
-    tangelo.log('USER NAME: '+userName)
-    if len(userName) == 0:
-        userName = user['userName']
-    tangelo.log('USER NAME: '+userName)
+    tangelo.log('USER NAME: ' + userName)
     domain = domain.encode('utf-8')
-    org = user['org'].encode('utf-8')
+    org = org.encode('utf-8')
     html = html.encode('utf-8')
     url = url.encode('utf-8')
-    #url = urllib.unquote(url)
-
-
     tangelo.log('posting url contents to kafka: ' + url)
     kafka_producer.sendVisitingMessage(org, domain, str(userId), url, html)
-
-
-    # ad the row to the database
+    # add the row to the database
 
     id = db.addBrowsePathData(org, url, userId, userName, trail, domain=domain)
 
@@ -101,15 +87,16 @@ def scrape_page(cookie, html, url, userId, userName, trail, domain):
 
 
 def get_selections(domain, trail, url):
-    user = getUser()
-    org = user['org']
+    org = users.get_org()
     return json.dumps(dict(selections=db.getSelections(domain, trail, url, org)))
 
 
-def full_page_scrape(cookie=u'', html=u'', url=u'', userName=u'', trail=u'', domain=u''):
-    user = getUser()
-    userId = user['userId']
-    return scrape_page(cookie, html, url, userId, userName, trail, domain)
+def full_page_scrape(cookie=u'', html=u'', url=u'', trail=u'', domain=u''):
+    user = users.get_user()
+    user_id = user['userId']
+    user_name = user['userName']
+    org = user['org']
+    return scrape_page(cookie, html, url, user_id, user_name, trail, domain, org)
 
 
 post_actions = {

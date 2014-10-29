@@ -21,6 +21,8 @@ import tangelo
 import cherrypy
 import datawaketools.datawake_db as db
 
+import users
+
 
 """
  List / Create Trails
@@ -29,35 +31,24 @@ import datawaketools.datawake_db as db
 
 """
 
-
-def getUser():
-    assert ('user' in cherrypy.session)
-    user = cherrypy.session['user']
-    assert ('org' in user)
-    return user
-
-
 #
 # Perform a starts-with search for trails
 #
 def get_trails(domain=u''):
-    user = getUser()
-    org = user['org']
-    return getTrails(org, domain)
+    org = users.get_org()
+    return get_trails_for_domain_and_org(org, domain)
 
 
-def getTrails(org, domain):
+def get_trails_for_domain_and_org(org, domain):
     trails = db.listTrails(org, domain)
-    result = [{'name': '', 'description': ''}]
-    result.extend(trails)
-    response = dict(trails=result)
+    response = dict(trails=trails)
     return json.dumps(response)
 
 
 def add_trail(trailname=u'', traildescription=u'', domain=u''):
     tangelo.log('datawake_trails POST trailname=' + trailname + ' traildescription=' + traildescription + ' domain=' + domain + ')')
-    user = getUser()
-    org = user['org']
+    user = users.get_user()
+    org = user.get('org')
     valid = re.match('^[\w]+$', trailname) is not None
     if not valid:
         raise ValueError("Trail names must be alphanumeric")
@@ -65,9 +56,8 @@ def add_trail(trailname=u'', traildescription=u'', domain=u''):
         raise ValueError("Trail names can not be blank")
     if ':' in trailname:
         raise ValueError("Trail names can not contain the character ':' ")
-    else:
-        db.addTrail(org, trailname, traildescription, user['email'], domain=domain)
-    return json.dumps(dict(success=True))
+    last_row = db.addTrail(org, trailname, traildescription, user.get('email'), domain=domain)
+    return json.dumps(dict(success=last_row >= 0))
 
 
 post_actions = {

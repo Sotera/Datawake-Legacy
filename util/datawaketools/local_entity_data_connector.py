@@ -99,7 +99,7 @@ class MySqlEntityDataConnector(DataConnector):
             for row in cursor.fetchall():
                 url= row[0]
                 attr = row[1]
-                value = row[2]
+                value = row[2].lower()
                 if url not in results:
                     results[url] = {}
                 if attr not in results[url]:
@@ -139,7 +139,7 @@ class MySqlEntityDataConnector(DataConnector):
             for row in cursor.fetchall():
                 url= row[0]
                 attr = row[1]
-                value = row[2]
+                value = row[2].lower()
                 if url not in results:
                     results[url] = {}
                 if attr not in results[url]:
@@ -232,6 +232,7 @@ class MySqlEntityDataConnector(DataConnector):
                 params = [url,entity_type,entity_value]
                 cursor.execute(sql,params)
                 count = cursor.fetchall()[0][0]
+                print count
                 if count == 0:
                     sql = "INSERT INTO general_extractor_web_index (url,entity_type,entity_value) VALUES (%s,%s,%s)"
                     cursor.execute(sql,params)

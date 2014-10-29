@@ -20,6 +20,8 @@ import tangelo
 import cherrypy
 import datawaketools.entity_data_connector_factory as factory
 
+import users
+
 
 """
 
@@ -27,64 +29,43 @@ import datawaketools.entity_data_connector_factory as factory
 
 """
 
-# TODO: If we add get requests to this, we should add a dictionary lookup for which method to service. See: Datawake scraper
-
-def getUser():
-    assert ('user' in cherrypy.session)
-    user = cherrypy.session['user']
-    assert ('org' in user)
-    return user
-
 
 def get_lookahead(url=u'', srcurl=u'', domain=u''):
     if url == u'' or srcurl == u'' or domain == u'':
         raise ValueError("lookahead - url,srcurl and domain must be specified. url:" + url + " srcurl:" + srcurl + " domain:" + domain)
-    #tangelo.log('lookahead GET url='+url+'srcurl='+srcurl+' domain='+domain)
-    user = getUser()
-    entityDataConnector = factory.getEntityDataConnector()
+    if users.is_in_session():
+        entity_data_connector = None
+        try:
+            entity_data_connector = factory.getEntityDataConnector()
 
+            # get the features from the lookahead url that are also on the src url
+            entities = entity_data_connector.getExtractedEntitiesFromUrls([url, srcurl])
+            matches = []
+            lookahead_entities = entities.get(url, {})
+            visited_features = entities.get(srcurl, {})
+            all_types = set([])
+            all_types.update(lookahead_entities.keys())
+            all_types.update(visited_features.keys())
+            for entity_type in all_types:
+                l = set([]) if entity_type not in lookahead_entities else set(lookahead_entities[entity_type])
+                v = set([]) if entity_type not in visited_features else set(visited_features[entity_type])
+                matches.extend(list(v & l))
+            del visited_features
+            del lookahead_entities
+            del all_types
+            # get the domain matches from the lookahead url
+            domain_lookahead_features = entity_data_connector.getExtractedDomainEntitiesFromUrls(domain, [url])
+            domain_lookahead_features = domain_lookahead_features.get(url, {})
+            domain_matches = domain_lookahead_features.values()
 
-    # get the features from the lookahead url that are also on the src url
-    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls([url])
-    if len(lookaheadFeatures) > 0:
-        lookaheadFeatures = lookaheadFeatures[lookaheadFeatures.keys()[0]]
+            del domain_lookahead_features
 
-
-    if len(lookaheadFeatures) == 0:
-        tangelo.log("lookahead - url not found in database")
-        return
-    visitedFeatures = entityDataConnector.getExtractedEntitiesFromUrls([srcurl])
-    if srcurl in visitedFeatures: visitedFeatures = visitedFeatures[srcurl]
-    matches = []
-    all_types = set([])
-    all_types.update(lookaheadFeatures.keys())
-    all_types.update(visitedFeatures.keys())
-    for type in all_types:
-        l = set([]) if type not in lookaheadFeatures else set(lookaheadFeatures[type])
-        v = set([]) if type not in visitedFeatures else set(visitedFeatures[type])
-        matches.extend(list(v & l))
-    del visitedFeatures
-    del lookaheadFeatures
-
-
-    # get the domain matches from the lookahead url
-    domain_matches = []
-    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,[url])
-    if url in domainLookaheadFeatures: domainLookaheadFeatures = domainLookaheadFeatures[url]
-    for type,value in domainLookaheadFeatures.iteritems():
-        domain_matches.append(value)
-
-    del domainLookaheadFeatures
-    entityDataConnector.close()
-
-    result = dict(url=url,
-                  matchCount=len(matches),
-                  matches=matches,
-                  domain_search_hits=len(domain_matches),
-                  domain_search_matches=domain_matches
-    )
-    #tangelo.log(str(result))
-    return json.dumps(result)
+            result = dict(url=url, matches=matches, domain_search_matches=domain_matches)
+            return json.dumps(result)
+        finally:
+            if entity_data_connector is not None:
+                entity_data_connector.close()
+    return json.dumps(dict(matches=[], domain_search_matches=[]))
 
 
 post_actions = {

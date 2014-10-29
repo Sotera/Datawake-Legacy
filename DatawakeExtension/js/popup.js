@@ -14,10 +14,8 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/lookahead/matches";
         var jsonData = JSON.stringify({url: extractedLinks[index], srcurl: tabUrl, domain: domain });
         popUpService.post(post_url, jsonData).then(function (response) {
-            if (response != "null" && response != undefined) {
-                if (response.matchCount > 0 || response.domain_search_hits > 0) {
-                    $scope.lookaheadLinks.push(response);
-                }
+            if (response.matches.length > 0 || response.domain_search_matches.length > 0) {
+                $scope.lookaheadLinks.push(response);
                 extractedLinks.splice(index, 1);
                 if (extractedLinks.length > 0) {
                     if (index >= extractedLinks.length) {
@@ -51,29 +49,24 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         });
     }
 
-    function extractedEntities(extracted_entities_dict, tabUrl, domain) {
-        $scope.extracted_entities_dict = extracted_entities_dict;
-        if (!$scope.lookaheadStarted && extracted_entities_dict.hasOwnProperty("website")) {
+    function extractedEntities(entities, tabUrl, domain) {
+        $scope.extracted_entities_dict = (entities.allEntities != null) ? entities.allEntities : {};
+        if (!$scope.lookaheadStarted && entities.allEntities.hasOwnProperty("website")) {
             $timeout(function () {
-                var lookaheadLinks = Object.keys(extracted_entities_dict["website"]);
+                var lookaheadLinks = entities.allEntities["website"];
                 linkLookahead(tabUrl, lookaheadLinks, 0, domain, 1000);
             }, 1000);
             $scope.lookaheadStarted = true;
         }
-
-        $scope.entities_in_domain = [];
-        $.map(extracted_entities_dict, function (value, type) {
-            $.map(value, function (extracted, name) {
-                if (extracted === "y") {
-                    var entity = {};
-                    entity.type = type;
-                    entity.name = name;
-                    $scope.entities_in_domain.push(entity);
-
-                }
-            });
-        });
+        $scope.entities_in_domain = (entities.domainExtracted != null) ? entities.domainExtracted : {};
     }
+
+    $scope.isExtracted = function (type, name) {
+        if ($scope.entities_in_domain.hasOwnProperty(type)) {
+
+            return $scope.entities_in_domain[type].indexOf(name) >= 0;
+        }
+    };
 
     function externalToolsCallback(extracted_tools) {
         $scope.extracted_tools = extracted_tools;

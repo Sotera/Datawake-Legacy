@@ -14,28 +14,27 @@ Copyright 2014 Sotera Defense Solutions, Inc.
    limitations under the License.
 """
 
-import tangelo
-import cherrypy
 import json
+
+import tangelo
 from datawaketools import datawakeconfig as conf
 
+import users
 
 
 def get_external_links():
-    return json.dumps(conf.EXTERNAL_LINKS)
-
+    if users.is_in_session():
+        return json.dumps(conf.EXTERNAL_LINKS)
+    return json.dumps([])
 
 
 get_actions = {
-    'get': get_external_links,
+    'get': get_external_links
 }
 
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    if 'user' not in cherrypy.session:
-        return json.dumps(dict())
-
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call")
 

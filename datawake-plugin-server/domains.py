@@ -17,24 +17,16 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 import json
 
 import tangelo
-import cherrypy
 from datawaketools import datawake_db as db
 
-
-# TODO: If we add get requests to this, we should add a dictionary lookup for which method to service. See: Datawake scraper
-
-def getUser():
-    assert ('user' in cherrypy.session)
-    user = cherrypy.session['user']
-    assert ('org' in user)
-    return user
+import users
 
 
 @tangelo.restful
 def get():
-    user = getUser()
-    results = db.get_domains()
-    results = map(lambda x: {'name': x[0], 'description': x[1]}, results)
-    results.insert(0, {'name': '', 'description': ''})
-    return json.dumps(results)
+    if users.is_in_session():
+        results = db.get_domains()
+        results = map(lambda x: {'name': x[0], 'description': x[1]}, results)
+        return json.dumps(results)
 
+    return json.dumps([])

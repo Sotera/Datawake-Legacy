@@ -22,6 +22,8 @@ from datawaketools import googleauth
 from datawaketools import datawake_db
 from datawaketools import datawakeconfig
 
+import users
+
 
 """
 
@@ -35,9 +37,7 @@ Establish a session for a user signed in with google.
 
 @tangelo.restful
 def get():
-    if 'user' in cherrypy.session:
-        return cherrypy.session['user']
-    return json.dumps(dict(session="No Session"))
+    return json.dumps(dict(user=users.get_user()))
 
 
 @tangelo.restful
@@ -45,33 +45,36 @@ def post():
     post_data = json.loads(cherrypy.request.body.read(), strict=False)
     token = post_data.get("token", u'')
     tangelo.log("TOKEN: " + token)
-    user = None
-    if 'user' in cherrypy.session and 'token' in cherrypy.session and cherrypy.session['token'] == token:
+    user = get_user(token)
+    org = get_org(user.get("email"))
+    user['org'] = org
+    users.set_user(user)
+    users.set_token(token)
+    return json.dumps(user)
+
+
+def get_org(email):
+    org = 'MEMEXDEMO'
+    if not datawakeconfig.MOCK_AUTH:
+        orgs = datawake_db.getOrgLinks(email)
+        if len(orgs) == 1:
+            org = orgs[0]
+        else:
+            raise ValueError("Org list length must be 1")
+    return org
+
+
+def get_user(token):
+    user = users.get_user()
+    if users.get_token() == token and user is not None:
         tangelo.log('plugin-sever.session tokens matched using existing session.')
-        user = cherrypy.session['user']
     else:
         user = googleauth.getUserFromToken(token)
         tangelo.log('session.post verified user: ' + str(user))
-    orgs = datawake_db.getOrgLinks(user['email'])
-
-    if not datawakeconfig.MOCK_AUTH:
-      assert(len(orgs) == 1)
-      user['org'] = orgs[0]
-    else:
-        user['org'] = 'MEMEXDEMO'
-
-
-    cherrypy.session['user'] = user
-    cherrypy.session['token'] = token
-    return json.dumps(user)
+    return user
 
 
 @tangelo.restful
 def delete():
-    if 'user' in cherrypy.session:
-        del cherrypy.session['user']
-    if 'token' in cherrypy.session:
-        del cherrypy.session['token']
-    cherrypy.lib.sessions.expire()
     tangelo.log('manually expired session')
-    return json.dumps(dict(session="Expired Session"))
+    return json.dumps(dict(success=users.expire_user()))

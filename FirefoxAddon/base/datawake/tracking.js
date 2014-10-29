@@ -79,7 +79,6 @@ function setupTabWorkerAndServices(tab) {
             pageContents.url = currentTrackingTabWorker.tab.url;
             pageContents.domain = datawakeInfoForTab.domain.name;
             pageContents.trail = datawakeInfoForTab.trail.name;
-            pageContents.userName = datawakeInfoForTab.user.userName;
             var url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/scrape";
             requestHelper.post(url, JSON.stringify(pageContents), function (response) {
                 console.debug("Setting up selections and advanced search");

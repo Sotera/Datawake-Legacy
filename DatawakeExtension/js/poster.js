@@ -13,7 +13,6 @@ var dwPoster = function () {
                 cookie: document.cookie,
                 html: $('body').html(),
                 url: response.url,
-                userName: response.userName,
                 domain: response.domain,
                 trail: response.trail
             });

@@ -21,19 +21,14 @@ import tangelo
 import cherrypy
 import datawaketools.datawake_db as db
 
+import users
+
 
 """
 
   User ranks a url (within the context of a trail)
 
 """
-
-
-def getUserData():
-    assert ('user' in cherrypy.session)
-    user = cherrypy.session['user']
-    assert ('org' in user)
-    return user, user['org']
 
 
 #
@@ -44,10 +39,12 @@ def get_rank(trailname=u'', url=u'', domain=u''):
     if trailname == u'' or url == u'' or domain == u'':
         raise ValueError("datawake_url_rank. trailname,url,and domain are required.")
 
-    (user, org) = getUserData()
+    user = users.get_user()
+    org = user['org']
+    user_id = user['userId']
     url = url.encode('utf-8')
     url = urllib.unquote(url)
-    rank = db.getUrlRank(org, user['userId'], trailname, url, domain=domain)
+    rank = db.getUrlRank(org, user_id, trailname, url, domain=domain)
     response = dict(rank=rank)
     return json.dumps(response)
 
@@ -59,8 +56,10 @@ def set_rank(trailname=u'', url=u'', rank=u'', domain=u''):
     if trailname == u'' or url == u'' or rank == u'' or domain == u'':
         raise ValueError("datawake_url_rank. trailname,url,rank,and domain are required.")
 
-    (user, org) = getUserData()
-    db.rankUrl(org, user['userId'], trailname, url, rank, domain=domain)
+    user = users.get_user()
+    org = user['org']
+    user_id = user['userId']
+    db.rankUrl(org, user_id, trailname, url, rank, domain=domain)
     return json.dumps(dict(success=True))
 
 

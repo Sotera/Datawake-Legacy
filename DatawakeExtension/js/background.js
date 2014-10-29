@@ -91,7 +91,7 @@ function lastId(request, sender, sendResponse) {
             chrome.browserAction.setBadgeText({text: request.count.toString(), tabId: tabId});
             chrome.browserAction.setBadgeBackgroundColor({color: "#20b2aa", tabId: tabId});
         }
-        advanceSearch(request.id, tabId, sender.tab.url, 1000);
+        getExtractedPageAttributes(request.id, tabId, sender.tab.url, 1000);
     }
 }
 
@@ -170,9 +170,10 @@ function setCurrentOrg(request, sender, sendResponse) {
 }
 
 function getExternalLinks(request, sender, sendResponse) {
-    function onSuccess(response){
-        sendResponse({links:response});
+    function onSuccess(response) {
+        sendResponse({links: response});
     }
+
     var url = config.datawake_serviceUrl + "/external_links/get";
     getContents(url, onSuccess, logError);
 }
@@ -274,30 +275,28 @@ function launchImageService(info, tab) {
 /*
  Call a service to determine if page attributes have been captured in the domain crawlers etc
  */
-function advanceSearch(postId, tabId, url, delay) {
+function getExtractedPageAttributes(postId, tabId, url, delay) {
 
     console.log("checking for domain hits on url: %s", url);
     function onSuccess(response) {
-        var extracted_entities_dict = response;
-
-        if (Object.keys(extracted_entities_dict).length == 0) {
-            console.log("advanceSearch, no response for url, setting time to try again.");
+        var domainEntities = response;
+        var domainExtracted = (domainEntities.domainExtracted != null) ? domainEntities.domainExtracted : {};
+        if (Object.keys(domainExtracted).length == 0) {
+            console.log("getExtractedPageAttributes, no response for url, setting time to try again.");
             if (delay <= 5 * 60 * 1000) { // eventually stop polling
                 window.setTimeout(function () {
-                    advanceSearch(postId, tabId, url)
+                    getExtractedPageAttributes(postId, tabId, url)
                 }, delay * 2);
             }
             return;
         }
         var entities_in_domain = [];
-        $.map(extracted_entities_dict, function (value, type) {
-            $.map(value, function (extracted, name) {
-                if (extracted === "y") {
-                    var entity = {};
-                    entity.type = type;
-                    entity.name = name;
-                    entities_in_domain.push(entity);
-                }
+        $.map(domainExtracted, function (value, type) {
+            $.each(value, function (index, name) {
+                var entity = {};
+                entity.type = type;
+                entity.name = name;
+                entities_in_domain.push(entity);
             });
         });
         var highlightMessage = {operation: 'highlighttext', entities_in_domain: entities_in_domain};
@@ -331,7 +330,7 @@ function advanceSearch(postId, tabId, url, delay) {
     for (index in advanceSearchIgnore) {
         var value = advanceSearchIgnore[index];
         if (url.indexOf(value) == 0) {
-            console.log("advanceSearch, ignoring url: %s", url);
+            console.log("getExtractedPageAttributes, ignoring url: %s", url);
             return;
         }
     }
@@ -339,7 +338,7 @@ function advanceSearch(postId, tabId, url, delay) {
         url: url,
         domain: dwState.tabToDomain[tabId]
     });
-    postContents(config.datawake_serviceUrl + "/visited_url_entities/entities", jsonData, onSuccess, logError);
+    postContents(config.datawake_serviceUrl + "/visited_url_entities/extracted", jsonData, onSuccess, logError);
 }
 
 

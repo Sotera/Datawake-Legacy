@@ -95,13 +95,11 @@ newTabApp.controller("NewTabCtrl", function ($scope, $timeout, requestService) {
         });
         var domain_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/domains";
         requestService.get(domain_url).then(function (domains) {
-            domains.shift();
             $scope.domains = domains;
         });
     }
 
     function populateTrails(trailContainer) {
-        trailContainer.trails.shift();
         $scope.trails = trailContainer.trails;
         $scope.selectedTrail = null;
     }

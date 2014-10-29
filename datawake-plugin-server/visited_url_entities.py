@@ -15,6 +15,7 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 """
 
 import json
+
 import tangelo
 import cherrypy
 import datawaketools.entity_data_connector_factory as factory
@@ -25,52 +26,39 @@ import datawaketools.entity_data_connector_factory as factory
 
 """
 
-def getUser():
-    assert ('user' in cherrypy.session)
-    user = cherrypy.session['user']
-    assert ('org' in user)
-    return user
 
-
-def get_entities(url=u'', domain=u''):
-    #tangelo.log('visited_url_entities url='+url+" domian="+domain)
+def get_all_entities(url=u'', domain=u''):
     if url == u'' or domain == u'':
         raise ValueError("visited_url_entities GET url and domain must be specified. url:" + url + " domain:" + domain)
-    user = getUser()
-    userId = user['userId']
-    org = user['org']
-    entityDataConnector = factory.getEntityDataConnector()
+    entity_data_connector = None
+    try:
+        entity_data_connector = factory.getEntityDataConnector()
+        tangelo.log("URL: " + url)
+        all_entities = entity_data_connector.getExtractedEntitiesFromUrls([url])
+        domain_extracted = entity_data_connector.getExtractedDomainEntitiesFromUrls(domain, [url])
+        entities = dict(domainExtracted=domain_extracted.get(url, {}), allEntities=all_entities.get(url, {}))
+        return json.dumps(entities)
+
+    finally:
+        entity_data_connector.close()
 
 
-    allFeatures = entityDataConnector.getExtractedEntitiesFromUrls([url])
-    if len(allFeatures) > 0:
-        allFeatures = allFeatures[allFeatures.keys()[0]]
-
-
-    domainFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,[url])
-    if url in domainFeatures: domainFeatures = domainFeatures[url]
-    entityDataConnector.close()
-
-    all_types = set([])
-    all_types.update(allFeatures.keys())
-    all_types.update(domainFeatures.keys())
-    results = {}
-    for type in all_types:
-        results[type] = {}
-        if type in allFeatures:
-            for value in allFeatures[type]:
-                results[type][value] = 'n'
-        if type in domainFeatures:
-            for value in domainFeatures[type]:
-                results[type][value] = 'y'
-
-
-    #tangelo.log("RESULTS = "+str(results))
-    return json.dumps(results)
+def get_domain_extracted_entities(url=u'', domain=u''):
+    if url == u'' or domain == u'':
+        raise ValueError("visited_url_entities GET url and domain must be specified. url:" + url + " domain:" + domain)
+    entity_data_connector = None
+    try:
+        entity_data_connector = factory.getEntityDataConnector()
+        domain_entities = entity_data_connector.getExtractedDomainEntitiesFromUrls(domain, [url])
+        return json.dumps(dict(domainExtracted=domain_entities.get(url)))
+    finally:
+        if entity_data_connector is not None:
+            entity_data_connector.close()
 
 
 post_actions = {
-    'entities': get_entities
+    'entities': get_all_entities,
+    'extracted': get_domain_extracted_entities
 }
 
 

@@ -53,21 +53,33 @@
             <div class="tab-content">
                 <div class="tab-pane active" id="domain_extracted_entities">
                     <div>
-                        <h3 ng-hide="entities_in_domain == 0">Extracted Entities found in Domain</h3>
-                        <table class="table table-bordered">
-                            <tr ng-repeat="entities in entities_in_domain">
+                        <h3 ng-hide="entities_in_domain.length == 0">Extracted Entities found in Domain</h3>
+                        <table class="table table-bordered" ng-repeat="(type, domainEntities) in entities_in_domain">
+                            <thead>
+                            <tr>
+                                <th>
+                                    <span>{{type}}</span>
+                                </th>
+                                <th>
+                                    External Tools
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="entity in domainEntities">
                                 <td>
-                            <span>
-                                {{entities.type}} : {{entities.name}}
-                            </span>
+                                    <span>
+                                        {{entity}}
+                                    </span>
                                 </td>
                                 <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
-                                    <button class="btn btn-default" ng-click="openExternalLink(tools.link.replace('$ATTR',entities.type).replace('$VALUE',entities.name));">{{tools.display}}</button>
+                                    <a ng-href="{{tools.link.replace('$ATTR',entities.type).replace('$VALUE',entities.name)}}">{{tools.display}}</a>
                                 </td>
-                                <td ng-show="extracted_tools.length <= 0">
+                                <td ng-show="extracted_tools.length == 0">
                                     <span>No External Tools Available</span>
                                 </td>
                             </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -75,25 +87,26 @@
                     <h2>Link Lookahead</h2>&nbsp<span id="lookahead_progress"></span>
 
                     <div id="lookahead_results">
-                        <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matchCount', 'domain_search_hits']">
-                            <button class="btn btn-default" ng-click="openExternalLink(lookaheadObj.url);">{{lookaheadObj.url}}</button>
+                        <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matches.length', 'domain_search_matches.length']">
+                            <a target="_blank" ng-href="{{lookaheadObj.url}}">{{lookaheadObj.url}}</a>
+
                             <div id="domain_search_hits_container" ng-if="lookaheadObj.domain_search_matches.length > 0">
-                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="searchHitsToggle(lookaheadObj);">domain search hits: {{lookaheadObj.domain_search_hits}}
+                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="searchHitsToggle(lookaheadObj);">domain search hits: {{lookaheadObj.domain_search_matches.length}}
                                 </button>
                                 <table class="table table-bordered" ng-show="lookaheadObj.searchHitsShow">
-                                    <tr ng-repeat="searchMatches in lookaheadObj.domain_search_matches">
+                                    <tr ng-repeat="searchMatch in lookaheadObj.domain_search_matches">
                                         <td>
-                                            <span>{{searchMatches}}</span>
+                                            <span>{{searchMatch}}</span>
                                         </td>
                                     </tr>
                                 </table>
                             </div>
                             <div id="lookahead_matches" ng-if="lookaheadObj.matches.length > 0">
-                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="matchesToggle(lookaheadObj);">shared entities: {{lookaheadObj.matchCount}}</button>
+                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="matchesToggle(lookaheadObj);">shared entities: {{lookaheadObj.matches.length}}</button>
                                 <table class="table table-bordered" ng-show="lookaheadObj.matchesShow">
-                                    <tr ng-repeat="matches in lookaheadObj.matches">
+                                    <tr ng-repeat="match in lookaheadObj.matches">
                                         <td>
-                                            <span>{{matches}}</span>
+                                            <span>{{match}}</span>
                                         </td>
                                     </tr>
                                 </table>
@@ -107,15 +120,15 @@
                     <div>
                         <h2>Extracted Entities</h2>
 
-                        <div ng-repeat="(entityType, entityDict) in extracted_entities_dict">
+                        <div ng-repeat="(entityType, entities) in extracted_entities_dict">
                             <h3>{{entityType}}</h3>
                             <table class="table table-bordered">
-                                <tr ng-repeat="(name, extracted) in entityDict">
+                                <tr ng-repeat="name in entities track by $index">
                                     <td>
-                            <span ng-switch on="extracted">
-                                <span ng-switch-when="y" style="font-weight: bold">{{name}}</span>
-                                <span ng-switch-default style="font-weight: normal">{{name}}</span>
-                            </span>
+                                        <span ng-switch on="isExtracted(entityType, name)">
+                                            <span ng-switch-when="true" style="font-weight: bold">{{name}}</span>
+                                            <span ng-switch-default style="font-weight: normal">{{name}}</span>
+                                        </span>
                                     </td>
                                 </tr>
                             </table>
