@@ -35,40 +35,35 @@ class KafkaProducer:
         self.producer = None
 
 
-LOOKAHEAD_PRODUCER = None
+
+
 VISITING_PRODUCER = None
-
-
-
-def sendLookaheadMessages(org,domain,messages):
-    global LOOKAHEAD_PRODUCER
-    if LOOKAHEAD_PRODUCER is None:
-        LOOKAHEAD_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL,datawakeconfig.KAFKA_LOOKAHEAD_TOPIC)
-
-    dt = datetime.utcnow().strftime("%s")
-    messages = map(lambda x: dt+'\0'+org+'\0'+domain+'\0'+x.replace('\0',''),messages)
-
-    LOOKAHEAD_PRODUCER.sendBulk(messages)
-
 
 
 def sendVisitingMessage(org,domain,userId,url,html):
     global VISITING_PRODUCER
     if VISITING_PRODUCER is None:
         VISITING_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL,datawakeconfig.KAFKA_VISITING_TOPIC)
-    message = []
+    try:
+        message = []
+        message.append(datetime.utcnow().strftime("%s"))
+        message.append(org)
+        message.append(domain)
+        message.append(userId)
+        message.append(url)
+        message.append(html)
 
-    message.append(datetime.utcnow().strftime("%s"))
-    message.append(org)
-    message.append(domain)
-    message.append(userId)
-    message.append(url)
-    message.append(html)
+        message = map(lambda x: x.replace('\0',''),message)
+        message = '\0'.join(message)
 
-    message = map(lambda x: x.replace('\0',''),message)
-    message = '\0'.join(message)
-
-    VISITING_PRODUCER.send(message)
+        VISITING_PRODUCER.send(message)
+    except:
+        try:
+            VISITING_PRODUCER.close()
+        except:
+            pass
+        VISITING_PRODUCER = None
+        raise
 
 
 

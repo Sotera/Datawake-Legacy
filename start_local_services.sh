@@ -16,9 +16,12 @@ $KAFKA_HOME/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replicatio
 $KAFKA_HOME/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic crawler-out
 #sleep 5
 
-#cd /vagrant/mock_backend
-#rm visiting.out lookahead.out &> /dev/null
-#nohup python kafka_visiting_consumer.py > visiting.out & \
-#nohup python kafka_lookahead_consumer.py > lookahead.out & \
+
+logfilename="streamparse_$(date +%F_%H:%M:%S,%N)"
+cd /vagrant/memex-datawake-stream
+rm nohup.out
+nohup sparse run -n local -t 9999999 -o "'topology.deployment=\"local\"'" >> /var/log/${logfilename}_stdout.log 2>> /var/log/${logfilename}_stderr.log & 
+echo "started local topology"
+
 
 sudo -H su vagrant bash -c "tangelo start"
