@@ -82,6 +82,7 @@ class CrawlerBolt(Bolt):
         input = tup.values[0]
 
         url = input['url']
+        safeurl = url.encode('utf-8','ignore')
 
         now = datetime.datetime.now()
         if url in self.seen:
@@ -98,8 +99,7 @@ class CrawlerBolt(Bolt):
             #self.log("CrawlerBolt sleeping")
             time.sleep(.25)
 
-
-        #self.log("CrawlerBolt fetching: "+url)
+        #self.log("CrawlerBolt fetching: "+safeurl)
         opener = urllib2.build_opener()
         headers = [("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0")]
         opener.addheaders = headers
@@ -128,11 +128,11 @@ class CrawlerBolt(Bolt):
             #self.emit([json.dumps(output)])
             self.producer.send_messages(self.topic, json.dumps(output))
 
-            self.log("CrawlerBolt fetched: "+url+" status: "+str(response.getcode()),level='debug')
+            #self.log("CrawlerBolt fetched: "+safeurl+" status: "+str(response.getcode()),level='debug')
             self.lastfetch = datetime.datetime.now()
         except:
-            self.log("error fetching url: "+url,level='error')
-            self.log(traceback.format_exc())
+            self.log("CrawlerBolt error fetching url: "+safeurl,level='error')
+            self.log("CrawlerBolt "+traceback.format_exc())
 
 
         if len(self.seen) > self.MAX_LRU_SIZE:

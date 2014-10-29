@@ -98,7 +98,8 @@ class KafkaDatawakeLookaheadSpout(Spout):
         message = offsetAndMessage.message.value
 
         crawled = json.loads(message)
-        self.log("Lookahead spout received id: "+crawled['id'])
+        safeurl = crawled['url'].encode('utf-8','ignore')
+        self.log("Lookahead spout received id: "+crawled['id']+" url: "+safeurl)
         context = {
             'source':'datawake-lookahead',
             'userId':crawled['attrs']['userId'],
@@ -106,10 +107,7 @@ class KafkaDatawakeLookaheadSpout(Spout):
             'domain':crawled['attrs']['domain'],
             'url':crawled['url']
         }
-        self.emit([crawled['url'],crawled['status_code'],'','',crawled['raw_html'],crawled['timestamp'],context['source'],context],stream='raw')
-        for link in crawled['links_found']:
-            #["attribute", "value", "extracted_raw", "extracted_metadata","context"]
-            self.emit(['website',link,'','',context],stream='links')
+        self.emit([crawled['url'],crawled['status_code'],'','',crawled['raw_html'],crawled['timestamp'],context['source'],context])
 
 
 

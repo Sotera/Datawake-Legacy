@@ -58,8 +58,11 @@ class ExtractorBolt(Bolt):
 
 
     def ack(self, tup):
-        #self.log("\n"+self.name+" acked tuple")
         Bolt.ack(self,tup)
+        #(url, status, headers, flags, body, timestamp, source,context) = tup.values
+        #safeurl = url.encode('utf-8','ignore')
+        #self.log(self.name+" acked tuple url: "+safeurl)
+
 
     def fail(self, tup):
         self.log("\n"+self.name+" FAILED TUPLE\n",level='error')

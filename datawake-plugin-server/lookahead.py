@@ -51,7 +51,8 @@ def get_lookahead(url=u'', srcurl=u'', domain=u''):
 
 
     if len(lookaheadFeatures) == 0:
-        tangelo.log("lookahead - url not found in database")
+        #safeurl = url.encode('utf-8','ignore')
+        #tangelo.log("lookahead - url not found in database "+safeurl)
         return
     visitedFeatures = entityDataConnector.getExtractedEntitiesFromUrls([srcurl])
     if srcurl in visitedFeatures: visitedFeatures = visitedFeatures[srcurl]
