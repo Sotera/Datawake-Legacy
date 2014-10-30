@@ -21,7 +21,9 @@ import cherrypy
 import datawaketools.datawake_db as db
 from datawaketools import kafka_producer
 
+from users import is_in_session
 import users
+from validate_parameters import required_parameters
 
 
 """
@@ -53,7 +55,9 @@ import users
 # postId = 'the post id this selection is associated with'
 
 
-def savePageSelection(selection, domain, postId=None):
+@is_in_session
+@required_parameters(['selection', 'domain', 'postId'])
+def save_page_selection(selection, domain, postId):
     tangelo.log('savePageSelection postId=' + str(postId) + ' selection=' + selection + ' domain=' + domain)
     user = users.get_user()
     org = user['org']
@@ -65,9 +69,7 @@ def savePageSelection(selection, domain, postId=None):
     return json.dumps(dict(id=id))
 
 
-def scrape_page(cookie, html, url, userId, userName, trail, domain, org):
-    if domain == u'' or trail == u'':
-        raise ValueError('datawakescrapper fullPageScrape must provide trail and domain. domain=' + domain + ' trail=' + trail)
+def scrape_page(html, url, userId, userName, trail, domain, org):
     tangelo.log('USER NAME: ' + userName)
     domain = domain.encode('utf-8')
     org = org.encode('utf-8')
@@ -86,22 +88,26 @@ def scrape_page(cookie, html, url, userId, userName, trail, domain, org):
     return json.dumps(result)
 
 
+@is_in_session
+@required_parameters(['domain', 'trail', 'url'])
 def get_selections(domain, trail, url):
     org = users.get_org()
     return json.dumps(dict(selections=db.getSelections(domain, trail, url, org)))
 
 
-def full_page_scrape(cookie=u'', html=u'', url=u'', trail=u'', domain=u''):
+@is_in_session
+@required_parameters(['domain', 'trail', 'html', 'url'])
+def full_page_scrape(domain, trail, html, url):
     user = users.get_user()
-    user_id = user['userId']
-    user_name = user['userName']
-    org = user['org']
-    return scrape_page(cookie, html, url, user_id, user_name, trail, domain, org)
+    user_id = user.get('userId')
+    user_name = user.get("userName")
+    org = user.get('org')
+    return scrape_page(html, url, user_id, user_name, trail, domain, org)
 
 
 post_actions = {
     'scrape': full_page_scrape,
-    'selection': savePageSelection,
+    'selection': save_page_selection,
     'selections': get_selections
 }
 

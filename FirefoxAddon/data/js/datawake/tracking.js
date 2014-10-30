@@ -3,7 +3,6 @@ var addon = self;
 function scrapePage() {
     try {
         var pageContents = {
-            cookie: document.cookie,
             html: encodeURI($('body').html())
         };
         console.debug("Emitting page contents....");

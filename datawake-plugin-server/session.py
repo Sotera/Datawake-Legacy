@@ -36,6 +36,7 @@ Establish a session for a user signed in with google.
 
 
 @tangelo.restful
+@users.is_in_session
 def get():
     return json.dumps(dict(user=users.get_user()))
 
@@ -43,7 +44,7 @@ def get():
 @tangelo.restful
 def post():
     post_data = json.loads(cherrypy.request.body.read(), strict=False)
-    token = post_data.get("token", u'')
+    token = post_data.get("token")
     tangelo.log("TOKEN: " + token)
     user = get_user(token)
     org = get_org(user.get("email"))

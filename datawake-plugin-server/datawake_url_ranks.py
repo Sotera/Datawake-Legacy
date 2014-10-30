@@ -16,11 +16,11 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 
 import urllib
 import json
-
+from users import is_in_session
 import tangelo
 import cherrypy
 import datawaketools.datawake_db as db
-
+from validate_parameters import required_parameters
 import users
 
 
@@ -35,12 +35,11 @@ import users
 # Get the ranking for a url
 # specific to a user and trail
 #
-def get_rank(trailname=u'', url=u'', domain=u''):
-    if trailname == u'' or url == u'' or domain == u'':
-        raise ValueError("datawake_url_rank. trailname,url,and domain are required.")
-
+@is_in_session
+@required_parameters(['trailname', 'url', 'domain'])
+def get_rank(trailname, url, domain):
     user = users.get_user()
-    org = user['org']
+    org = user.get('org')
     user_id = user['userId']
     url = url.encode('utf-8')
     url = urllib.unquote(url)
@@ -52,13 +51,12 @@ def get_rank(trailname=u'', url=u'', domain=u''):
 #
 # Set the ranking for a url
 # specifc to a user and trail
-def set_rank(trailname=u'', url=u'', rank=u'', domain=u''):
-    if trailname == u'' or url == u'' or rank == u'' or domain == u'':
-        raise ValueError("datawake_url_rank. trailname,url,rank,and domain are required.")
-
+@is_in_session
+@required_parameters(['trailname', 'url', 'domain', 'rank'])
+def set_rank(trailname, url, rank, domain):
     user = users.get_user()
-    org = user['org']
-    user_id = user['userId']
+    org = user.get('org')
+    user_id = user.get('userId')
     db.rankUrl(org, user_id, trailname, url, rank, domain=domain)
     return json.dumps(dict(success=True))
 

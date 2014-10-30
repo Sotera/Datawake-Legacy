@@ -20,6 +20,9 @@ import tangelo
 import cherrypy
 import datawaketools.entity_data_connector_factory as factory
 
+from validate_parameters import required_parameters
+from users import is_in_session
+
 
 """
   Return the list of entities extracted from a url
@@ -27,13 +30,12 @@ import datawaketools.entity_data_connector_factory as factory
 """
 
 
-def get_all_entities(url=u'', domain=u''):
-    if url == u'' or domain == u'':
-        raise ValueError("visited_url_entities GET url and domain must be specified. url:" + url + " domain:" + domain)
+@is_in_session
+@required_parameters(['url', 'domain'])
+def get_all_entities(url, domain):
     entity_data_connector = None
     try:
         entity_data_connector = factory.getEntityDataConnector()
-        tangelo.log("URL: " + url)
         all_entities = entity_data_connector.getExtractedEntitiesFromUrls([url])
         domain_extracted = entity_data_connector.getExtractedDomainEntitiesFromUrls(domain, [url])
         entities = dict(domainExtracted=domain_extracted.get(url, {}), allEntities=all_entities.get(url, {}))
@@ -43,9 +45,9 @@ def get_all_entities(url=u'', domain=u''):
         entity_data_connector.close()
 
 
-def get_domain_extracted_entities(url=u'', domain=u''):
-    if url == u'' or domain == u'':
-        raise ValueError("visited_url_entities GET url and domain must be specified. url:" + url + " domain:" + domain)
+@is_in_session
+@required_parameters(['url', 'domain'])
+def get_domain_extracted_entities(url, domain):
     entity_data_connector = None
     try:
         entity_data_connector = factory.getEntityDataConnector()

@@ -10,7 +10,6 @@ var dwPoster = function () {
                 return;
             }
             var data = JSON.stringify({
-                cookie: document.cookie,
                 html: $('body').html(),
                 url: response.url,
                 domain: response.domain,

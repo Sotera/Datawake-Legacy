@@ -15,18 +15,14 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 """
 
 import json
-
+from users import is_in_session
 import tangelo
 from datawaketools import datawake_db as db
 
-import users
-
 
 @tangelo.restful
+@is_in_session
 def get():
-    if users.is_in_session():
-        results = db.get_domains()
-        results = map(lambda x: {'name': x[0], 'description': x[1]}, results)
-        return json.dumps(results)
-
-    return json.dumps([])
+    results = db.get_domains()
+    results = map(lambda x: {'name': x[0], 'description': x[1]}, results)
+    return json.dumps(results)

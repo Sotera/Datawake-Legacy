@@ -1,18 +1,21 @@
 import cherrypy
 
+import datawake_exception
 
 # TODO: If we add get requests to this, we should add a dictionary lookup for which method to service. See: Datawake scraper
 
+def is_in_session(callback):
+    def has_session(**kwargs):
+        if 'user' in cherrypy.session:
+            return callback(**kwargs)
+        raise datawake_exception.SessionError(repr(callback), "No User in the current session")
+
+    return has_session
+
+
 def get_user():
-    if is_in_session():
-        user = cherrypy.session.get('user')
-        if user_has_org(user):
-            return user
-    return None
-
-
-def is_in_session():
-    return 'user' in cherrypy.session
+    user = cherrypy.session.get('user')
+    return user
 
 
 def user_has_org(user):
@@ -43,9 +46,11 @@ def expire_user():
     cherrypy.lib.sessions.expire()
     return True
 
+
 def set_user(user):
     cherrypy.session['user'] = user
     return True
+
 
 def set_token(token):
     cherrypy.session['token'] = token

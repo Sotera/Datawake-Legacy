@@ -19,13 +19,12 @@ import json
 import tangelo
 from datawaketools import datawakeconfig as conf
 
-import users
+from users import is_in_session
 
 
+@is_in_session
 def get_external_links():
-    if users.is_in_session():
-        return json.dumps(conf.EXTERNAL_LINKS)
-    return json.dumps([])
+    return json.dumps(conf.EXTERNAL_LINKS)
 
 
 get_actions = {
