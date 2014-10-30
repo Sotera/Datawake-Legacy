@@ -296,6 +296,7 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
+
     def get_domain_items(self, name, limit):
         self._checkConn()
         cursor = self.cnx.cursor()
