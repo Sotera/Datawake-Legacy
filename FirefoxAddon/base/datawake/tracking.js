@@ -83,10 +83,9 @@ function setupTabWorkerAndServices(tab) {
             requestHelper.post(url, JSON.stringify(pageContents), function (response) {
                 console.debug("Setting up selections and advanced search");
                 var scrapeObject = response.json;
-                var postId = scrapeObject.id;
                 //Sets up the context menu objects for this tab.
                 if (currentTrackingTabWorker.tab != null) {
-                    selectionHelper.useContextMenu(postId, currentTrackingTabWorker.tab);
+                    selectionHelper.useContextMenu(currentTrackingTabWorker.tab);
                     widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, datawakeInfoForTab, scrapeObject.count);
                 }
             });

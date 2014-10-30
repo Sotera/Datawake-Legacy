@@ -115,7 +115,7 @@ function setupNewTabListener(worker) {
 
         //Sends the domains to the newtab overlay
         authHelper.getLoggedInUser(function (user) {
-            if (!user.json.hasOwnProperty("session")) {
+            if (!(user.status == 501)) {
                 getDomains(function (response) {
                     console.debug("Emitting Domains");
                     worker.port.emit("sendDomains", response.json);

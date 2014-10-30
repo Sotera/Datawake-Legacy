@@ -45,7 +45,7 @@ dwConfig.getOptions(function (options) {
 
 
 //TODO: look at moving this into local storage so it can persist over sessions, need to know if tab ids persist over sessions?
-var dwState = { tabToPostId: {}, tabToTrail: {}, tabToDomain: {}, lastTrail: null, lastDomain: null, tracking: false, currentOrg: null};
+var dwState = { tabToTrail: {}, tabToDomain: {}, lastTrail: null, lastDomain: null, tracking: false, currentOrg: null};
 
 
 // don't search for tips in tools while looking at the tools
@@ -85,8 +85,6 @@ function lastId(request, sender, sendResponse) {
     console.log("Datawake background post response: last-id: %s url count: %d", request.id, request.count);
     var tabId = sender.tab.id;
     if (tabId) {
-        console.log("setting tabtoPostId[%s]=%s %s", tabId, request.id, request.count);
-        dwState.tabToPostId[tabId] = request.id;
         if (request.count > 0) {
             chrome.browserAction.setBadgeText({text: request.count.toString(), tabId: tabId});
             chrome.browserAction.setBadgeBackgroundColor({color: "#20b2aa", tabId: tabId});
@@ -98,9 +96,7 @@ function lastId(request, sender, sendResponse) {
 function getPopupData(request, sender, sendResponse) {
     var tabId = request.tab.id;
     var last = -1;
-    if (tabId in dwState.tabToPostId) last = dwState.tabToPostId[tabId];
     var popUpDataResponse = {
-        lastId: last,
         serviceUrl: config.datawake_serviceUrl + "/datawakescraper",
         rankUrl: config.datawake_serviceUrl + "/datawake_url_ranks",
         trail: dwState.tabToTrail[tabId],
@@ -221,11 +217,10 @@ function captureSelectedText(info, tab) {
     else {
         console.log("datawake capture selection - text: %s", info.selectionText);
         console.log("datawake capture selection - tab: %s", tab.id);
-        var postId = dwState.tabToPostId[tab.id];
 
-        console.log("datawake capture selection - post: %s", postId);
+        console.log("datawake capture selection - post: %s", tab.url);
         var jsonData = JSON.stringify({
-            postId: postId,
+            url: tab.url,
             selection: info.selectionText,
             domain: dwState.tabToDomain[tab.id]
         });
@@ -309,21 +304,18 @@ function getExtractedPageAttributes(postId, tabId, url, delay) {
             }
         });
 
-        // TODO, should check if tab is at same url
-        // need to remove all POST ID logic
-        if (dwState.tabToPostId[tabId] == postId) {
+        chrome.tabs.query({active: true}, function (tabs) {
+            if (url == tabs[0].url) {
 
-            if (entities_in_domain.length > 0) {
-                console.log("Domain matches found on url: %s setting badge RED", url);
-                chrome.browserAction.setBadgeBackgroundColor({color: "#FF0000", tabId: tabId});
+                if (entities_in_domain.length > 0) {
+                    console.log("Domain matches found on url: %s setting badge RED", url);
+                    chrome.browserAction.setBadgeBackgroundColor({color: "#FF0000", tabId: tabId});
+                }
+                else {
+                    console.log("no domain matches found on url: %s", url);
+                }
             }
-            else {
-                console.log("no domain matches found on url: %s", url);
-            }
-        }
-        else {
-            console.log("tab state has changed, was post %s is now %s", postId, dwState.tabToPostId[tabId]);
-        }
+        });
 
     }
 

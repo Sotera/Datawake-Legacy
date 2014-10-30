@@ -21,9 +21,9 @@ import tangelo
 import cherrypy
 import datawaketools.datawake_db as db
 
-from users import is_in_session
+from session_helper import is_in_session
 from validate_parameters import required_parameters
-import users
+import session_helper
 
 
 """
@@ -39,7 +39,7 @@ import users
 @is_in_session
 @required_parameters(['domain'])
 def get_trails(domain):
-    org = users.get_org()
+    org = session_helper.get_org()
     return get_trails_for_domain_and_org(org, domain)
 
 
@@ -52,12 +52,12 @@ def get_trails_for_domain_and_org(org, domain):
 @required_parameters(['domain', 'trailname'])
 def add_trail(trailname, domain, traildescription=u''):
     tangelo.log('datawake_trails POST trailname=%s traildescription=%s domain=%s' % (trailname, traildescription, domain))
-    user = users.get_user()
-    org = user.get('org')
+    user = session_helper.get_user()
+    org = user.get_org()
     invalid = re.match('^[\w]*(?!:)+$', trailname) is None
     if invalid:
         raise ValueError("Trail names must be alphanumeric and not contain a ':'")
-    last_row = db.addTrail(org, trailname, traildescription, user.get('email'), domain=domain)
+    last_row = db.addTrail(org, trailname, traildescription, user.get_email(), domain=domain)
     return json.dumps(dict(success=last_row >= 0))
 
 

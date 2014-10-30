@@ -18,14 +18,10 @@ def get_user():
     return user
 
 
-def user_has_org(user):
-    return 'org' in user
-
-
 def get_org():
     user = get_user()
     if user is not None:
-        return user.get('org')
+        return user.get_org()
 
     return None
 
@@ -55,8 +51,3 @@ def set_user(user):
 def set_token(token):
     cherrypy.session['token'] = token
     return True
-
-
-
-
-

@@ -5,8 +5,8 @@ var requestWrapper = require("./request-wrapper");
 //exports.get = getRequest;
 
 
-exports.post = sidePost;
-exports.get = sideGet;
+exports.post = proxyPost;
+exports.get = proxyGet;
 exports.postCode = postCode;
 exports.delete = deleteRequest;
 
@@ -65,7 +65,7 @@ function postCode(url, svc, callback) {
     postObj.post();
 }
 
-function sidePost(url, post_data, callback) {
+function proxyPost(url, post_data, callback) {
     requestWrapper.postRequest(url, post_data, function (resp) {
         if (resp.status === 200) {
             var response = {};
@@ -79,7 +79,7 @@ function sidePost(url, post_data, callback) {
     })
 }
 
-function sideGet(url, callback) {
+function proxyGet(url, callback) {
     requestWrapper.getRequest(url, function (resp) {
         var response = {};
         if (resp.status === 200) {

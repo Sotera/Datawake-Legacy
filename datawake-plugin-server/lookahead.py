@@ -21,7 +21,7 @@ import cherrypy
 import datawaketools.entity_data_connector_factory as factory
 
 from validate_parameters import required_parameters
-from users import is_in_session
+from session_helper import is_in_session
 
 
 """

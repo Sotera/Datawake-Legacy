@@ -22,7 +22,7 @@ from datawaketools import googleauth
 from datawaketools import datawake_db
 from datawaketools import datawakeconfig
 
-import users
+import session_helper
 
 
 """
@@ -36,9 +36,9 @@ Establish a session for a user signed in with google.
 
 
 @tangelo.restful
-@users.is_in_session
+@session_helper.is_in_session
 def get():
-    return json.dumps(dict(user=users.get_user()))
+    return json.dumps(dict(user=session_helper.get_user()))
 
 
 @tangelo.restful
@@ -47,11 +47,11 @@ def post():
     token = post_data.get("token")
     tangelo.log("TOKEN: " + token)
     user = get_user(token)
-    org = get_org(user.get("email"))
-    user['org'] = org
-    users.set_user(user)
-    users.set_token(token)
-    return json.dumps(user)
+    org = get_org(user.get_email())
+    user.set_org(org)
+    session_helper.set_user(user)
+    session_helper.set_token(token)
+    return json.dumps(user.__dict__)
 
 
 def get_org(email):
@@ -66,8 +66,8 @@ def get_org(email):
 
 
 def get_user(token):
-    user = users.get_user()
-    if users.get_token() == token and user is not None:
+    user = session_helper.get_user()
+    if session_helper.get_token() == token and user is not None:
         tangelo.log('plugin-sever.session tokens matched using existing session.')
     else:
         user = googleauth.getUserFromToken(token)
@@ -78,4 +78,4 @@ def get_user(token):
 @tangelo.restful
 def delete():
     tangelo.log('manually expired session')
-    return json.dumps(dict(success=users.expire_user()))
+    return json.dumps(dict(success=session_helper.expire_user()))

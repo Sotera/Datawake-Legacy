@@ -11,17 +11,14 @@ exports.useContextMenu = useContextMenu;
 exports.cleanUpTab = cleanUpTab;
 
 var contextMenus = {};
-var postIds = {};
 
 /**
  * Turns on the context menu with the datawake.
- * @param postId The current scrape id.
  * @param tab The tab to add the context to.
  */
-function useContextMenu(postId, tab) {
+function useContextMenu(tab) {
     var url = tab.url;
     var tabId = tab.id;
-    setPostId(postId, tabId);
     destroyPreviousContextMenu(tabId);
     var datawakeInfo = storage.getDatawakeInfo(tabId);
     contextMenus[tabId] = contextMenu.Menu({
@@ -40,31 +37,11 @@ function useContextMenu(postId, tab) {
                     highlightAllTextOnPage(tabId, datawakeInfo);
                     break;
                 case "selection":
-                    var postId = postIds[tabId];
-                    saveWindowSelection(datawakeInfo, postId, message.text);
+                    saveWindowSelection(datawakeInfo,tabs.activeTab.url, message.text);
                     break;
             }
         }
     });
-}
-
-/**
- * Sets the postId associated with a tab.
- * @param postId The PostId to set.
- * @param tabId The TabId to associate.
- */
-function setPostId(postId, tabId) {
-    deletePostId(tabId);
-    postIds[tabId] = postId;
-}
-
-/**
- * Deletes the postId associated with a tabId.
- * @param tabId The tabid to delete.
- */
-function deletePostId(tabId) {
-    if (postIds.hasOwnProperty(tabId))
-        delete postIds[tabId];
 }
 
 /**
@@ -88,12 +65,12 @@ function highlightAllTextOnPage(tabId, datawakeInfo) {
 /**
  * Saves the current window selection.
  * @param datawakeInfo The datawake information associated with this request.
- * @param postId The scraping Id associated with this request.
+ * @param url The url associated with this request.
  * @param selectionText The text selected.
  */
-function saveWindowSelection(datawakeInfo, postId, selectionText) {
+function saveWindowSelection(datawakeInfo, url, selectionText) {
     var post_data = JSON.stringify({
-        postId: postId,
+        url: url,
         selection: selectionText,
         domain: datawakeInfo.domain.name,
 
@@ -119,5 +96,4 @@ function destroyPreviousContextMenu(tabId) {
  */
 function cleanUpTab(tabId) {
     destroyPreviousContextMenu(tabId);
-    deletePostId(tabId);
 }

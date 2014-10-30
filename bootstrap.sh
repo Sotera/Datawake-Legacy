@@ -79,7 +79,7 @@ pip install streamparse &> /dev/null
 
 # install kafka
 
-wget http://mirror.cogentco.com/pub/apache/kafka/0.8.1.1/kafka_2.9.2-0.8.1.1.tgz &> /dev/null
+wget http://mirror.nexcess.net/apache/kafka/0.8.1.1/kafka_2.9.2-0.8.1.1.tgz &> /dev/null
 tar -xzf kafka_2.9.2-0.8.1.1.tgz 
 mv kafka_2.9.2-0.8.1.1 /usr/local/kafka
 

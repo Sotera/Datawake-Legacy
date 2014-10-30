@@ -21,8 +21,8 @@ import cherrypy
 import datawaketools.datawake_db as db
 from datawaketools import kafka_producer
 
-from users import is_in_session
-import users
+from session_helper import is_in_session
+import session_helper
 from validate_parameters import required_parameters
 
 
@@ -56,17 +56,17 @@ from validate_parameters import required_parameters
 
 
 @is_in_session
-@required_parameters(['selection', 'domain', 'postId'])
-def save_page_selection(selection, domain, postId):
-    tangelo.log('savePageSelection postId=' + str(postId) + ' selection=' + selection + ' domain=' + domain)
-    user = users.get_user()
-    org = user['org']
-
+@required_parameters(['selection', 'domain', 'url'])
+def save_page_selection(selection, domain, url):
+    tangelo.log('savePageSelection url=' + str(url) + ' selection=' + selection + ' domain=' + domain)
+    user = session_helper.get_user()
+    org = user.get_org()
+    postId = db.get_post_id(url)
     row = db.getBrowsePathData(org, postId, domain)
-
-    assert (row['org'] == org)  # ensure the user is saving a selection to a post from their org
-    id = db.addSelection(postId, selection)
-    return json.dumps(dict(id=id))
+    row_id = -1
+    if row['org'] == org:  # ensure the user is saving a selection to a post from their org
+        row_id = db.addSelection(postId, selection)
+    return json.dumps(dict(id=row_id))
 
 
 def scrape_page(html, url, userId, userName, trail, domain, org):
@@ -91,17 +91,17 @@ def scrape_page(html, url, userId, userName, trail, domain, org):
 @is_in_session
 @required_parameters(['domain', 'trail', 'url'])
 def get_selections(domain, trail, url):
-    org = users.get_org()
+    org = session_helper.get_org()
     return json.dumps(dict(selections=db.getSelections(domain, trail, url, org)))
 
 
 @is_in_session
 @required_parameters(['domain', 'trail', 'html', 'url'])
 def full_page_scrape(domain, trail, html, url):
-    user = users.get_user()
-    user_id = user.get('userId')
-    user_name = user.get("userName")
-    org = user.get('org')
+    user = session_helper.get_user()
+    user_id = user.get_user_id()
+    user_name = user.get_user_name()
+    org = user.get_org()
     return scrape_page(html, url, user_id, user_name, trail, domain, org)
 
 

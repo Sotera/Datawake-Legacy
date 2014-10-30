@@ -217,6 +217,14 @@ def addBrowsePathData(org, url, userId, userName, trail=None, domain='default'):
     return lastId
 
 
+def get_post_id(url):
+    sql = "select id from datawake_data where url=%s limit 1;"
+    params = [url]
+    rows = dbGetRows(sql, params)
+    if len(rows) == 0:
+        return -1
+    return rows[0][0]
+
 #
 # Get a post from the posts table (datwake_data)
 #

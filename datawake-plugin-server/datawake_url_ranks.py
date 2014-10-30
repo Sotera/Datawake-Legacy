@@ -16,12 +16,12 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 
 import urllib
 import json
-from users import is_in_session
+from session_helper import is_in_session
 import tangelo
 import cherrypy
 import datawaketools.datawake_db as db
 from validate_parameters import required_parameters
-import users
+import session_helper
 
 
 """
@@ -38,9 +38,9 @@ import users
 @is_in_session
 @required_parameters(['trailname', 'url', 'domain'])
 def get_rank(trailname, url, domain):
-    user = users.get_user()
-    org = user.get('org')
-    user_id = user['userId']
+    user = session_helper.get_user()
+    org = user.get_org()
+    user_id = user.get_user_id()
     url = url.encode('utf-8')
     url = urllib.unquote(url)
     rank = db.getUrlRank(org, user_id, trailname, url, domain=domain)
@@ -54,9 +54,9 @@ def get_rank(trailname, url, domain):
 @is_in_session
 @required_parameters(['trailname', 'url', 'domain', 'rank'])
 def set_rank(trailname, url, rank, domain):
-    user = users.get_user()
-    org = user.get('org')
-    user_id = user.get('userId')
+    user = session_helper.get_user()
+    org = user.get_org()
+    user_id = user.get_user_id()
     db.rankUrl(org, user_id, trailname, url, rank, domain=domain)
     return json.dumps(dict(success=True))
 
