@@ -43,6 +43,9 @@
                     <b>Trail:</b> {{trail}}
                 </td>
             </tr>
+            <tr>
+                <td colspan="2"><b>URL: </b>{{current_url}}</td>
+            </tr>
             </tbody>
         </table>
         <div class="row" style="margin: 10px">
@@ -52,14 +55,36 @@
         </div>
         <div class="row">
             <ul class="nav nav-tabs nav-pills" role="tablist">
-                <li class="active"><a href="#domain_extracted_entities" role="tab" data-toggle="tab">Domain Extracted Entities</a></li>
+                <li class="active"><a href="#all_extracted_entities" role="tab" data-toggle="tab">Extracted Features</a></li>
+                <li><a href="#domain_extracted_entities" role="tab" data-toggle="tab">Features in Domain</a></li>
                 <li><a href="#lookahead" role="tab" data-toggle="tab">Lookahead</a></li>
-                <li><a href="#all_extracted_entities" role="tab" data-toggle="tab">All Extracted Entities</a></li>
             </ul>
             <div class="tab-content">
-                <div class="tab-pane active" id="domain_extracted_entities">
+
+                <div class="tab-pane active" id="all_extracted_entities">
                     <div>
-                        <h3>Extracted Entities found in Domain</h3>
+                        <h2>Extracted Features</h2>
+
+                        <div ng-repeat="(entityType, entities) in extracted_entities_dict">
+                            <h3>{{entityType}}</h3>
+                            <table class="table table-bordered">
+                                <tr ng-repeat="name in entities track by $index">
+                                    <td>
+                                        <span ng-switch on="isExtracted(entityType, name)">
+                                            <span ng-switch-when="true" style="font-weight: bold">{{name}}</span>
+                                            <span ng-switch-default style="font-weight: normal">{{name}}</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="domain_extracted_entities">
+                    <div>
+                        <h3>Features in Domain</h3>
                         <table class="table table-bordered" ng-repeat="(type, entities) in entities_in_domain">
                             <thead>
                             <tr>
@@ -122,26 +147,6 @@
 
                 </div>
 
-                <div class="tab-pane" id="all_extracted_entities">
-                    <div>
-                        <h2>Extracted Entities</h2>
-
-                        <div ng-repeat="(entityType, entities) in extracted_entities_dict">
-                            <h3>{{entityType}}</h3>
-                            <table class="table table-bordered">
-                                <tr ng-repeat="name in entities track by $index">
-                                    <td>
-                                        <span ng-switch on="isExtracted(entityType, name)">
-                                            <span ng-switch-when="true" style="font-weight: bold">{{name}}</span>
-                                            <span ng-switch-default style="font-weight: normal">{{name}}</span>
-                                        </span>
-                                    </td>
-                                </tr>
-                            </table>
-
-                        </div>
-                    </div>
-                </div>
             </div>
 
         </div>
