@@ -64,8 +64,8 @@ def set_rank(trailname, url, rank, domain):
 
 
 post_actions = {
-    'getRank': get_rank,
-    'setRank': set_rank
+    'get': get_rank,
+    'set': set_rank
 }
 
 

@@ -130,7 +130,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
                     rank: rank,
                     domain: response.domain
                 });
-                var rankUrl = response.rankUrl + "/setRank";
+                var rankUrl = response.rankUrl + "/set";
                 console.log("datawake-popup setUrlRank submit reguest for: " + data);
                 popUpService.post(rankUrl, data).then(function (response) {
                     if (response.success) {
@@ -144,7 +144,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     function getUrlRank() {
         chrome.tabs.query({active: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (domainSpecificInformation) {
-                var rank_url = domainSpecificInformation.rankUrl + "/getRank";
+                var rank_url = domainSpecificInformation.rankUrl + "/get";
                 var rank_data = JSON.stringify({
                     trailname: domainSpecificInformation.trail,
                     url: tabs[0].url,

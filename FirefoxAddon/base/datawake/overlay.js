@@ -32,7 +32,7 @@ function getDomains(callback) {
  * @param callback Response callback.
  */
 function getTrails(domain, callback) {
-    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/trails";
+    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/get";
     var post_data = JSON.stringify({
         domain: domain
     });
@@ -137,7 +137,7 @@ function setupNewTabListener(worker) {
  * @param callback Response callback.
  */
 function createTrail(domain, trailname, traildescription, callback) {
-    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/createTrail";
+    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/create";
     var post_data = JSON.stringify(
         {
             domain: domain,

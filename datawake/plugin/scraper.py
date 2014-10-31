@@ -54,20 +54,6 @@ from validate_parameters import required_parameters
 # postId = 'the post id this selection is associated with'
 
 
-@is_in_session
-@required_parameters(['selection', 'domain', 'url'])
-def save_page_selection(selection, domain, url):
-    tangelo.log('savePageSelection url=' + str(url) + ' selection=' + selection + ' domain=' + domain)
-    user = session_helper.get_user()
-    org = user.get_org()
-    postId = db.get_post_id(url)
-    row = db.getBrowsePathData(org, postId, domain)
-    row_id = -1
-    if row['org'] == org:  # ensure the user is saving a selection to a post from their org
-        row_id = db.addSelection(postId, selection)
-    return json.dumps(dict(id=row_id))
-
-
 def scrape_page(html, url, userId, userName, trail, domain, org):
     tangelo.log('USER NAME: ' + userName)
     domain = domain.encode('utf-8')
@@ -88,13 +74,6 @@ def scrape_page(html, url, userId, userName, trail, domain, org):
 
 
 @is_in_session
-@required_parameters(['domain', 'trail', 'url'])
-def get_selections(domain, trail, url):
-    org = session_helper.get_org()
-    return json.dumps(dict(selections=db.getSelections(domain, trail, url, org)))
-
-
-@is_in_session
 @required_parameters(['domain', 'trail', 'html', 'url'])
 def full_page_scrape(domain, trail, html, url):
     user = session_helper.get_user()
@@ -106,8 +85,6 @@ def full_page_scrape(domain, trail, html, url):
 
 post_actions = {
     'scrape': full_page_scrape,
-    'selection': save_page_selection,
-    'selections': get_selections
 }
 
 

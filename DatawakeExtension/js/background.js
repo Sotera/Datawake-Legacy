@@ -229,7 +229,7 @@ function captureSelectedText(info, tab) {
             console.log("datawake - saved selection: %s id=%s", info.selectionText, responseObj.id);
         }
 
-        postContents(config.datawake_serviceUrl + "/scraper/selection", jsonData, logSuccess, logError);
+        postContents(config.datawake_serviceUrl + "/selections/save", jsonData, logSuccess, logError);
 
     }
 }
@@ -253,7 +253,7 @@ function getSelections(info, tab) {
         });
     }
 
-    postContents(config.datawake_serviceUrl + "/scraper/selections", postData, sendSelections, logError);
+    postContents(config.datawake_serviceUrl + "/selections/get", postData, sendSelections, logError);
 
 }
 

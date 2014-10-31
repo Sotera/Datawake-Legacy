@@ -62,8 +62,8 @@ def add_trail(trailname, domain, traildescription=u''):
 
 
 post_actions = {
-    'trails': get_trails,
-    'createTrail': add_trail
+    'get': get_trails,
+    'create': add_trail
 }
 
 
