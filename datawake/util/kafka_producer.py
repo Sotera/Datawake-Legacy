@@ -3,7 +3,7 @@ from datetime import datetime
 from kafka.client import KafkaClient
 from kafka.producer import SimpleProducer
 
-from datawake.util import datawakeconfig
+from datawake.conf import datawakeconfig
 
 
 """

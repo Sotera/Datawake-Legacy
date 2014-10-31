@@ -24,10 +24,10 @@ import threading
 from Queue import Queue
 from Queue import Empty
 
-from datawake.util.data_connector import DataConnector
 from impala.dbapi import connect
 
-from datawake.util import datawakeconfig
+from datawake.conf import datawakeconfig
+from datawake.util.data_connector import DataConnector
 import happybase
 
 

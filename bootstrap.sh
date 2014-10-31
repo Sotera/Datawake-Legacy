@@ -147,12 +147,12 @@ pip install pyodbc &> /dev/null
 echo "linking tangelo web server"
 ln -s /vagrant/datawake/ /usr/local/share/tangelo/web/
 ln -s /vagrant/forensic/ /usr/local/share/tangelo/web/
-ln -s /vagrant/domain-loader/ /usr/local/share/tangelo/web/
-#ln -s /vagrant/datawake-plugin-server/ /usr/local/share/tangelo/web/
+ln -s /vagrant/domain/ /usr/local/share/tangelo/web/
 
 echo "installing datawake tools and setting up empty database"
-cd /vagrant/datawake/util/
+cd /vagrant/datawake/conf/
 cp datawakeconfig.py.template datawakeconfig.py
+cd /vagrant/datawake/util/
 python datawake_db.py create-db
 python domainLoader.py memex_program "emails asscoiated with the memex program" ../../etc/default_domain.csv 
 cd ~

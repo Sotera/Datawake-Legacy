@@ -3,7 +3,7 @@ import time
 
 import httplib2
 
-from datawake.util import datawakeconfig as constants
+from datawake.conf import datawakeconfig as constants
 from user import User
 
 

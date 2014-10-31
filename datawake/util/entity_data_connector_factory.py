@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from datawake.util import datawakeconfig
+from datawake.conf import datawakeconfig
 
 
 if datawakeconfig.ENTITY_CONNECTION == 'cluster':

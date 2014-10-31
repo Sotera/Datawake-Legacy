@@ -20,9 +20,10 @@ import json
 
 import tangelo
 import cherrypy
+
+from datawake.conf import datawakeconfig
 from datawake.util import googleauth
 from datawake.util import datawake_db
-from datawake.util import datawakeconfig
 
 
 """

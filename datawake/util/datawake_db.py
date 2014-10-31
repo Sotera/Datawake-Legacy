@@ -22,7 +22,7 @@ import mysql.connector
 from mysql.connector import errorcode
 import tangelo
 
-from datawake.util import datawakeconfig as dbconfig
+from datawake.conf import datawakeconfig as dbconfig
 
 
 """

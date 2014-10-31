@@ -2,7 +2,7 @@ import datetime
 
 from impala.dbapi import connect
 
-from datawake.util import datawakeconfig
+from datawake.conf import datawakeconfig
 
 
 """
