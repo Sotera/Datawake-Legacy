@@ -93,7 +93,7 @@
                     <h2>Link Lookahead</h2>&nbsp<span id="lookahead_progress"></span>
 
                     <div id="lookahead_results">
-                        <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matches.length', 'domain_search_matches.length']">
+                        <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matches.length', 'domain_search_matches.length']:true">
                             <a target="_blank" ng-href="{{lookaheadObj.url}}">{{lookaheadObj.url}}</a>
 
                             <div id="domain_search_hits_container" ng-if="lookaheadObj.domain_search_matches.length > 0">
