@@ -24,6 +24,7 @@ class ExtractEmail(extractor.Extractor):
         if not body:
             return []
 
+        body = body.lower()
         email = self.myCompiledRE.findall(body)
         email = list(set(email))
         email_list = []

@@ -103,9 +103,9 @@ class MySqlEntityDataConnector(DataConnector):
                 if url not in results:
                     results[url] = {}
                 if attr not in results[url]:
-                    results[url][attr] = [value.lower()]
+                    results[url][attr] = [value]
                 else:
-                    results[url][attr].append(value.lower())
+                    results[url][attr].append(value)
             return results
         except:
             self.close()
@@ -143,9 +143,9 @@ class MySqlEntityDataConnector(DataConnector):
                 if url not in results:
                     results[url] = {}
                 if attr not in results[url]:
-                    results[url][attr] = [value.lower()]
+                    results[url][attr] = [value]
                 else:
-                    results[url][attr].append(value.lower())
+                    results[url][attr].append(value)
             return results
         except:
             self.close()

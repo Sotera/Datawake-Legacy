@@ -17,9 +17,8 @@ limitations under the License.
 """
 import igraph
 import datawake.util.entity_data_connector_factory as factory
-
 from datawake.util import datawake_db
-
+import tangelo
 
 """
 
@@ -398,10 +397,12 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
                 }
 
         if link not in nodes:
-            nodes[link] = node
-            for url in link_map[link]:
-              edges.append((url,link))
-
+            if link in link_map:
+                nodes[link] = node
+                for url in link_map[link]:
+                    edges.append((url,link))
+            else:
+                tangelo.log("KeyError. ignoring link: "+link)
 
 
     entityDataConnector.close()
