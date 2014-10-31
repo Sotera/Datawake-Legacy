@@ -18,11 +18,10 @@ import json
 
 import tangelo
 import cherrypy
-from datawaketools import googleauth
-from datawaketools import datawake_db
-from datawaketools import datawakeconfig
 
-import session_helper
+from datawake.util import googleauth, session_helper
+from datawake.util import datawake_db
+from datawake.util import datawakeconfig
 
 
 """
@@ -38,7 +37,7 @@ Establish a session for a user signed in with google.
 @tangelo.restful
 @session_helper.is_in_session
 def get():
-    return json.dumps(dict(user=session_helper.get_user()))
+    return json.dumps(dict(user=session_helper.get_user().__dict__))
 
 
 @tangelo.restful

@@ -1,6 +1,5 @@
 from kafka.client import KafkaClient
 from kafka.consumer import SimpleConsumer
-import datawakeconfig
 
 
 class KafkaConsumer:

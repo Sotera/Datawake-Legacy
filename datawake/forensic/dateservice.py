@@ -20,9 +20,9 @@ import json
 
 import tangelo
 import cherrypy
-from datawaketools import datawake_db
+from datawake.util import datawake_db
 
-import session_helper
+from datawake.util import session_helper
 
 """
 

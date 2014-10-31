@@ -18,10 +18,10 @@ import json
 
 import tangelo
 import cherrypy
-import datawaketools.entity_data_connector_factory as factory
 
+import datawake.util.entity_data_connector_factory as factory
 from validate_parameters import required_parameters
-from session_helper import is_in_session
+from datawake.util.session_helper import is_in_session
 
 
 """

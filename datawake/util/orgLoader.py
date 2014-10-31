@@ -1,8 +1,9 @@
 import sys
 import csv
-import datawake_db
 import argparse
 import os.path
+
+from datawake.util import datawake_db
 
 
 """

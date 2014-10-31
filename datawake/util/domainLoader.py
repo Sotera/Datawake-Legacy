@@ -19,8 +19,8 @@ limitations under the License.
 import sys
 import argparse
 import os.path
-from datawaketools import datawake_db as db
-import datawaketools.entity_data_connector_factory as factory
+from datawake.util import datawake_db as db
+import datawake.util.entity_data_connector_factory as factory
 
 
 

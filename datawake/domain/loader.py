@@ -22,9 +22,9 @@ from Queue import Queue
 import json
 
 import tangelo
-from datawaketools import datawake_db as db
-import datawaketools.entity_data_connector_factory as factory
-from datawaketools.domain_upload_connector import ConnectorUtil
+from datawake.util import datawake_db as db
+import datawake.util.entity_data_connector_factory as factory
+from datawake.util.domain_upload_connector import ConnectorUtil
 
 
 completed_threads = Queue()

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 DBPASSWD=root
-
+echo "export PYTHONPATH=$PYTHONPATH:/vagrant/" >> /etc/environment
+source /etc/environment
 
 apt-get update
 
@@ -150,16 +151,11 @@ ln -s /vagrant/domain-loader/ /usr/local/share/tangelo/web/
 #ln -s /vagrant/datawake-plugin-server/ /usr/local/share/tangelo/web/
 
 echo "installing datawake tools and setting up empty database"
-cd /vagrant/util/
-cd datawaketools
+cd /vagrant/datawake/util/
 cp datawakeconfig.py.template datawakeconfig.py
-cd ..
-python setup.py install
-cd datawaketools
 python datawake_db.py create-db
 python domainLoader.py memex_program "emails asscoiated with the memex program" ../../etc/default_domain.csv 
 cd ~
-
 
 # start kafka and create topics
 

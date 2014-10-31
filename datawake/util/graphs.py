@@ -15,11 +15,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
-import datawake_db
 import igraph
-import traceback
-import datawaketools.entity_data_connector_factory as factory
+import datawake.util.entity_data_connector_factory as factory
+
+from datawake.util import datawake_db
 
 
 """

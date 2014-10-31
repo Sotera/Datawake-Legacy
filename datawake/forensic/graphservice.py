@@ -20,16 +20,16 @@ import json
 
 import tangelo
 import cherrypy
-from datawaketools import graphs
-from datawaketools import datawake_db
+from datawake.util import graphs
+from datawake.util import datawake_db
 
-import session_helper
-from session_helper import is_in_session
+from datawake.util import session_helper
+from datawake.util.session_helper import is_in_session
 
 
 """
 
-Serves graphs for the datawake forensic viewer.  Graph building is primailry done in datawaketools.graphs
+Serves graphs for the datawake forensic viewer.  Graph building is primailry done in datawake.util.graphs
 
 """
 

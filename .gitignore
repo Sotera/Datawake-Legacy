@@ -71,7 +71,7 @@ docs/_build/
 target/
 
 #local datawake config
-util/datawaketools/datawakeconfig.py
+datawake/util/datawakeconfig.py
 
 #Firefox
 *.xpi

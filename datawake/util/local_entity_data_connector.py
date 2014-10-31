@@ -17,7 +17,7 @@ limitations under the License.
 """
 
 import mysql.connector
-from datawaketools.data_connector import DataConnector
+from datawake.util.data_connector import DataConnector
 
 
 class MySqlEntityDataConnector(DataConnector):

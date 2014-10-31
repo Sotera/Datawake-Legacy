@@ -18,11 +18,10 @@ import json
 
 import tangelo
 import cherrypy
-import datawaketools.datawake_db as db
-from datawaketools import kafka_producer
 
-import session_helper
-from session_helper import is_in_session
+import datawake.util.datawake_db as db
+from datawake.util import kafka_producer, session_helper
+from datawake.util.session_helper import is_in_session
 from validate_parameters import required_parameters
 
 

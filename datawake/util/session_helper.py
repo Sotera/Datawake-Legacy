@@ -1,6 +1,7 @@
 import cherrypy
 
-import exception
+from datawake.util import exception
+
 
 
 # TODO: If we add get requests to this, we should add a dictionary lookup for which method to service. See: Datawake scraper

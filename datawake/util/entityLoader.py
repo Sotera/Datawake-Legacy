@@ -17,9 +17,10 @@ limitations under the License.
 """
 
 import sys
-import datawake_db
 import argparse
 import os.path
+
+from datawake.util import datawake_db
 
 
 """

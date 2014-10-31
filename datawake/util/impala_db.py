@@ -1,6 +1,8 @@
-from impala.dbapi import connect
-import datawakeconfig
 import datetime
+
+from impala.dbapi import connect
+
+from datawake.util import datawakeconfig
 
 
 """

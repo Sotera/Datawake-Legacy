@@ -20,7 +20,7 @@ import json
 
 import tangelo
 import cherrypy
-from datawaketools import datawakeconfig as conf
+from datawake.util import datawakeconfig as conf
 
 
 def get_external_links():

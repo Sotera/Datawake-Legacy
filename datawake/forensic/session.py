@@ -20,9 +20,9 @@ import json
 
 import tangelo
 import cherrypy
-from datawaketools import googleauth
-from datawaketools import datawake_db
-from datawaketools import datawakeconfig
+from datawake.util import googleauth
+from datawake.util import datawake_db
+from datawake.util import datawakeconfig
 
 
 """
@@ -37,7 +37,7 @@ MOCK_USER_ORG = 'MEMEXDEMO'
 @tangelo.restful
 def get():
     if 'user' in cherrypy.session:
-        return json.dumps(dict(user=cherrypy.session['user'], hasSession=True))
+        return json.dumps(dict(user=cherrypy.session['user'].__dict__, hasSession=True))
     return json.dumps(dict(hasSession=False))
 
 
