@@ -79,7 +79,7 @@ function setupTabWorkerAndServices(tab) {
             pageContents.url = currentTrackingTabWorker.tab.url;
             pageContents.domain = datawakeInfoForTab.domain.name;
             pageContents.trail = datawakeInfoForTab.trail.name;
-            var url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/scrape";
+            var url = addOnPrefs.datawakeDeploymentUrl + "/scraper/scrape";
             requestHelper.post(url, JSON.stringify(pageContents), function (response) {
                 console.debug("Setting up selections and advanced search");
                 var scrapeObject = response.json;

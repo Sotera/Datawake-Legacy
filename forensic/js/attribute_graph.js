@@ -82,7 +82,7 @@ function updateTimeSlider() {
 function getTrailList() {
     $.ajax({
         type: "GET",
-        url: 'graphservice/trails',
+        url: '/datawake/forensic/graphservice/trails',
         dataType: 'json',
         success: function (trails) {
             d3.select("#trail_select").selectAll("option").remove();
@@ -142,7 +142,7 @@ $(function () {
         });
         $.ajax({
             type: 'DELETE',
-            url: 'graphservice/deleteUser',
+            url: '/datawake/forensic/graphservice/deleteUser',
             data: jsonData,
             dataType: 'json',
             contentType: 'application/json',
@@ -170,7 +170,7 @@ $(function () {
 function list_graphs() {
     $.ajax({
         type: "GET",
-        url: 'graphservice/list',
+        url: '/datawake/forensic/graphservice/list',
         dataType: 'json',
         success: function (data) {
             d3.select("#graph_select").selectAll("option").remove();
@@ -194,7 +194,7 @@ function list_graphs() {
 function list_users() {
     $.ajax({
         type: "GET",
-        url: 'graphservice/getusers',
+        url: '/datawake/forensic/graphservice/getusers',
         dataType: 'json',
         success: function (data) {
             //console.log("got users: " + data);
@@ -248,7 +248,7 @@ function change_graph() {
     });
     $.ajax({
         type: "POST",
-        url: 'graphservice/get',
+        url: '/datawake/forensic/graphservice/get',
         data: jsonData,
         contentType: 'application/json',
         dataType: 'json',
@@ -825,7 +825,7 @@ function getExternalLinks(mainDiv,type,id){
 
     $.ajax({
         type: "GET",
-        url: "external_links/get",
+        url: "/datawake/forensic/tools/get",
         contentType: 'application/json',
         dataType: 'json',
         success: function (links) {

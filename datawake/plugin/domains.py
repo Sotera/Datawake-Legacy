@@ -15,9 +15,11 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 """
 
 import json
-from session_helper import is_in_session
+
 import tangelo
 from datawaketools import datawake_db as db
+
+from session_helper import is_in_session
 
 
 @tangelo.restful

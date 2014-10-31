@@ -56,7 +56,7 @@ function highlightAllTextOnPage(tabId, datawakeInfo) {
         trail: datawakeInfo.trail.name,
         url: tabUrl
     });
-    var post_url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/selections";
+    var post_url = addOnPrefs.datawakeDeploymentUrl + "/scraper/selections";
     requestHelper.post(post_url, post_data, function (response) {
         tracking.emitHighlightTextToTabWorker(tabId, response.json);
     });
@@ -75,7 +75,7 @@ function saveWindowSelection(datawakeInfo, url, selectionText) {
         domain: datawakeInfo.domain.name,
 
     });
-    var post_url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/selection";
+    var post_url = addOnPrefs.datawakeDeploymentUrl + "/scraper/selection";
     requestHelper.post(post_url, post_data, function (response) {
         console.debug("Selection saved");
     });

@@ -17,10 +17,14 @@ limitations under the License.
 """
 
 import json
+
 import tangelo
 import cherrypy
 from datawaketools import graphs
 from datawaketools import datawake_db
+
+import session_helper
+from session_helper import is_in_session
 
 
 """
@@ -32,18 +36,11 @@ Serves graphs for the datawake forensic viewer.  Graph building is primailry don
 DEBUG = True
 
 
-def getUserData():
-    assert ('user' in cherrypy.session)
-    user = cherrypy.session['user']
-    assert ('org' in user)
-    return user, user['org']
-
-
 #
 # Return the graph display options
 #
+@is_in_session
 def listGraphs():
-    (user, org) = getUserData()
     return json.dumps(dict(graphs=['none',
                                    'browse path',
                                    'browse path - with adjacent urls',
@@ -57,8 +54,9 @@ def listGraphs():
 #
 # Return list of trails with user and size counts
 #
+@is_in_session
 def getTrails():
-    user, org = getUserData()
+    org = session_helper.get_org()
     results = datawake_db.getTrailsWithUserCounts(org)
     results.insert(0, {})
     return json.dumps(results)
@@ -68,8 +66,9 @@ def getTrails():
 # return all time stamps from the selected trail,users,org
 # returns a dictionary of the form  {'min':0,'max':0,'data':[]}
 #
+@is_in_session
 def getTimeWindow(users, trail=u'*'):
-    user, org = getUserData()
+    org = session_helper.get_org()
     if trail == u'':
         trail = u'*'
     print 'getTimeWindow(', users, ',', trail, ')'
@@ -84,24 +83,26 @@ def getTimeWindow(users, trail=u'*'):
 # Return users within an org who have been active on at least one trail
 # returns a list of dicts, {name:_, id:_}
 #
+@is_in_session
 def listUsers():
-    user, org = getUserData()
+    org = session_helper.get_org()
     return json.dumps(datawake_db.getActiveUsers(org))
 
 
 #
 # Delete all user activity within a time frame
 #
+@is_in_session
 def deleteUser(users, startdate, enddate):
-    user, org = getUserData()
+    org = session_helper.get_org()
     tangelo.log('deleteUser(' + users + ',' + startdate + ',' + enddate + ')')
     datawake_db.deleteUserData(org, users, startdate, enddate)
     return json.dumps(dict(success=True))
 
 
+@is_in_session
 def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''):
-    user, org = getUserData()
-    tangelo.log(str(user))
+    org = session_helper.get_org()
     if trail == u'':
         trail = u'*'
     userlist = map(lambda x: x.replace('\"', '').strip(), users.split(','))
@@ -121,7 +122,7 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
         return json.dumps(graphs.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path - with adjacent phone #\'s':
-        graph = graph = graphs.getBrowsePathAndAdjacentPhoneEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
+        graph = graphs.getBrowsePathAndAdjacentPhoneEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
         return json.dumps(graphs.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path - with adjacent email #\'s':

@@ -21,8 +21,8 @@ import cherrypy
 import datawaketools.datawake_db as db
 from datawaketools import kafka_producer
 
-from session_helper import is_in_session
 import session_helper
+from session_helper import is_in_session
 from validate_parameters import required_parameters
 
 

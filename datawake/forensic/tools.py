@@ -16,23 +16,20 @@ limitations under the License.
 
 """
 
+import json
+
 import tangelo
 import cherrypy
-import json
 from datawaketools import datawakeconfig as conf
-
 
 
 def get_external_links():
     return json.dumps(conf.EXTERNAL_LINKS)
 
 
-
-
 get_actions = {
     'get': get_external_links,
-    }
-
+}
 
 
 @tangelo.restful

@@ -84,7 +84,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
 
     function fetchEntities(delay) {
         chrome.tabs.query({active: true}, function (tabs) {
-            var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/visited_url_entities/entities";
+            var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/visited/entities";
             var domain = chrome.extension.getBackgroundPage().dwState.tabToDomain[tabs[0].id];
             var tabUrl = tabs[0].url;
             var fetch_entities_post_data = JSON.stringify({ url: tabUrl, domain: domain});
@@ -98,8 +98,8 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function loadExternalLinks() {
-        var external_links_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/external_links/get";
-        popUpService.get(external_links_url).then(externalToolsCallback);
+        var tools_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/tools/get";
+        popUpService.get(tools_url).then(externalToolsCallback);
     }
 
     function setRankAndCreateStarRating(rankObject) {

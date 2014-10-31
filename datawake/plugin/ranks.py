@@ -16,12 +16,14 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 
 import urllib
 import json
-from session_helper import is_in_session
+
 import tangelo
 import cherrypy
 import datawaketools.datawake_db as db
-from validate_parameters import required_parameters
+
 import session_helper
+from session_helper import is_in_session
+from validate_parameters import required_parameters
 
 
 """

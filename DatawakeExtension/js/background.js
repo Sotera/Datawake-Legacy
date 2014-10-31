@@ -64,14 +64,14 @@ function getPosterData(request, sender, sendResponse) {
                     var user_info = JSON.parse(this.response);
                     var tab = sender.tab.id;
                     var trail = dwState.tabToTrail[tab];
-                    sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: user_info.id, userName: user_info.displayName, serviceUrl: config.datawake_serviceUrl + "/datawakescraper", trail: trail, domain: dwState.tabToDomain[tab]});
+                    sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: user_info.id, userName: user_info.displayName, serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: dwState.tabToDomain[tab]});
                 };
                 xhr.send();
             } else {
                 var tabId = sender.tab.id;
                 var trail = dwState.tabToTrail[tabId];
                 var domain = dwState.tabToDomain[tabId];
-                sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: "", userName: "", serviceUrl: config.datawake_serviceUrl + "/datawakescraper", trail: trail, domain: domain});
+                sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: "", userName: "", serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: domain});
             }
         } else {
             sendResponse({domain: dwState.tabToDomain[sender.tab.id], tracking: dwState.tracking });
@@ -97,8 +97,8 @@ function getPopupData(request, sender, sendResponse) {
     var tabId = request.tab.id;
     var last = -1;
     var popUpDataResponse = {
-        serviceUrl: config.datawake_serviceUrl + "/datawakescraper",
-        rankUrl: config.datawake_serviceUrl + "/datawake_url_ranks",
+        serviceUrl: config.datawake_serviceUrl + "/scraper",
+        rankUrl: config.datawake_serviceUrl + "/ranks",
         trail: dwState.tabToTrail[tabId],
         domain: dwState.tabToDomain[tabId],
         org: dwState.currentOrg
@@ -158,7 +158,7 @@ function postPageContents(request, sender, sendResponse) {
     }
 
     var pageContents = request.contents;
-    postContents(config.datawake_serviceUrl + "/datawakescraper/scrape", pageContents, onSuccess, logError);
+    postContents(config.datawake_serviceUrl + "/scraper/scrape", pageContents, onSuccess, logError);
 }
 
 function setCurrentOrg(request, sender, sendResponse) {
@@ -170,7 +170,7 @@ function getExternalLinks(request, sender, sendResponse) {
         sendResponse({links: response});
     }
 
-    var url = config.datawake_serviceUrl + "/external_links/get";
+    var url = config.datawake_serviceUrl + "/tools/get";
     getContents(url, onSuccess, logError);
 }
 
@@ -229,7 +229,7 @@ function captureSelectedText(info, tab) {
             console.log("datawake - saved selection: %s id=%s", info.selectionText, responseObj.id);
         }
 
-        postContents(config.datawake_serviceUrl + "/datawakescraper/selection", jsonData, logSuccess, logError);
+        postContents(config.datawake_serviceUrl + "/scraper/selection", jsonData, logSuccess, logError);
 
     }
 }
@@ -253,7 +253,7 @@ function getSelections(info, tab) {
         });
     }
 
-    postContents(config.datawake_serviceUrl + "/datawakescraper/selections", postData, sendSelections, logError);
+    postContents(config.datawake_serviceUrl + "/scraper/selections", postData, sendSelections, logError);
 
 }
 
@@ -330,7 +330,7 @@ function getExtractedPageAttributes(postId, tabId, url, delay) {
         url: url,
         domain: dwState.tabToDomain[tabId]
     });
-    postContents(config.datawake_serviceUrl + "/visited_url_entities/extracted", jsonData, onSuccess, logError);
+    postContents(config.datawake_serviceUrl + "/visited/extracted", jsonData, onSuccess, logError);
 }
 
 

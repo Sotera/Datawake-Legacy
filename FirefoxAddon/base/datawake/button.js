@@ -39,7 +39,7 @@ function getAllEntities(delay) {
         var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
         var tabUrl = tabs.activeTab.url;
         if (constants.isValidUrl(tabUrl)) {
-            var entitiesUrl = addOnPrefs.datawakeDeploymentUrl + "/visited_url_entities/entities";
+            var entitiesUrl = addOnPrefs.datawakeDeploymentUrl + "/visited/entities";
             var post_data = JSON.stringify({
                 url: tabUrl,
                 domain: datawakeInfo.domain.name
@@ -200,7 +200,7 @@ function openExternalTool(externalUrlObject) {
  * @param datawakeInfo The datawake info associated with the current tab.
  */
 function emitRanks(datawakeInfo) {
-    var url = addOnPrefs.datawakeDeploymentUrl + "/datawake_url_ranks/getRank";
+    var url = addOnPrefs.datawakeDeploymentUrl + "/ranks/getRank";
     var post_data = JSON.stringify({
         domain: datawakeInfo.domain.name,
         trailname: datawakeInfo.trail.name,
@@ -220,7 +220,7 @@ function emitRanks(datawakeInfo) {
  */
 function setUrlRank(rank_data) {
     rank_data.url = tabs.activeTab.url;
-    var url = addOnPrefs.datawakeDeploymentUrl + "/datawake_url_ranks/setRank";
+    var url = addOnPrefs.datawakeDeploymentUrl + "/ranks/setRank";
     console.debug("Posting Rank..");
     requestHelper.post(url, JSON.stringify(rank_data), function (response) {
         if (response.json.success) {

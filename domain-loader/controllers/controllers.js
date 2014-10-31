@@ -137,7 +137,7 @@ domainLoaderApp.service("domainService", function ($http, $q) {
     function poll() {
         var request = $http({
             method: "get",
-            url: "domain/poll"
+            url: "/datawake/domain/loader/poll"
         });
         return request.then(handleSuccess, handleError);
     }
@@ -147,7 +147,7 @@ domainLoaderApp.service("domainService", function ($http, $q) {
         formData.append("domain", name);
         var request = $http({
             method: "post",
-            url: "domain/preview",
+            url: "/datawake/domain/loader/preview",
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined
@@ -160,7 +160,7 @@ domainLoaderApp.service("domainService", function ($http, $q) {
     function getDomains() {
         var request = $http({
             method: "get",
-            url: "domain/domains"
+            url: "/datawake/domain/loader/domains"
         });
         return(request.then(handleSuccess, handleError));
     }
@@ -170,7 +170,7 @@ domainLoaderApp.service("domainService", function ($http, $q) {
         formData.append("domain_name", name);
         var request = $http({
             method: 'post',
-            url: 'domain/delete',
+            url: '/datawake/domain/loader/delete',
             data: formData,
             transformRequest: angular.identity,
             headers: {
@@ -181,7 +181,7 @@ domainLoaderApp.service("domainService", function ($http, $q) {
     }
 
     function addDomainViaConnectionString(name, description, connection, table, attribute, values) {
-        var url = 'domain/upload-database';
+        var url = '/datawake/domain/loader/upload-database';
         var formData = new FormData();
         formData.append("domain_name", name);
         formData.append("domain_description", description);
@@ -208,7 +208,7 @@ domainLoaderApp.service("domainService", function ($http, $q) {
         formData.append("description", description);
         var request = $http({
             method: "post",
-            url: "domain/upload",
+            url: "/datawake/domain/loader/upload",
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined

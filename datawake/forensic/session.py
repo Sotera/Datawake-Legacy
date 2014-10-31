@@ -41,9 +41,6 @@ def get():
     return json.dumps(dict(hasSession=False))
 
 
-
-
-
 @tangelo.restful
 def post(token=u''):
     user = None
@@ -51,19 +48,18 @@ def post(token=u''):
         tangelo.log('plugin-sever.session tokens matched using existing session.')
         user = cherrypy.session['user']
     else:
-        user = googleauth.getUserFromToken(token,mock = MOCK_FORENSIC_AUTH)
-        tangelo.log('session.post verified user: '+str(user))
+        user = googleauth.getUserFromToken(token, mock=MOCK_FORENSIC_AUTH)
+        tangelo.log('session.post verified user: ' + str(user))
+    org = MOCK_USER_ORG
     if not datawakeconfig.MOCK_AUTH and not MOCK_FORENSIC_AUTH:
-        orgs = datawake_db.getOrgLinks(user['email'])
-        assert(len(orgs) == 1)
-        user['org'] = orgs[0]
-    else:
-        user['org'] = MOCK_USER_ORG
+        orgs = datawake_db.getOrgLinks(user.get_email())
+        assert (len(orgs) == 1)
+        org = orgs[0]
 
-
+    user.set_org(org)
     cherrypy.session['user'] = user
     cherrypy.session['token'] = token
-    return json.dumps(user)
+    return json.dumps(user.__dict__)
 
 
 @tangelo.restful

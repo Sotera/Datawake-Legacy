@@ -21,9 +21,9 @@ import tangelo
 import cherrypy
 import datawaketools.datawake_db as db
 
+import session_helper
 from session_helper import is_in_session
 from validate_parameters import required_parameters
-import session_helper
 
 
 """

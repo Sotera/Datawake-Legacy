@@ -16,13 +16,13 @@ limitations under the License.
 
 """
 
-
 import json
 
 import tangelo
 import cherrypy
 from datawaketools import datawake_db
 
+import session_helper
 
 """
 
@@ -31,15 +31,9 @@ from datawaketools import datawake_db
 """
 
 
-def getUserData():
-    assert ('user' in cherrypy.session)
-    user = cherrypy.session['user']
-    assert ('org' in user)
-    return user, user['org']
-
-
+@session_helper.is_in_session
 def get_chart(users=u'', trail=u'*', domain=u''):
-    (user, org) = getUserData()
+    org = session_helper.get_org()
     tangelo.log('dataservice-get org=' + org + ' users=' + users + ' trail= ' + trail + ' domain=' + domain)
     if trail == u'':
         trail = u'*'
