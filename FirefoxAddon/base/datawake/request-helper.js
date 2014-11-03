@@ -5,8 +5,8 @@ var requestWrapper = require("./request-wrapper");
 //exports.get = getRequest;
 
 
-exports.post = sidePost;
-exports.get = sideGet;
+exports.post = proxyPost;
+exports.get = proxyGet;
 exports.postCode = postCode;
 exports.delete = deleteRequest;
 
@@ -65,7 +65,7 @@ function postCode(url, svc, callback) {
     postObj.post();
 }
 
-function sidePost(url, post_data, callback) {
+function proxyPost(url, post_data, callback) {
     requestWrapper.postRequest(url, post_data, function (resp) {
         if (resp.status === 200) {
             var response = {};
@@ -73,13 +73,15 @@ function sidePost(url, post_data, callback) {
             response.status = resp.status;
             callback(response);
         } else {
-            console.error("There is an error on the server side.");
+            console.error("POST: There is an error on the server side.");
+            console.error(resp.error);
+            console.error(resp.body);
             callback(resp);
         }
     })
 }
 
-function sideGet(url, callback) {
+function proxyGet(url, callback) {
     requestWrapper.getRequest(url, function (resp) {
         var response = {};
         if (resp.status === 200) {
@@ -87,7 +89,9 @@ function sideGet(url, callback) {
             response.json = JSON.parse(resp.body);
             callback(response);
         } else {
-            console.error("There is an error on the server side.");
+            console.error("GET: There is an error on the server side.");
+            console.error(resp.error);
+            console.error(resp.body);
             callback(resp);
         }
 

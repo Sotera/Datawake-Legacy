@@ -17,7 +17,7 @@
             "title": "Datawake Deployment Address",
             "description": "(Required) Sets the current Datawake instance address.",
             "type": "string",
-            "value": "http://localhost:8088/datawake-plugin-server"
+            "value": "http://localhost:8088/datawake/plugin"
         },
         {
             "name": "proxyHost",

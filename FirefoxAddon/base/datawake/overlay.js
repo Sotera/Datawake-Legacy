@@ -32,7 +32,7 @@ function getDomains(callback) {
  * @param callback Response callback.
  */
 function getTrails(domain, callback) {
-    var url = addOnPrefs.datawakeDeploymentUrl + "/datawake_trails/trails";
+    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/get";
     var post_data = JSON.stringify({
         domain: domain
     });
@@ -114,14 +114,15 @@ function setupNewTabListener(worker) {
         worker.port.emit("authType", auth);
 
         //Sends the domains to the newtab overlay
-        authHelper.getLoggedInUser(function (user) {
-            if (!user.json.hasOwnProperty("session")) {
-                getDomains(function (response) {
-                    console.debug("Emitting Domains");
-                    worker.port.emit("sendDomains", response.json);
-                });
-            }
-        });
+        //Commented out for now
+//        authHelper.getLoggedInUser(function (user) {
+//            if (!(user.status == 501)) {
+//                getDomains(function (response) {
+//                    console.debug("Emitting Domains");
+//                    worker.port.emit("sendDomains", response.json);
+//                });
+//            }
+//        });
     } else {
         worker.port.emit("invalidPreferences");
     }
@@ -137,7 +138,7 @@ function setupNewTabListener(worker) {
  * @param callback Response callback.
  */
 function createTrail(domain, trailname, traildescription, callback) {
-    var url = addOnPrefs.datawakeDeploymentUrl + "/datawake_trails/createTrail";
+    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/create";
     var post_data = JSON.stringify(
         {
             domain: domain,

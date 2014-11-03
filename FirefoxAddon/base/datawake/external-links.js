@@ -7,7 +7,7 @@ var externalLinks = null;
 
 function getExternalLinks(callback) {
     if (externalLinks == null) {
-        requestHelper.get(addOnPrefs.datawakeDeploymentUrl + "/external_links/get", function (response) {
+        requestHelper.get(addOnPrefs.datawakeDeploymentUrl + "/tools/get", function (response) {
             externalLinks = response;
             callback(externalLinks);
         });
