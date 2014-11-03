@@ -167,7 +167,7 @@ function onToggle(state) {
     if (datawakeInfo != null && datawakeInfo.isDatawakeOn && constants.isValidUrl(tabs.activeTab.url)) {
         //Emit that it is a validTab to Scrape
         console.debug("Valid Tab");
-        mainPanel.port.emit("validTab");
+        mainPanel.port.emit("validTab", tabs.activeTab.url);
         //Get the rank info and listen for someone ranking the page.
         emitRanks(datawakeInfo);
         mainPanel.port.on("setUrlRank", setUrlRank);

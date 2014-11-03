@@ -114,14 +114,15 @@ function setupNewTabListener(worker) {
         worker.port.emit("authType", auth);
 
         //Sends the domains to the newtab overlay
-        authHelper.getLoggedInUser(function (user) {
-            if (!(user.status == 501)) {
-                getDomains(function (response) {
-                    console.debug("Emitting Domains");
-                    worker.port.emit("sendDomains", response.json);
-                });
-            }
-        });
+        //Commented out for now
+//        authHelper.getLoggedInUser(function (user) {
+//            if (!(user.status == 501)) {
+//                getDomains(function (response) {
+//                    console.debug("Emitting Domains");
+//                    worker.port.emit("sendDomains", response.json);
+//                });
+//            }
+//        });
     } else {
         worker.port.emit("invalidPreferences");
     }

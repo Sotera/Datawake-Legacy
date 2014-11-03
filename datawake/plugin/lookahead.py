@@ -22,6 +22,7 @@ import cherrypy
 import datawake.util.entity_data_connector_factory as factory
 from validate_parameters import required_parameters
 from datawake.util.session_helper import is_in_session
+import itertools
 
 
 """
@@ -56,7 +57,7 @@ def get_lookahead(url, srcurl, domain):
         # get the domain matches from the lookahead url
         domain_lookahead_features = entity_data_connector.getExtractedDomainEntitiesFromUrls(domain, [url])
         domain_lookahead_features = domain_lookahead_features.get(url, {})
-        domain_matches = domain_lookahead_features.values()
+        domain_matches = list(itertools.chain.from_iterable(domain_lookahead_features.values()))
 
         del domain_lookahead_features
 

@@ -7,12 +7,15 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
     $scope.lookaheadLinks = [];
     $scope.extracted_tools = [];
     $scope.datawake = null;
+    $scope.current_url = "";
 
     addon.port.on("datawakeInfo", function (datawakeInfo) {
         $scope.datawake = datawakeInfo;
         $scope.hideSignInButton = datawakeInfo.user != null;
         $scope.lookaheadLinks = [];
         $scope.extracted_tools = [];
+        $scope.entities_in_domain = [];
+        $scope.extracted_entities_dict = {};
         $scope.lookaheadTimerStarted = false;
         //Trigger the starting tab.
         var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
@@ -30,7 +33,8 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         $scope.$apply();
     });
 
-    addon.port.on("validTab", function () {
+    addon.port.on("validTab", function (url) {
+        $scope.current_url = url;
         $scope.invalidTab = false;
         $scope.$apply();
     });

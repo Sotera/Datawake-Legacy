@@ -8,7 +8,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.lookaheadStarted = false;
     $scope.lookaheadLinks = [];
     $scope.entities_in_domain = [];
-    $scope.current_url = ""
+    $scope.current_url = "";
 
 
     function linkLookahead(tabUrl, extractedLinks, index, domain, delay) {
@@ -34,7 +34,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
             } else {
                 index = (index + 1) % extractedLinks.length;
                 if (index == 0) {
-                    // pause for the delay at the begining of the list
+                    // pause for the delay at the beginning of the list
                     if (delay <= 5 * 60 * 1000) {
                         $timeout(function () {
                             linkLookahead(tabUrl, extractedLinks, index, domain, delay * 2);
@@ -146,7 +146,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         chrome.tabs.query({active: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (domainSpecificInformation) {
                 var rank_url = domainSpecificInformation.rankUrl + "/get";
-                $scope.current_url = tabs[0].url
+                $scope.current_url = tabs[0].url;
                 var rank_data = JSON.stringify({
                     trailname: domainSpecificInformation.trail,
                     url: tabs[0].url,

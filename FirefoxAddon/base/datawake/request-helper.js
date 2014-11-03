@@ -73,7 +73,9 @@ function proxyPost(url, post_data, callback) {
             response.status = resp.status;
             callback(response);
         } else {
-            console.error("There is an error on the server side.");
+            console.error("POST: There is an error on the server side.");
+            console.error(resp.error);
+            console.error(resp.body);
             callback(resp);
         }
     })
@@ -87,7 +89,9 @@ function proxyGet(url, callback) {
             response.json = JSON.parse(resp.body);
             callback(response);
         } else {
-            console.error("There is an error on the server side.");
+            console.error("GET: There is an error on the server side.");
+            console.error(resp.error);
+            console.error(resp.body);
             callback(resp);
         }
 
