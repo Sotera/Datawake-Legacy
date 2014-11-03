@@ -89,7 +89,7 @@ function lastId(request, sender, sendResponse) {
             chrome.browserAction.setBadgeText({text: request.count.toString(), tabId: tabId});
             chrome.browserAction.setBadgeBackgroundColor({color: "#20b2aa", tabId: tabId});
         }
-        getExtractedPageAttributes(request.id, tabId, sender.tab.url, 1000);
+        getExtractedPageAttributes(tabId, sender.tab.url, 1000);
     }
 }
 
@@ -270,7 +270,7 @@ function launchImageService(info, tab) {
 /*
  Call a service to determine if page attributes have been captured in the domain crawlers etc
  */
-function getExtractedPageAttributes(postId, tabId, url, delay) {
+function getExtractedPageAttributes(tabId, url, delay) {
 
     console.log("checking for domain hits on url: %s", url);
     function onSuccess(response) {
@@ -280,7 +280,7 @@ function getExtractedPageAttributes(postId, tabId, url, delay) {
             console.log("getExtractedPageAttributes, no response for url, setting time to try again.");
             if (delay <= 5 * 60 * 1000) { // eventually stop polling
                 window.setTimeout(function () {
-                    getExtractedPageAttributes(postId, tabId, url)
+                    getExtractedPageAttributes(tabId, url, delay * 2);
                 }, delay * 2);
             }
             return;
