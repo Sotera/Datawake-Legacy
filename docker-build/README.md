@@ -23,4 +23,8 @@ docker run -it --link datawake-mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQ
 docker run  -it --link datawake-mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" ' < build_db.sql
 
 
+# link the datawake web app to the mysql container
+docker run --name datawake-web --link datawake-mysql:mysql -d -p 80:80 erickimbrel/datawake tangelo -nd start
+
+
 ```

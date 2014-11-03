@@ -21,7 +21,7 @@ COPY datawake /usr/local/share/tangelo/web/datawake
 COPY domain /usr/local/share/tangelo/web/domain
 COPY forensic /usr/local/share/tangelo/web/forensic
 COPY docker-build/datawakeconfig.py /usr/local/share/tangelo/web/datawake/conf/datawakeconfig.py
-
+ENV PYTHONPATH /usr/local/share/tangelo/web
 
 
 

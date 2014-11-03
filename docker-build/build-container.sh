@@ -5,6 +5,7 @@ echo "install pip and python dev tools"
 apt-get update
 apt-get upgrade
 apt-get install -y python-software-properties
+apt-get install -y software-properties-common
 apt-get -y install python-pip
 apt-get -y install python-dev
 
@@ -13,7 +14,7 @@ apt-get -y install python-dev
 
 # needed until sessions are supported in offical tangelo release
 echo "install dependencies required to build tangelo"
-apt-add-repository -y ppa:chris-lea/node.js
+add-apt-repository -y ppa:chris-lea/node.js
 apt-get install -y nodejs
 apt-get install -y npm
 ln -s /usr/bin/nodejs /usr/bin/node
