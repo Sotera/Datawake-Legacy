@@ -30,7 +30,7 @@ newTabApp.controller("NewTabCtrl", function ($scope, $timeout, requestService) {
     };
 
     $scope.createNewTrail = function () {
-        var trail_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/datawake_trails/createTrail";
+        var trail_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/trails/create";
         //Persists the object
         var newTrail = {};
         newTrail.name = $scope.newTrail.name;
@@ -64,7 +64,7 @@ newTabApp.controller("NewTabCtrl", function ($scope, $timeout, requestService) {
     $scope.domainChanged = function (domain) {
         chrome.runtime.sendMessage({operation: "set-domain", name: domain.name}, function (response) {
             console.log("Domain Set: %s", domain.name);
-            var trail_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/datawake_trails/trails";
+            var trail_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/trails/get";
             var trail_data = JSON.stringify({domain: domain.name});
             requestService.post(trail_url, trail_data).then(populateTrails);
         });
@@ -95,13 +95,11 @@ newTabApp.controller("NewTabCtrl", function ($scope, $timeout, requestService) {
         });
         var domain_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/domains";
         requestService.get(domain_url).then(function (domains) {
-            domains.shift();
             $scope.domains = domains;
         });
     }
 
     function populateTrails(trailContainer) {
-        trailContainer.trails.shift();
         $scope.trails = trailContainer.trails;
         $scope.selectedTrail = null;
     }

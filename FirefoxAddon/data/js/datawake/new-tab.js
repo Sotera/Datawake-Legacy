@@ -7,13 +7,11 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     $scope.newTrail = {};
 
     addon.port.on("sendDomains", function (domains) {
-        domains.shift();
         $scope.domains = domains;
         $scope.$apply();
     });
 
     addon.port.on("sendTrails", function (trails) {
-        trails.shift();
         $scope.trails = trails;
         $scope.$apply();
     });

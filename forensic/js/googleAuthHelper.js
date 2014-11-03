@@ -38,7 +38,7 @@ var authHelper = (function () {
                 // start a session on the server
                 $.ajax({
                     type: 'POST',
-                    url: 'session',
+                    url: '/datawake/forensic/session',
                     data: jsonData,
                     dataType: 'json',
                     contentType: 'application/json',
@@ -62,7 +62,7 @@ var authHelper = (function () {
                 // clear any session on the server
                 $.ajax({
                     type: 'DELETE',
-                    url: 'session',
+                    url: '/datawake/forensic/session',
                     success: function (response) {
                         console.log("datawake server logout: " + response.removeSession);
                         onLoggedIn();
@@ -97,7 +97,7 @@ var authHelper = (function () {
                         // clear any session on the server
                         $.ajax({
                             type: 'DELETE',
-                            url: 'session',
+                            url: '/datawake/forensic/session',
                             dataType:'json',
                             success: function (response) {
                                 console.log("datawake server logout: " + response.removedSession);

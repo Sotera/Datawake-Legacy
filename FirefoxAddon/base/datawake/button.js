@@ -34,22 +34,21 @@ function addValidTabAndData(datawakeInfo) {
  * Does the advanced search for any entities that were pulled out.
  * @param delay Timeout delay between each call.
  */
-function advancedSearch(delay) {
+function getAllEntities(delay) {
     if (tracking.isTabWorkerAttached(tabs.activeTab.id)) {
         var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
         var tabUrl = tabs.activeTab.url;
         if (constants.isValidUrl(tabUrl)) {
-            var entitiesUrl = addOnPrefs.datawakeDeploymentUrl + "/visited_url_entities/entities";
+            var entitiesUrl = addOnPrefs.datawakeDeploymentUrl + "/visited/entities";
             var post_data = JSON.stringify({
                 url: tabUrl,
                 domain: datawakeInfo.domain.name
             });
             requestHelper.post(entitiesUrl, post_data, function (response) {
-                var extracted_entities_dict = response.json;
-                mainPanel.port.emit("entities", extracted_entities_dict);
-                if (Object.keys(extracted_entities_dict).length > 0) {
-                    var entitiesInDomain = getEntitiesInDomain(extracted_entities_dict);
-                    mainPanel.port.emit("entitiesInDomain", entitiesInDomain);
+                var entities = response.json;
+                mainPanel.port.emit("entities", entities);
+                if (Object.keys(entities.domainExtracted).length > 0) {
+                    var entitiesInDomain = getEntitiesInDomain(entities.domainExtracted);
                     highlightExtractedLinks(entitiesInDomain);
                     if (entitiesInDomain.length > 0) {
                         console.debug("Domain matches found on url: " + tabUrl + " setting badge RED");
@@ -63,7 +62,7 @@ function advancedSearch(delay) {
                 //Keep Polling
                 if (delay <= 5 * 60 * 1000) { // eventually stop polling
                     advanceSearchTimerId = timer.setTimeout(function (newDelay) {
-                        advancedSearch(newDelay);
+                        getAllEntities(newDelay);
                     }, delay * 2);
                 }
 
@@ -80,6 +79,7 @@ function advancedSearch(delay) {
  */
 function highlightExtractedLinks(entitiesInDomain) {
     externalLinkHelper.getExternalLinks(function (response) {
+
         var highlightObject = {};
         highlightObject.entities = entitiesInDomain;
         mainPanel.port.emit("externalLinks", response.json);
@@ -94,17 +94,15 @@ function highlightExtractedLinks(entitiesInDomain) {
  * @param extracted_entities_dict The entities that were extracted.
  * @returns {Array} The entities that are in this domain.
  */
-function getEntitiesInDomain(extracted_entities_dict) {
+function getEntitiesInDomain(domainExtracted) {
     var entitiesInDomain = [];
-    for (var type in extracted_entities_dict) {
-        for (var name in extracted_entities_dict[type]) {
-            if (extracted_entities_dict[type][name] === "y") {
-                var typeObject = {};
-                typeObject.type = type;
-                typeObject.name = name;
-                console.debug("Extracted value: " + typeObject.name);
-                entitiesInDomain.push(typeObject);
-            }
+    for (var type in domainExtracted) {
+        for(var index in domainExtracted[type]){
+            var typeObject = {};
+            typeObject.type = type;
+            typeObject.name = domainExtracted[type][index];
+            console.debug("Extracted value: " + typeObject.name);
+            entitiesInDomain.push(typeObject);
         }
     }
     return entitiesInDomain;
@@ -169,7 +167,7 @@ function onToggle(state) {
     if (datawakeInfo != null && datawakeInfo.isDatawakeOn && constants.isValidUrl(tabs.activeTab.url)) {
         //Emit that it is a validTab to Scrape
         console.debug("Valid Tab");
-        mainPanel.port.emit("validTab");
+        mainPanel.port.emit("validTab", tabs.activeTab.url);
         //Get the rank info and listen for someone ranking the page.
         emitRanks(datawakeInfo);
         mainPanel.port.on("setUrlRank", setUrlRank);
@@ -192,7 +190,7 @@ function resetToggleButton() {
     mainPanel.port.emit("invalidTab");
 }
 
-function openExternalTool(externalUrlObject){
+function openExternalTool(externalUrlObject) {
     console.log("Opening External Tool");
     tabs.activeTab.url = externalUrlObject.externalUrl;
 }
@@ -202,7 +200,7 @@ function openExternalTool(externalUrlObject){
  * @param datawakeInfo The datawake info associated with the current tab.
  */
 function emitRanks(datawakeInfo) {
-    var url = addOnPrefs.datawakeDeploymentUrl + "/datawake_url_ranks/getRank";
+    var url = addOnPrefs.datawakeDeploymentUrl + "/ranks/get";
     var post_data = JSON.stringify({
         domain: datawakeInfo.domain.name,
         trailname: datawakeInfo.trail.name,
@@ -222,7 +220,7 @@ function emitRanks(datawakeInfo) {
  */
 function setUrlRank(rank_data) {
     rank_data.url = tabs.activeTab.url;
-    var url = addOnPrefs.datawakeDeploymentUrl + "/datawake_url_ranks/setRank";
+    var url = addOnPrefs.datawakeDeploymentUrl + "/ranks/set";
     console.debug("Posting Rank..");
     requestHelper.post(url, JSON.stringify(rank_data), function (response) {
         if (response.json.success) {
@@ -247,8 +245,9 @@ function startLookaheadTimer(datawakeInfo, links, index, delay) {
     };
     var url = addOnPrefs.datawakeDeploymentUrl + "/lookahead/matches";
     requestHelper.post(url, JSON.stringify(post_data), function (response) {
-        if (response && response != void(0)) {
-            mainPanel.port.emit("lookaheadTimerResults", response.json);
+        var entities = response.json;
+        if (entities.matches.length > 0 || entities.domain_search_matches.length > 0) {
+            mainPanel.port.emit("lookaheadTimerResults", entities);
             //TODO: Fix the index Ugliness
             links.splice(index, 1);
             if (links.length > 0) {
@@ -280,6 +279,8 @@ function startLookaheadTimer(datawakeInfo, links, index, delay) {
                 }, 1);
             }
         }
+    }, function(err){
+        console.info("lookahead error");
     });
 }
 
@@ -317,7 +318,7 @@ function switchToTab(tabId, datawakeInfo, badgeCount) {
         setBadge(badgeForTab[tabId]);
         //TODO: Reset Badge Color here.
         addValidTabAndData(datawakeInfo);
-        advancedSearch(1000);
+        getAllEntities(1000);
     }
 }
 

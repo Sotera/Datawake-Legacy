@@ -79,15 +79,13 @@ function setupTabWorkerAndServices(tab) {
             pageContents.url = currentTrackingTabWorker.tab.url;
             pageContents.domain = datawakeInfoForTab.domain.name;
             pageContents.trail = datawakeInfoForTab.trail.name;
-            pageContents.userName = datawakeInfoForTab.user.userName;
-            var url = addOnPrefs.datawakeDeploymentUrl + "/datawakescraper/scrape";
+            var url = addOnPrefs.datawakeDeploymentUrl + "/scraper/scrape";
             requestHelper.post(url, JSON.stringify(pageContents), function (response) {
                 console.debug("Setting up selections and advanced search");
                 var scrapeObject = response.json;
-                var postId = scrapeObject.id;
                 //Sets up the context menu objects for this tab.
                 if (currentTrackingTabWorker.tab != null) {
-                    selectionHelper.useContextMenu(postId, currentTrackingTabWorker.tab);
+                    selectionHelper.useContextMenu(currentTrackingTabWorker.tab);
                     widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, datawakeInfoForTab, scrapeObject.count);
                 }
             });

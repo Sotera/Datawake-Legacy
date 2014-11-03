@@ -8,16 +8,15 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.lookaheadStarted = false;
     $scope.lookaheadLinks = [];
     $scope.entities_in_domain = [];
+    $scope.current_url = "";
 
 
     function linkLookahead(tabUrl, extractedLinks, index, domain, delay) {
         var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/lookahead/matches";
         var jsonData = JSON.stringify({url: extractedLinks[index], srcurl: tabUrl, domain: domain });
         popUpService.post(post_url, jsonData).then(function (response) {
-            if (response != "null" && response != undefined) {
-                if (response.matchCount > 0 || response.domain_search_hits > 0) {
-                    $scope.lookaheadLinks.push(response);
-                }
+            if (response.matches.length > 0 || response.domain_search_matches.length > 0) {
+                $scope.lookaheadLinks.push(response);
                 extractedLinks.splice(index, 1);
                 if (extractedLinks.length > 0) {
                     if (index >= extractedLinks.length) {
@@ -35,7 +34,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
             } else {
                 index = (index + 1) % extractedLinks.length;
                 if (index == 0) {
-                    // pause for the delay at the begining of the list
+                    // pause for the delay at the beginning of the list
                     if (delay <= 5 * 60 * 1000) {
                         $timeout(function () {
                             linkLookahead(tabUrl, extractedLinks, index, domain, delay * 2);
@@ -51,29 +50,24 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         });
     }
 
-    function extractedEntities(extracted_entities_dict, tabUrl, domain) {
-        $scope.extracted_entities_dict = extracted_entities_dict;
-        if (!$scope.lookaheadStarted && extracted_entities_dict.hasOwnProperty("website")) {
+    function extractedEntities(entities, tabUrl, domain) {
+        $scope.extracted_entities_dict = (entities.allEntities != null) ? entities.allEntities : {};
+        if (!$scope.lookaheadStarted && entities.allEntities.hasOwnProperty("website")) {
             $timeout(function () {
-                var lookaheadLinks = Object.keys(extracted_entities_dict["website"]);
+                var lookaheadLinks = entities.allEntities["website"];
                 linkLookahead(tabUrl, lookaheadLinks, 0, domain, 1000);
             }, 1000);
             $scope.lookaheadStarted = true;
         }
-
-        $scope.entities_in_domain = [];
-        $.map(extracted_entities_dict, function (value, type) {
-            $.map(value, function (extracted, name) {
-                if (extracted === "y") {
-                    var entity = {};
-                    entity.type = type;
-                    entity.name = name;
-                    $scope.entities_in_domain.push(entity);
-
-                }
-            });
-        });
+        $scope.entities_in_domain = (entities.domainExtracted != null) ? entities.domainExtracted : {};
     }
+
+    $scope.isExtracted = function (type, name) {
+        if ($scope.entities_in_domain.hasOwnProperty(type)) {
+
+            return $scope.entities_in_domain[type].indexOf(name) >= 0;
+        }
+    };
 
     function externalToolsCallback(extracted_tools) {
         $scope.extracted_tools = extracted_tools;
@@ -91,7 +85,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
 
     function fetchEntities(delay) {
         chrome.tabs.query({active: true}, function (tabs) {
-            var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/visited_url_entities/entities";
+            var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/visited/entities";
             var domain = chrome.extension.getBackgroundPage().dwState.tabToDomain[tabs[0].id];
             var tabUrl = tabs[0].url;
             var fetch_entities_post_data = JSON.stringify({ url: tabUrl, domain: domain});
@@ -105,8 +99,8 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function loadExternalLinks() {
-        var external_links_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/external_links/get";
-        popUpService.get(external_links_url).then(externalToolsCallback);
+        var tools_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/tools/get";
+        popUpService.get(tools_url).then(externalToolsCallback);
     }
 
     function setRankAndCreateStarRating(rankObject) {
@@ -137,7 +131,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
                     rank: rank,
                     domain: response.domain
                 });
-                var rankUrl = response.rankUrl + "/setRank";
+                var rankUrl = response.rankUrl + "/set";
                 console.log("datawake-popup setUrlRank submit reguest for: " + data);
                 popUpService.post(rankUrl, data).then(function (response) {
                     if (response.success) {
@@ -151,7 +145,8 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     function getUrlRank() {
         chrome.tabs.query({active: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (domainSpecificInformation) {
-                var rank_url = domainSpecificInformation.rankUrl + "/getRank";
+                var rank_url = domainSpecificInformation.rankUrl + "/get";
+                $scope.current_url = tabs[0].url;
                 var rank_data = JSON.stringify({
                     trailname: domainSpecificInformation.trail,
                     url: tabs[0].url,

@@ -7,7 +7,7 @@ var dateWidget = function () {
     function makeChart(users, trail, domain) {
         var jsonData = JSON.stringify({users: users.toString(), trail: trail, domain: domain});
         $.ajax({
-            url: 'dateservice/chart',
+            url: '/datawake/forensic/dateservice/chart',
             type: 'POST',
             data: jsonData,
             dataType: 'json',

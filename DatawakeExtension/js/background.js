@@ -45,7 +45,7 @@ dwConfig.getOptions(function (options) {
 
 
 //TODO: look at moving this into local storage so it can persist over sessions, need to know if tab ids persist over sessions?
-var dwState = { tabToPostId: {}, tabToTrail: {}, tabToDomain: {}, lastTrail: null, lastDomain: null, tracking: false, currentOrg: null};
+var dwState = { tabToTrail: {}, tabToDomain: {}, lastTrail: null, lastDomain: null, tracking: false, currentOrg: null};
 
 
 // don't search for tips in tools while looking at the tools
@@ -64,14 +64,14 @@ function getPosterData(request, sender, sendResponse) {
                     var user_info = JSON.parse(this.response);
                     var tab = sender.tab.id;
                     var trail = dwState.tabToTrail[tab];
-                    sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: user_info.id, userName: user_info.displayName, serviceUrl: config.datawake_serviceUrl + "/datawakescraper", trail: trail, domain: dwState.tabToDomain[tab]});
+                    sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: user_info.id, userName: user_info.displayName, serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: dwState.tabToDomain[tab]});
                 };
                 xhr.send();
             } else {
                 var tabId = sender.tab.id;
                 var trail = dwState.tabToTrail[tabId];
                 var domain = dwState.tabToDomain[tabId];
-                sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: "", userName: "", serviceUrl: config.datawake_serviceUrl + "/datawakescraper", trail: trail, domain: domain});
+                sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: "", userName: "", serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: domain});
             }
         } else {
             sendResponse({domain: dwState.tabToDomain[sender.tab.id], tracking: dwState.tracking });
@@ -85,24 +85,20 @@ function lastId(request, sender, sendResponse) {
     console.log("Datawake background post response: last-id: %s url count: %d", request.id, request.count);
     var tabId = sender.tab.id;
     if (tabId) {
-        console.log("setting tabtoPostId[%s]=%s %s", tabId, request.id, request.count);
-        dwState.tabToPostId[tabId] = request.id;
         if (request.count > 0) {
             chrome.browserAction.setBadgeText({text: request.count.toString(), tabId: tabId});
             chrome.browserAction.setBadgeBackgroundColor({color: "#20b2aa", tabId: tabId});
         }
-        advanceSearch(request.id, tabId, sender.tab.url, 1000);
+        getExtractedPageAttributes(tabId, sender.tab.url, 1000);
     }
 }
 
 function getPopupData(request, sender, sendResponse) {
     var tabId = request.tab.id;
     var last = -1;
-    if (tabId in dwState.tabToPostId) last = dwState.tabToPostId[tabId];
     var popUpDataResponse = {
-        lastId: last,
-        serviceUrl: config.datawake_serviceUrl + "/datawakescraper",
-        rankUrl: config.datawake_serviceUrl + "/datawake_url_ranks",
+        serviceUrl: config.datawake_serviceUrl + "/scraper",
+        rankUrl: config.datawake_serviceUrl + "/ranks",
         trail: dwState.tabToTrail[tabId],
         domain: dwState.tabToDomain[tabId],
         org: dwState.currentOrg
@@ -162,7 +158,7 @@ function postPageContents(request, sender, sendResponse) {
     }
 
     var pageContents = request.contents;
-    postContents(config.datawake_serviceUrl + "/datawakescraper/scrape", pageContents, onSuccess, logError);
+    postContents(config.datawake_serviceUrl + "/scraper/scrape", pageContents, onSuccess, logError);
 }
 
 function setCurrentOrg(request, sender, sendResponse) {
@@ -170,10 +166,11 @@ function setCurrentOrg(request, sender, sendResponse) {
 }
 
 function getExternalLinks(request, sender, sendResponse) {
-    function onSuccess(response){
-        sendResponse({links:response});
+    function onSuccess(response) {
+        sendResponse({links: response});
     }
-    var url = config.datawake_serviceUrl + "/external_links/get";
+
+    var url = config.datawake_serviceUrl + "/tools/get";
     getContents(url, onSuccess, logError);
 }
 
@@ -220,11 +217,10 @@ function captureSelectedText(info, tab) {
     else {
         console.log("datawake capture selection - text: %s", info.selectionText);
         console.log("datawake capture selection - tab: %s", tab.id);
-        var postId = dwState.tabToPostId[tab.id];
 
-        console.log("datawake capture selection - post: %s", postId);
+        console.log("datawake capture selection - post: %s", tab.url);
         var jsonData = JSON.stringify({
-            postId: postId,
+            url: tab.url,
             selection: info.selectionText,
             domain: dwState.tabToDomain[tab.id]
         });
@@ -233,7 +229,7 @@ function captureSelectedText(info, tab) {
             console.log("datawake - saved selection: %s id=%s", info.selectionText, responseObj.id);
         }
 
-        postContents(config.datawake_serviceUrl + "/datawakescraper/selection", jsonData, logSuccess, logError);
+        postContents(config.datawake_serviceUrl + "/selections/save", jsonData, logSuccess, logError);
 
     }
 }
@@ -257,7 +253,7 @@ function getSelections(info, tab) {
         });
     }
 
-    postContents(config.datawake_serviceUrl + "/datawakescraper/selections", postData, sendSelections, logError);
+    postContents(config.datawake_serviceUrl + "/selections/get", postData, sendSelections, logError);
 
 }
 
@@ -274,30 +270,28 @@ function launchImageService(info, tab) {
 /*
  Call a service to determine if page attributes have been captured in the domain crawlers etc
  */
-function advanceSearch(postId, tabId, url, delay) {
+function getExtractedPageAttributes(tabId, url, delay) {
 
     console.log("checking for domain hits on url: %s", url);
     function onSuccess(response) {
-        var extracted_entities_dict = response;
-
-        if (Object.keys(extracted_entities_dict).length == 0) {
-            console.log("advanceSearch, no response for url, setting time to try again.");
+        var domainEntities = response;
+        var domainExtracted = (domainEntities.domainExtracted != null) ? domainEntities.domainExtracted : {};
+        if (Object.keys(domainExtracted).length == 0) {
+            console.log("getExtractedPageAttributes, no response for url, setting time to try again.");
             if (delay <= 5 * 60 * 1000) { // eventually stop polling
                 window.setTimeout(function () {
-                    advanceSearch(postId, tabId, url)
+                    getExtractedPageAttributes(tabId, url, delay * 2);
                 }, delay * 2);
             }
             return;
         }
         var entities_in_domain = [];
-        $.map(extracted_entities_dict, function (value, type) {
-            $.map(value, function (extracted, name) {
-                if (extracted === "y") {
-                    var entity = {};
-                    entity.type = type;
-                    entity.name = name;
-                    entities_in_domain.push(entity);
-                }
+        $.map(domainExtracted, function (value, type) {
+            $.each(value, function (index, name) {
+                var entity = {};
+                entity.type = type;
+                entity.name = name;
+                entities_in_domain.push(entity);
             });
         });
         var highlightMessage = {operation: 'highlighttext', entities_in_domain: entities_in_domain};
@@ -310,28 +304,25 @@ function advanceSearch(postId, tabId, url, delay) {
             }
         });
 
-        // TODO, should check if tab is at same url
-        // need to remove all POST ID logic
-        if (dwState.tabToPostId[tabId] == postId) {
+        chrome.tabs.query({active: true}, function (tabs) {
+            if (url == tabs[0].url) {
 
-            if (entities_in_domain.length > 0) {
-                console.log("Domain matches found on url: %s setting badge RED", url);
-                chrome.browserAction.setBadgeBackgroundColor({color: "#FF0000", tabId: tabId});
+                if (entities_in_domain.length > 0) {
+                    console.log("Domain matches found on url: %s setting badge RED", url);
+                    chrome.browserAction.setBadgeBackgroundColor({color: "#FF0000", tabId: tabId});
+                }
+                else {
+                    console.log("no domain matches found on url: %s", url);
+                }
             }
-            else {
-                console.log("no domain matches found on url: %s", url);
-            }
-        }
-        else {
-            console.log("tab state has changed, was post %s is now %s", postId, dwState.tabToPostId[tabId]);
-        }
+        });
 
     }
 
     for (index in advanceSearchIgnore) {
         var value = advanceSearchIgnore[index];
         if (url.indexOf(value) == 0) {
-            console.log("advanceSearch, ignoring url: %s", url);
+            console.log("getExtractedPageAttributes, ignoring url: %s", url);
             return;
         }
     }
@@ -339,7 +330,7 @@ function advanceSearch(postId, tabId, url, delay) {
         url: url,
         domain: dwState.tabToDomain[tabId]
     });
-    postContents(config.datawake_serviceUrl + "/visited_url_entities/entities", jsonData, onSuccess, logError);
+    postContents(config.datawake_serviceUrl + "/visited/extracted", jsonData, onSuccess, logError);
 }
 
 

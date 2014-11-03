@@ -3,7 +3,6 @@ var addon = self;
 function scrapePage() {
     try {
         var pageContents = {
-            cookie: document.cookie,
             html: encodeURI($('body').html())
         };
         console.debug("Emitting page contents....");
@@ -45,13 +44,12 @@ addon.port.on("highlight", function (selectionObject) {
 
 addon.port.on("highlightWithToolTips", function (helperObject) {
     console.debug("Highlight with tool tips..");
-    var i = 0;
     var entities = helperObject.entities;
     var externalLinks = helperObject.links;
-    for (var index in entities) {
-        var typeObj = entities[index];
+    $.each(entities, function (index, typeObj) {
         var value = typeObj.name;
         var key = typeObj.type;
+        var i = index;
         $('body').highlight(value, 'datawake-highlight-' + i);
         if (externalLinks.length > 0) {
             var content = '<div> <h4>' + key + ":" + value + '</h4>';
@@ -88,8 +86,7 @@ addon.port.on("highlightWithToolTips", function (helperObject) {
                 trigger: 'hover'
             });
         }
-        i = i + 1;
-    }
+    })
 });
 $(document).ready(function () {
     addon.port.emit("getToolTips");

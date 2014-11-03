@@ -7,12 +7,15 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
     $scope.lookaheadLinks = [];
     $scope.extracted_tools = [];
     $scope.datawake = null;
+    $scope.current_url = "";
 
     addon.port.on("datawakeInfo", function (datawakeInfo) {
         $scope.datawake = datawakeInfo;
         $scope.hideSignInButton = datawakeInfo.user != null;
         $scope.lookaheadLinks = [];
         $scope.extracted_tools = [];
+        $scope.entities_in_domain = [];
+        $scope.extracted_entities_dict = {};
         $scope.lookaheadTimerStarted = false;
         //Trigger the starting tab.
         var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
@@ -30,7 +33,8 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         $scope.$apply();
     });
 
-    addon.port.on("validTab", function () {
+    addon.port.on("validTab", function (url) {
+        $scope.current_url = url;
         $scope.invalidTab = false;
         $scope.$apply();
     });
@@ -49,32 +53,24 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         $scope.$apply();
     });
 
-    addon.port.on("entitiesInDomain", function (extractedEntities) {
-        $scope.entities_in_domain = extractedEntities;
-        $scope.$apply();
-    });
-
-    addon.port.on("entities", function (extracted_entities_dict) {
+    addon.port.on("entities", function (extractedEntities) {
         if (!$scope.lookaheadTimerStarted) {
-            if (extracted_entities_dict.hasOwnProperty("website")) {
+            if (extractedEntities.allEntities.hasOwnProperty("website")) {
                 var lookaheadTimerObject = {};
-                lookaheadTimerObject.links = Object.keys(extracted_entities_dict["website"]);
+                lookaheadTimerObject.links = extractedEntities.allEntities["website"];
                 addon.port.emit("startLookaheadTimer", lookaheadTimerObject);
                 $scope.lookaheadTimerStarted = true;
-                $scope.$apply();
             }
         }
         console.debug("Parsing Extracted Entities...");
-        $scope.extracted_entities_dict = extracted_entities_dict;
+        $scope.extracted_entities_dict = extractedEntities.allEntities;
+        $scope.entities_in_domain = extractedEntities.domainExtracted;
         $scope.$apply();
     });
 
     addon.port.on("lookaheadTimerResults", function (lookahead) {
-        if (lookahead != null) {
-            if (lookahead.matchCount > 0 || lookahead.domain_search_hits > 0) {
-                $scope.lookaheadLinks.push(lookahead);
-            }
-        }
+        $scope.lookaheadLinks.push(lookahead);
+        $scope.$apply();
     });
 
     addon.port.on("badgeCount", function (badgeCount) {
@@ -98,6 +94,13 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
 
     $scope.openExternalLink = function (externalUrl) {
         addon.port.emit("openExternalLink", {externalUrl: externalUrl});
+    };
+
+    $scope.isExtracted = function (type, name) {
+        if ($scope.entities_in_domain.hasOwnProperty(type)) {
+
+            return $scope.entities_in_domain[type].indexOf(name) >= 0;
+        }
     };
 
     function createStarRating(starUrl) {

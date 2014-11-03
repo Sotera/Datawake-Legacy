@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 DBPASSWD=root
-
+echo "export PYTHONPATH=$PYTHONPATH:/vagrant/" >> /etc/environment
+source /etc/environment
 
 apt-get update
 
@@ -79,7 +80,7 @@ pip install streamparse &> /dev/null
 
 # install kafka
 
-wget http://mirror.cogentco.com/pub/apache/kafka/0.8.1.1/kafka_2.9.2-0.8.1.1.tgz &> /dev/null
+wget http://mirror.nexcess.net/apache/kafka/0.8.1.1/kafka_2.9.2-0.8.1.1.tgz &> /dev/null
 tar -xzf kafka_2.9.2-0.8.1.1.tgz 
 mv kafka_2.9.2-0.8.1.1 /usr/local/kafka
 
@@ -144,21 +145,17 @@ pip install pyodbc &> /dev/null
 # make sym links to tangelo web directory
 
 echo "linking tangelo web server"
+ln -s /vagrant/datawake/ /usr/local/share/tangelo/web/
 ln -s /vagrant/forensic/ /usr/local/share/tangelo/web/
-ln -s /vagrant/domain-loader/ /usr/local/share/tangelo/web/
-ln -s /vagrant/datawake-plugin-server/ /usr/local/share/tangelo/web/
+ln -s /vagrant/domain/ /usr/local/share/tangelo/web/
 
 echo "installing datawake tools and setting up empty database"
-cd /vagrant/util/
-cd datawaketools
+cd /vagrant/datawake/conf/
 cp datawakeconfig.py.template datawakeconfig.py
-cd ..
-python setup.py install
-cd datawaketools
+cd /vagrant/datawake/util/
 python datawake_db.py create-db
 python domainLoader.py memex_program "emails asscoiated with the memex program" ../../etc/default_domain.csv 
 cd ~
-
 
 # start kafka and create topics
 
