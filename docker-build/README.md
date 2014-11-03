@@ -19,6 +19,8 @@ docker run --name datawake-mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
 # connect to the instance via mysql terminal
 docker run -it --link datawake-mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 
+# run the build_db.sql script
+docker run  -it --link datawake-mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" ' < build_db.sql
 
 
 ```
