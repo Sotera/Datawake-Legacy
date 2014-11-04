@@ -49,8 +49,7 @@ dwConfig.getOnOffOptions(function (options) {
         onOff = dwConfig.onOffDefaults;
     }
     if (onOff.context_menus) {
-        chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
-        chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+        createContextMenus();
     } else {
         console.log("Context Menus disabled");
     }
@@ -63,6 +62,12 @@ var dwState = { tabToTrail: {}, tabToDomain: {}, lastTrail: null, lastDomain: nu
 
 // don't search for tips in tools while looking at the tools
 var advanceSearchIgnore = ["http://lakitu:8080/", "chrome:", "http://localhost", "https://sotweb.istresearch.com", "https://ocweb.istresearch.com"];
+
+function createContextMenus(){
+    chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
+    chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+}
+
 
 function getPosterData(request, sender, sendResponse) {
     console.log('get-poster-data');
@@ -425,8 +430,7 @@ chrome.storage.onChanged.addListener(function (obj, type) {
         if (!onOff.context_menus) {
             chrome.contextMenus.removeAll();
         } else {
-            chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
-            chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+            createContextMenus();
         }
     }
 });
