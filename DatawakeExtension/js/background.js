@@ -23,6 +23,7 @@
  Set a listener to get any changes and read in the current config values.
  */
 var config = {};
+var onOff = {};
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (key in changes) {
         var storageChange = changes[key];
@@ -34,12 +35,24 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
 dwConfig.getOptions(function (options) {
     config = options;
     // once options are loaded load the context menus
-    chrome.contextMenus.create({title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
-    chrome.contextMenus.create({title: "Show user selections", contexts: ["all"], "onclick": getSelections});
 
     // load the image service context menu if it is available
     if (config.datawake_imageServiceUrl && config.datawake_imageServiceUrl.length > 0) {
         chrome.contextMenus.create({title: "Image Service", contexts: ["all"], "onclick": launchImageService});
+    }
+});
+
+dwConfig.getOnOffOptions(function (options) {
+    if (options.hasOwnProperty("onOff")) {
+        onOff = options.onOff;
+    } else {
+        onOff = dwConfig.onOffDefaults;
+    }
+    if (onOff.context_menus) {
+        chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
+        chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+    } else {
+        console.log("Context Menus disabled");
     }
 });
 
@@ -89,7 +102,9 @@ function lastId(request, sender, sendResponse) {
             chrome.browserAction.setBadgeText({text: request.count.toString(), tabId: tabId});
             chrome.browserAction.setBadgeBackgroundColor({color: "#20b2aa", tabId: tabId});
         }
+
         getExtractedPageAttributes(tabId, sender.tab.url, 1000);
+
     }
 }
 
@@ -158,7 +173,11 @@ function postPageContents(request, sender, sendResponse) {
     }
 
     var pageContents = request.contents;
-    postContents(config.datawake_serviceUrl + "/scraper/scrape", pageContents, onSuccess, logError);
+    if (onOff.scraper) {
+        postContents(config.datawake_serviceUrl + "/scraper/scrape", pageContents, onSuccess, logError);
+    } else {
+        sendResponse({success: true, contents: {count: 0, id: -1}});
+    }
 }
 
 function setCurrentOrg(request, sender, sendResponse) {
@@ -294,28 +313,35 @@ function getExtractedPageAttributes(tabId, url, delay) {
                 entities_in_domain.push(entity);
             });
         });
-        var highlightMessage = {operation: 'highlighttext', entities_in_domain: entities_in_domain};
-        chrome.tabs.sendMessage(tabId, highlightMessage, function (response) {
-            if (response.success) {
-                console.log("highlight message to %s recv.", tabId);
-            }
-            else {
-                console.log("highlight message error %s", response.error)
-            }
-        });
-
-        chrome.tabs.query({active: true}, function (tabs) {
-            if (url == tabs[0].url) {
-
-                if (entities_in_domain.length > 0) {
-                    console.log("Domain matches found on url: %s setting badge RED", url);
-                    chrome.browserAction.setBadgeBackgroundColor({color: "#FF0000", tabId: tabId});
+        if (onOff.highlight) {
+            var highlightMessage = {operation: 'highlighttext', entities_in_domain: entities_in_domain};
+            chrome.tabs.sendMessage(tabId, highlightMessage, function (response) {
+                if (response.success) {
+                    console.log("highlight message to %s recv.", tabId);
                 }
                 else {
-                    console.log("no domain matches found on url: %s", url);
+                    console.log("highlight message error %s", response.error)
                 }
-            }
-        });
+            });
+        } else {
+            console.log("Highlight feature disabled");
+        }
+        if (onOff.scraper) {
+            chrome.tabs.query({active: true}, function (tabs) {
+                if (url == tabs[0].url) {
+
+                    if (entities_in_domain.length > 0) {
+                        console.log("Domain matches found on url: %s setting badge RED", url);
+                        chrome.browserAction.setBadgeBackgroundColor({color: "#FF0000", tabId: tabId});
+                    }
+                    else {
+                        console.log("no domain matches found on url: %s", url);
+                    }
+                }
+            });
+        } else {
+            console.log("Badge Disabled due to the scraper.")
+        }
 
     }
 
@@ -330,7 +356,10 @@ function getExtractedPageAttributes(tabId, url, delay) {
         url: url,
         domain: dwState.tabToDomain[tabId]
     });
-    postContents(config.datawake_serviceUrl + "/visited/extracted", jsonData, onSuccess, logError);
+    if (onOff.highlight || onOff.scraper)
+        postContents(config.datawake_serviceUrl + "/visited/extracted", jsonData, onSuccess, logError);
+    else
+        console.log("Highlight and Scraper are both disabled.")
 }
 
 
@@ -389,3 +418,15 @@ function getContents(url, successCallback, errorCallback) {
         error: errorCallback
     });
 }
+
+chrome.storage.onChanged.addListener(function (obj, type) {
+    if (obj.hasOwnProperty("onOff")) {
+        onOff = obj.onOff.newValue;
+        if (!onOff.context_menus) {
+            chrome.contextMenus.removeAll();
+        } else {
+            chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
+            chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+        }
+    }
+});

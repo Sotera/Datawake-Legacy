@@ -29,10 +29,30 @@ dwConfig = function () {
     };
     pubs.localHostDefaults = localHostDefaults;
 
-    pubs.deployments = {"Empty":emptyDefaults,"localhost":localHostDefaults};
+    pubs.deployments = {"Empty": emptyDefaults, "localhost": localHostDefaults};
     var defaultDeployment = localHostDefaults;
 
 
+    pubs.saveOnOffOptions = function (onOffOptions, callback) {
+        chrome.storage.local.set({'onOff': onOffOptions}, function () {
+            callback();
+        });
+    };
+
+    pubs.onOffDefaults = {
+        scraper: true,
+        highlight: true,
+        context_menus: true,
+        lookahead: true,
+        domain_features: true,
+        ranking: true
+    };
+
+    pubs.getOnOffOptions = function (callback) {
+        chrome.storage.local.get('onOff', function (options) {
+            callback(options);
+        });
+    };
     /*
      save an options dictionary to chrome storage
      */

@@ -6,6 +6,9 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.extracted_tools = [];
     $scope.extracted_entities_dict = {};
     $scope.lookaheadStarted = false;
+    $scope.lookaheadEnabled = chrome.extension.getBackgroundPage().onOff.lookahead;
+    $scope.showRanking = chrome.extension.getBackgroundPage().onOff.ranking;
+    $scope.showDomainFeatures = chrome.extension.getBackgroundPage().onOff.domain_features;
     $scope.lookaheadLinks = [];
     $scope.entities_in_domain = [];
     $scope.current_url = "";
@@ -45,7 +48,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
 
     function extractedEntities(entities, tabUrl, domain) {
         $scope.extracted_entities_dict = (entities.allEntities != null) ? entities.allEntities : {};
-        if (!$scope.lookaheadStarted && entities.allEntities.hasOwnProperty("website")) {
+        if ($scope.lookaheadEnabled && !$scope.lookaheadStarted && entities.allEntities.hasOwnProperty("website")) {
             $timeout(function () {
                 var lookaheadLinks = entities.allEntities["website"];
                 linkLookahead(tabUrl, lookaheadLinks, 0, domain, 1000);
