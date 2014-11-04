@@ -13,6 +13,9 @@ https://registry.hub.docker.com/_/mysql/
 
 ```
 
+# pull the mysql container
+docker pull mysql
+
 # start a mysql docker instance
 docker run --name datawake-mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
 

@@ -23,6 +23,8 @@ COPY forensic /usr/local/share/tangelo/web/forensic
 COPY docker-build/datawakeconfig.py /usr/local/share/tangelo/web/datawake/conf/datawakeconfig.py
 ENV PYTHONPATH /usr/local/share/tangelo/web
 
+CMD ["tangelo","-nd","start"]
+
 
 
 
