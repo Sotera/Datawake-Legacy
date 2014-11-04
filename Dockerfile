@@ -23,6 +23,10 @@ COPY forensic /usr/local/share/tangelo/web/forensic
 COPY docker-build/conf/datawakeconfig.py /usr/local/share/tangelo/web/datawake/conf/datawakeconfig.py
 ENV PYTHONPATH /usr/local/share/tangelo/web
 
+
+# set up streamparse to use for launching topologies or running in a local container to test
+COPY memex-datawake-stream /memex-datawake-stream
+
 CMD ["tangelo","-nd","start"]
 
 

@@ -102,6 +102,27 @@ apt-get -y install unixodbc-dev
 pip install --allow-external pyodbc --allow-unverified pyodbc pyodbc
 
 
+# install clojure and lein
+
+echo "installing clojure and lein"
+apt-get -y install clojure &> /dev/null
+wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein &> /dev/null
+chmod a+x lein
+mv lein /usr/bin
+/usr/bin/lein &> /dev/null
+
+
+
+# install streamparse (from parse.ly)
+
+echo "installing streamparse"
+pip install streamparse &> /dev/null
+
+
+
+# install java
+
+apt-get -y install default-jdk
 
 echo "software install complete"
 
