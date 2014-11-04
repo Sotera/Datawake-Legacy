@@ -23,5 +23,6 @@ datawake:
   build: ../
   links:
     - mysql:mysql
+    - kafka:kafka
   ports:
     - "80:80"

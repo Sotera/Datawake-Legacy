@@ -29,5 +29,8 @@ docker run  -it --link datawake-mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYS
 # link the datawake web app to the mysql container
 docker run --name datawake-web --link datawake-mysql:mysql -d -p 80:80 erickimbrel/datawake tangelo -nd start
 
+#run a datawake console
+docker run  --link dockerbuild_kafka_1:kafka  dockerbuild_datawake env
+
 
 ```

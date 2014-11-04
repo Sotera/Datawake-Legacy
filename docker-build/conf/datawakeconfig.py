@@ -20,7 +20,9 @@ DATAWAKE_CORE_DB = {
     'host': os.environ['MYSQL_PORT_3306_TCP_ADDR']
 }
 
-KAFKA_CONN_POOL="localhost:9092"
+
+KAFKA_CONN_POOL=os.envrion['KAFKA_PORT_9092_TCP_ADDR']+':9092'
+
 KAFKA_LOOKAHEAD_TOPIC='memex-datawake-lookahead'
 KAFKA_VISITING_TOPIC='memex-datawake-visited'
 
