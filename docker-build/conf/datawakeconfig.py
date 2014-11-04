@@ -21,7 +21,7 @@ DATAWAKE_CORE_DB = {
 }
 
 
-KAFKA_CONN_POOL=os.envrion['KAFKA_PORT_9092_TCP_ADDR']+':9092'
+KAFKA_CONN_POOL=os.environ['KAFKA_PORT_9092_TCP_ADDR']+':9092'
 
 KAFKA_LOOKAHEAD_TOPIC='memex-datawake-lookahead'
 KAFKA_VISITING_TOPIC='memex-datawake-visited'
