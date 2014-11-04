@@ -38,29 +38,9 @@ def get_lookahead(url, srcurl, domain):
     entity_data_connector = None
     try:
         entity_data_connector = factory.getEntityDataConnector()
-
         # get the features from the lookahead url that are also on the src url
-        entities = entity_data_connector.getExtractedEntitiesFromUrls([url, srcurl])
-        matches = []
-        lookahead_entities = entities.get(url, {})
-        visited_features = entities.get(srcurl, {})
-        all_types = set([])
-        all_types.update(lookahead_entities.keys())
-        all_types.update(visited_features.keys())
-        for entity_type in all_types:
-            l = set([]) if entity_type not in lookahead_entities else set(lookahead_entities[entity_type])
-            v = set([]) if entity_type not in visited_features else set(visited_features[entity_type])
-            matches.extend(list(v & l))
-        del visited_features
-        del lookahead_entities
-        del all_types
-        # get the domain matches from the lookahead url
-        domain_lookahead_features = entity_data_connector.getExtractedDomainEntitiesFromUrls(domain, [url])
-        domain_lookahead_features = domain_lookahead_features.get(url, {})
-        domain_matches = list(itertools.chain.from_iterable(domain_lookahead_features.values()))
-
-        del domain_lookahead_features
-
+        matches = entity_data_connector.get_matching_entities_from_url([url, srcurl])
+        domain_matches = entity_data_connector.get_extracted_domain_entities_for_urls(domain, [url])
         result = dict(url=url, matches=matches, domain_search_matches=domain_matches)
         return json.dumps(result)
     finally:

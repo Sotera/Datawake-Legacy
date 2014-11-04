@@ -28,6 +28,38 @@
             </form>
         </div>
     </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2>On/Off Configuration</h2>
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>
+                        Options
+                    </th>
+                    <th>
+                        Enable/Disable
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(key, value) in onOffOptions">
+                    <td>
+                        {{key.replace(reg," ").toUpperCase()}}
+                    </td>
+                    <td>
+                        <input type="checkbox" ng-change="changeColor()" ng-model="onOffOptions[key]" ng-checked="value"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button ng-click="saveOnOff();" ng-class="{'btn btn-success' : onOffSaved, 'btn btn-default': !onOffSaved}" class="btn btn-default">Save</button>
+
+        </div>
+    </div>
 </div>
 <script src="js/jquery-1.11.0.min.js"></script>
 <script src="js/angular.min.js"></script>

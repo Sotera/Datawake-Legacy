@@ -3,6 +3,10 @@ var optionsApp = angular.module("optionsApp", []);
 optionsApp.controller("OptionsCtrl", function ($scope) {
     $scope.selectedDeployment = "";
     $scope.saved = false;
+    $scope.onOffSaved = false;
+    $scope.onOffOptions = {};
+    $scope.reg = new RegExp("_", "g");
+
     $scope.deploymentChanged = function () {
         $scope.deploymentUrl = $scope.selectedDeployment.datawake_serviceUrl;
         $scope.imageService = $scope.selectedDeployment.datawake_imageServiceUrl;
@@ -17,6 +21,17 @@ optionsApp.controller("OptionsCtrl", function ($scope) {
         $scope.saved = true;
     };
 
+    $scope.saveOnOff = function(){
+      dwConfig.saveOnOffOptions($scope.onOffOptions, function(){
+          $scope.onOffSaved = true;
+          $scope.$apply();
+      });
+    };
+
+    $scope.changeColor = function(){
+      $scope.onOffSaved = false;
+    };
+
     function getDeployments() {
         $scope.deployments = dwConfig.deployments;
     }
@@ -29,6 +44,19 @@ optionsApp.controller("OptionsCtrl", function ($scope) {
         });
     }
 
+    function getOnOffOptions() {
+        dwConfig.getOnOffOptions(function (options) {
+            if (options.hasOwnProperty("onOff")) {
+                $scope.onOffOptions = options.onOff;
+            } else {
+                $scope.onOffOptions = dwConfig.onOffDefaults;
+            }
+            $scope.$apply();
+        });
+    }
+
     getDeployments();
     getOptions();
+
+    getOnOffOptions();
 });

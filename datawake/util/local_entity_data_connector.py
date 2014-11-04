@@ -70,6 +70,27 @@ class MySqlEntityDataConnector(DataConnector):
             self.open()
 
 
+    def get_matching_entities_from_url(self, urls):
+        self._checkConn()
+        urls_in = "(" + (','.join(['"%s"' % urls[i] for i in range(len(urls))])) + ")"
+        params = []
+        sql = """select distinct a.entity_value from general_extractor_web_index a inner join
+                 (
+                  select url,entity_type,entity_value from general_extractor_web_index
+                  ) b where a.entity_value = b.entity_value
+                  AND a.url in %s
+                  AND b.url in %s
+                  AND a.url != b.url;""" % (urls_in, urls_in)
+        try:
+            cursor = self.cnx.cursor()
+            cursor.execute(sql, params)
+            results = []
+            for row in cursor.fetchall():
+                results.append(row[0])
+            return results
+        except:
+            self.close()
+            raise
 
 
 
@@ -111,6 +132,23 @@ class MySqlEntityDataConnector(DataConnector):
             self.close()
             raise
 
+    def get_extracted_domain_entities_for_urls(self, domain, urls):
+        self._checkConn()
+        urls_in = "(" + ( ','.join(['%s' for i in range(len(urls))]) ) + ")"
+        params = [domain]
+        params.extend(urls)
+        sql = "select entity_value from domain_extractor_web_index where domain = %s and url in  "+urls_in
+        self._checkConn()
+        try:
+            cursor = self.cnx.cursor()
+            cursor.execute(sql,params)
+            results = []
+            for row in cursor.fetchall():
+                results.append(row[0])
+            return results
+        except:
+            self.close()
+            raise
 
 
     def getExtractedDomainEntitiesFromUrls(self,domain,urls,type=None):

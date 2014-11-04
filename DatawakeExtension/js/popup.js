@@ -6,6 +6,9 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.extracted_tools = [];
     $scope.extracted_entities_dict = {};
     $scope.lookaheadStarted = false;
+    $scope.lookaheadEnabled = chrome.extension.getBackgroundPage().onOff.lookahead;
+    $scope.showRanking = chrome.extension.getBackgroundPage().onOff.ranking;
+    $scope.showDomainFeatures = chrome.extension.getBackgroundPage().onOff.domain_features;
     $scope.lookaheadLinks = [];
     $scope.entities_in_domain = [];
     $scope.current_url = "";
@@ -15,33 +18,26 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/lookahead/matches";
         var jsonData = JSON.stringify({url: extractedLinks[index], srcurl: tabUrl, domain: domain });
         popUpService.post(post_url, jsonData).then(function (response) {
-            if (response.matches.length > 0 || response.domain_search_matches.length > 0) {
+            var objectReturned;
+            if (objectReturned = response.matches.length > 0 || response.domain_search_matches.length > 0) {
                 $scope.lookaheadLinks.push(response);
                 extractedLinks.splice(index, 1);
-                if (extractedLinks.length > 0) {
-                    if (index >= extractedLinks.length) {
-                        index = 0;
-                        if (delay <= 5 * 60 * 1000) {
-                            $timeout(function () {
-                                linkLookahead(tabUrl, extractedLinks, index, domain, delay * 2);
-                            }, delay);
-                        }
-                    }
-                    else {
-                        linkLookahead(tabUrl, extractedLinks, index, domain, delay);
-                    }
+                if (index >= extractedLinks.length) {
+                    index = 0;
                 }
             } else {
                 index = (index + 1) % extractedLinks.length;
-                if (index == 0) {
-                    // pause for the delay at the beginning of the list
+            }
+            if (extractedLinks.length > 0) {
+                if (objectReturned) {
+                    linkLookahead(tabUrl, extractedLinks, index, domain, delay);
+                } else if (index == 0) {
                     if (delay <= 5 * 60 * 1000) {
                         $timeout(function () {
                             linkLookahead(tabUrl, extractedLinks, index, domain, delay * 2);
                         }, delay);
                     }
-                }
-                else {
+                } else {
                     $timeout(function () {
                         linkLookahead(tabUrl, extractedLinks, index, domain, delay);
                     }, 1);
@@ -52,7 +48,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
 
     function extractedEntities(entities, tabUrl, domain) {
         $scope.extracted_entities_dict = (entities.allEntities != null) ? entities.allEntities : {};
-        if (!$scope.lookaheadStarted && entities.allEntities.hasOwnProperty("website")) {
+        if ($scope.lookaheadEnabled && !$scope.lookaheadStarted && entities.allEntities.hasOwnProperty("website")) {
             $timeout(function () {
                 var lookaheadLinks = entities.allEntities["website"];
                 linkLookahead(tabUrl, lookaheadLinks, 0, domain, 1000);
@@ -64,7 +60,6 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
 
     $scope.isExtracted = function (type, name) {
         if ($scope.entities_in_domain.hasOwnProperty(type)) {
-
             return $scope.entities_in_domain[type].indexOf(name) >= 0;
         }
     };
