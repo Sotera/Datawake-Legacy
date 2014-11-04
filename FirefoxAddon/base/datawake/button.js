@@ -28,6 +28,9 @@ var badgeForTab = {};
  */
 function addValidTabAndData(datawakeInfo) {
     mainPanel.port.emit("datawakeInfo", datawakeInfo);
+    mainPanel.port.emit("useDomainFeatures", addOnPrefs.useDomainFeatures);
+    mainPanel.port.emit("useLookahead", addOnPrefs.useLookahead);
+    mainPanel.port.emit("useRanking", addOnPrefs.useRanking);
 }
 
 /**
@@ -91,8 +94,8 @@ function highlightExtractedLinks(entitiesInDomain) {
 
 /**
  * Gets the entities in this domain.
- * @param extracted_entities_dict The entities that were extracted.
  * @returns {Array} The entities that are in this domain.
+ * @param domainExtracted
  */
 function getEntitiesInDomain(domainExtracted) {
     var entitiesInDomain = [];

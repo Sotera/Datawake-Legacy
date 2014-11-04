@@ -52,7 +52,7 @@
                 <td><b>URL: </b></td>
                 <td>{{current_url}}</td>
             </tr>
-            <tr>
+            <tr ng-show="rankingEnabled">
                 <td>
                     <b>URL Ranking:</b>
                 </td>
@@ -74,8 +74,8 @@
         <div class="row">
             <ul class="nav nav-tabs nav-pills" role="tablist">
                 <li class="active"><a href="#all_extracted_entities" role="tab" data-toggle="tab">Extracted Features</a></li>
-                <li><a href="#domain_extracted_entities" role="tab" data-toggle="tab">Features in Domain</a></li>
-                <li><a href="#lookahead" role="tab" data-toggle="tab">Lookahead</a></li>
+                <li><a href="#domain_extracted_entities" role="tab" data-toggle="tab" ng-show="domainFeaturesEnabled">Features in Domain</a></li>
+                <li><a href="#lookahead" role="tab" data-toggle="tab" ng-show="lookaheadEnabled">Lookahead</a></li>
             </ul>
             <div class="tab-content">
 
@@ -100,7 +100,7 @@
                     </div>
                 </div>
 
-                <div class="tab-pane" id="domain_extracted_entities">
+                <div class="tab-pane" id="domain_extracted_entities" ng-show="domainFeaturesEnabled">
                     <div>
                         <h3>Features in Domain</h3>
                         <table class="table table-bordered" ng-repeat="(type, entities) in entities_in_domain">
@@ -132,7 +132,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="tab-pane" id="lookahead" style="margin-bottom: 15px; margin-top: 15px;">
+                <div class="tab-pane" id="lookahead" style="margin-bottom: 15px; margin-top: 15px;" ng-show="lookaheadEnabled">
                     <h3>Link Lookahead</h3>&nbsp<span id="lookahead_progress"></span>
 
                     <div id="lookahead_results">

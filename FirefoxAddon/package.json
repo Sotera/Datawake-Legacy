@@ -55,6 +55,42 @@
             "description": "(Required if Google Auth is checked) Sets the client secret that should be used when using Google Auth.",
             "type": "string",
             "value": ""
+        },
+        {
+            "name":"useContextMenu",
+            "title":"Enable/Disable Context Menus",
+            "type": "bool",
+            "value": true
+        },
+        {
+            "name":"useLookahead",
+            "title":"Enable/Disable Lookahead",
+            "type": "bool",
+            "value": true
+        },
+        {
+            "name":"useScraper",
+            "title":"Enable/Disable Scraper",
+            "type": "bool",
+            "value": true
+        },
+        {
+            "name":"useRanking",
+            "title":"Enable/Disable Ranking",
+            "type": "bool",
+            "value": true
+        },
+        {
+            "name":"useDomainFeatures",
+            "title":"Enable/Disable Domain Features",
+            "type": "bool",
+            "value": true
+        },
+        {
+            "name":"useHighlighting",
+            "title":"Enable/Disable Highlighting",
+            "type": "bool",
+            "value": true
         }
     ],
     "icon": "./data/img/waveicon38.png",

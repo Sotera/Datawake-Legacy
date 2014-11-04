@@ -17,31 +17,33 @@ var contextMenus = {};
  * @param tab The tab to add the context to.
  */
 function useContextMenu(tab) {
-    var url = tab.url;
-    var tabId = tab.id;
-    destroyPreviousContextMenu(tabId);
-    var datawakeInfo = storage.getDatawakeInfo(tabId);
-    contextMenus[tabId] = contextMenu.Menu({
-        label: "Datawake Menu: " + datawakeInfo.domain.name,
-        contentScriptFile: data.url("js/datawake/selections.js"),
-        context: contextMenu.URLContext(url),
-        items: [
-            contextMenu.Item({ label: "Selection", data: "selection"}),
-            contextMenu.Item({label: "Highlight All Selections", data: "highlight"})
-        ],
-        onMessage: function (message) {
-            var tabId = tabs.activeTab.id;
-            var datawakeInfo = storage.getDatawakeInfo(tabId);
-            switch (message.intent) {
-                case "highlight":
-                    highlightAllTextOnPage(tabId, datawakeInfo);
-                    break;
-                case "selection":
-                    saveWindowSelection(datawakeInfo,tabs.activeTab.url, message.text);
-                    break;
+    if (addOnPrefs.useContextMenu) {
+        var url = tab.url;
+        var tabId = tab.id;
+        destroyPreviousContextMenu(tabId);
+        var datawakeInfo = storage.getDatawakeInfo(tabId);
+        contextMenus[tabId] = contextMenu.Menu({
+            label: "Datawake Menu: " + datawakeInfo.domain.name,
+            contentScriptFile: data.url("js/datawake/selections.js"),
+            context: contextMenu.URLContext(url),
+            items: [
+                contextMenu.Item({ label: "Selection", data: "selection"}),
+                contextMenu.Item({label: "Highlight All Selections", data: "highlight"})
+            ],
+            onMessage: function (message) {
+                var tabId = tabs.activeTab.id;
+                var datawakeInfo = storage.getDatawakeInfo(tabId);
+                switch (message.intent) {
+                    case "highlight":
+                        highlightAllTextOnPage(tabId, datawakeInfo);
+                        break;
+                    case "selection":
+                        saveWindowSelection(datawakeInfo, tabs.activeTab.url, message.text);
+                        break;
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 /**
