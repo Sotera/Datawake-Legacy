@@ -11,26 +11,30 @@ other / supporting  docker containers
 https://registry.hub.docker.com/_/mysql/
 
 
+
+useful snippets
+===============
+
 ```
 
-# pull the mysql container
-docker pull mysql
-
-# start a mysql docker instance
-docker run --name datawake-mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
-
-# connect to the instance via mysql terminal
-docker run -it --link datawake-mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
-
-# run the build_db.sql script
-docker run  -it --link datawake-mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" ' < build_db.sql
+# start up the app local
+fig up -d
 
 
-# link the datawake web app to the mysql container
-docker run --name datawake-web --link datawake-mysql:mysql -d -p 80:80 erickimbrel/datawake tangelo -nd start
+# set up the database and kafka topics
+cd init_scripts
+./init_system.sh
 
-#run a datawake console
-docker run  --link dockerbuild_kafka_1:kafka  dockerbuild_datawake env
+# start the local streamparse topology
+cd init_scripts
+./start_topology.sh
 
+
+# connect to the mysql terminal
+docker run -it --link  dockerbuild_mysql_1:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+
+
+# start a datawake terminal
+docker run -it --rm  --link dockerbuild_mysql_1:mysql  --link dockerbuild_kafka_1:kafka    -w /usr/local/share/tangelo/web  dockerbuild_datawake /bin/bash
 
 ```
