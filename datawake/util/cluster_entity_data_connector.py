@@ -17,7 +17,7 @@ limitations under the License.
 """
 
 
-#TODO Bring up to speed with data_connector interface.
+# TODO Bring up to speed with data_connector interface.
 
 import random
 import threading
@@ -25,18 +25,18 @@ from Queue import Queue
 from Queue import Empty
 
 from impala.dbapi import connect
+import happybase
 
+from entity import Entity
 from datawake.conf import datawakeconfig
 from datawake.util.data_connector import DataConnector
-import happybase
 
 
 THREADS_PER_HOST = 2
 
 
-class ImpalaQueryThread (threading.Thread):
-
-    def __init__(self, host,port,q,do_work):
+class ImpalaQueryThread(threading.Thread):
+    def __init__(self, host, port, q, do_work):
         threading.Thread.__init__(self)
         self.host = host
         self.port = port
@@ -44,28 +44,23 @@ class ImpalaQueryThread (threading.Thread):
         self.do_work = do_work
 
     def run(self):
-        cnx = connect(host=self.host,port=self.port)
+        cnx = connect(host=self.host, port=self.port)
         cursor = cnx.cursor()
         try:
             while True:
                 work_item = self.q.get(block=False)
-                self.do_work(cursor,work_item)
+                self.do_work(cursor, work_item)
         except Empty:
             pass
         finally:
             cnx.close()
 
 
-
-
-
-
 class ClusterEntityDataConnector(DataConnector):
-
     """Provides connection to local mysql database for extracted entity data"""
 
-
     def __init__(self, config):
+        DataConnector.__init__(self)
         self.config = config
         self.cnx = None
         self.lock = threading.Lock()
@@ -73,7 +68,7 @@ class ClusterEntityDataConnector(DataConnector):
 
     def open(self):
         host = random.choice(self.config['hosts'])
-        self.cnx = connect(host=host,port=self.config['port'])
+        self.cnx = connect(host=host, port=self.config['port'])
 
 
     def close(self):
@@ -89,274 +84,155 @@ class ClusterEntityDataConnector(DataConnector):
         if self.cnx is None:
             self.open()
 
-
-    # ###  LOOK AHEAD  ####
-    def getLookaheadEntities(self, url, org, domain='default'):
-        """
-        Return all lookahead entities extracted from a url
-        :param url:
-        :return: nested dict of extract type -> extracted value -> indomain ('y' or 'n')
-        """
-        rowkey = org + '\0' + domain + '\0' + url + '\0'
-        self._checkConn()
-        try:
-            cursor = self.cnx.cursor()
-            sql = "select attribute, value, in_domain from " + self.config['lookahead_table'] + "  where rowkey >=  %(startkey)s AND rowkey < %(endkey)s"
-            params = {'startkey': rowkey, 'endkey': rowkey + "~"}
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-            results = {}
-            for row in rows:
-                (entity_type, entity_value, indomain) = row
-                if entity_type not in results:
-                    results[entity_type] = {}
-                results[entity_type][entity_value] = indomain
-            cursor.close()
-            return results
-        except:
-            self.close()
-            raise
+    def get_domain_entity_matches(self, domain, type, values):
+        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+        hbase_table = hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
+        rowkey = "%s\0%s\0" % (domain, type)
+        found = []
+        for value in values:
+            for item in hbase_table.scan(row_prefix="%s%s" % (rowkey, value)):
+                found.append(value)
+        return found
 
 
-    def insertLookaheadEntities(self, url, entity_type, entity_values, indomain, domain='default'):
-        raise NotImplementedError("Insert methods not implemented for cluster data.")
-
-
-
-
-    def getLookaheadEntityMatches(self,urls,entity_set,org,domain='default'):
-        """
-        For a set of urls return extracted entities that match those in the provided set,
-        Also include extracted entities for each url that are memebers of the domain.
-        :param urls: list of urls for which to test extracted entities
-        :param entity_set:  list of entities to match against
-        :return: a dict of url -> {'all_matchies': entities that match the provided set, 'domain_matches': entities found in the domain }
-        """
-
-        result = {}
-
-        # create the work queue
-        q = Queue()
+    def getExtractedDomainEntitiesFromUrls(self, domain, urls, type=None):
+        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+        hbase_table = hbase_conn.table("domain_extractor_web_index_hbase")
+        entity_dict = dict()
         for url in urls:
-            result[url] = {'all_matches':set([]),'domain_matches':set([])}
-            try:
-                rowkey = org+'\0'+domain+'\0'+url+'\0'
-            except:
-                continue
+            entity_dict[url] = dict()
+            for d in hbase_table.scan(row_prefix="%s\0%s\0" % (domain, url)):
+                tokens = d[0].split("\0")
+                type = tokens[2]
+                value = tokens[3]
+                if type not in entity_dict[url]:
+                    entity_dict[url][type] = [value]
+                else:
+                    entity_dict[url][type].append(value)
+        return entity_dict
+
+    def get_extracted_entities_list_from_urls(self, urls):
+        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+        hbase_table = hbase_conn.table("general_extractor_web_index_hbase")
+        data = []
+        for url in urls:
+            for d in hbase_table.scan(row_prefix="%s\0" % url):
+                data.append(d[0])
+        return data
+
+    def getExtractedEntitiesFromUrls(self, urls, type=None):
+        q = Queue()
+        sql = "select rowkey from general_extractor_web_index "
+        results = {}
+        for url in urls:
+            results[url] = dict()
             work_item = {}
-            work_item['sql'] = "select attribute, value, in_domain,url from "+self.config['lookahead_table']+" where rowkey >= %(startkey)s and rowkey < %(endkey)s"
-            work_item['params'] = {'startkey':rowkey, 'endkey':rowkey+"~"}
+            rowkey = "%s\0" % url
+            work_item['sql'] = sql + " where rowkey >= %(startkey)s and rowkey < %(endkey)s "
+            work_item['params'] = {'startkey': rowkey, 'endkey': rowkey + "~"}
             q.put(work_item)
 
-
-        #define the work function
-        lock = threading.Lock()
-        def do_work(cursor,work_item):
-            cursor.execute(work_item['sql'],work_item['params'])
-            for row in cursor:
-                url = row[3]
-                entity = row[0]+":"+row[1]
-                with lock:
-                    if entity in entity_set:
-                        result[url]['all_matches'].add(entity)
-                    if row[2] == 'y':
-                        result[url]['domain_matches'].add(entity)
-
-
-        # create the thread pool
-        threads = []
-        hosts = self.config['hosts']
-        max_threads = THREADS_PER_HOST * len(hosts)
-        total_work = q.qsize()
-        if total_work < len(hosts):
-            hosts = random.sample(hosts,total_work)
-        else:
-            while len(hosts) < max_threads and total_work > len(hosts):
-                diff = total_work - len(hosts)
-                diff = min(diff,self.config['hosts'])
-                diff = min(diff, max_threads - len(hosts))
-                hosts.extend( random.sample(self.config['hosts'],diff) )
-
-        for host in hosts:
-            t = ImpalaQueryThread(host,self.config['port'],q, do_work)
-            t.start()
-            threads.append(t)
-
-        #print 'created ',len(threads),' threads'
-
-        #finished = 0
-        for thread in threads:
-            thread.join()
-            #finished = finished + 1
-            #print '\tjoined ',finished
-
-
-
-        return result
-
-
-
-
-
-    ####   VISITED   ####
-
-
-    def insertVisitedEntities(self, userId, url, entity_type, entity_values, indomain, domain='default', org='default'):
-        raise NotImplementedError("Insert methods not implemented for cluster data.")
-
-
-    # TODO   Ah!  problem.  this uses a userId in the where clause but not a type, which causes a problem with the rowkey scheme
-    # TODO   for now going to ignore the user id al together and just get everything for the page from the org.
-    def getVisitedEntities(self, userId, url, org, domain='default'):
-
-        rowkey = org + '\0' + domain + '\0' + url + '\0'
-
-        self._checkConn()
-        cursor = self.cnx.cursor()
-        # sql = "select distinct attribute, value, in_domain from "+self.config['visited_table']+" where rowkey >= %(startkey)s and rowkey < %(endkey)s"
-        sql = "select attribute, value, in_domain from " + self.config['visited_table'] + " where rowkey >= %(startkey)s and rowkey < %(endkey)s"
-        #sql = "select rowkey from "+self.config['visited_table']+" where rowkey >= %(startkey)s and rowkey < %(endkey)s"
-        params = {'startkey': rowkey, 'endkey': rowkey + "~"}
-
-        try:
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-            #rows = map(lambda x: x[0].split('\0'),rows)
-            #rows = map(lambda x: [x[3],x[5],'n'],rows)
-            cursor.close()
-        except:
-            self.close()
-            raise
-
-        results = {}
-        for row in rows:
-            (entity_type, entity_value, indomain) = row
-            if entity_type not in results:
-                results[entity_type] = {}
-            results[entity_type][entity_value] = indomain
-        return results
-
-
-    # TODO for now going to ignore users and get it all.   THis should really be fine because we
-    # already pull the urls based on users browse paths
-    def getVisitedEntitiesByUsersAndTypes(self, userIds, urls, types, org, domain='default'):
-
-        if len(types) == 0:
-            raise ValueError("must specify types")
-
-        # create the work queue
-        q = Queue()
-        sql = "select attribute, value, in_domain,url from "+self.config['visited_table']+" "
-        for url in urls:
-            for type in types:
-                work_item = {}
-                rowkey = org+'\0'+domain+'\0'+url+'\0'+type+'\0'
-                work_item['sql'] = sql + " where rowkey >= %(startkey)s and rowkey < %(endkey)s "
-                work_item['params'] = {'startkey':rowkey, 'endkey':rowkey+"~"}
-                q.put(work_item)
-        #print 'added ',q.qsize(),' work items to queue'
-
         # define the work function
-        results = {}
+
         lock = threading.Lock()
-        def do_work(cursor,work_item):
-            cursor.execute(work_item['sql'],work_item['params'])
+
+        def append_to_list(cursor, work_item):
+            cursor.execute(work_item['sql'], work_item['params'])
             for row in cursor:
-                (type,value,indomain,url) = row
+                (rowkey) = row
+                tokens = rowkey[0].split("\0")
+                url = tokens[0]
+                attr = tokens[1]
+                value = tokens[2]
                 with lock:
-                    if url not in results:
-                        results[url] = []
-                    results[url].append({'type':type,'value':value,'indomain':indomain})
+                    if attr not in results[url]:
+                        results[url][attr] = [value]
+                    else:
+                        results[url][attr].append(value)
 
 
-        # create the thread pool
         threads = []
         hosts = self.config['hosts']
         max_threads = THREADS_PER_HOST * len(hosts)
         total_work = q.qsize()
         if total_work < len(hosts):
-            hosts = random.sample(hosts,total_work)
+            hosts = random.sample(hosts, total_work)
         else:
             while len(hosts) < max_threads and total_work > len(hosts):
                 diff = total_work - len(hosts)
-                diff = min(diff,self.config['hosts'])
+                diff = min(diff, self.config['hosts'])
                 diff = min(diff, max_threads - len(hosts))
-                hosts.extend( random.sample(self.config['hosts'],diff) )
+                hosts.extend(random.sample(self.config['hosts'], diff))
 
         for host in hosts:
-            t = ImpalaQueryThread(host,self.config['port'],q, do_work)
+            t = ImpalaQueryThread(host, self.config['port'], q, append_to_list)
             t.start()
             threads.append(t)
 
-        #print 'created ',len(threads),' threads'
 
         # execute with all threads
-        #finished = 0
         for thread in threads:
             thread.join()
-            #finished = finished + 1
-            #print '\tjoined ',finished
 
         return results
 
 
+    def getExtractedEntitiesWithDomainCheck(self, urls, types=[], domain='default'):
+        return DataConnector.getExtractedEntitiesWithDomainCheck(self, urls, types, domain)
+
+    def get_extracted_domain_entities_for_urls(self, domain, urls):
+        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+        hbase_table = hbase_conn.table("domain_extractor_web_index_hbase")
+        entity_values = []
+        for url in urls:
+            for d in hbase_table.scan(row_prefix="%s\0%s\0" % (domain, url)):
+                tokens = d[0].split("\0")
+                value = tokens[3]
+                entity_values.append(value)
+        return entity_values
+
+    def insertHBASE(self, rowkey_prefix, items, table):
+        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+        hbase_table = hbase_conn.table(table)
+        batch_put = hbase_table.batch(batch_size=100)
+        for i in items:
+            batch_put.put(row="%s%s" % (rowkey_prefix, i), data=dict(c=""))
+
+        batch_put.send()
+
+    def insertEntities(self, url, entity_type, entity_values):
+        rowkey_prefix = "%s\0%s\0" % (url, entity_type)
+        self.insertHBASE(rowkey_prefix, entity_values, "general_extractor_web_index_hbase")
+
+    def insertDomainEntities(self, domain, url, entity_type, entity_values):
+        rowkey_prefix = "%s\0%s\0%s\0" % (domain, url, entity_type)
+        self.insertHBASE(rowkey_prefix, entity_values, "domain_extractor_web_index_hbase")
+
+    def get_matching_entities_from_url(self, urls):
+        entities = self.get_extracted_entities_list_from_urls(urls)
+        url_dict = dict()
+        for url in urls:
+            url_dict[url] = set()
+
+        def new_entity(x):
+            values = x.split("\0")
+            url_dict[values[0]].add(Entity(dict(type=values[1], name=values[2])))
+
+        map(lambda x: new_entity(x), entities)
+        vals = url_dict.values()
+        return set.intersection(*vals)
 
 
-
-    def getEntityMatches(self,values):
-        self._checkConn()
-        cursor = self.cnx.cursor()
-        sql = ""
-        params = {}
-        max = len(values) - 1
-        for i in range(len(values)):
-            paramname = 'url' + str(i)
-            params[paramname] = values[i]
-            sql = sql + "select rowkey from hbase_idx_memexht_urn where rowkey = %(" + paramname + ")s "
-            if i < max:
-                sql = sql + " union all "
-        #print sql,params
-        try:
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-        except:
-            self.close()
-            raise
-        return map(lambda x: x[0], rows)
-
-
-
-
-
-    def inDomain(self, domain, type, value):
-        self._checkConn()
-        cursor = self.cnx.cursor()
-        params = {'rowkey': domain + '\0' + type + '\0' + value}
-        sql = "select rowkey from datawake_domain_entities where rowkey = %(rowkey)s"
-        try:
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-            cursor.close()
-            return len(rows) > 0
-        except:
-            self.close()
-            raise
-
-
-
-
-
-
-    ## DOMAINS  ####
+    # # DOMAINS  ####
     def get_domain_items(self, name, limit):
         self._checkConn()
         cursor = self.cnx.cursor()
-        #sql = "select rowkey from " + self.config["values_table"] + " where instr(rowkey,%(name)s) >= 1 limit " + str(limit)
-        sql = "select rowkey from " + self.config["values_table"] + " where rowkey >= %(startkey)s and rowkey < %(endkey)s limit %(limit)s"
+        sql = "select rowkey from %(table)s where rowkey >= %(startkey)s and rowkey < %(endkey)s limit %(limit)s"
         params = {
             'startkey': name + '\0',
             'endkey': name + '\0~',
-            'limit': limit
+            'limit': limit,
+            'table': datawakeconfig.DOMAIN_VALUES_TABLE_HBASE
         }
         try:
             cursor.execute(sql, params)
@@ -366,7 +242,7 @@ class ClusterEntityDataConnector(DataConnector):
             raise
         return map(lambda x: x[0], rows)
 
-    #TODO: Might need to make this threaded
+    # TODO: Might need to make this threaded
     def delete_domain_items(self, domain_name):
         hbase_conn = None
         try:
@@ -388,7 +264,7 @@ class ClusterEntityDataConnector(DataConnector):
         cursor = self.cnx.cursor()
         params = []
         item_list = ','.join(map(lambda x: "('%s','')" % x, domain_items))
-        sql = "insert into %s values %s" % (self.config["values_table"], item_list)
+        sql = "insert into %s values %s" % (datawakeconfig.DOMAIN_VALUES_TABLE_HBASE, item_list)
         try:
             cursor.execute(sql, params)
             self.cnx.commit()

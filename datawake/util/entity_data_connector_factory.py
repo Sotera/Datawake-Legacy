@@ -23,18 +23,19 @@ if datawakeconfig.ENTITY_CONNECTION == 'cluster':
 elif datawakeconfig.ENTITY_CONNECTION == 'mysql':
     from datawake.util.local_entity_data_connector import MySqlEntityDataConnector
 
+
 def getEntityDataConnector():
     if datawakeconfig.ENTITY_CONNECTION == 'cluster':
-        config = {'hosts': datawakeconfig.IMPALA_HOSTS,'port': datawakeconfig.IMPALA_PORT}
-        config['lookahead_table'] = datawakeconfig.LOOKAHEAD_ENTITY_TABLENAME
-        config['visited_table'] = datawakeconfig.VISITED_ENTITY_TABLENAME
-        config['values_table'] = datawakeconfig.DOMAIN_VALUES_TABLE
+        config = {
+            'hosts': datawakeconfig.IMPALA_HOSTS,
+            'port': datawakeconfig.IMPALA_PORT,
+        }
         return ClusterEntityDataConnector(config)
     elif datawakeconfig.ENTITY_CONNECTION == 'mysql':
         config = datawakeconfig.DATAWAKE_CORE_DB
         return MySqlEntityDataConnector(config)
     else:
-        raise ValueError("ENTITY_CONNECTION must be 'mysql' or 'cluster', not "+ datawakeconfig.ENTITY_CONNECTION)
+        raise ValueError("ENTITY_CONNECTION must be 'mysql' or 'cluster', not " + datawakeconfig.ENTITY_CONNECTION)
 
 
 
