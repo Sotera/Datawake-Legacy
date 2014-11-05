@@ -85,40 +85,55 @@ class ClusterEntityDataConnector(DataConnector):
             self.open()
 
     def get_domain_entity_matches(self, domain, type, values):
-        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
-        hbase_table = hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
-        rowkey = "%s\0%s\0" % (domain, type)
-        found = []
-        for value in values:
-            for item in hbase_table.scan(row_prefix="%s%s" % (rowkey, value)):
-                found.append(value)
-        return found
+        hbase_conn = None
+        try:
+            hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+            hbase_table = hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
+            rowkey = "%s\0%s\0" % (domain, type)
+            found = []
+            for value in values:
+                for item in hbase_table.scan(row_prefix="%s%s" % (rowkey, value)):
+                    found.append(value)
+            return found
+        finally:
+            if hbase_conn is not None:
+                hbase_conn.close()
 
 
     def getExtractedDomainEntitiesFromUrls(self, domain, urls, type=None):
-        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
-        hbase_table = hbase_conn.table("domain_extractor_web_index_hbase")
-        entity_dict = dict()
-        for url in urls:
-            entity_dict[url] = dict()
-            for d in hbase_table.scan(row_prefix="%s\0%s\0" % (domain, url)):
-                tokens = d[0].split("\0")
-                type = tokens[2]
-                value = tokens[3]
-                if type not in entity_dict[url]:
-                    entity_dict[url][type] = [value]
-                else:
-                    entity_dict[url][type].append(value)
-        return entity_dict
+        hbase_conn = None
+        try:
+            hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+            hbase_table = hbase_conn.table("domain_extractor_web_index_hbase")
+            entity_dict = dict()
+            for url in urls:
+                entity_dict[url] = dict()
+                for d in hbase_table.scan(row_prefix="%s\0%s\0" % (domain, url)):
+                    tokens = d[0].split("\0")
+                    type = tokens[2]
+                    value = tokens[3]
+                    if type not in entity_dict[url]:
+                        entity_dict[url][type] = [value]
+                    else:
+                        entity_dict[url][type].append(value)
+            return entity_dict
+        finally:
+            if hbase_conn is not None:
+                hbase_conn.close()
 
     def get_extracted_entities_list_from_urls(self, urls):
-        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
-        hbase_table = hbase_conn.table("general_extractor_web_index_hbase")
-        data = []
-        for url in urls:
-            for d in hbase_table.scan(row_prefix="%s\0" % url):
-                data.append(d[0])
-        return data
+        hbase_conn = None
+        try:
+            hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+            hbase_table = hbase_conn.table("general_extractor_web_index_hbase")
+            data = []
+            for url in urls:
+                for d in hbase_table.scan(row_prefix="%s\0" % url):
+                    data.append(d[0])
+            return data
+        finally:
+            if hbase_conn is not None:
+                hbase_conn.close()
 
     def getExtractedEntitiesFromUrls(self, urls, type=None):
         q = Queue()
@@ -181,24 +196,34 @@ class ClusterEntityDataConnector(DataConnector):
         return DataConnector.getExtractedEntitiesWithDomainCheck(self, urls, types, domain)
 
     def get_extracted_domain_entities_for_urls(self, domain, urls):
-        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
-        hbase_table = hbase_conn.table("domain_extractor_web_index_hbase")
-        entity_values = []
-        for url in urls:
-            for d in hbase_table.scan(row_prefix="%s\0%s\0" % (domain, url)):
-                tokens = d[0].split("\0")
-                value = tokens[3]
-                entity_values.append(value)
-        return entity_values
+        hbase_conn = None
+        try:
+            hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+            hbase_table = hbase_conn.table("domain_extractor_web_index_hbase")
+            entity_values = []
+            for url in urls:
+                for d in hbase_table.scan(row_prefix="%s\0%s\0" % (domain, url)):
+                    tokens = d[0].split("\0")
+                    value = tokens[3]
+                    entity_values.append(value)
+            return entity_values
+        finally:
+            if hbase_conn is not None:
+                hbase_conn.close()
 
     def insertHBASE(self, rowkey_prefix, items, table):
-        hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
-        hbase_table = hbase_conn.table(table)
-        batch_put = hbase_table.batch(batch_size=100)
-        for i in items:
-            batch_put.put(row="%s%s" % (rowkey_prefix, i), data=dict(c=""))
+        hbase_conn = None
+        try:
+            hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+            hbase_table = hbase_conn.table(table)
+            batch_put = hbase_table.batch(batch_size=100)
+            for i in items:
+                batch_put.put(row="%s%s" % (rowkey_prefix, i), data=dict(c=""))
 
-        batch_put.send()
+            batch_put.send()
+        finally:
+            if hbase_conn is not None:
+                hbase_conn.close()
 
     def insertEntities(self, url, entity_type, entity_values):
         rowkey_prefix = "%s\0%s\0" % (url, entity_type)
@@ -242,7 +267,6 @@ class ClusterEntityDataConnector(DataConnector):
             raise
         return map(lambda x: x[0], rows)
 
-    # TODO: Might need to make this threaded
     def delete_domain_items(self, domain_name):
         hbase_conn = None
         try:
@@ -258,18 +282,16 @@ class ClusterEntityDataConnector(DataConnector):
                 hbase_conn.close()
 
 
-    # TODO vulnerable to sql injection
     def add_new_domain_items(self, domain_items):
-        self._checkConn()
-        cursor = self.cnx.cursor()
-        params = []
-        item_list = ','.join(map(lambda x: "('%s','')" % x, domain_items))
-        sql = "insert into %s values %s" % (datawakeconfig.DOMAIN_VALUES_TABLE_HBASE, item_list)
+        hbase_conn = None
         try:
-            cursor.execute(sql, params)
-            self.cnx.commit()
-            cursor.close()
-            return True
-        except:
-            self.close()
-            return False
+            hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+            hbase_table = hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
+            batch_put = hbase_table.batch(batch_size=100)
+            for i in domain_items:
+                batch_put.put(row=i, data=dict(c=""))
+
+            batch_put.send()
+        finally:
+            if hbase_conn is not None:
+                hbase_conn.close()
