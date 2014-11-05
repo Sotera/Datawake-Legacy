@@ -17,9 +17,25 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         $scope.entities_in_domain = [];
         $scope.extracted_entities_dict = {};
         $scope.lookaheadTimerStarted = false;
+        $scope.lookaheadEnabled = true;
+        $scope.domainFeaturesEnabled = true;
+        $scope.rankingEnabled = true;
         //Trigger the starting tab.
         var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
         domainExtractedEntities.trigger('click');
+        $scope.$apply();
+    });
+
+    addon.port.on("useDomainFeatures", function (domainFeatures){
+        $scope.domainFeaturesEnabled = domainFeatures;
+        $scope.$apply();
+    });
+    addon.port.on("useLookahead", function (lookahead){
+        $scope.lookaheadEnabled = lookahead;
+        $scope.$apply();
+    });
+    addon.port.on("useRanking", function (ranking){
+        $scope.rankingEnabled = ranking;
         $scope.$apply();
     });
 

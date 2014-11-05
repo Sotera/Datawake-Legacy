@@ -28,6 +28,9 @@ var badgeForTab = {};
  */
 function addValidTabAndData(datawakeInfo) {
     mainPanel.port.emit("datawakeInfo", datawakeInfo);
+    mainPanel.port.emit("useDomainFeatures", addOnPrefs.useDomainFeatures);
+    mainPanel.port.emit("useLookahead", addOnPrefs.useLookahead);
+    mainPanel.port.emit("useRanking", addOnPrefs.useRanking);
 }
 
 /**
@@ -91,8 +94,8 @@ function highlightExtractedLinks(entitiesInDomain) {
 
 /**
  * Gets the entities in this domain.
- * @param extracted_entities_dict The entities that were extracted.
  * @returns {Array} The entities that are in this domain.
+ * @param domainExtracted
  */
 function getEntitiesInDomain(domainExtracted) {
     var entitiesInDomain = [];
@@ -246,34 +249,24 @@ function startLookaheadTimer(datawakeInfo, links, index, delay) {
     var url = addOnPrefs.datawakeDeploymentUrl + "/lookahead/matches";
     requestHelper.post(url, JSON.stringify(post_data), function (response) {
         var entities = response.json;
-        if (entities.matches.length > 0 || entities.domain_search_matches.length > 0) {
+        var objectReturned;
+        if (objectReturned = entities.matches.length > 0 || entities.domain_search_matches.length > 0) {
             mainPanel.port.emit("lookaheadTimerResults", entities);
-            //TODO: Fix the index Ugliness
             links.splice(index, 1);
-            if (links.length > 0) {
-                if (index >= links.length) {
-                    index = 0;
-                    if (delay <= 5 * 60 * 1000) {
-                        lookaheadTimerId = timer.setTimeout(function (delayTimesTwo) {
-                            startLookaheadTimer(datawakeInfo, links, index + 1, delayTimesTwo);
-                        }, 2 * delay);
-                    }
-                }
-                else {
-                    startLookaheadTimer(datawakeInfo, links, index, delay);
-                }
+            if (index >= links.length) {
+                index = 0;
             }
         } else {
             index = (index + 1) % links.length;
-            if (index == 0) {
-                // pause for the delay at the begining of the list
-                if (delay <= 5 * 60 * 1000) {
-                    lookaheadTimerId = timer.setTimeout(function (delayTimesTwo) {
-                        startLookaheadTimer(datawakeInfo, links, index, delayTimesTwo);
-                    }, delay);
-                }
-            }
-            else {
+        }
+        if (links.length > 0) {
+            if (objectReturned) {
+                startLookaheadTimer(datawakeInfo, links, index, delay);
+            } else if (index == 0) {
+                lookaheadTimerId = timer.setTimeout(function (delayTimesTwo) {
+                    startLookaheadTimer(datawakeInfo, links, index, delayTimesTwo);
+                }, 2 * delay);
+            } else {
                 lookaheadTimerId = timer.setTimeout(function (delayTimesTwo) {
                     startLookaheadTimer(datawakeInfo, links, index, delayTimesTwo);
                 }, 1);

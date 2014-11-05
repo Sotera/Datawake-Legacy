@@ -38,13 +38,13 @@ def loadDomain(name,description,filename):
         items = []
         for row in fobj:
             row = row.strip()
-            row = row.replace("\"",'')
+            row = row.replace("\0",'')
             cnt = cnt + 1
-            if ',' not in row:
-                continue
             i = row.index(',')
             attr = row[:i]
             value = row[i+1:]
+            if attr[0] == '"' and attr[len(type)-1] == '"': attr = attr[1:-1]
+            if value[0] == '"' and value[len(value)-1] == '"': value = value[1:-1]
             items.append(name+'\0'+attr+'\0'+value)
             if cnt % 1000 == 0:
                 domain_content_connector.add_new_domain_items(items)

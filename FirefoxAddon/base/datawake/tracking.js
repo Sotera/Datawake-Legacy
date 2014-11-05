@@ -32,7 +32,7 @@ function trackTab(tab, datawakeInfo) {
     if (datawakeInfo.isDatawakeOn) {
         tab.on('ready', setupTabWorkerAndServices);
         tab.on('activate', switchTab);
-        tab.on('close', function(other){
+        tab.on('close', function (other) {
             close(tabId);
         });
     } else {
@@ -73,23 +73,26 @@ function setupTabWorkerAndServices(tab) {
 
         //Posts the scrape contents to the server.
         trackingTabWorker.port.on("contents", function (pageContents) {
-            console.debug("Scraping Page");
             var currentTrackingTabWorker = trackingTabWorkers[tab.id];
             var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
-            pageContents.url = currentTrackingTabWorker.tab.url;
-            pageContents.domain = datawakeInfoForTab.domain.name;
-            pageContents.trail = datawakeInfoForTab.trail.name;
-            var url = addOnPrefs.datawakeDeploymentUrl + "/scraper/scrape";
-            requestHelper.post(url, JSON.stringify(pageContents), function (response) {
-                console.debug("Setting up selections and advanced search");
-                var scrapeObject = response.json;
-                //Sets up the context menu objects for this tab.
-                if (currentTrackingTabWorker.tab != null) {
-                    selectionHelper.useContextMenu(currentTrackingTabWorker.tab);
-                    widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, datawakeInfoForTab, scrapeObject.count);
-                }
-            });
-
+            if (addOnPrefs.useScraper) {
+                console.debug("Scraping Page");
+                pageContents.url = currentTrackingTabWorker.tab.url;
+                pageContents.domain = datawakeInfoForTab.domain.name;
+                pageContents.trail = datawakeInfoForTab.trail.name;
+                var url = addOnPrefs.datawakeDeploymentUrl + "/scraper/scrape";
+                requestHelper.post(url, JSON.stringify(pageContents), function (response) {
+                    console.debug("Setting up selections and advanced search");
+                    var scrapeObject = response.json;
+                    //Sets up the context menu objects for this tab.
+                    if (currentTrackingTabWorker.tab != null) {
+                        widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, datawakeInfoForTab, scrapeObject.count);
+                    }
+                });
+            } else {
+                widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, datawakeInfoForTab, 0);
+            }
+            selectionHelper.useContextMenu(currentTrackingTabWorker.tab);
         });
 
     }
@@ -116,7 +119,7 @@ function emitHighlightTextToTabWorker(tabId, highlightList) {
  * @param helperObject The helper object to forward to the worker.
  */
 function highlightTextWithToolTips(tabId, helperObject) {
-    if (trackingTabWorkers.hasOwnProperty(tabId)) {
+    if (trackingTabWorkers.hasOwnProperty(tabId) && addOnPrefs.useHighlighting) {
         var tabWorker = trackingTabWorkers[tabId];
         tabWorker.port.emit("highlightWithToolTips", helperObject);
     }

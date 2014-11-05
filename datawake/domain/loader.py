@@ -69,9 +69,18 @@ def upload_file(*args, **kwargs):
             if domain_file is not None:
                 tangelo.log("read domain file")
                 domain_file_lines = domain_file.file.readlines()
-                domain_file_lines = map(lambda x: x.strip(), domain_file_lines)
+                domain_file_lines = map(lambda x: x.strip().replace('\0',''), domain_file_lines)
                 db.add_new_domain(domain_name, domain_description)
-                return json.dumps(dict(success=domain_content_connector.add_new_domain_items(map(lambda x: "%s\0%s" % (domain_name, re.sub(",", "\0", x)), domain_file_lines))))
+                rowkeys = []
+                for line in domain_file_lines:
+                    i = line.index(',')   # split on the first comma
+                    type = line[:i]
+                    value = line[i+1:]
+                    if type[0] == '"' and type[len(type)-1] == '"': type = type[1:-1]
+                    if value[0] == '"' and value[len(value)-1] == '"': value = value[1:-1]
+                    rowkeys.append( domain_name+'\0'+type+'\0'+value )
+                result = domain_content_connector.add_new_domain_items(rowkeys)
+                return json.dumps(dict(success=result))
             else:
                 return json.dumps(dict(success=False))
         else:
