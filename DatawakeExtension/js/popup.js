@@ -12,6 +12,8 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.lookaheadLinks = [];
     $scope.entities_in_domain = [];
     $scope.current_url = "";
+    $scope.versionNumber = chrome.runtime.getManifest().version;
+
 
 
     function linkLookahead(tabUrl, extractedLinks, index, domain, delay) {

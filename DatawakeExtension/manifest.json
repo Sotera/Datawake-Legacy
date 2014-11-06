@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "DataWake",
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGUr7t4bUW7aAyeOl8FSYe33bwHpAUV0JnDkMJTZWUuwC6PFmyJ/J8AgXxYSLDeZPyfZa6fPb6+iXty8W12S2CLzlLweZyW1NHAO8Ze0gW/Y6lW2hiBBdfQBRe0egvfgUyi7ZrKfBYAMmRzrvuw11Fq8TlKKIn0Jm5UzigMPtA7er//oaFhOe346Vizo8r5Ai+RqEwD6p9x7Ddp6qryRGgjQqKE4WmxEyT2xvmAzc7/QzeIbZWZY7CXlCT5rMYhw7CRU5Ex9OdpM3BqPCECH1Kj4em3JoSp15hHxt7HZLEygFXfPnmvlOJviNw3iHWG4jDCeQK91Cz3Qb+/iL1PFOwIDAQAB",
-    "version": "0.2",
+    "version": "0.1",
     "options_page": "options.html",
    "web_accessible_resources": [
             "js/*.js"
