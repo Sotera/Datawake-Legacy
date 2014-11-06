@@ -634,6 +634,8 @@ window.onload = function () {
         }
     };
 
+    $("#forensic_version").html("0.1");
+
     // Dataset pulldown help.
     popover_cfg.content = "<b>Select a Graph:</b><br><br>" +
         "Choose a graph form the list.";

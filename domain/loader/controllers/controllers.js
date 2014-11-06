@@ -19,6 +19,8 @@ var domainLoaderApp = angular.module('domainLoaderApp', []);
 domainLoaderApp.controller("DomainLoaderCtrl", function ($scope, $timeout, domainService) {
     $scope.domains = [];
 
+    $scope.versionNumber = "0.1";
+
     $scope.domain = {
         name: "",
         description: "",
