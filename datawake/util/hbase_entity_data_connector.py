@@ -65,8 +65,7 @@ class HBASEDataConnector(data_connector.DataConnector):
             self.close()
 
     def _checkConn(self):
-        if self.hbase_conn is None:
-            self.open()
+        self.open()
 
     def getExtractedEntitiesFromUrls(self, urls, type=None):
         try:
