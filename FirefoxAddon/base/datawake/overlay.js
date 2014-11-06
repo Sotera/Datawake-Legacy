@@ -79,6 +79,8 @@ function setupNewTabListener(worker) {
             });
         });
 
+        worker.port.emit("versionNumber", self.version);
+
         worker.port.on("signOut", function () {
             authHelper.signOut(function (response) {
                 worker.port.emit("signOutComplete");
