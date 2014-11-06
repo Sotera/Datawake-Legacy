@@ -31,6 +31,11 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
         }
     });
 
+    addon.port.on("versionNumber", function(version){
+        $scope.versionNumber = version;
+        $scope.$apply();
+    });
+
     addon.port.on("signOutComplete", function () {
         $scope.hideSignInButton = false;
         $scope.$apply();

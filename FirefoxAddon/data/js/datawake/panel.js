@@ -26,15 +26,20 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         $scope.$apply();
     });
 
-    addon.port.on("useDomainFeatures", function (domainFeatures){
+    addon.port.on("versionNumber", function (version) {
+        $scope.versionNumber = version;
+        $scope.$apply();
+    });
+
+    addon.port.on("useDomainFeatures", function (domainFeatures) {
         $scope.domainFeaturesEnabled = domainFeatures;
         $scope.$apply();
     });
-    addon.port.on("useLookahead", function (lookahead){
+    addon.port.on("useLookahead", function (lookahead) {
         $scope.lookaheadEnabled = lookahead;
         $scope.$apply();
     });
-    addon.port.on("useRanking", function (ranking){
+    addon.port.on("useRanking", function (ranking) {
         $scope.rankingEnabled = ranking;
         $scope.$apply();
     });
