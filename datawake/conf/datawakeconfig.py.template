@@ -9,6 +9,7 @@ CLIENT_IDS = [
 # Flag to skip actual user Auth and return fake results instead
 MOCK_AUTH = True
 
+VERSION_NUMBER=0.1
 
 ### DATABASE SETTINGS
 

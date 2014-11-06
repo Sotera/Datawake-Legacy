@@ -19,7 +19,9 @@ var domainLoaderApp = angular.module('domainLoaderApp', []);
 domainLoaderApp.controller("DomainLoaderCtrl", function ($scope, $timeout, domainService) {
     $scope.domains = [];
 
-    $scope.versionNumber = "0.1";
+    domainService.getVersionNumber().then(function (response){
+        $scope.versionNumber = response.version;
+    });
 
     $scope.domain = {
         name: "",
@@ -132,10 +134,17 @@ domainLoaderApp.service("domainService", function ($http, $q) {
         addDomainViaConnectionString: addDomainViaConnectionString,
         deleteDomain: deleteDomain,
         getPreview: getPreview,
-        poll: poll
+        poll: poll,
+        getVersionNumber: getVersionNumber
     });
 
-
+    function getVersionNumber(){
+        var request = $http({
+            method: "get",
+            url: "/datawake/version/number"
+        });
+        return request.then(handleSuccess, handleError);
+    }
     function poll() {
         var request = $http({
             method: "get",

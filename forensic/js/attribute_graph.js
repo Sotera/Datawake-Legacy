@@ -633,8 +633,10 @@ window.onload = function () {
             hide: 100
         }
     };
-
-    $("#forensic_version").html("0.1");
+    $.get("/datawake/version/number", function(response){
+        var resp = JSON.parse(response);
+        $("#forensic_version").html(resp.version);
+    });
 
     // Dataset pulldown help.
     popover_cfg.content = "<b>Select a Graph:</b><br><br>" +

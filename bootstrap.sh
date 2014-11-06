@@ -148,6 +148,7 @@ echo "linking tangelo web server"
 ln -s /vagrant/datawake/ /usr/local/share/tangelo/web/
 ln -s /vagrant/forensic/ /usr/local/share/tangelo/web/
 ln -s /vagrant/domain/ /usr/local/share/tangelo/web/
+ln -s /vagrant/version/ /usr/local/share/tangelo/web/
 
 echo "installing datawake tools and setting up empty database"
 cd /vagrant/datawake/conf/
