@@ -17,8 +17,6 @@ limitations under the License.
 """
 
 
-# TODO Bring up to speed with data_connector interface.
-
 import random
 import threading
 from Queue import Queue
@@ -132,6 +130,29 @@ class ClusterEntityDataConnector(DataConnector):
                 for d in hbase_table.scan(row_prefix="%s\0" % url):
                     data.append(d[0])
             return data
+        finally:
+            if hbase_conn is not None:
+                hbase_conn.close()
+
+    def getExtractedEntitiesFromUrlsHappyBase(self, urls):
+        hbase_conn = None
+        try:
+            hbase_conn = happybase.Connection(datawakeconfig.HBASE_HOST)
+            hbase_table = hbase_conn.table("general_extractor_web_index_hbase")
+            results = {}
+            for url in urls:
+                for d in hbase_table.scan(row_prefix="%s\0" % url):
+                    if url not in results:
+                        results[url] = {}
+                    tokens = d[0].split("\0")
+                    url = tokens[0]
+                    type = tokens[1]
+                    value = tokens[2]
+                    if type not in results[url]:
+                        results[url][type] = [value]
+                    else:
+                        results[url][type].append(value)
+            return results
         finally:
             if hbase_conn is not None:
                 hbase_conn.close()
