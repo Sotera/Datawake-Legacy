@@ -26,6 +26,7 @@ from Queue import Empty
 
 from impala.dbapi import connect
 import happybase
+import tangelo
 
 from entity import Entity
 from datawake.conf import datawakeconfig
@@ -241,11 +242,14 @@ class ClusterEntityDataConnector(DataConnector):
 
         def new_entity(x):
             values = x.split("\0")
-            url_dict[values[0]].add(Entity(dict(type=values[1], name=values[2])))
+            if len(values) == 3:
+                url_dict[values[0]].add(Entity(dict(type=values[1], name=values[2])))
+            else:
+                tangelo.log(",".join(values))
 
         map(lambda x: new_entity(x), entities)
         vals = url_dict.values()
-        return set.intersection(*vals)
+        return map(lambda entity: entity.item["name"], set.intersection(*vals))
 
 
     # # DOMAINS  ####

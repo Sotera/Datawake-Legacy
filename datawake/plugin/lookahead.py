@@ -15,7 +15,7 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 """
 
 import json
-
+from datawake.util.entity import EntityEncoder
 import tangelo
 import cherrypy
 
