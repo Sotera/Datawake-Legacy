@@ -152,7 +152,7 @@ class HBASEDataConnector(data_connector.DataConnector):
             hbase_table = self.hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
             batch_put = hbase_table.batch(batch_size=100)
             for i in domain_items:
-                batch_put.put(row=i, data=dict(c=""))
+                batch_put.put(row=i, data={"colFam:c": ""})
 
             batch_put.send()
         finally:
@@ -162,9 +162,9 @@ class HBASEDataConnector(data_connector.DataConnector):
         try:
             self._checkConn()
             hbase_table = self.hbase_conn.table(table)
-            batch_put = hbase_table.batch(batch_size=100)
+            batch_put = hbase_table.batch(batch_size=len(items))
             for i in items:
-                batch_put.put(row="%s%s" % (rowkey_prefix, i), data=dict(c=""))
+                batch_put.put(row="%s%s" % (rowkey_prefix, i), data={"colFam:c": ""})
 
             batch_put.send()
         finally:
