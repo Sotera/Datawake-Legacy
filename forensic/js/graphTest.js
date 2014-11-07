@@ -61,7 +61,7 @@ function main() {
 	var HEIGHT = 760;
 
 
-	var nodes = randomNodes(WIDTH,HEIGHT,10,50);
+	var nodes = randomNodes(WIDTH,HEIGHT,5,100);
 	//var nodes = nonRandomNodes();
 
 	links = [{
@@ -114,5 +114,6 @@ function main() {
 		.nodeHover(onNodeOver,onNodeOut)
 		.nodeClick(onNodeClick)
 		.layout(new RadialLayout(nodes[0], 200))
+		.pannable()
 		.draw();
 }

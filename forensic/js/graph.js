@@ -6,6 +6,8 @@ function Graph() {
 	this._links = null;
 	this._canvas = null;
 	this._scene = null;
+	this._onZoom = null;
+	this._pannable = null;
 };
 
 Graph.prototype.nodes = function(nodes) {
@@ -53,6 +55,41 @@ Graph.prototype.nodeHover = function(over,out) {
 
 Graph.prototype.nodeClick = function(callback) {
 	this._nodeClick = callback;
+	return this;
+};
+
+Graph.prototype.pannable = function() {
+	function pan(dx,dy) {
+		this._scene.x += -dx;
+		this._scene.y += -dy;
+		this.update();
+	}
+	var x,y;
+	if (!this._pannable) {
+		var that = this;
+		$(this._canvas).on('mousedown',function(e) {
+			console.log('mousedown');
+			x = e.clientX;
+			y = e.clientY;
+			$(that._canvas).on('mousemove',function(e) {
+				pan.call(that,x- e.clientX,y- e.clientY);
+				x = e.clientX;
+				y = e.clientY;
+			});
+		});
+
+		$(this._canvas).on('mouseup',function() {
+			console.log('mouseup');
+			$(that._canvas).off('mousemove');
+		});
+	}
+	return this;
+};
+
+Graph.prototype.zoomable = function() {
+	if (!this._onZoom) {
+		// TODO
+	}
 	return this;
 };
 
