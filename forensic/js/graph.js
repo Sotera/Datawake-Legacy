@@ -56,6 +56,23 @@ Graph.prototype.nodeClick = function(callback) {
 	return this;
 };
 
+Graph.prototype.layout = function(layouter) {
+	if (layouter) {
+		this._layouter = layouter;
+		this._layouter.nodes(this._nodes)
+			.layout();
+	} else {
+		this._layouter.layout();
+		this._scene.update();
+	}
+	return this;
+};
+
+Graph.prototype.update = function() {
+	this._scene.update();
+	return this;
+};
+
 Graph.prototype.draw = function() {
 	var that = this
 	if (!this._scene) {
