@@ -115,6 +115,15 @@ Graph.prototype.draw = function() {
 	if (!this._scene) {
 		this._scene = path(this._canvas);
 	}
+	$.each(this._links,function() {
+		var line = path.line({
+			source: this.source,
+			target: this.target,
+			strokeStyle: '#ebebeb'
+		});
+		that._scene.addChild(line);
+	});
+
 	$.each(this._nodes, function(i) {
 		var circle = path.circle(this);
 		if (that._nodeOver) {
@@ -131,6 +140,7 @@ Graph.prototype.draw = function() {
 		}
 		if (that._nodeClick) {
 			circle.on('click', function(e) {
+				console.log('('+circle.x + ',' + circle.y + ')')
 				that._nodeClick(circle,e);
 				that._scene.update();
 			});

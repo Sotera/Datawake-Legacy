@@ -36,6 +36,21 @@ var randomNodes = function(maxX, maxY, maxRadius, num) {
 	return nodes;
 };
 
+var radialLinks = function(nodes,focusIdx) {
+	var focusNode = nodes[focusIdx];
+	var links = [];
+	$.each(nodes,function() {
+		if (this.index === focusIdx) {
+			return;
+		}
+		links.push({
+			source : focusNode,
+			target : this
+		});
+	});
+	return links;
+};
+
 var nonRandomNodes = function() {
 	var c = ['#220000','#440000','#660000','#880000','#AA0000','#CC0000','#EE0000'];
 	var xy = [[50,50],[100,100],[150,150],[200,200],[250,250],[300,300],[350,350]];
@@ -61,18 +76,8 @@ function main() {
 	var HEIGHT = 760;
 
 
-	var nodes = randomNodes(WIDTH,HEIGHT,5,100);
-	//var nodes = nonRandomNodes();
-
-	links = [{
-		source : nodes[0],
-		target : nodes[1],
-		style : 'arrow'
-	},{
-		source : nodes[1],
-		target : nodes[2],
-		style : 'arrow'
-	}];
+	var nodes = randomNodes(WIDTH,HEIGHT,5,75);
+	var links = radialLinks(nodes,0);
 
 	var onNodeOver = function(node) {
 		node.strokeStyle = '#000000';
@@ -82,7 +87,6 @@ function main() {
 		node.strokeStyle = null;
 	};
 	var onNodeClick = function(node) {
-
 		node.tweenAttr({
 			radius: node.radius+10
 		}, {
