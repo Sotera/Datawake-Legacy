@@ -91,6 +91,7 @@ Graph.prototype.zoomable = function() {
 	if (!this._zoomable) {
 		var that = this;
 		$(this._canvas).on('mousewheel',function(e) {
+			e.preventDefault();
 			var bWheelUp = e.originalEvent.deltaY < 0;
 			if (bWheelUp) {
 				zoomLevel++;
