@@ -28,7 +28,6 @@ ENV PYTHONPATH /usr/local/share/tangelo/web:$PYTHONPATH
 COPY memex-datawake-stream /memex-datawake-stream
 
 
-USER tangelo
 CMD ["tangelo","-nd","start"]
 
 
