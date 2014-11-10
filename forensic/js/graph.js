@@ -6,8 +6,8 @@ function Graph() {
 	this._links = null;
 	this._canvas = null;
 	this._scene = null;
-	this._onZoom = null;
 	this._pannable = null;
+	this._zoomable = null;
 };
 
 Graph.prototype.nodes = function(nodes) {
@@ -87,8 +87,19 @@ Graph.prototype.pannable = function() {
 };
 
 Graph.prototype.zoomable = function() {
-	if (!this._onZoom) {
-		// TODO
+	var zoomLevel = 1.0;
+	if (!this._zoomable) {
+		var that = this;
+		$(this._canvas).on('mousewheel',function(e) {
+			var bWheelUp = e.originalEvent.deltaY < 0;
+			if (bWheelUp) {
+				zoomLevel++;
+			} else {
+				zoomLevel--;
+			}
+			zoomLevel = Math.max(zoomLevel,1.0);
+			that._scene.zoom(zoomLevel, e.clientX, e.clientY);
+		});
 	}
 	return this;
 };

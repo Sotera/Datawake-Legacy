@@ -119,5 +119,6 @@ function main() {
 		.nodeClick(onNodeClick)
 		.layout(new RadialLayout(nodes[0], 200))
 		.pannable()
+		.zoomable()
 		.draw();
 }
