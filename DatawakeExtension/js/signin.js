@@ -3,7 +3,7 @@
 
  */
 
-var MOCK_TOKEN = "123456"
+var MOCK_TOKEN = "123456";
 
 var MOCK_USER = {
     "kind": "plus#person",
@@ -34,51 +34,37 @@ var MOCK_USER = {
     },
     "circledByCount": 0,
     "verified": false
-}
+};
 
 
-var googlePlusUserLoader = (function() {
+var googlePlusUserLoader = (function () {
 
-    var userInfo = {}
-
-
+    var userInfo = {};
 
 
-    function getUserInfo(interactive,callback) {
+    function getUserInfo(interactive, callback) {
         // bind the user callback function into the onUserINfoFetched function
-        var user_info = MOCK_USER;
-//        user_info_div.innerHTML = user_info.displayName;
-//        var imgElem = document.createElement('img');
-//        imgElem.src = "images/photo.png"
-//        user_info_div.insertAdjacentElement("afterbegin", imgElem);
-        callback(user_info)
+        callback(MOCK_USER);
     }
 
 
-
-
-
-
     return {
-
-
-        getAuthToken: function(callback){
+        getAuthToken: function (callback) {
             callback(MOCK_TOKEN)
         },
 
-        getId: function (){
-            if (userInfo && userInfo.user){
+        getId: function () {
+            if (userInfo && userInfo.user) {
                 return userInfo.user.id
+            } else {
+                return null;
             }
-            else return null
 
         },
 
         // takes a callback of type function(user_info)
         onload: function (callback) {
-
-            user_info_div = document.querySelector('#user_info');
-            getUserInfo(false,callback);
+            getUserInfo(false, callback);
         }
     };
 

@@ -28,6 +28,8 @@
 
 <!-- add the google plus script dynamically because google says so -->
 <script type="text/javascript">
+    //Make sure you add your client id if you enable.
+    var useGoogleAuth = false;
     (function () {
 
         authHelper.setOnLoggedIn(function () {
@@ -35,17 +37,25 @@
             refreshForensicView()
         });
 
-        /* comment out for google auth */
-        authHelper.onSignInCallback({'access_token': '123456'});
-
-//        comment in to enable google auth auth
-//        var po = document.createElement('script');
-//        po.type = 'text/javascript'; po.async = true;
-//        po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
-//        var s = document.getElementsByTagName('script')[0];
-//        s.parentNode.insertBefore(po, s);
+        if (!useGoogleAuth) {
+            authHelper.onSignInCallback({'access_token': '123456'});
+        } else {
+            var po = document.createElement('script');
+            po.type = 'text/javascript'; po.async = true;
+            po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(po, s);
+            checkClientId();
+        }
 
     })();
+
+    function checkClientId(){
+        var clientId = $("meta[name='google-signin-clientid']").attr('content');
+        if(clientId == ""){
+            alert("You have Google Auth Enabled, but forgot to add a client Id!");
+        }
+    }
 
     function onSignInCallback(authResult) {
         authHelper.onSignInCallback(authResult);
@@ -98,7 +108,7 @@
 <body>
 
 
-<div id=info-panel class="modal fade">
+<div id="info-panel" class="modal fade">
     <div class=modal-dialog>
         <div class=modal-content>
             <div class=modal-header>
@@ -130,10 +140,10 @@
     </div>
 
     <ul class="nav navbar-nav">
-        <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
+        <li><a style="cursor:pointer" data-toggle="modal" data-target="#info-panel"><span class="glyphicon glyphicon-info-sign"></span> Info</a>
     </ul>
 
-    <div style="position: fixed; right: 2%; top: 1%;">
+    <div style="position: fixed; right: 2%; top: 1%;" id="googleAuthContainer">
         <!-- Google Sign In -->
         <div id="gConnect">
             <button class="g-signin"></button>
@@ -289,8 +299,8 @@
 
 
 <script>
-
-
+    if(!useGoogleAuth)
+        $("#googleAuthContainer").hide();
     $(function () {
         $('#userselect').chosen({'width': "100%"});
         $('#userselect').change(updateTimeSlider);
