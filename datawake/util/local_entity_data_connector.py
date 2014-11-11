@@ -48,7 +48,8 @@ class MySqlEntityDataConnector(DataConnector):
         db = self.config['database']
         pw = self.config['password']
         host = self.config['host']
-        self.cnx = mysql.connector.connect(user=user, password=pw, host=host, database=db)
+        port = self.config['port']
+        self.cnx = mysql.connector.connect(user=user, password=pw, host=host, database=db,port=port)
 
 
     def close(self):

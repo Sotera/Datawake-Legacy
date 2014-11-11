@@ -45,7 +45,7 @@ VISITING_PRODUCER = None
 def sendVisitingMessage(org,domain,userId,url,html):
     global VISITING_PRODUCER
     if VISITING_PRODUCER is None:
-        VISITING_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL, datawakeconfig.KAFKA_VISITING_TOPIC)
+        VISITING_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL, datawakeconfig.KAFKA_PUBLISH_TOPIC)
     try:
         message = []
         message.append(datetime.utcnow().strftime("%s"))
