@@ -18,7 +18,6 @@ import urllib
 import json
 
 import tangelo
-import cherrypy
 
 import datawake.util.db.datawake_mysql as db
 from datawake.util.session.helper import is_in_session
@@ -71,7 +70,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    post_data = json.loads(cherrypy.request.body.read(), strict=False)
+    post_data = json.loads(tangelo.request_body().read(), strict=False)
 
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(404, "unknown service call")

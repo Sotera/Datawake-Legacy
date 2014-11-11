@@ -18,7 +18,6 @@ import re
 import json
 
 import tangelo
-import cherrypy
 
 import datawake.util.db.datawake_mysql as db
 from datawake.util.session.helper import is_in_session
@@ -48,6 +47,7 @@ def get_trails_for_domain_and_org(org, domain):
     response = dict(trails=trails)
     return json.dumps(response)
 
+
 @is_in_session
 @required_parameters(['domain', 'trailname'])
 def add_trail(trailname, domain, traildescription=u''):
@@ -69,7 +69,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    body = cherrypy.request.body.read()
+    body = tangelo.request_body().read()
     post_data = json.loads(body, strict=False)
 
     def unknown(**kwargs):

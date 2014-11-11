@@ -17,7 +17,6 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 import json
 
 import tangelo
-import cherrypy
 
 from datawake.util.authentication import factory
 from datawake.util.db import datawake_mysql
@@ -52,7 +51,7 @@ def get():
 
 @tangelo.restful
 def post():
-    post_data = json.loads(cherrypy.request.body.read(), strict=False)
+    post_data = json.loads(tangelo.request_body().read(), strict=False)
     token = post_data.get("token")
     tangelo.log("TOKEN: " + token)
     user = get_user(token)

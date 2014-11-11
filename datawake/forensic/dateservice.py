@@ -19,7 +19,6 @@ limitations under the License.
 import json
 
 import tangelo
-import cherrypy
 
 from datawake.util.db import datawake_mysql
 from datawake.util.session import helper
@@ -54,7 +53,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    post_data = json.loads(cherrypy.request.body.read())
+    post_data = json.loads(tangelo.request_body().read())
 
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "unknown service call")

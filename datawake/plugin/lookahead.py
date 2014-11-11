@@ -17,7 +17,6 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 import json
 
 import tangelo
-import cherrypy
 
 import datawake.util.dataconnector.factory as factory
 from datawake.util.validate.parameters import required_parameters
@@ -54,7 +53,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    post_data = json.loads(cherrypy.request.body.read(), strict=False)
+    post_data = json.loads(tangelo.request_body().read(), strict=False)
 
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "unknown service call")

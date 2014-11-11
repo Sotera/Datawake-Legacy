@@ -19,7 +19,6 @@ limitations under the License.
 import json
 
 import tangelo
-import cherrypy
 
 from datawake.util.db import datawake_mysql
 from datawake.util.graph import helper as graph_helper
@@ -159,9 +158,7 @@ delete_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    if 'user' not in cherrypy.session:
-        return json.dumps(dict())
-    post_data = json.loads(cherrypy.request.body.read())
+    post_data = json.loads(tangelo.request_body().read())
 
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call")
@@ -171,9 +168,6 @@ def post(action, *args, **kwargs):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    if 'user' not in cherrypy.session:
-        return json.dumps(dict())
-
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call")
 
@@ -182,9 +176,6 @@ def get(action, *args, **kwargs):
 
 @tangelo.restful
 def delete(action, *args, **kwargs):
-    if 'user' not in cherrypy.session:
-        return json.dumps(dict())
-
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call")
 

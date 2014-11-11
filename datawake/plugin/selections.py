@@ -17,7 +17,6 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 import json
 
 import tangelo
-import cherrypy
 
 import datawake.util.db.datawake_mysql as db
 from datawake.util.session.helper import is_in_session
@@ -62,7 +61,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    json_obj = cherrypy.request.body.read()
+    json_obj = tangelo.request_body().read()
     post_data = json.loads(json_obj, strict=False)
 
     def unknown(*args):
