@@ -23,7 +23,7 @@ import json
 import tangelo
 
 import datawake.util.dataconnector.factory as factory
-from datawake.util.domain_upload_connector import ConnectorUtil
+from datawake.util.dataconnector.domain_upload_connector import ConnectorUtil
 from datawake.util.db import datawake_mysql as db
 
 
