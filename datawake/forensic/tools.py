@@ -19,11 +19,11 @@ limitations under the License.
 import json
 
 import tangelo
-import cherrypy
+from datawake.util.session import helper as session_helper
 
 from datawake.conf import datawakeconfig as conf
 
-
+@session_helper.is_in_session
 def get_external_links():
     return json.dumps(conf.EXTERNAL_LINKS)
 
@@ -35,9 +35,6 @@ get_actions = {
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    if 'user' not in cherrypy.session:
-        return json.dumps(dict())
-
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call")
 

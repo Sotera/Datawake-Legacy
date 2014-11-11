@@ -19,14 +19,14 @@ from datawake.conf import datawakeconfig
 
 
 if datawakeconfig.ENTITY_CONNECTION == 'cluster-impala':
-    from datawake.util.impala_entity_data_connector import ClusterEntityDataConnector
+    from datawake.util.dataconnector.impala_entity_data_connector import ClusterEntityDataConnector
 elif datawakeconfig.ENTITY_CONNECTION == 'cluster-hbase':
-    from datawake.util.hbase_entity_data_connector import HBASEDataConnector
+    from datawake.util.dataconnector.hbase_entity_data_connector import HBASEDataConnector
 elif datawakeconfig.ENTITY_CONNECTION == 'mysql':
-    from datawake.util.local_entity_data_connector import MySqlEntityDataConnector
+    from datawake.util.dataconnector.local_entity_data_connector import MySqlEntityDataConnector
 
 
-def getEntityDataConnector():
+def get_entity_data_connector():
     if datawakeconfig.ENTITY_CONNECTION == 'cluster-impala':
         config = {
             'hosts': datawakeconfig.IMPALA_HOSTS,

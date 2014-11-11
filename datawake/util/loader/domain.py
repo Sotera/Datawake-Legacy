@@ -16,12 +16,10 @@ limitations under the License.
 
 """
 
-import sys
 import argparse
-import os.path
-from datawake.util import datawake_db as db
-import datawake.util.entity_data_connector_factory as factory
 
+import datawake.util.dataconnector.factory as factory
+from datawake.util.db import datawake_mysql as db
 
 
 def loadDomain(name,description,filename):
@@ -32,7 +30,7 @@ def loadDomain(name,description,filename):
 
     fobj = open(filename,'r')
 
-    domain_content_connector = factory.getEntityDataConnector()
+    domain_content_connector = factory.get_entity_data_connector()
     try:
         cnt = 0
         items = []

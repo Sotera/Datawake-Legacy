@@ -20,7 +20,7 @@ import sys
 import argparse
 import os.path
 
-from datawake.util import datawake_db
+from datawake.util.db import datawake_mysql
 
 
 """
@@ -38,7 +38,7 @@ def loadEntities(file,domainName):
         print 'file not found ',file
         sys.exit(1)
 
-    cnx = datawake_db.get_cnx()
+    cnx = datawake_mysql.get_cnx()
     cursor = cnx.cursor()
     sql = "INSERT INTO datawake_domain_entities (rowkey) VALUES (%s)"
     fobj = open(file,'r')

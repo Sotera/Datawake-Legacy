@@ -1,6 +1,3 @@
-from json import JSONEncoder
-
-
 class Entity(object):
     def __init__(self, d):
         self.item = d
@@ -13,12 +10,3 @@ class Entity(object):
 
     def __dict__(self):
         return self.item
-
-
-
-class EntityEncoder(JSONEncoder):
-    def default(self, o):
-        if type(o) is Entity:
-            return o.item
-        else:
-            return o

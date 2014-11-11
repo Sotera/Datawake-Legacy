@@ -15,14 +15,12 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 """
 
 import json
-from datawake.util.entity import EntityEncoder
-import tangelo
-import cherrypy
 
-import datawake.util.entity_data_connector_factory as factory
-from validate_parameters import required_parameters
-from datawake.util.session_helper import is_in_session
-import itertools
+import tangelo
+
+import datawake.util.dataconnector.factory as factory
+from datawake.util.validate.parameters import required_parameters
+from datawake.util.session.helper import is_in_session
 
 
 """
@@ -37,7 +35,7 @@ import itertools
 def get_lookahead(url, srcurl, domain):
     entity_data_connector = None
     try:
-        entity_data_connector = factory.getEntityDataConnector()
+        entity_data_connector = factory.get_entity_data_connector()
         # get the features from the lookahead url that are also on the src url
         matches = entity_data_connector.get_matching_entities_from_url([url, srcurl])
         domain_matches = entity_data_connector.get_extracted_domain_entities_for_urls(domain, [url])
@@ -55,7 +53,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    post_data = json.loads(cherrypy.request.body.read(), strict=False)
+    post_data = json.loads(tangelo.request_body().read(), strict=False)
 
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "unknown service call")

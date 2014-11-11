@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from streamparse.bolt import Bolt
 from datawakestreams import all_settings
-from datawakeio import extracted_data_connector_factory as factory
+from datawakeio import factory as factory
 import traceback
 
 
@@ -49,7 +49,7 @@ class DomainWriterBolt(Bolt):
         (attribute,value,extracted_raw,extracted_metadata,context) = tup.values
         domainValues = self.connector.get_domain_entity_matches( context['domain'], attribute, [value])
         if len(domainValues) > 0:
-            self.connector.insertDomainEntities( context['domain'],context['url'],attribute,domainValues)
+            self.connector.insert_domain_entities( context['domain'],context['url'],attribute,domainValues)
             self.log("WROTE to DOMAIN attribute: "+attribute+" value: "+value)
 
 

@@ -1,9 +1,10 @@
 import happybase
 
-from datawakeio.extracted_data_connector_interface import ExtractedDataConnector
+from datawakeio.data_connector import ExtractedDataConnector
 
 class HBASEDataConnector(ExtractedDataConnector):
     def __init__(self, hbase_host):
+        ExtractedDataConnector.__init__(self)
         self.hbase_host = hbase_host
         self.hbase_conn = None
 
@@ -30,11 +31,11 @@ class HBASEDataConnector(ExtractedDataConnector):
         finally:
             self.close()
 
-    def insertEntities(self, url, entity_type, entity_values):
+    def insert_entities(self, url, entity_type, entity_values):
         rowkey_prefix = "%s\0%s\0" % (url, entity_type)
         self.insertHBASE(rowkey_prefix, entity_values, "general_extractor_web_index_hbase")
 
-    def insertDomainEntities(self, domain, url, entity_type, entity_values):
+    def insert_domain_entities(self, domain, url, entity_type, entity_values):
         rowkey_prefix = "%s\0%s\0%s\0" % (domain, url, entity_type)
         self.insertHBASE(rowkey_prefix, entity_values, "domain_extractor_web_index_hbase")
 
