@@ -63,7 +63,7 @@ var dwState = { tabToTrail: {}, tabToDomain: {}, lastTrail: null, lastDomain: nu
 // don't search for tips in tools while looking at the tools
 var advanceSearchIgnore = ["http://lakitu:8080/", "chrome:", "http://localhost", "https://sotweb.istresearch.com", "https://ocweb.istresearch.com"];
 
-function createContextMenus(){
+function createContextMenus() {
     chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
     chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
 }
@@ -71,32 +71,30 @@ function createContextMenus(){
 
 function getPosterData(request, sender, sendResponse) {
     console.log('get-poster-data');
-    chrome.identity.getAuthToken({ 'interactive': false }, function (token) {
-        if (dwState.tracking) {
+    if (!dwState.tracking) {
+        sendResponse({domain: dwState.tabToDomain[sender.tab.id], tracking: dwState.tracking });
+    } else if (chrome.runtime.getManifest().hasOwnProperty("oauth2")) {
+        chrome.identity.getAuthToken({ 'interactive': false }, function (token) {
             //now that we have a token get the user id and name
-            if (token != undefined) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "https://www.googleapis.com/plus/v1/people/me");
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                xhr.onload = function () {
-                    var user_info = JSON.parse(this.response);
-                    var tab = sender.tab.id;
-                    var trail = dwState.tabToTrail[tab];
-                    sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: user_info.id, userName: user_info.displayName, serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: dwState.tabToDomain[tab]});
-                };
-                xhr.send();
-            } else {
-                var tabId = sender.tab.id;
-                var trail = dwState.tabToTrail[tabId];
-                var domain = dwState.tabToDomain[tabId];
-                sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: "", userName: "", serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: domain});
-            }
-        } else {
-            sendResponse({domain: dwState.tabToDomain[sender.tab.id], tracking: dwState.tracking });
-        }
 
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.googleapis.com/plus/v1/people/me");
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            xhr.onload = function () {
+                var user_info = JSON.parse(this.response);
+                var tab = sender.tab.id;
+                var trail = dwState.tabToTrail[tab];
+                sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: user_info.id, userName: user_info.displayName, serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: dwState.tabToDomain[tab]});
+            };
+            xhr.send();
+        });
+    } else {
+        var tabId = sender.tab.id;
+        var trail = dwState.tabToTrail[tabId];
+        var domain = dwState.tabToDomain[tabId];
+        sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: "", userName: "", serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: domain});
 
-    });
+    }
 }
 
 function lastId(request, sender, sendResponse) {
