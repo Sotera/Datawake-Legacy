@@ -22,7 +22,7 @@ import tangelo
 import cherrypy
 
 from datawake.util.db import datawake_mysql
-from datawake.util.graph import helper
+from datawake.util.graph import helper as graph_helper
 from datawake.util.session.helper import is_in_session
 from datawake.util.session import helper
 
@@ -110,32 +110,32 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
     tangelo.log('getGraph( ' + str(name) + ',' + str(startdate) + ',' + str(enddate) + ',' + str(userlist) + ',' + str(trail) + ',' + str(domain) + ')')
 
     if name == 'browse path':
-        graph = helper.getBrowsePathEdges(org, startdate, enddate, userlist, trail, domain)
-        return json.dumps(helper.processEdges(graph['edges'], graph['nodes']))
+        graph = graph_helper.getBrowsePathEdges(org, startdate, enddate, userlist, trail, domain)
+        return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path - with adjacent urls':
-        graph = helper.getBrowsePathAndAdjacentWebsiteEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
-        return json.dumps(helper.processEdges(graph['edges'], graph['nodes']))
+        graph = graph_helper.getBrowsePathAndAdjacentWebsiteEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
+        return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path - with adjacent urls min degree 2':
-        graph = helper.getBrowsePathAndAdjacentWebsiteEdgesWithLimit(org, startdate, enddate, 2, userlist, trail, domain)
-        return json.dumps(helper.processEdges(graph['edges'], graph['nodes']))
+        graph = graph_helper.getBrowsePathAndAdjacentWebsiteEdgesWithLimit(org, startdate, enddate, 2, userlist, trail, domain)
+        return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path - with adjacent phone #\'s':
-        graph = helper.getBrowsePathAndAdjacentPhoneEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
-        return json.dumps(helper.processEdges(graph['edges'], graph['nodes']))
+        graph = graph_helper.getBrowsePathAndAdjacentPhoneEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
+        return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path - with adjacent email #\'s':
-        graph = helper.getBrowsePathAndAdjacentEmailEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
-        return json.dumps(helper.processEdges(graph['edges'], graph['nodes']))
+        graph = graph_helper.getBrowsePathAndAdjacentEmailEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
+        return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path - with text selections':
-        graph = helper.getBrowsePathWithTextSelections(org, startdate, enddate, userlist, trail, domain)
-        return json.dumps(helper.processEdges(graph['edges'], graph['nodes']))
+        graph = graph_helper.getBrowsePathWithTextSelections(org, startdate, enddate, userlist, trail, domain)
+        return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path- with look ahead':
-        graph = helper.getBrowsePathWithLookAhead(org, startdate, enddate, userlist, trail, domain)
-        return json.dumps(helper.processEdges(graph['edges'], graph['nodes']))
+        graph = graph_helper.getBrowsePathWithLookAhead(org, startdate, enddate, userlist, trail, domain)
+        return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     return json.dumps(dict(nodes=[], links=[]))
 

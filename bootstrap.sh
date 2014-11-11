@@ -157,6 +157,7 @@ cd /vagrant/datawake/util/db/
 python datawake_mysql.py create-db
 cd /vagrant/datawake/util/loader
 python domain.py memex_program "emails asscoiated with the memex program" ../../../etc/default_domain.csv
+python org.py --demo nofile
 cd ~
 
 # start kafka and create topics

@@ -19,20 +19,19 @@ import json
 import tangelo
 import cherrypy
 
-from datawake.conf import datawakeconfig
 from datawake.util.authentication import factory
 from datawake.util.db import datawake_mysql
 from datawake.util.session import helper
 
 
 def get_org(email):
-    org = 'MEMEXDEMO'
-    if not datawakeconfig.MOCK_AUTH:
-        orgs = datawake_mysql.getOrgLinks(email)
-        if len(orgs) == 1:
-            org = orgs[0]
-        else:
-            raise ValueError("Org list length must be 1")
+    org = None
+
+    orgs = datawake_mysql.getOrgLinks(email)
+    if len(orgs) == 1:
+        org = orgs[0]
+    else:
+        raise ValueError("Org list length must be 1")
     return org
 
 
