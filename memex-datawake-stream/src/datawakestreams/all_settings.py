@@ -22,6 +22,20 @@ ALL_SETTINGS['local'] = {
     'crawler-out-topic' : 'crawler-out',
     'visited-topic': 'memex-datawake-visited',
     'conn_pool' : "localhost:9092",
+    'user':'root',
+    'database':'memex_sotera',
+    'password':'root',
+    'host':'localhost'
+}
+
+ALL_SETTINGS['cluster'] = {
+    'topology':'cluster',
+    'hbase_host':'localhost',
+    'appid': 'datawake',
+    'crawler-in-topic' : 'crawler-in',
+    'crawler-out-topic' : 'crawler-out',
+    'visited-topic': 'memex-datawake-visited',
+    'conn_pool' : "localhost:9092",
 
     'user':'root',
     'database':'memex_sotera',

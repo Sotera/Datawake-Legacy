@@ -16,14 +16,16 @@ limitations under the License.
 
 """
 
-
-
 from datawakeio.local_entity_data_connector import MySqlEntityDataConnector
+from datawakeio.HBASEEntityDataConnector import HBASEDataConnector
 
 
 def getEntityDataConnector(conf):
     if conf['topology'] == 'local':
         return  MySqlEntityDataConnector(conf)
+    elif conf['topology'] == 'cluster':
+        hbase_host = conf['hbase_host']
+        return HBASEDataConnector(hbase_host)
     else:
         raise ValueError("Invalid topology in getEntityDataConnector")
 

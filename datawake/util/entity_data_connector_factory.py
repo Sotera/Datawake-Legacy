@@ -18,23 +18,28 @@ limitations under the License.
 from datawake.conf import datawakeconfig
 
 
-if datawakeconfig.ENTITY_CONNECTION == 'cluster':
-    from datawake.util.cluster_entity_data_connector import ClusterEntityDataConnector
+if datawakeconfig.ENTITY_CONNECTION == 'cluster-impala':
+    from datawake.util.impala_entity_data_connector import ClusterEntityDataConnector
+elif datawakeconfig.ENTITY_CONNECTION == 'cluster-hbase':
+    from datawake.util.hbase_entity_data_connector import HBASEDataConnector
 elif datawakeconfig.ENTITY_CONNECTION == 'mysql':
     from datawake.util.local_entity_data_connector import MySqlEntityDataConnector
 
+
 def getEntityDataConnector():
-    if datawakeconfig.ENTITY_CONNECTION == 'cluster':
-        config = {'hosts': datawakeconfig.IMPALA_HOSTS,'port': datawakeconfig.IMPALA_PORT}
-        config['lookahead_table'] = datawakeconfig.LOOKAHEAD_ENTITY_TABLENAME
-        config['visited_table'] = datawakeconfig.VISITED_ENTITY_TABLENAME
-        config['values_table'] = datawakeconfig.DOMAIN_VALUES_TABLE
+    if datawakeconfig.ENTITY_CONNECTION == 'cluster-impala':
+        config = {
+            'hosts': datawakeconfig.IMPALA_HOSTS,
+            'port': datawakeconfig.IMPALA_PORT
+        }
         return ClusterEntityDataConnector(config)
     elif datawakeconfig.ENTITY_CONNECTION == 'mysql':
         config = datawakeconfig.DATAWAKE_CORE_DB
         return MySqlEntityDataConnector(config)
+    elif datawakeconfig.ENTITY_CONNECTION == 'cluster-hbase':
+        return HBASEDataConnector(datawakeconfig.HBASE_HOST)
     else:
-        raise ValueError("ENTITY_CONNECTION must be 'mysql' or 'cluster', not "+ datawakeconfig.ENTITY_CONNECTION)
+        raise ValueError("ENTITY_CONNECTION must be 'mysql' or 'cluster', not " + datawakeconfig.ENTITY_CONNECTION)
 
 
 

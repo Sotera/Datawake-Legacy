@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import mysql.connector
+
 from datawake.util.data_connector import DataConnector
 
 
@@ -94,8 +95,7 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
-
-    def getExtractedEntitiesFromUrls(self,urls,type=None):
+    def getExtractedEntitiesFromUrls(self, urls, type=None):
         """
         Returns all extracted attributs for a url
         :param
@@ -108,18 +108,18 @@ class MySqlEntityDataConnector(DataConnector):
         params = []
         params.extend(urls)
         if type is None:
-            sql = "select url,entity_type,entity_value from general_extractor_web_index where url in  "+urls_in
+            sql = "select url,entity_type,entity_value from general_extractor_web_index where url in  " + urls_in
         else:
-            sql = "select url,entity_type,entity_value from general_extractor_web_index where url in "+urls_in+"  and entity_type = %s"
+            sql = "select url,entity_type,entity_value from general_extractor_web_index where url in " + urls_in + "  and entity_type = %s"
             params.append(type)
 
         self._checkConn()
         try:
             cursor = self.cnx.cursor()
-            cursor.execute(sql,params)
+            cursor.execute(sql, params)
             results = {}
             for row in cursor.fetchall():
-                url= row[0]
+                url = row[0]
                 attr = row[1]
                 value = row[2]
                 if url not in results:
@@ -138,11 +138,11 @@ class MySqlEntityDataConnector(DataConnector):
         urls_in = "(" + ( ','.join(['%s' for i in range(len(urls))]) ) + ")"
         params = [domain]
         params.extend(urls)
-        sql = "select entity_value from domain_extractor_web_index where domain = %s and url in  "+urls_in
+        sql = "select entity_value from domain_extractor_web_index where domain = %s and url in  " + urls_in
         self._checkConn()
         try:
             cursor = self.cnx.cursor()
-            cursor.execute(sql,params)
+            cursor.execute(sql, params)
             results = []
             for row in cursor.fetchall():
                 results.append(row[0])
@@ -152,7 +152,7 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
-    def getExtractedDomainEntitiesFromUrls(self,domain,urls,type=None):
+    def getExtractedDomainEntitiesFromUrls(self, domain, urls, type=None):
         """
         Returns all extracted attributs for a url
         :param
@@ -165,18 +165,18 @@ class MySqlEntityDataConnector(DataConnector):
         params = [domain]
         params.extend(urls)
         if type is None:
-            sql = "select url,entity_type,entity_value from domain_extractor_web_index where domain = %s and url in  "+urls_in
+            sql = "select url,entity_type,entity_value from domain_extractor_web_index where domain = %s and url in  " + urls_in
         else:
-            sql = "select url,entity_type,entity_value from domain_extractor_web_index where domain = %s and url in "+urls_in+"  and entity_type = %s"
+            sql = "select url,entity_type,entity_value from domain_extractor_web_index where domain = %s and url in " + urls_in + "  and entity_type = %s"
             params.append(type)
 
         self._checkConn()
         try:
             cursor = self.cnx.cursor()
-            cursor.execute(sql,params)
+            cursor.execute(sql, params)
             results = {}
             for row in cursor.fetchall():
-                url= row[0]
+                url = row[0]
                 attr = row[1]
                 value = row[2]
                 if url not in results:
@@ -191,9 +191,6 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
-
-
-
     def getExtractedEntitiesWithDomainCheck(self, urls, types=[], domain='default'):
         """
         Return all entities extracted from a given set of urls, indication which entities were found in the domain
@@ -202,23 +199,22 @@ class MySqlEntityDataConnector(DataConnector):
         :param domain:  the domain to check for memebership against
         :return:  dict of results with the form  { url: { extract_type: { extract_value: in_domain, .. }, .. } , ..} where in_domain is 'y' or 'n'
         """
-        assert(len(urls) > 0)
+        assert (len(urls) > 0)
         self._checkConn()
         cursor = self.cnx.cursor()
         try:
             params = []
             params.extend(urls)
             urls_in = "(" + ( ','.join(['%s' for i in range(len(urls))]) ) + ")"
-            sql = "select url,entity_type,entity_value from general_extractor_web_index where  url in "+urls_in
+            sql = "select url,entity_type,entity_value from general_extractor_web_index where  url in " + urls_in
             params = []
             params.extend(urls)
             if len(types) > 0:
                 params.extend(types)
                 types_in = "(" + ( ','.join(['%s' for i in range(len(types))]) ) + ")"
-                sql = sql + " and entity_type in "+types_in
+                sql = sql + " and entity_type in " + types_in
 
-
-            cursor.execute(sql,params)
+            cursor.execute(sql, params)
             allEntities = {}
             for row in cursor.fetchall():
                 url = row[0]
@@ -230,16 +226,15 @@ class MySqlEntityDataConnector(DataConnector):
                     allEntities[url][attr] = {}
                 allEntities[url][attr][value] = 'n'
 
-
             params = [domain]
             params.extend(urls)
-            sql = "select url,entity_type,entity_value from domain_extractor_web_index where  domain = %s and url in "+urls_in
+            sql = "select url,entity_type,entity_value from domain_extractor_web_index where  domain = %s and url in " + urls_in
             if len(types) > 0:
                 params.extend(types)
                 types_in = "(" + ( ','.join(['%s' for i in range(len(types))]) ) + ")"
-                sql = sql + " and entity_type in "+types_in
+                sql = sql + " and entity_type in " + types_in
 
-            cursor.execute(sql,params)
+            cursor.execute(sql, params)
             for row in cursor.fetchall():
                 url = row[0]
                 attr = row[1]
@@ -250,7 +245,6 @@ class MySqlEntityDataConnector(DataConnector):
                     allEntities[url][attr] = {}
                 allEntities[url][attr][value] = 'y'
 
-
             cursor.close()
             return allEntities
 
@@ -259,21 +253,18 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
-
-
-
     def insertEntities(self, url, entity_type, entity_values):
         self._checkConn()
         cursor = self.cnx.cursor()
         try:
             for entity_value in entity_values:
                 sql = "select count(1) from general_extractor_web_index where url = %s and entity_type = %s and entity_value = %s"
-                params = [url,entity_type,entity_value]
-                cursor.execute(sql,params)
+                params = [url, entity_type, entity_value]
+                cursor.execute(sql, params)
                 count = cursor.fetchall()[0][0]
                 if count == 0:
                     sql = "INSERT INTO general_extractor_web_index (url,entity_type,entity_value) VALUES (%s,%s,%s)"
-                    cursor.execute(sql,params)
+                    cursor.execute(sql, params)
             self.cnx.commit()
             cursor.close()
         except:
@@ -281,32 +272,23 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
-
-    def insertDomainEntities(self, domain,url, entity_type, entity_values):
+    def insertDomainEntities(self, domain, url, entity_type, entity_values):
         self._checkConn()
         cursor = self.cnx.cursor()
         try:
             for entity_value in entity_values:
                 sql = "select count(1) from domain_extractor_web_index where domain = %s and url = %s and entity_type = %s and entity_value = %s"
-                params = [domain,url,entity_type,entity_value]
-                cursor.execute(sql,params)
+                params = [domain, url, entity_type, entity_value]
+                cursor.execute(sql, params)
                 count = cursor.fetchall()[0][0]
                 if count == 0:
                     sql = "INSERT INTO domain_extractor_web_index (domain,url,entity_type,entity_value) VALUES (%s,%s,%s,%s)"
-                    cursor.execute(sql,params)
+                    cursor.execute(sql, params)
             self.cnx.commit()
             cursor.close()
         except:
             self.close()
             raise
-
-
-
-
-
-
-
-
 
 
     # # DOMAINS  ####
@@ -335,12 +317,11 @@ class MySqlEntityDataConnector(DataConnector):
             raise
 
 
-
     def get_domain_items(self, name, limit):
         self._checkConn()
         cursor = self.cnx.cursor()
         sql = "select rowkey from datawake_domain_entities where rowkey >= %s and rowkey <= %s limit %s"
-        params = [name + '\0',name+"~", limit]
+        params = [name + '\0', name + "~", limit]
         try:
             cursor.execute(sql, params)
             rows = cursor.fetchall()

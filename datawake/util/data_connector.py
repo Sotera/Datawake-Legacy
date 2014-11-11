@@ -33,6 +33,11 @@ class DataConnector:
     def _checkConn(self):
         raise NotImplementedError("Implement _checkConn()")
 
+    def get_matching_entities_from_url(self, urls):
+        raise NotImplementedError("Implement get_matching_entities_from_url() ")
+
+    def get_extracted_domain_entities_for_urls(self, domain, urls):
+        raise NotImplementedError("Implement get_extracted_domain_entities_for_urls")
 
     def getExtractedEntitiesFromUrls(self,urls,type=None):
         raise NotImplementedError("Implement getExtractedEntitiesFromUrls()")

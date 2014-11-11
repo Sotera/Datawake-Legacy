@@ -31,6 +31,7 @@ function addValidTabAndData(datawakeInfo) {
     mainPanel.port.emit("useDomainFeatures", addOnPrefs.useDomainFeatures);
     mainPanel.port.emit("useLookahead", addOnPrefs.useLookahead);
     mainPanel.port.emit("useRanking", addOnPrefs.useRanking);
+    mainPanel.port.emit("versionNumber", self.version)
 }
 
 /**

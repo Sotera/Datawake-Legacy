@@ -11,6 +11,7 @@ newTabApp.controller("NewTabCtrl", function ($scope, $timeout, requestService) {
     $scope.processingNewTrailFailed = false;
     $scope.user = null;
     $scope.isDatawakeOn = chrome.extension.getBackgroundPage().dwState.tracking;
+    $scope.versionNumber = chrome.runtime.getManifest().version;
 
     $scope.logout = function () {
         var sessionUrl = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/session";

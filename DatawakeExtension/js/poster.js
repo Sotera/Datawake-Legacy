@@ -50,8 +50,11 @@ function highlightText(request, sender, sendResponse) {
     var entities_in_domain = request.entities_in_domain;
     if (entities_in_domain.length > 0) {
         chrome.runtime.sendMessage({operation: "get-external-links"}, function (links) {
-            $.each(entities_in_domain, function (index, entity) {
+            $.each(entities_in_domain, function (index, e) {
                 var i = index;
+                var entity = {};
+                entity.name = e.name.trim();
+                entity.type = e.type.trim();
                 $('body').highlight(entity.name, 'datawake-highlight-' + i);
 
                 if (links.length > 0) {
