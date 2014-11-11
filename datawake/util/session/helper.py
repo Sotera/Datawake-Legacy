@@ -1,16 +1,16 @@
 import cherrypy
 
-from datawake.util import exception
-
 
 
 # TODO: If we add get requests to this, we should add a dictionary lookup for which method to service. See: Datawake scraper
+from datawake.util.exceptions import datawakeexception
+
 
 def is_in_session(callback):
     def has_session(**kwargs):
         if 'user' in cherrypy.session:
             return callback(**kwargs)
-        raise exception.SessionError(repr(callback), "No User in the current session")
+        raise datawakeexception.SessionError(repr(callback), "No User in the current session")
 
     return has_session
 

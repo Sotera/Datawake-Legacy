@@ -3,7 +3,7 @@ import csv
 import argparse
 import os.path
 
-from datawake.util import datawake_db
+from datawake.util.db import datawake_mysql
 
 
 """
@@ -24,10 +24,10 @@ def loadOrgs(add,file):
     for row in reader:
         if add:
             print 'add ',row
-            datawake_db.addOrgLink(row[0],row[1])
+            datawake_mysql.addOrgLink(row[0],row[1])
         else:
             print 'delete ',row
-            datawake_db.deleteOrgLink(row[0],row[1])
+            datawake_mysql.deleteOrgLink(row[0],row[1])
     fobj.close()
 
 

@@ -17,7 +17,7 @@ limitations under the License.
 """
 
 import mysql.connector
-from datawakeio.extracted_data_connector_interface import ExtractedDataConnector
+from datawakeio.data_connector import ExtractedDataConnector
 
 
 class MySqlEntityDataConnector(ExtractedDataConnector):
@@ -73,7 +73,7 @@ class MySqlEntityDataConnector(ExtractedDataConnector):
 
 
 
-    def insertEntities(self, url, entity_type, entity_values):
+    def insert_entities(self, url, entity_type, entity_values):
         self._checkConn()
         cursor = self.cnx.cursor()
         try:
@@ -93,7 +93,7 @@ class MySqlEntityDataConnector(ExtractedDataConnector):
 
 
 
-    def insertDomainEntities(self, domain,url, entity_type, entity_values):
+    def insert_domain_entities(self, domain,url, entity_type, entity_values):
         self._checkConn()
         cursor = self.cnx.cursor()
         try:

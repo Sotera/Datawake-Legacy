@@ -19,10 +19,10 @@ import json
 import tangelo
 import cherrypy
 
-import datawake.util.datawake_db as db
-from datawake.util import session_helper
-from datawake.util.session_helper import is_in_session
-from validate_parameters import required_parameters
+import datawake.util.db.datawake_mysql as db
+from datawake.util.session.helper import is_in_session
+from datawake.util.session import helper
+from datawake.util.validate.parameters import required_parameters
 
 
 """
@@ -37,7 +37,7 @@ from validate_parameters import required_parameters
 @required_parameters(['selection', 'domain', 'url'])
 def save_page_selection(selection, domain, url):
     tangelo.log('savePageSelection url=' + str(url) + ' selection=' + selection + ' domain=' + domain)
-    user = session_helper.get_user()
+    user = helper.get_user()
     org = user.get_org()
     postId = db.get_post_id(url)
     row = db.getBrowsePathData(org, postId, domain)
@@ -50,7 +50,7 @@ def save_page_selection(selection, domain, url):
 @is_in_session
 @required_parameters(['domain', 'trail', 'url'])
 def get_selections(domain, trail, url):
-    org = session_helper.get_org()
+    org = helper.get_org()
     return json.dumps(dict(selections=db.getSelections(domain, trail, url, org)))
 
 

@@ -20,24 +20,35 @@ import tangelo
 import cherrypy
 
 from datawake.conf import datawakeconfig
-from datawake.util import googleauth, session_helper
-from datawake.util import datawake_db
+from datawake.util.authentication import factory
+from datawake.util.db import datawake_mysql
+from datawake.util.session import helper
 
 
-"""
+def get_org(email):
+    org = 'MEMEXDEMO'
+    if not datawakeconfig.MOCK_AUTH:
+        orgs = datawake_mysql.getOrgLinks(email)
+        if len(orgs) == 1:
+            org = orgs[0]
+        else:
+            raise ValueError("Org list length must be 1")
+    return org
 
-Establish a session for a user signed in with google.
 
-
-"""
-
-# TODO: If we add get requests to this, we should add a dictionary lookup for which method to service. See: Datawake scraper
+def get_user(token):
+    user = helper.get_user()
+    if helper.get_token() != token or user is None:
+        user_auth = factory.get_authentication_object(token)
+        user = user_auth.get_user_from_token()
+        tangelo.log('session.post verified user: ' + str(user))
+    return user
 
 
 @tangelo.restful
-@session_helper.is_in_session
+@helper.is_in_session
 def get():
-    return json.dumps(dict(user=session_helper.get_user().__dict__))
+    return json.dumps(dict(user=helper.get_user().__dict__))
 
 
 @tangelo.restful
@@ -48,33 +59,12 @@ def post():
     user = get_user(token)
     org = get_org(user.get_email())
     user.set_org(org)
-    session_helper.set_user(user)
-    session_helper.set_token(token)
+    helper.set_user(user)
+    helper.set_token(token)
     return json.dumps(user.__dict__)
-
-
-def get_org(email):
-    org = 'MEMEXDEMO'
-    if not datawakeconfig.MOCK_AUTH:
-        orgs = datawake_db.getOrgLinks(email)
-        if len(orgs) == 1:
-            org = orgs[0]
-        else:
-            raise ValueError("Org list length must be 1")
-    return org
-
-
-def get_user(token):
-    user = session_helper.get_user()
-    if session_helper.get_token() == token and user is not None:
-        tangelo.log('plugin-sever.session tokens matched using existing session.')
-    else:
-        user = googleauth.getUserFromToken(token)
-        tangelo.log('session.post verified user: ' + str(user))
-    return user
 
 
 @tangelo.restful
 def delete():
     tangelo.log('manually expired session')
-    return json.dumps(dict(success=session_helper.expire_user()))
+    return json.dumps(dict(success=helper.expire_user()))

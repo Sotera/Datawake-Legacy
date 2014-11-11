@@ -20,10 +20,10 @@ import json
 import tangelo
 import cherrypy
 
-from datawake.util import session_helper
-import datawake.util.datawake_db as db
-from datawake.util.session_helper import is_in_session
-from validate_parameters import required_parameters
+import datawake.util.db.datawake_mysql as db
+from datawake.util.session.helper import is_in_session
+from datawake.util.session import helper
+from datawake.util.validate.parameters import required_parameters
 
 
 """
@@ -40,7 +40,7 @@ from validate_parameters import required_parameters
 @is_in_session
 @required_parameters(['trailname', 'url', 'domain'])
 def get_rank(trailname, url, domain):
-    user = session_helper.get_user()
+    user = helper.get_user()
     org = user.get_org()
     user_id = user.get_user_id()
     url = url.encode('utf-8')
@@ -56,7 +56,7 @@ def get_rank(trailname, url, domain):
 @is_in_session
 @required_parameters(['trailname', 'url', 'domain', 'rank'])
 def set_rank(trailname, url, rank, domain):
-    user = session_helper.get_user()
+    user = helper.get_user()
     org = user.get_org()
     user_id = user.get_user_id()
     db.rankUrl(org, user_id, trailname, url, rank, domain=domain)

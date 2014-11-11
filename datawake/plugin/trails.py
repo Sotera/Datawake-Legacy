@@ -20,10 +20,10 @@ import json
 import tangelo
 import cherrypy
 
-from datawake.util import session_helper
-import datawake.util.datawake_db as db
-from datawake.util.session_helper import is_in_session
-from validate_parameters import required_parameters
+import datawake.util.db.datawake_mysql as db
+from datawake.util.session.helper import is_in_session
+from datawake.util.session import helper
+from datawake.util.validate.parameters import required_parameters
 
 
 """
@@ -39,7 +39,7 @@ from validate_parameters import required_parameters
 @is_in_session
 @required_parameters(['domain'])
 def get_trails(domain):
-    org = session_helper.get_org()
+    org = helper.get_org()
     return get_trails_for_domain_and_org(org, domain)
 
 
@@ -52,7 +52,7 @@ def get_trails_for_domain_and_org(org, domain):
 @required_parameters(['domain', 'trailname'])
 def add_trail(trailname, domain, traildescription=u''):
     tangelo.log('datawake_trails POST trailname=%s traildescription=%s domain=%s' % (trailname, traildescription, domain))
-    user = session_helper.get_user()
+    user = helper.get_user()
     org = user.get_org()
     invalid = re.match('^[\w]*(?!:)+$', trailname) is None
     if invalid:

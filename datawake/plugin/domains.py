@@ -18,9 +18,8 @@ import json
 
 import tangelo
 
-from datawake.util import datawake_db as db
-
-from datawake.util.session_helper import is_in_session
+from datawake.util.db import datawake_mysql as db
+from datawake.util.session.helper import is_in_session
 
 
 @tangelo.restful

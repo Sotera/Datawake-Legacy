@@ -19,9 +19,9 @@ import json
 import tangelo
 import cherrypy
 
-import datawake.util.entity_data_connector_factory as factory
-from validate_parameters import required_parameters
-from datawake.util.session_helper import is_in_session
+import datawake.util.dataconnector.factory as factory
+from datawake.util.validate.parameters import required_parameters
+from datawake.util.session.helper import is_in_session
 
 
 """
@@ -35,9 +35,9 @@ from datawake.util.session_helper import is_in_session
 def get_all_entities(url, domain):
     entity_data_connector = None
     try:
-        entity_data_connector = factory.getEntityDataConnector()
-        all_entities = entity_data_connector.getExtractedEntitiesFromUrls([url])
-        domain_extracted = entity_data_connector.getExtractedDomainEntitiesFromUrls(domain, [url])
+        entity_data_connector = factory.get_entity_data_connector()
+        all_entities = entity_data_connector.get_extracted_entities_from_urls([url])
+        domain_extracted = entity_data_connector.get_extracted_domain_entities_from_urls(domain, [url])
         entities = dict(domainExtracted=domain_extracted.get(url, {}), allEntities=all_entities.get(url, {}))
         return json.dumps(entities)
 
@@ -50,8 +50,8 @@ def get_all_entities(url, domain):
 def get_domain_extracted_entities(url, domain):
     entity_data_connector = None
     try:
-        entity_data_connector = factory.getEntityDataConnector()
-        domain_entities = entity_data_connector.getExtractedDomainEntitiesFromUrls(domain, [url])
+        entity_data_connector = factory.get_entity_data_connector()
+        domain_entities = entity_data_connector.get_extracted_domain_entities_from_urls(domain, [url])
         return json.dumps(dict(domainExtracted=domain_entities.get(url)))
     finally:
         if entity_data_connector is not None:

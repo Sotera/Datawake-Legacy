@@ -12,16 +12,16 @@ class ExtractedDataConnector:
         raise NotImplementedError("Implement close()")
 
 
-    def _checkConn(self):
+    def _check_conn(self):
         raise NotImplementedError("Implement _checkConn()")
 
 
 
-    def insertEntities(self, url, entity_type, entity_values):
+    def insert_entities(self, url, entity_type, entity_values):
         raise NotImplementedError("Implement insertEntities()")
 
 
-    def insertDomainEntities(self, domain,url, entity_type, entity_values):
+    def insert_domain_entities(self, domain,url, entity_type, entity_values):
         raise NotImplementedError("Implement insertDomainEntities()")
 
 

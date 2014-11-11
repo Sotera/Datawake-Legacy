@@ -22,8 +22,8 @@ import tangelo
 import cherrypy
 
 from datawake.conf import datawakeconfig
-from datawake.util import googleauth
-from datawake.util import datawake_db
+from datawake.util.authentication import googleauth
+from datawake.util.db import datawake_mysql
 
 
 """
@@ -53,7 +53,7 @@ def post(token=u''):
         tangelo.log('session.post verified user: ' + str(user))
     org = MOCK_USER_ORG
     if not datawakeconfig.MOCK_AUTH and not MOCK_FORENSIC_AUTH:
-        orgs = datawake_db.getOrgLinks(user.get_email())
+        orgs = datawake_mysql.getOrgLinks(user.get_email())
         assert (len(orgs) == 1)
         org = orgs[0]
 

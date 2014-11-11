@@ -16,8 +16,8 @@ limitations under the License.
 
 """
 
-class DataConnector:
 
+class DataConnector:
     def __init__(self):
         pass
 
@@ -30,7 +30,7 @@ class DataConnector:
         raise NotImplementedError("Implement close()")
 
 
-    def _checkConn(self):
+    def _check_conn(self):
         raise NotImplementedError("Implement _checkConn()")
 
     def get_matching_entities_from_url(self, urls):
@@ -39,24 +39,16 @@ class DataConnector:
     def get_extracted_domain_entities_for_urls(self, domain, urls):
         raise NotImplementedError("Implement get_extracted_domain_entities_for_urls")
 
-    def getExtractedEntitiesFromUrls(self,urls,type=None):
+    def get_extracted_entities_from_urls(self, urls, type=None):
         raise NotImplementedError("Implement getExtractedEntitiesFromUrls()")
 
 
-    def getExtractedDomainEntitiesFromUrls(self,domain,urls,type=None):
+    def get_extracted_domain_entities_from_urls(self, domain, urls, type=None):
         raise NotImplementedError("Implement getExtractedDomainEntitiesFromUrls()")
 
 
-    def getExtractedEntitiesWithDomainCheck(self, urls, types=[], domain='default'):
+    def get_extracted_entities_with_domain_check(self, urls, types=None, domain='default'):
         raise NotImplementedError("Implement getExtractedEntitiesWithDomainCheck()")
-
-
-    def insertEntities(self, url, entity_type, entity_values):
-        raise NotImplementedError("Implement insertEntities()")
-
-
-    def insertDomainEntities(self, domain,url, entity_type, entity_values):
-        raise NotImplementedError("Implement insertDomainEntities()")
 
 
     def get_domain_entity_matches(self, domain, type, values):
