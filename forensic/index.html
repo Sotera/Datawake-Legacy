@@ -4,7 +4,6 @@
 <script src=js/jquery-1.11.0.min.js></script>
 <script src=js/jquery-ui-1.10.4.custom.min.js></script>
 <script src=js/d3.v3.min.js charset=utf-8></script>
-<script src=/js/tangelo.min.js></script>
 <script src="js/bootstrap.min.js"></script>
 <script src=js/sotera.webgraph.v1.js></script>
 <script src=js/attribute_graph.js></script>
@@ -20,31 +19,31 @@
 
 
 <!-- TODO, to use authentication you must fill in your client id here  -->
-<meta name="google-signin-clientid" content="" />
-<meta name="google-signin-scope" content="https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email" />
-<meta name="google-signin-requestvisibleactions" content="http://schema.org/AddAction" />
-<meta name="google-signin-cookiepolicy" content="single_host_origin" />
-<meta name="google-signin-callback" content="onSignInCallback" />
+<meta name="google-signin-clientid" content=""/>
+<meta name="google-signin-scope" content="https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email"/>
+<meta name="google-signin-requestvisibleactions" content="http://schema.org/AddAction"/>
+<meta name="google-signin-cookiepolicy" content="single_host_origin"/>
+<meta name="google-signin-callback" content="onSignInCallback"/>
 
 <!-- add the google plus script dynamically because google says so -->
 <script type="text/javascript">
-    (function() {
+    (function () {
 
-        authHelper.setOnLoggedIn(function(){
+        authHelper.setOnLoggedIn(function () {
             //once a session is established on the datawake server refresh the view
             refreshForensicView()
-        })
+        });
 
         /* comment out for google auth */
-        authHelper.onSignInCallback({'access_token':'123456'})
+        authHelper.onSignInCallback({'access_token': '123456'});
 
-        /* comment in to enable google auth auth
-        var po = document.createElement('script');
-        po.type = 'text/javascript'; po.async = true;
-        po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(po, s);
-        */
+//        comment in to enable google auth auth
+//        var po = document.createElement('script');
+//        po.type = 'text/javascript'; po.async = true;
+//        po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
+//        var s = document.getElementsByTagName('script')[0];
+//        s.parentNode.insertBefore(po, s);
+
     })();
 
     function onSignInCallback(authResult) {
@@ -85,7 +84,7 @@
         shape-rendering: crispEdges;
     }
 
-    .chosen-container .chosen-results{
+    .chosen-container .chosen-results {
         max-height: 120px;
         overflow-y: auto;
     }
@@ -133,9 +132,11 @@
         <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
     </ul>
 
-    <div style="position: fixed; right: 2%; top: 1%;" >
+    <div style="position: fixed; right: 2%; top: 1%;">
         <!-- Google Sign In -->
-        <div id="gConnect"><button class="g-signin"></button></div>
+        <div id="gConnect">
+            <button class="g-signin"></button>
+        </div>
         <!-- Google Sign out / revoke token -->
         <div id="gDisconnect" style="display:none">
             <button onclick="authHelper.disconnectUser()">Sign Out</button>
@@ -146,9 +147,8 @@
 </div>
 
 
-
 <!-- Create a fullscreen SVG element -->
-<div id=node_graph ></div>
+<div id=node_graph></div>
 
 <!-- Create an SVG element to represent the legend -->
 <svg id=legend height=100% style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
@@ -156,7 +156,7 @@
 <!-- Create a drawer with the control panel in it -->
 <div id=control-panel>
     <div class=container-fluid>
-        <div class=row >
+        <div class=row>
 
             <!-- Graph layout controls -->
             <div class="col-md-1" style="padding-left: 50px">
@@ -166,8 +166,12 @@
                 <div class="row" style="margin-top: 10px">
                     <table style="align-content: center ">
                         <tr>
-                            <td>  <div id="linkstrengthsllider"></div></td>
-                            <td> <div id="forceslider"></div></td>
+                            <td>
+                                <div id="linkstrengthsllider"></div>
+                            </td>
+                            <td>
+                                <div id="forceslider"></div>
+                            </td>
                         </tr>
                         <tr style="font-size: 70%">
                             <td>Link <br>Strength</td>
@@ -195,7 +199,7 @@
                         <b>Link Options:<b>
                             <select id=graph_select class=form-control></select>
                     </div>
-                    <div class="col-md-3">  <a id=refresh_btn class="btn btn-default" >Refresh</a></div>
+                    <div class="col-md-3"><a id=refresh_btn class="btn btn-default">Refresh</a></div>
                 </div>
 
                 <div class=row>
@@ -225,7 +229,7 @@
                     <div class="col-md-6">
                         <div class="input-group">
                             <span class="input-group-addon" style="height: 20px">Trail:</span>
-                            <select id="trail_select"  data-placeholder="Select a Trail " >
+                            <select id="trail_select" data-placeholder="Select a Trail ">
                             </select>
                         </div>
                     </div>
@@ -241,7 +245,7 @@
 
                 <div class="row">
                     <div style="text-align: center; padding-top: 10px">Records posted per day. Click and drag to set filter.</div>
-                    <svg id="dateChart" class="chart"  height="0" width="100%"></svg>
+                    <svg id="dateChart" class="chart" height="0" width="100%"></svg>
 
                 </div>
 
@@ -278,51 +282,48 @@
     </div>
 </div>
 
-<div id="dialog" title="Highlighted Vertices" />
-<div id="link-dialog" title="Vertex Details" />
+<div id="dialog" title="Highlighted Vertices"/>
+<div id="link-dialog" title="Vertex Details"/>
 </body>
 
 
 <script>
 
 
+    $(function () {
+        $('#userselect').chosen({'width': "100%"});
+        $('#userselect').change(updateTimeSlider);
 
-    $(function() {
-        $('#userselect').chosen({'width':"100%"})
-        $('#userselect').change(updateTimeSlider)
+        $('#trail_select').chosen({'width': "100%", height: "200px"});
+        $('#trail_select').change(updateTimeSlider);
 
-        $('#trail_select').chosen({'width':"100%",height:"200px"})
-        $('#trail_select').change(updateTimeSlider)
-
-    })
-
+    });
 
 
-
-    $(function() {
-        $( "#linkstrengthsllider" ).slider({
+    $(function () {
+        $("#linkstrengthsllider").slider({
             min: 1,
             max: 1000,
             value: 1000,
             orientation: "vertical",
-            change: function(event,ui){
-                var strength = ui.value / 1000.0
-                console.log("setting link strength to "+strength)
-                SWG.setLengthStrength(strength)
+            change: function (event, ui) {
+                var strength = ui.value / 1000.0;
+                console.log("setting link strength to " + strength);
+                SWG.setLengthStrength(strength);
             }
         });
     });
 
-    $(function() {
-        $( "#forceslider" ).slider({
+    $(function () {
+        $("#forceslider").slider({
             min: 0,
             max: 1000,
             value: 30,
             orientation: "vertical",
-            change: function(event,ui){
-                var strength = 0 - ui.value
-                console.log("setting force to "+strength)
-                SWG.setChargeStrength(strength)
+            change: function (event, ui) {
+                var strength = 0 - ui.value;
+                console.log("setting force to " + strength);
+                SWG.setChargeStrength(strength);
             }
         });
     });
