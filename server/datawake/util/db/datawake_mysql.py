@@ -170,7 +170,8 @@ def get_cnx():
     db = dbconfig.DATAWAKE_CORE_DB['database']
     pw = dbconfig.DATAWAKE_CORE_DB['password']
     host = dbconfig.DATAWAKE_CORE_DB['host']
-    return mysql.connector.connect(user=user, password=pw, host=host, database=db)
+    port = dbconfig.DATAWAKE_CORE_DB['port']
+    return mysql.connector.connect(user=user, password=pw, host=host, database=db,port=port)
 
 
 #

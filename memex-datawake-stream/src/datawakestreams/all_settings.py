@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-
+import os
 """
 Deployment based configuration
 
@@ -44,6 +44,20 @@ ALL_SETTINGS['cluster'] = {
 }
 
 
+
+ALL_SETTINGS['local-docker'] = {
+    'topology':'local',
+    'appid': 'datawake',
+    'crawler-in-topic' : 'crawler-in',
+    'crawler-out-topic' : 'crawler-out',
+    'visited-topic': 'memex-datawake-visited',
+    'conn_pool' : os.environ['KAFKA_PORT_9092_TCP_ADDR']+":9092",
+
+    'user':'root',
+    'database':'memex_sotera',
+    'password':os.environ['MYSQL_ENV_MYSQL_ROOT_PASSWORD'],
+    'host':os.environ['MYSQL_PORT_3306_TCP_ADDR']
+}
 
 
 
