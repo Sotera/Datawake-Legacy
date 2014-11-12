@@ -36,7 +36,8 @@ window.setTimeout(function () {
 
 var messageListenerMethods = {
     "highlighttext": highlightText,
-    "selections": highlightSelections
+    "selections": highlightSelections,
+    "removeSelections": removeSelections
 };
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -99,11 +100,20 @@ function highlightText(request, sender, sendResponse) {
     }
 }
 
+function removeSelections(request, sender, sendResponse){
+    try {
+        $('body').removeHighlight(".datawake-highlight.selection");
+        sendResponse({success: true});
+    } catch (e) {
+        sendResponse({success: false, error: e.message})
+    }
+}
+
 function highlightSelections(request, sender, sendResponse) {
     try {
         var selections = request.selections;
         $.each(selections, function (index, selection) {
-            $('body').highlight(selection);
+            $('body').highlight(selection,"selection");
         });
         sendResponse({success: true});
     } catch (e) {

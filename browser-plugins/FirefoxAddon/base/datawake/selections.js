@@ -28,7 +28,8 @@ function useContextMenu(tab) {
             context: contextMenu.URLContext(url),
             items: [
                 contextMenu.Item({ label: "Selection", data: "selection"}),
-                contextMenu.Item({label: "Highlight All Selections", data: "highlight"})
+                contextMenu.Item({label: "Highlight All Selections", data: "highlight"}),
+                contextMenu.Item({label: "Remove All Highlighted Selections", data: "removeSelections"})
             ],
             onMessage: function (message) {
                 var tabId = tabs.activeTab.id;
@@ -40,10 +41,17 @@ function useContextMenu(tab) {
                     case "selection":
                         saveWindowSelection(datawakeInfo, tabs.activeTab.url, message.text);
                         break;
+                    case "removeSelections":
+                        removeHighlightSelections(tabId);
+                        break;
                 }
             }
         });
     }
+}
+
+function removeHighlightSelections(tabId) {
+    tracking.emitRemoveHighlightToTabWorker(tabId);
 }
 
 /**

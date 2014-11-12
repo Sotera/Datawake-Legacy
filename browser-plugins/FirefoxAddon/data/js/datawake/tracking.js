@@ -38,8 +38,12 @@ addon.port.on("loadToolTips", function (urls) {
 
 addon.port.on("highlight", function (selectionObject) {
     for (var index in selectionObject.selections) {
-        $('body').highlight(selectionObject.selections[index]);
+        $('body').highlight(selectionObject.selections[index], "selection");
     }
+});
+
+addon.port.on("removeSelection", function(){
+    $('body').removeHighlight(".datawake-highlight.selection");
 });
 
 addon.port.on("highlightWithToolTips", function (helperObject) {

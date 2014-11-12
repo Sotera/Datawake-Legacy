@@ -11,6 +11,7 @@ var selectionHelper = require("./selections");
 
 exports.trackTab = trackTab;
 exports.emitHighlightTextToTabWorker = emitHighlightTextToTabWorker;
+exports.emitRemoveHighlightToTabWorker = emitRemoveHighlightToTabWorker;
 exports.highlightTextWithToolTips = highlightTextWithToolTips;
 exports.isTabWorkerAttached = isTabWorkerAttached;
 
@@ -111,6 +112,11 @@ function setupTabWorkerAndServices(tab) {
 function emitHighlightTextToTabWorker(tabId, highlightList) {
     var currentTrackingTabWorker = trackingTabWorkers[tabId];
     currentTrackingTabWorker.port.emit("highlight", highlightList);
+}
+
+function emitRemoveHighlightToTabWorker(tabId){
+    var currentTrackingTabWorker = trackingTabWorkers[tabId];
+    currentTrackingTabWorker.port.emit("removeSelection");
 }
 
 /**

@@ -65,7 +65,7 @@ var advanceSearchIgnore = ["http://lakitu:8080/", "chrome:", "http://localhost",
 
 function createContextMenus() {
     chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
-    chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+    chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections, type: "checkbox"});
 }
 
 
@@ -275,8 +275,17 @@ function getSelections(info, tab) {
         });
     }
 
-    postContents(config.datawake_serviceUrl + "/selections/get", postData, sendSelections, logError);
-
+    if (!info.wasChecked) {
+        postContents(config.datawake_serviceUrl + "/selections/get", postData, sendSelections, logError);
+    } else {
+        chrome.tabs.sendMessage(tabId, {operation: 'removeSelections'}, function (response) {
+            if (response.success) {
+                console.log("Remove Highlights for TabId %s recv.", tabId);
+            } else {
+                console.log("Remove Highlights error %s", response.error);
+            }
+        });
+    }
 }
 
 
