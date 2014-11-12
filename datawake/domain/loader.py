@@ -16,15 +16,15 @@
 
 """
 
-import re
 import threading
 from Queue import Queue
 import json
 
 import tangelo
-from datawake.util import datawake_db as db
-import datawake.util.entity_data_connector_factory as factory
-from datawake.util.domain_upload_connector import ConnectorUtil
+
+import datawake.util.dataconnector.factory as factory
+from datawake.util.dataconnector.domain_upload_connector import ConnectorUtil
+from datawake.util.db import datawake_mysql as db
 
 
 completed_threads = Queue()
@@ -36,7 +36,7 @@ def get_domains(*args):
 
 
 def get_preview(*args, **kwargs):
-    domain_content_connector = factory.getEntityDataConnector()
+    domain_content_connector = factory.get_entity_data_connector()
     try:
         name = kwargs.get("domain")
         data = domain_content_connector.get_domain_items(name, 10)
@@ -60,7 +60,7 @@ def finished_database_upload(*args):
 
 
 def upload_file(*args, **kwargs):
-    domain_content_connector = factory.getEntityDataConnector()
+    domain_content_connector = factory.get_entity_data_connector()
     try:
         domain_file = kwargs.get("file_upload")
         domain_name = kwargs.get("name")
@@ -90,7 +90,7 @@ def upload_file(*args, **kwargs):
 
 
 def upload_database_threaded(**kwargs):
-    domain_content_connector = factory.getEntityDataConnector()
+    domain_content_connector = factory.get_entity_data_connector()
     domain_name = kwargs.get("domain_name")
     connection_string = kwargs.get("connection_string")
     domain_description = kwargs.get("domain_description")
@@ -122,7 +122,7 @@ def delete_domain(*args, **kwargs):
     for key in kwargs.keys():
         tangelo.log(key)
     if db.domain_exists(domain_name):
-        domain_content_connector = factory.getEntityDataConnector()
+        domain_content_connector = factory.get_entity_data_connector()
         db.remove_domain(domain_name)
         domain_content_connector.delete_domain_items(domain_name)
         return json.dumps(dict(success=True))

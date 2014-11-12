@@ -1,7 +1,8 @@
 from __future__ import absolute_import, print_function, unicode_literals
+import traceback
 from streamparse.bolt import Bolt
 from datawakestreams import all_settings
-from datawakeio import extracted_data_connector_factory as factory
+from datawakeio import factory as factory
 
 class ExtractorBolt(Bolt):
     """
@@ -49,7 +50,7 @@ class ExtractorBolt(Bolt):
 
             values = map(lambda x: x[1],tuples)
             type = tuples[0][0]
-            self.connector.insertEntities(context['url'], type, values)
+            self.connector.insert_entities(context['url'], type, values)
             self.log("WROTE attribute: "+type+" values: "+str(values))
 
 

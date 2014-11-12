@@ -16,9 +16,11 @@ limitations under the License.
 
 """
 import igraph
-import datawake.util.entity_data_connector_factory as factory
-from datawake.util import datawake_db
 import tangelo
+
+import datawake.util.dataconnector.factory as factory
+from datawake.util.db import datawake_mysql
+
 
 """
 
@@ -27,7 +29,7 @@ forensic view.
 
 """
 
-entityDataConnector = factory.getEntityDataConnector()
+entityDataConnector = factory.get_entity_data_connector()
 
 
 def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
@@ -68,7 +70,7 @@ def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
         commandArgs.append(trail)
 
     command = command + " ORDER BY userId,t1.ts asc"
-    rows = datawake_db.dbGetRows(command,commandArgs)
+    rows = datawake_mysql.dbGetRows(command,commandArgs)
 
     edges = []
     nodes = {}
@@ -128,7 +130,7 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
 
 
     # for every url in the browse path get all extracted entities
-    results = entityDataConnector.getExtractedEntitiesWithDomainCheck(urls,adjTypes,domain=domain)
+    results = entityDataConnector.get_extracted_entities_with_domain_check(urls,adjTypes,domain=domain)
 
 
     nodes = browsePathGraph['nodes']
@@ -208,7 +210,7 @@ def getBrowsePathWithTextSelections(org,startdate,enddate,userlist=[],trail='*',
                    FROM datawake_data posts, datawake_selections selections
                    WHERE posts.id = selections.postId and posts.id  in ("""+params+")"
 
-                rows = datawake_db.dbGetRows(sql,postIds)
+                rows = datawake_mysql.dbGetRows(sql,postIds)
                 for row in rows:
                     postid = row[0]
                     selectionId = row[1]
@@ -256,7 +258,7 @@ def getBrowsePathWithTextSelections(org,startdate,enddate,userlist=[],trail='*',
 # add the url ranking to a set of nodes, and update the node size
 #
 def addUrlRankstoNodes(org,nodes,user,trail,domain=''):
-    ranks = datawake_db.getUserUrlRanks(org,user,trail,domain=domain)
+    ranks = datawake_mysql.getUserUrlRanks(org,user,trail,domain=domain)
     for key,node in nodes.iteritems():
         if key in ranks:
             rank = ranks[key]
@@ -342,7 +344,7 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
 
 
     # for every url in the browse path get all extracted entities and collect all adjacent urls in a set + url-> link map
-    visitedEntities = entityDataConnector.getExtractedEntitiesFromUrls(urls)
+    visitedEntities = entityDataConnector.get_extracted_entities_from_urls(urls)
     entity_set = set([])
     adj_urls = set([])
     link_map = {}
@@ -360,14 +362,14 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
 
     del visitedEntities
 
-    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls(adj_urls)
+    lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
 
     # add place holders for urls with no extracted data
     for adj_url in adj_urls:
         if adj_url not in lookaheadFeatures:
             lookaheadFeatures[adj_url] = {}
 
-    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,adj_urls)
+    domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
 
 
 

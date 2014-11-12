@@ -19,7 +19,7 @@ import json
 import tangelo
 
 from datawake.conf import datawakeconfig as conf
-from datawake.util.session_helper import is_in_session
+from datawake.util.session.helper import is_in_session
 
 
 @is_in_session

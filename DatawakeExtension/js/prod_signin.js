@@ -1,19 +1,16 @@
 /*
-To use google authentication for sign in of users copy this file to signin.js
+ To use google authentication for sign in of users copy this file to signin.js
 
-This requires google authentication to be correctly set up with google servers.
+ This requires google authentication to be correctly set up with google servers.
  */
 
 
+var googlePlusUserLoader = (function () {
 
-
-
-var googlePlusUserLoader = (function() {
-
-    var userInfo = {}
-    var STATE_START=1;
-    var STATE_ACQUIRING_AUTHTOKEN=2;
-    var STATE_AUTHTOKEN_ACQUIRED=3;
+    var userInfo = {};
+    var STATE_START = 1;
+    var STATE_ACQUIRING_AUTHTOKEN = 2;
+    var STATE_AUTHTOKEN_ACQUIRED = 3;
 
     var state = STATE_START;
 
@@ -28,7 +25,7 @@ var googlePlusUserLoader = (function() {
     }
 
     function changeState(newState) {
-        var old = state
+        var old = state;
         state = newState;
         switch (state) {
             case STATE_START:
@@ -56,7 +53,7 @@ var googlePlusUserLoader = (function() {
         getToken();
 
         function getToken() {
-            chrome.identity.getAuthToken({ interactive: interactive }, function(token) {
+            chrome.identity.getAuthToken({ interactive: interactive }, function (token) {
                 if (chrome.runtime.lastError) {
                     callback(chrome.runtime.lastError);
                     return;
@@ -85,7 +82,7 @@ var googlePlusUserLoader = (function() {
         }
     }
 
-    function getUserInfo(interactive,callback) {
+    function getUserInfo(interactive, callback) {
         // bind the user callback function into the onUserINfoFetched function
         var onUserInfoFetched = getOnUserInfoFetchedFucntion(callback)
         xhrWithAuth('GET',
@@ -93,14 +90,15 @@ var googlePlusUserLoader = (function() {
             interactive,
             onUserInfoFetched);
     }
+
     // @corecode_end getProtectedData
 
 
-    function getOnUserInfoFetchedFucntion(callback){
+    function getOnUserInfoFetchedFucntion(callback) {
         // Code updating the user interface, when the user information has been
         // fetched or displaying the error.
         var onUserInfoFetched =
-            function(error, status, response) {
+            function (error, status, response) {
                 if (!error && status == 200) {
                     changeState(STATE_AUTHTOKEN_ACQUIRED);
                     var user_info = JSON.parse(response);
@@ -109,14 +107,13 @@ var googlePlusUserLoader = (function() {
                 } else {
                     changeState(STATE_START);
                 }
-            }
+            };
         return onUserInfoFetched
     }
 
 
-
     function populateUserInfo(user_info) {
-        userInfo.user =  user_info
+        userInfo.user = user_info;
         user_info_div.innerHTML = user_info.displayName;
         fetchImageBytes(user_info);
     }
@@ -135,9 +132,9 @@ var googlePlusUserLoader = (function() {
         var imgElem = document.createElement('img');
         var objUrl = window.webkitURL.createObjectURL(this.response);
         imgElem.src = objUrl;
-        imgElem.onload = function() {
+        imgElem.onload = function () {
             window.webkitURL.revokeObjectURL(objUrl);
-        }
+        };
         user_info_div.insertAdjacentElement("afterbegin", imgElem);
     }
 
@@ -165,32 +162,33 @@ var googlePlusUserLoader = (function() {
         // will be opened when the user is not yet authenticated or not.
         // @see http://developer.chrome.com/apps/app_identity.html
         // @see http://developer.chrome.com/apps/identity.html#method-getAuthToken
-        chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
+        chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
             if (chrome.runtime.lastError) {
                 console.log(chrome.runtime.lastError);
                 changeState(STATE_START);
             } else {
-                console.log('Token acquired:'+token+
+                console.log('Token acquired:' + token +
                     '. See chrome://identity-internals for details.');
                 changeState(STATE_AUTHTOKEN_ACQUIRED);
-                getUserInfo(false,callback);
+                getUserInfo(false, callback);
             }
         });
         // @corecode_end getAuthToken
     }
 
     function revokeToken() {
-        userInfo.user = null
-        user_info_div.innerHTML="";
+        userInfo.user = null;
+        user_info_div.innerHTML = "";
         chrome.identity.getAuthToken({ 'interactive': false },
-            function(current_token) {
+            function (current_token) {
                 if (!chrome.runtime.lastError) {
 
                     // @corecode_begin removeAndRevokeAuthToken
                     // @corecode_begin removeCachedAuthToken
                     // Remove the local cached token
                     chrome.identity.removeCachedAuthToken({ token: current_token },
-                        function() {});
+                        function () {
+                        });
                     // @corecode_end removeCachedAuthToken
 
                     // Make a request to revoke token in the server
@@ -202,16 +200,16 @@ var googlePlusUserLoader = (function() {
 
                     // Update the user interface accordingly
                     changeState(STATE_START);
-                    console.log('Token revoked and removed from cache. '+
+                    console.log('Token revoked and removed from cache. ' +
                         'Check chrome://identity-internals to confirm.');
                 }
             });
     }
 
 
-    function getToken(callback){
-        chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
-            console.log("token: "+token)
+    function getToken(callback) {
+        chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
+            console.log("token: " + token);
             callback(token)
         });
     }
@@ -219,12 +217,12 @@ var googlePlusUserLoader = (function() {
     return {
 
 
-        getAuthToken: function(callback){
+        getAuthToken: function (callback) {
             getToken(callback)
         },
 
-        getId: function (){
-            if (userInfo && userInfo.user){
+        getId: function () {
+            if (userInfo && userInfo.user) {
                 return userInfo.user.id
             }
             else return null
@@ -234,7 +232,9 @@ var googlePlusUserLoader = (function() {
         // takes a callback of type function(user_info)
         onload: function (callback) {
             signin_button = document.querySelector('#signin');
-            signin_button.addEventListener('click', function(){interactiveSignIn(callback)});
+            signin_button.addEventListener('click', function () {
+                interactiveSignIn(callback)
+            });
 
             revoke_button = document.querySelector('#revoke');
             revoke_button.addEventListener('click', revokeToken);
@@ -243,9 +243,15 @@ var googlePlusUserLoader = (function() {
 
             // Trying to get user's info without signing in, it will work if the
             // application was previously authorized by the user.
-            getUserInfo(false,callback);
+            getUserInfo(false, callback);
         }
     };
 
 })();
+
+$(document).ready(function(){
+    if (!chrome.runtime.getManifest().hasOwnProperty("oauth2")){
+        alert("You enabled google auth, but forgot to add your client ids to the manifest file.");
+    }
+});
 

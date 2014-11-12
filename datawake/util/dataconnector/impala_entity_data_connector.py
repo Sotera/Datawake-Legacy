@@ -25,9 +25,8 @@ from impala.dbapi import connect
 import tangelo
 
 from entity import Entity
-
 from datawake.conf import datawakeconfig
-from datawake.util.data_connector import DataConnector
+from datawake.util.dataconnector.data_connector import DataConnector
 
 
 THREADS_PER_HOST = 2
@@ -79,7 +78,7 @@ class ClusterEntityDataConnector(DataConnector):
             finally:
                 self.cnx = None
 
-    def _checkConn(self):
+    def _check_conn(self):
         if self.cnx is None:
             self.open()
 
@@ -122,7 +121,7 @@ class ClusterEntityDataConnector(DataConnector):
 
         return results
 
-    def getExtractedEntitiesFromUrls(self, urls, type=None):
+    def get_extracted_entities_from_urls(self, urls, type=None):
 
         def work_item_iterator():
             sql = "select rowkey from general_extractor_web_index "
@@ -152,12 +151,12 @@ class ClusterEntityDataConnector(DataConnector):
         return self.queue_impala_query(append_to_list, results, work_item_iterator)
 
 
-    def getExtractedEntitiesWithDomainCheck(self, urls, types=[], domain='default'):
-        return DataConnector.getExtractedEntitiesWithDomainCheck(self, urls, types, domain)
+    def get_extracted_entities_with_domain_check(self, urls, types=[], domain='default'):
+        return DataConnector.get_extracted_entities_with_domain_check(self, urls, types, domain)
 
     # # DOMAINS  ####
     def get_domain_items(self, name, limit):
-        self._checkConn()
+        self._check_conn()
         cursor = self.cnx.cursor()
         sql = "select rowkey from %(table)s where rowkey >= %(startkey)s and rowkey < %(endkey)s limit %(limit)s"
         params = {
@@ -195,7 +194,7 @@ class ClusterEntityDataConnector(DataConnector):
         return self.queue_impala_query(append_to_list, results, work_item_iterator)
 
 
-    def getExtractedDomainEntitiesFromUrls(self, domain, urls, type=None):
+    def get_extracted_domain_entities_from_urls(self, domain, urls, type=None):
         def work_item_iterator():
             sql = "select rowkey from datawake_domain_entities "
             for url in urls:
@@ -279,11 +278,6 @@ class ClusterEntityDataConnector(DataConnector):
     def delete_domain_items(self, domain_name):
         return DataConnector.delete_domain_items(self, domain_name)
 
-    def insertEntities(self, url, entity_type, entity_values):
-        return DataConnector.insertEntities(self, url, entity_type, entity_values)
-
     def add_new_domain_items(self, domain_items):
         return DataConnector.add_new_domain_items(self, domain_items)
 
-    def insertDomainEntities(self, domain, url, entity_type, entity_values):
-        return DataConnector.insertDomainEntities(self, domain, url, entity_type, entity_values)

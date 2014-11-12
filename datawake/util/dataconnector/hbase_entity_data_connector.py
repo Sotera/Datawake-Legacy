@@ -22,7 +22,7 @@ class HBASEDataConnector(data_connector.DataConnector):
 
     def get_domain_items(self, name, limit):
         try:
-            self._checkConn()
+            self._check_conn()
             hbase_table = self.hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
             rowkey = "%s\0" % name
             entities = []
@@ -34,7 +34,7 @@ class HBASEDataConnector(data_connector.DataConnector):
 
     def get_domain_entity_matches(self, domain, type, values):
         try:
-            self._checkConn()
+            self._check_conn()
             hbase_table = self.hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
             rowkey = "%s\0%s\0" % (domain, type)
             found = []
@@ -45,9 +45,9 @@ class HBASEDataConnector(data_connector.DataConnector):
         finally:
             self.close()
 
-    def getExtractedDomainEntitiesFromUrls(self, domain, urls, type=None):
+    def get_extracted_domain_entities_from_urls(self, domain, urls, type=None):
         try:
-            self._checkConn()
+            self._check_conn()
             hbase_table = self.hbase_conn.table("domain_extractor_web_index_hbase")
             entity_dict = dict()
             for url in urls:
@@ -64,12 +64,12 @@ class HBASEDataConnector(data_connector.DataConnector):
         finally:
             self.close()
 
-    def _checkConn(self):
+    def _check_conn(self):
         self.open()
 
-    def getExtractedEntitiesFromUrls(self, urls, type=None):
+    def get_extracted_entities_from_urls(self, urls, type=None):
         try:
-            self._checkConn()
+            self._check_conn()
             hbase_table = self.hbase_conn.table("general_extractor_web_index_hbase")
             results = {}
             for url in urls:
@@ -90,7 +90,7 @@ class HBASEDataConnector(data_connector.DataConnector):
 
     def delete_domain_items(self, domain_name):
         try:
-            self._checkConn()
+            self._check_conn()
             hbase_table = self.hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
             rowkey_prefix = domain_name + '\0'
             batch_delete = hbase_table.batch(batch_size=20)
@@ -100,12 +100,12 @@ class HBASEDataConnector(data_connector.DataConnector):
         finally:
             self.close()
 
-    def getExtractedEntitiesWithDomainCheck(self, urls, types=[], domain='default'):
-        return data_connector.DataConnector.getExtractedEntitiesWithDomainCheck(self, urls, types, domain)
+    def get_extracted_entities_with_domain_check(self, urls, types=[], domain='default'):
+        return data_connector.DataConnector.get_extracted_entities_with_domain_check(self, urls, types, domain)
 
     def get_extracted_domain_entities_for_urls(self, domain, urls):
         try:
-            self._checkConn()
+            self._check_conn()
             hbase_table = self.hbase_conn.table("domain_extractor_web_index_hbase")
             entity_values = []
             for url in urls:
@@ -119,7 +119,7 @@ class HBASEDataConnector(data_connector.DataConnector):
 
     def get_extracted_entities_list_from_urls(self, urls):
         try:
-            self._checkConn()
+            self._check_conn()
             hbase_table = self.hbase_conn.table("general_extractor_web_index_hbase")
             data = []
             for url in urls:
@@ -148,7 +148,7 @@ class HBASEDataConnector(data_connector.DataConnector):
 
     def add_new_domain_items(self, domain_items):
         try:
-            self._checkConn()
+            self._check_conn()
             hbase_table = self.hbase_conn.table(datawakeconfig.DOMAIN_VALUES_TABLE_HBASE)
             batch_put = hbase_table.batch(batch_size=100)
             for i in domain_items:
@@ -157,23 +157,3 @@ class HBASEDataConnector(data_connector.DataConnector):
             batch_put.send()
         finally:
             self.close()
-
-    def insertHBASE(self, rowkey_prefix, items, table):
-        try:
-            self._checkConn()
-            hbase_table = self.hbase_conn.table(table)
-            batch_put = hbase_table.batch(batch_size=len(items))
-            for i in items:
-                batch_put.put(row="%s%s" % (rowkey_prefix, i), data={"colFam:c": ""})
-
-            batch_put.send()
-        finally:
-            self.close()
-
-    def insertEntities(self, url, entity_type, entity_values):
-        rowkey_prefix = "%s\0%s\0" % (url, entity_type)
-        self.insertHBASE(rowkey_prefix, entity_values, "general_extractor_web_index_hbase")
-
-    def insertDomainEntities(self, domain, url, entity_type, entity_values):
-        rowkey_prefix = "%s\0%s\0%s\0" % (domain, url, entity_type)
-        self.insertHBASE(rowkey_prefix, entity_values, "domain_extractor_web_index_hbase")

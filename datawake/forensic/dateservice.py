@@ -19,10 +19,9 @@ limitations under the License.
 import json
 
 import tangelo
-import cherrypy
-from datawake.util import datawake_db
 
-from datawake.util import session_helper
+from datawake.util.db import datawake_mysql
+from datawake.util.session import helper
 
 """
 
@@ -31,9 +30,9 @@ from datawake.util import session_helper
 """
 
 
-@session_helper.is_in_session
+@helper.is_in_session
 def get_chart(users=u'', trail=u'*', domain=u''):
-    org = session_helper.get_org()
+    org = helper.get_org()
     tangelo.log('dataservice-get org=' + org + ' users=' + users + ' trail= ' + trail + ' domain=' + domain)
     if trail == u'':
         trail = u'*'
@@ -42,7 +41,7 @@ def get_chart(users=u'', trail=u'*', domain=u''):
     else:
         users = []
 
-    result = datawake_db.getHourlyBrowsePathCounts(org, users, trail, domain=domain)
+    result = datawake_mysql.getHourlyBrowsePathCounts(org, users, trail, domain=domain)
     tangelo.log("dataservice result: " + str(result))
     return json.dumps(dict(data=result))
 
@@ -54,7 +53,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    post_data = json.loads(cherrypy.request.body.read())
+    post_data = json.loads(tangelo.request_body().read())
 
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "unknown service call")

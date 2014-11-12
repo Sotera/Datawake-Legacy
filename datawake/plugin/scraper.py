@@ -17,12 +17,12 @@ Copyright 2014 Sotera Defense Solutions, Inc.
 import json
 
 import tangelo
-import cherrypy
 
-import datawake.util.datawake_db as db
-from datawake.util import kafka_producer, session_helper
-from datawake.util.session_helper import is_in_session
-from validate_parameters import required_parameters
+import datawake.util.db.datawake_mysql as db
+from datawake.util.kafka import kafka_producer
+from datawake.util.session.helper import is_in_session
+from datawake.util.session import helper
+from datawake.util.validate.parameters import required_parameters
 
 
 """
@@ -76,7 +76,7 @@ def scrape_page(html, url, userId, userName, trail, domain, org):
 @is_in_session
 @required_parameters(['domain', 'trail', 'html', 'url'])
 def full_page_scrape(domain, trail, html, url):
-    user = session_helper.get_user()
+    user = helper.get_user()
     user_id = user.get_user_id()
     user_name = user.get_user_name()
     org = user.get_org()
@@ -90,7 +90,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    json_obj = cherrypy.request.body.read()
+    json_obj = tangelo.request_body().read()
     post_data = json.loads(json_obj, strict=False)
 
     def unknown(*args):
