@@ -1,0 +1,46 @@
+{
+    "manifest_version": 2,
+    "name": "DataWake",
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGUr7t4bUW7aAyeOl8FSYe33bwHpAUV0JnDkMJTZWUuwC6PFmyJ/J8AgXxYSLDeZPyfZa6fPb6+iXty8W12S2CLzlLweZyW1NHAO8Ze0gW/Y6lW2hiBBdfQBRe0egvfgUyi7ZrKfBYAMmRzrvuw11Fq8TlKKIn0Jm5UzigMPtA7er//oaFhOe346Vizo8r5Ai+RqEwD6p9x7Ddp6qryRGgjQqKE4WmxEyT2xvmAzc7/QzeIbZWZY7CXlCT5rMYhw7CRU5Ex9OdpM3BqPCECH1Kj4em3JoSp15hHxt7HZLEygFXfPnmvlOJviNw3iHWG4jDCeQK91Cz3Qb+/iL1PFOwIDAQAB",
+    "version": "0.1",
+    "options_page": "options.html",
+    "web_accessible_resources": [
+        "js/*.js"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["js/jquery-1.11.0.min.js", "js/jquery.highlight-4.js", "js/jquery.tooltipster.min.js", "js/d3.min.js", "js/jquery-ui.js", "js/poster.js", "js/jquery.urlive.js", "js/image-service.js"],
+            "css": ["css/highlight.css", "css/tooltipster.css", "css/tooltipster-noir.css", "css/jquery.urlive.css", "css/jquery-ui.css"]
+        }
+    ],
+    "background": {
+        "scripts": ["js/jquery-1.11.0.min.js", "js/config.js", "js/background.js"]
+    },
+
+    "permissions": [
+        "tabs",
+        "identity",
+        "contextMenus",
+        "storage",
+        "activeTab",
+        "<all_urls>"
+    ],
+    "icons": {
+        "16": "images/waveicon16.png"
+    },
+
+    "browser_action": {
+        "default_icon": {
+            "19": "images/waveicon19.png",
+            "38": "images/waveicon38.png"
+        },
+        "default_title": "Data Wake",
+        "default_popup": "popup.html"
+    },
+
+    "chrome_url_overrides": {
+        "newtab": "newTab.html"
+    },
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html ng-app="optionsApp">
+<head>
+    <title>My Test Extension Options</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen"/>
+</head>
+<body ng-controller="OptionsCtrl">
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2>Set Datawake Configuration</h2>
+        </div>
+        <div class="panel-body">
+            <label for="deployment">Select Datawake Deployment:</label>
+            <select id="deployment" class="form-control" ng-model="selectedDeployment" ng-change="deploymentChanged();" ng-options="key for (key, value) in deployments"></select>
+            <br/>
+
+            <form role="form">
+                <div class="form-group">
+                    <label for="deploymentUrl">Datawake Service Url:</label>
+                    <input id="deploymentUrl" ng-model="deploymentUrl" type="text" size="100">
+                </div>
+                <div class="form-group">
+                    <label for="imageService">Image Service URL:</label>
+                    <input id="imageService" ng-model="imageService" type="text" size="100">
+                </div>
+                <button ng-click="save();" ng-class="{'btn btn-success' : saved, 'btn btn-default': !saved}" class="btn btn-default">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2>On/Off Configuration</h2>
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>
+                        Options
+                    </th>
+                    <th>
+                        Enable/Disable
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(key, value) in onOffOptions">
+                    <td>
+                        {{key.replace(reg," ").toUpperCase()}}
+                    </td>
+                    <td>
+                        <input type="checkbox" ng-change="changeColor()" ng-model="onOffOptions[key]" ng-checked="value"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button ng-click="saveOnOff();" ng-class="{'btn btn-success' : onOffSaved, 'btn btn-default': !onOffSaved}" class="btn btn-default">Save</button>
+
+        </div>
+    </div>
+</div>
+<script src="js/jquery-1.11.0.min.js"></script>
+<script src="js/angular.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/options.js"></script>
+
+</body>
+</html>
