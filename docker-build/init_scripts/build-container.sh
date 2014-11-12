@@ -126,6 +126,23 @@ pip install streamparse &> /dev/null
 
 
 
+echo "install MITIE"
+cd /
+git clone https://github.com/mitll/MITIE.git
+cd MITIE
+make MITIE-models
+cd tools/ner_stream
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+cd ../../../mitielib
+make
+
+
+echo "installing Beautiful Soup"
+apt-get install -y python-bs4
+
 
 
 echo "software install complete"

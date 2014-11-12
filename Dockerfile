@@ -26,6 +26,8 @@ ENV PYTHONPATH /usr/local/share/tangelo/web:$PYTHONPATH
 
 COPY memex-datawake-stream /memex-datawake-stream
 
+# set an environment variable for MITIE
+ENV MITIE_HOME /MITIE
 
 # set the default container command to run tangelo
 

@@ -66,6 +66,13 @@
             ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
         )
 
+        "mitie-bolt" (python-bolt-spec
+            options
+            {"datawake-visited-spout" :shuffle }
+            "datawakestreams.extractors.mitie_bolt.MitieBolt"
+            ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+         )
+
         ;; write extracted links to the crawler-in
         "crawler-queue-writer" (python-bolt-spec
             options
@@ -79,7 +86,8 @@
             options
             {"email-bolt" :shuffle
             "phone-bolt" :shuffle
-            "website-bolt" :shuffle}
+            "website-bolt" :shuffle
+            "mitie-bolt" :shuffle}
             "datawakestreams.domain_writer_bolt.DomainWriterBolt"
             []
             :p 1
@@ -130,13 +138,20 @@
              ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
           )
 
+         "lookahead-mitie-bolt" (python-bolt-spec
+             options
+             {"datawake-lookahead-spout" :shuffle }
+             "datawakestreams.extractors.mitie_bolt.MitieBolt"
+             ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+             )
 
 
         "lookahaed-domain-writer-bolt" (python-bolt-spec
               options
               {"lookahead-email-bolt" :shuffle
               "lookahead-phone-bolt" :shuffle
-              "lookahead-website-bolt" :shuffle}
+              "lookahead-website-bolt" :shuffle
+              "lookahead-mitie-bolt" :shuffle }
               "datawakestreams.domain_writer_bolt.DomainWriterBolt"
               []
               :p 1

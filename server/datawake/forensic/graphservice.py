@@ -47,7 +47,8 @@ def listGraphs():
                                    'browse path - with adjacent phone #\'s',
                                    'browse path - with adjacent email #\'s',
                                    'browse path - with text selections',
-                                   'browse path- with look ahead']))
+                                   'browse path- with look ahead',
+                                   'browse path - with adjacent info',]))
 
 
 #
@@ -134,6 +135,10 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
 
     if name == 'browse path- with look ahead':
         graph = graph_helper.getBrowsePathWithLookAhead(org, startdate, enddate, userlist, trail, domain)
+        return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
+
+    if name == 'browse path - with adjacent info':
+        graph = graph_helper.getBrowsePathAndAdjacentInfoEdges(org, startdate, enddate,1,userlist, trail, domain)
         return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     return json.dumps(dict(nodes=[], links=[]))
