@@ -17,7 +17,7 @@ fig
 Docker runs on linux and requires specific kernel features, so to run in OSX we actually run docker in a VM called boot2docker.  If you are running on windows or linux be sure to follow the docker setup instructions to install and use boot2docker as well.
 
 NOTE:  boot2docker should automatically allow you to link volumes from your user directory into the VM.  If you are adding volumes they must be in your User directory.
-WARNING:  A current issue with boot2docker on OSX prevents us from writing to mounted directories from within containers.  THis prevents us from persisting data outside of containers.
+WARNING:  A current issue with boot2docker on OSX prevents us from writing to mounted directories from within containers.  This prevents us from persisting data outside of containers.
 
 
 ###  Seting up a dev environment.
