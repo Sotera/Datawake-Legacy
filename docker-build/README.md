@@ -6,10 +6,10 @@ Dockerfile and conf files to build a Datawake docker container.  Prior to runnin
 
 ### Pre-reqs
 
-virtual box
-docker
-boot2docker (if not running on linux, see docker install guide)
-fig
+1. virtual box
+2. docker
+3. boot2docker (if not running on linux, see docker install guide)
+4. fig
 
 
 ### Dev-environments on non - Linux systems  (Windows or OSX)
@@ -92,12 +92,7 @@ useful docker snippets
 ===============
 
 ```
-
 # connect to the mysql terminal
 docker run -it --link  dockerbuild_mysql_1:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
-
-
-# start a datawake terminal
-docker run -it --rm  --link dockerbuild_mysql_1:mysql  --link dockerbuild_kafka_1:kafka    -w /usr/local/share/tangelo/web  dockerbuild_datawake /bin/bash
 
 ```
