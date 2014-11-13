@@ -97,8 +97,8 @@ var nonRandomNodes = function() {
 
 function main() {
 
-	var WIDTH = 1024;
-	var HEIGHT = 760;
+	var WIDTH = 500;
+	var HEIGHT = 500;
 
 
 	var nodes = randomNodes(WIDTH,HEIGHT,5,75);
@@ -141,9 +141,14 @@ function main() {
 		.canvas(canvas)
 		.nodeHover(onNodeOver,onNodeOut)
 		.nodeClick(onNodeClick)
-		.layout(new RadialLayout(nodes[0], 200))
 		.pannable()
 		.zoomable()
 		.draggable()
 		.draw();
+
+	var layoutBtn = $('<button/>').click(function() {
+		graph.layout(new RadialLayout(nodes[0], 200));
+		graph.update();
+	}).html('Layout');
+	$('body').append(layoutBtn);
 }

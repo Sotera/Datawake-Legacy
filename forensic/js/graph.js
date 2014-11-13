@@ -12,13 +12,16 @@ function Graph() {
 	this._currentOverNode = null;
 	this._currentMoveState = null;
 
+	// Data to render object maps
 	this._nodeIndexToLinkLine = null;
+	this._nodeIndexToCircle = null;
 }
 
 Graph.prototype.nodes = function(nodes) {
 	if (nodes) {
 		this._nodes = nodes;
 		this._nodeIndexToLinkLine = {};
+		this._nodeIndexToCircle = {};
 		var that = this;
 		nodes.forEach(function(node) {
 			that._nodeIndexToLinkLine[node.index] = [];
@@ -108,7 +111,10 @@ Graph.prototype.zoomable = function() {
 Graph.prototype.layout = function(layouter) {
 	if (layouter) {
 		this._layouter = layouter;
-		this._layouter.nodes(this._nodes)
+		this._layouter
+			.nodes(this._nodes)
+			.linkMap(this._nodeIndexToLinkLine)
+			.nodeMap(this._nodeIndexToCircle)
 			.layout();
 	} else {
 		this._layouter.layout();
@@ -138,6 +144,7 @@ Graph.prototype.draw = function() {
 
 	this._nodes.forEach(function(node) {
 		var circle = path.circle(node);
+		that._nodeIndexToCircle[node.index] = circle;
 		if (that._nodeOver) {
 			circle.on('mouseover', function(e) {
 				that._nodeOver(circle,e);
