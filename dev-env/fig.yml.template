@@ -23,8 +23,19 @@ kafka:
     - /var/run/docker.sock:/var/run/docker.sock
 
 
+dwstream:
+  build: ../memex-datawake-stream
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+  volumes:
+    - /Users/ekimbrel/code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
+
+
+
 datawake:
-  build: ../
+  build: ../server
   links:
     - mysql:mysql
     - kafka:kafka
@@ -50,5 +61,7 @@ datawake:
     - /Users/.../code/sotera/Datawake/server/domain:/usr/local/share/tangelo/web/domain
     - /Users/.../code/sotera/Datawake/server/forensic:/usr/local/share/tangelo/web/forensic
     - /Users/.../code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
+
+
 
 

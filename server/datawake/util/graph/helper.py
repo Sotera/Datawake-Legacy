@@ -160,6 +160,8 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
                 group = 'length= '+str( len(name))
             elif type == 'email' and '@' in name:
                 group = name.split('@')[1]
+            elif type == 'info':
+                group = name.split('->')[0]
             node = {'id':name,
                     'type':type,
                     'size':5,
@@ -189,7 +191,8 @@ def getBrowsePathAndAdjacentEmailEdgesWithLimit(org,startdate,enddate,limit,user
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['email'],limit,userlist,trail,domain)
 
 
-
+def getBrowsePathAndAdjacentInfoEdges(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
+    return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['info'],limit,userlist,trail,domain)
 
 
 def getBrowsePathWithTextSelections(org,startdate,enddate,userlist=[],trail='*',domain=''):
