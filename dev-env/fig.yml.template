@@ -30,7 +30,7 @@ dwstream:
     - kafka:kafka
     - zookeeper:zk
   volumes:
-    - /Users/ekimbrel/code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
+    - /Users/.../code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
 
 
 
