@@ -8,7 +8,10 @@ function Graph() {
 	this._scene = null;
 	this._pannable = null;
 	this._zoomable = null;
-};
+	this._draggable = null;
+	this._currentOverNode = null;
+	this._currentMoveState = null;
+}
 
 Graph.prototype.nodes = function(nodes) {
 	if (nodes) {
@@ -58,31 +61,19 @@ Graph.prototype.nodeClick = function(callback) {
 	return this;
 };
 
-Graph.prototype.pannable = function() {
-	function pan(dx,dy) {
-		this._scene.x += -dx;
-		this._scene.y += -dy;
-		this.update();
-	}
-	var x,y;
-	if (!this._pannable) {
-		var that = this;
-		$(this._canvas).on('mousedown',function(e) {
-			console.log('mousedown');
-			x = e.clientX;
-			y = e.clientY;
-			$(that._canvas).on('mousemove',function(e) {
-				pan.call(that,x- e.clientX,y- e.clientY);
-				x = e.clientX;
-				y = e.clientY;
-			});
-		});
+Graph.prototype._pan = function(dx,dy) {
+	this._scene.x += dx;
+	this._scene.y += dy;
+	this.update();
+};
 
-		$(this._canvas).on('mouseup',function() {
-			console.log('mouseup');
-			$(that._canvas).off('mousemove');
-		});
-	}
+Graph.prototype.pannable = function() {
+	this._pannable = true;
+	return this;
+};
+
+Graph.prototype.draggable = function() {
+	this._draggable = true;
 	return this;
 };
 
@@ -101,6 +92,7 @@ Graph.prototype.zoomable = function() {
 			zoomLevel = Math.max(zoomLevel,1.0);
 			that._scene.zoom(zoomLevel, e.clientX, e.clientY);
 		});
+		this._zoomable = true;
 	}
 	return this;
 };
@@ -123,7 +115,7 @@ Graph.prototype.update = function() {
 };
 
 Graph.prototype.draw = function() {
-	var that = this
+	var that = this;
 	if (!this._scene) {
 		this._scene = path(this._canvas);
 	}
@@ -131,7 +123,7 @@ Graph.prototype.draw = function() {
 		var line = path.line({
 			source: this.source,
 			target: this.target,
-			strokeStyle: '#ebebeb'
+			strokeStyle: this.strokeStyle || '#000000'
 		});
 		that._scene.addChild(line);
 	});
@@ -141,23 +133,56 @@ Graph.prototype.draw = function() {
 		if (that._nodeOver) {
 			circle.on('mouseover', function(e) {
 				that._nodeOver(circle,e);
+				if (that._currentMoveState!=='dragging') {
+					that._currentOverNode = circle;
+				}
 				that._scene.update();
 			});
 		}
 		if (that._nodeOut) {
 			circle.on('mouseout', function(e) {
+				if (that._currentMoveState!=='dragging') {
+					that._currentOverNode = null;
+				}
 				that._nodeOut(circle,e);
 				that._scene.update();
 			});
 		}
 		if (that._nodeClick) {
 			circle.on('click', function(e) {
-				console.log('('+circle.x + ',' + circle.y + ')')
 				that._nodeClick(circle,e);
 				that._scene.update();
 			});
 		}
 		that._scene.addChild(circle);
+	});
+
+	var x,y;
+	$(this._canvas).on('mousedown',function(e) {
+		console.log('mousedown');
+		x = e.clientX;
+		y = e.clientY;
+		$(that._canvas).on('mousemove',function(e) {
+			var dx = x - e.clientX;
+			var dy = y - e.clientY;
+			if (that._draggable && that._currentOverNode && (that._currentMoveState === null || that._currentMoveState === 'dragging'))  {
+				that._currentOverNode.x -= dx;
+				that._currentOverNode.y -= dy;
+				that._currentMoveState = 'dragging';
+				that.update();
+			} else if (that._pannable && (that._currentMoveState === null || that._currentMoveState === 'panning')) {
+				that._pan(dx,dy);
+				that._currentMoveState = 'panning';
+			}
+			x = e.clientX;
+			y = e.clientY;
+		});
+	});
+
+	$(this._canvas).on('mouseup',function() {
+		console.log('mouseup');
+		$(that._canvas).off('mousemove');
+		that._currentMoveState = null;
 	});
 
 

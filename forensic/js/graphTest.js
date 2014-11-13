@@ -45,7 +45,8 @@ var radialLinks = function(nodes,focusIdx) {
 		}
 		links.push({
 			source : focusNode,
-			target : this
+			target : this,
+			strokeStyle : '#ababab'
 		});
 	});
 	return links;
@@ -120,5 +121,6 @@ function main() {
 		.layout(new RadialLayout(nodes[0], 200))
 		.pannable()
 		.zoomable()
+		.draggable()
 		.draw();
 }
