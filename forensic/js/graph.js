@@ -11,11 +11,19 @@ function Graph() {
 	this._draggable = null;
 	this._currentOverNode = null;
 	this._currentMoveState = null;
+
+	this._nodeIndexToLinkLine = null;
 }
 
 Graph.prototype.nodes = function(nodes) {
 	if (nodes) {
 		this._nodes = nodes;
+		this._nodeIndexToLinkLine = {};
+		var that = this;
+		nodes.forEach(function(node) {
+			that._nodeIndexToLinkLine[node.index] = [];
+		});
+
 	} else {
 		return this._nodes;
 	}
@@ -119,17 +127,17 @@ Graph.prototype.draw = function() {
 	if (!this._scene) {
 		this._scene = path(this._canvas);
 	}
-	$.each(this._links,function() {
-		var line = path.line({
-			source: this.source,
-			target: this.target,
-			strokeStyle: this.strokeStyle || '#000000'
-		});
+	this._links.forEach(function(link) {
+		var line = path.line(link);
+
+		that._nodeIndexToLinkLine[link.source.index].push(line);
+		that._nodeIndexToLinkLine[link.target.index].push(line);
+
 		that._scene.addChild(line);
 	});
 
-	$.each(this._nodes, function(i) {
-		var circle = path.circle(this);
+	this._nodes.forEach(function(node) {
+		var circle = path.circle(node);
 		if (that._nodeOver) {
 			circle.on('mouseover', function(e) {
 				that._nodeOver(circle,e);
@@ -166,9 +174,22 @@ Graph.prototype.draw = function() {
 			var dx = x - e.clientX;
 			var dy = y - e.clientY;
 			if (that._draggable && that._currentOverNode && (that._currentMoveState === null || that._currentMoveState === 'dragging'))  {
+				that._currentMoveState = 'dragging';
+
+				// Move the node
 				that._currentOverNode.x -= dx;
 				that._currentOverNode.y -= dy;
-				that._currentMoveState = 'dragging';
+
+				// Move any links that contain that node
+				that._nodeIndexToLinkLine[that._currentOverNode.index].forEach(function(line) {
+					if (line.source.index === that._currentOverNode.index) {
+						line.source.x = that._currentOverNode.x;
+						line.source.y = that._currentOverNode.y;
+					} else {
+						line.target.x = that._currentOverNode.x;
+						line.target.y = that._currentOverNode.y;
+					}
+				});
 				that.update();
 			} else if (that._pannable && (that._currentMoveState === null || that._currentMoveState === 'panning')) {
 				that._pan(dx,dy);

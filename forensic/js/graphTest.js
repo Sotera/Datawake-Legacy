@@ -29,11 +29,37 @@ var randomNodes = function(maxX, maxY, maxRadius, num) {
 			fillStyle : prettyPalette[ Math.floor(prettyPalette.length * Math.random())]
 		};
 		nodes.push(node);
-		var ibreak = 0;
-		ibreak++;
-
 	}
 	return nodes;
+};
+
+var linkedGraph = function() {
+	var nodes = [];
+	nodes.push({
+		x : 100,
+		y : 100,
+		radius : 5,
+		index : 0,
+		fillStyle : '#000000'
+	});
+	nodes.push({
+		x : 300,
+		y : 300,
+		radius : 5,
+		index : 1,
+		fillStyle : '#000000'
+	});
+
+	var links = [];
+	links.push({
+		source : nodes[0],
+		target: nodes[1],
+		strokeStyle:'#ababab'
+	});
+	return {
+		nodes:nodes,
+		links:links
+	};
 };
 
 var radialLinks = function(nodes,focusIdx) {
@@ -69,8 +95,6 @@ var nonRandomNodes = function() {
 	return nodes;
 };
 
-
-
 function main() {
 
 	var WIDTH = 1024;
@@ -84,7 +108,6 @@ function main() {
 		node.strokeStyle = '#000000';
 	};
 	var onNodeOut = function(node) {
-
 		node.strokeStyle = null;
 	};
 	var onNodeClick = function(node) {
