@@ -111,8 +111,28 @@ CREATE TABLE domain_extractor_runtimes (
   domain VARCHAR(300),
   url varchar(1024),
   entity_type varchar(100),
-   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   index(domain(300),url(300))
+);
+
+DROP TABLE IF EXISTS scraping_feedback;
+CREATE TABLE scraping_feedback (
+  entity_type varchar(100),
+  entity_value varchar(100),
+  raw_text varchar (100),
+  url TEXT,
+  domain varchar (300),
+  index(domain(300))
+);
+
+DROP TABLE IF EXISTS invalid_extracted_entity;
+CREATE TABLE invalid_extracted_entity (
+  entity_value varchar (100),
+  entity_type varchar (100),
+  domain varchar (300),
+  userName TEXT,
+  ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  index(domain(300), entity_type(100), entity_value(100))
 );
 
 \q

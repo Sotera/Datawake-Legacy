@@ -64,8 +64,29 @@ var dwState = { tabToTrail: {}, tabToDomain: {}, lastTrail: null, lastDomain: nu
 var advanceSearchIgnore = ["http://lakitu:8080/", "chrome:", "http://localhost", "https://sotweb.istresearch.com", "https://ocweb.istresearch.com"];
 
 function createContextMenus() {
-    chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["all"], "onclick": captureSelectedText});
-    chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
+    chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["selection"], onclick: captureSelectedText});
+    chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], onclick: getSelections});
+    chrome.contextMenus.create({id: "line-break", contexts: ["all"], type: "separator"});
+    chrome.contextMenus.create({id: "report-extractor-feedback", title: "Report Extraction Error", contexts: ["selection"], onclick: reportFeedback});
+
+
+}
+
+function reportFeedback(info, tab){
+    var selectedText = info.selectionText;
+    function logSuccess(response){
+        console.log("%s was successfully saved as feedback.", selectedText);
+    }
+    var extractedValue = prompt("What should have been extracted?", selectedText);
+    var type = prompt("What type of entity is this? (phone, email, etc)");
+
+    var post_obj = {};
+    post_obj.raw_text = selectedText;
+    post_obj.entity_value = extractedValue;
+    post_obj.entity_type = type;
+    post_obj.url = tab.url;
+    post_obj.domain = dwState.tabToDomain[tab.id];
+    postContents(config.datawake_serviceUrl + "/feedback/good", JSON.stringify(post_obj), logSuccess, logError);
 }
 
 
