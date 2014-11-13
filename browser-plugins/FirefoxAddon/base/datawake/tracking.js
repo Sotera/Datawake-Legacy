@@ -12,6 +12,7 @@ var selectionHelper = require("./selections");
 exports.trackTab = trackTab;
 exports.emitHighlightTextToTabWorker = emitHighlightTextToTabWorker;
 exports.highlightTextWithToolTips = highlightTextWithToolTips;
+exports.promptForExtractedFeedback = promptForExtractedFeedback;
 exports.isTabWorkerAttached = isTabWorkerAttached;
 
 /**
@@ -40,6 +41,16 @@ function trackTab(tab, datawakeInfo) {
         tab.removeListener('activate', switchTab);
         tab.removeListener('close', close);
     }
+}
+
+function promptForExtractedFeedback(highlightedText, callback){
+    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+    var obj = {};
+    obj.raw_text = highlightedText;
+    currentTrackingTabWorker.port.emit("promptForFeedback", obj);
+    currentTrackingTabWorker.port.on("feedback", function(response){
+       callback(response.type, response.value);
+    });
 }
 
 /**

@@ -42,6 +42,15 @@ addon.port.on("highlight", function (selectionObject) {
     }
 });
 
+addon.port.on("promptForFeedback", function(obj){
+    var extractedValue = prompt("What should have been extracted?", obj.raw_text);
+    var type = prompt("What type of entity is this? (phone, email, etc)");
+    var response = {};
+    response.type = type;
+    response.value = extractedValue;
+    addon.port.emit("feedback", response);
+});
+
 addon.port.on("highlightWithToolTips", function (helperObject) {
     console.debug("Highlight with tool tips..");
     var entities = helperObject.entities;

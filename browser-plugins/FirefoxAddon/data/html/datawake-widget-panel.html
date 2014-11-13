@@ -79,6 +79,7 @@
                 <li class="active"><a href="#all_extracted_entities" role="tab" data-toggle="tab">Extracted Features</a></li>
                 <li><a href="#domain_extracted_entities" role="tab" data-toggle="tab" ng-show="domainFeaturesEnabled">Features in Domain</a></li>
                 <li><a href="#lookahead" role="tab" data-toggle="tab" ng-show="lookaheadEnabled">Lookahead</a></li>
+                <li><a href="#feedback" role="tab" data-toggle="tab">Extractor Feedback</a></li>
             </ul>
             <div class="tab-content">
 
@@ -115,6 +116,9 @@
                                 <th>
                                     External Tools
                                 </th>
+                                <th>
+                                    Remove
+                                </th>
                             </tr>
                             </thead>
                             <tbody>
@@ -125,10 +129,14 @@
                                     </span>
                                 </td>
                                 <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
-                                    <a ng-href="{{tools.link.replace('$ATTR',entities.type).replace('$VALUE',entities.name)}}">{{tools.display}}</a>
+                                    <a ng-href="{{tools.link.replace('$ATTR',entities.type).replace('$VALUE',entity)}}">{{tools.display}}</a>
                                 </td>
                                 <td ng-show="extracted_tools.length == 0">
                                     <span>No External Tools Available</span>
+                                </td>
+                                <td>
+                                    <button ng-hide="invalid[entity]" class="btn btn-danger" ng-click="markInvalid(type, entity);">Invalid Extraction?</button>
+                                    <span ng-hide="!invalid[entity]">Marked</span>
                                 </td>
                             </tr>
                             </tbody>
@@ -167,6 +175,34 @@
                         </div>
                     </div>
 
+                </div>
+                <div class="tab-pane"  id="feedback">
+                    <h3>Extractor Feedback</h3>
+
+                    <div>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>
+                                    Entity Type
+                                </th>
+                                <th>
+                                    Extracted Value
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="entity in feedbackEntities">
+                                <td>
+                                    {{entity.type}}
+                                </td>
+                                <td>
+                                    {{entity.value}}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
             </div>

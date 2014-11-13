@@ -17,21 +17,21 @@
             "title": "Datawake Deployment Address",
             "description": "(Required) Sets the current Datawake instance address.",
             "type": "string",
-            "value": "http://localhost:8088/datawake/plugin"
+            "value": "http://192.168.59.103/datawake/plugin"
         },
         {
             "name": "proxyHost",
             "title": "Datawake Deployment Address IP",
             "description": "(Required) Sets the proxy ip address for sending side requests through Tor.",
             "type": "string",
-            "value": "127.0.0.1"
+            "value": "192.168.59.103"
         },
         {
             "name": "proxyPort",
             "title": "Datawake Deployment Address PORT",
             "description": "(Required) Sets the proxy port for sending side requests through Tor.",
             "type": "integer",
-            "value": 8088
+            "value": 80
         },
         {
             "name": "useGoogleAuth",
