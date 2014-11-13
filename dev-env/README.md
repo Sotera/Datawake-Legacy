@@ -34,16 +34,16 @@ In addition to the docker containers your install the chrome or firefox plugin t
 
 For an easy dev environment we use fig to set up and deploy the docker containers.
 
-Edit docker-build/fig.yml
+Edit dev-env/fig.yml.template
 
 1. Set  KAFKA_ADVERTISED_HOST_NAME,  DW_DB_HOST, and  DW_KAFKA_CONN_POOL to your host ip address
 2. Under datawake edit the volumes for the location of code in your user directory. This allows you to edit code on your machine for development without having to rebuild containers for changes to be deployed. 
-3. For details on other env variables see datawake/conf/datawakeconfig.py
+3. Rename to fig.yml
 
 
 
-To persist data edit fig.yml to mount a volume for the mysql container.  
-WILL NOT CURRENTLY WORK USING BOOT2DOCKER  on OSX (https://github.com/boot2docker/boot2docker/issues/581) due to a problem with write permissions
+(LINUX ONLY) To persist data edit across mysql containers edit fig.yml to mount a volume for the mysql container.  
+WILL NOT CURRENTLY WORK USING BOOT2DOCKER  on OSX (https://github.com/boot2docker/boot2docker/issues/581) due to a problem with write permissions.
 ```
 mysql:
   image: mysql
@@ -60,30 +60,20 @@ Launch containers and configure the app
 ```
 
 # move to the docker-build direcotry
-cd docker-build
+cd dev-env
 
 # download and build containers
 fig up -d
 
 # list the running docker containers to make sure everything worked
-# you should see 4 containers, datawake,kafka,zookeeper, and mysql
+# you should see 5 containers, datawake,dwstream,kafka,zookeeper, and mysql
 docker ps
 
 
-# if needed set up the initial database, 
-cd init_scripts
-./init_mysql.sh
-
-# delete and create required kafka topics 
-./init_kafka.sh
-
-# start the streampare / storm topology in its own container
-./start_topology.sh
+# if needed set up the initial database, and create a mock user
+./init_db.sh   
 
 
-# check to see the datawake-streamparse container is now running
-docker ps
-docker logs datawake-streamparse
 ```
 
 

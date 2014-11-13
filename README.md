@@ -11,4 +11,4 @@ The datawake captures user browsing data for future analysis while also capturin
 
 ## Quick Start / Local Development Environemnts using Docker and Fig
 
-see docker-build/README.md
+see dev-env/README.md

@@ -8,14 +8,14 @@ mysql:
 
 zookeeper:
   image: jplock/zookeeper
-  ports: 
+  ports:
     - "2181"
 
 kafka:
   image: wurstmeister/kafka:0.8.1.1-1
   ports:
     - "9092:9092"
-  links: 
+  links:
     - zookeeper:zk
   environment:
     KAFKA_ADVERTISED_HOST_NAME: 192.168.59.103
@@ -57,10 +57,10 @@ datawake:
     #DW_EXTERNAL_LINK_NAMES:
     #DW_EXTERNAL_LINK_VALUES:
   volumes:
-    - /Users/ekimbrel/code/sotera/Datawake/server/datawake:/usr/local/share/tangelo/web/datawake
-    - /Users/ekimbrel/code/sotera/Datawake/server/domain:/usr/local/share/tangelo/web/domain
-    - /Users/ekimbrel/code/sotera/Datawake/server/forensic:/usr/local/share/tangelo/web/forensic
-    - /Users/ekimbrel/code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
+    - /Users/.../code/sotera/Datawake/server/datawake:/usr/local/share/tangelo/web/datawake
+    - /Users/.../code/sotera/Datawake/server/domain:/usr/local/share/tangelo/web/domain
+    - /Users/.../code/sotera/Datawake/server/forensic:/usr/local/share/tangelo/web/forensic
+    - /Users/.../code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
 
 
 
