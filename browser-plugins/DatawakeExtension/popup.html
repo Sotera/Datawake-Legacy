@@ -113,7 +113,7 @@
                                 <th>
                                     <span>{{type}}</span>
                                 </th>
-                                <th>
+                                <th colspan=42>
                                     External Tools
                                 </th>
                             </tr>
@@ -126,7 +126,7 @@
                                     </span>
                                 </td>
                                 <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
-                                    <a ng-href="{{tools.link.replace('$ATTR',entities.type).replace('$VALUE',entities.name)}}">{{tools.display}}</a>
+                                    <a target="_blank" ng-href="{{tools.link.replace('$ATTR',type).replace('$VALUE',entity)}}">{{tools.display}}</a>
                                 </td>
                                 <td ng-show="extracted_tools.length == 0">
                                     <span>No External Tools Available</span>
