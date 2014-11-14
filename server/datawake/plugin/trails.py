@@ -49,6 +49,19 @@ def get_trails_for_domain_and_org(org, domain):
 
 
 @is_in_session
+@required_parameters(['domain', 'trail', 'entity'])
+def add_trail_based_entity(domain, trail, entity):
+    success = db.add_trail_based_entity(domain, trail, entity) == 0
+    return json.dumps(dict(success=success))
+
+@is_in_session
+@required_parameters(['domain', 'trail'])
+def get_trail_based_entities(domain, trail):
+    entities = db.get_trail_based_entities(domain, trail)
+    return json.dumps(dict(entities=entities))
+
+
+@is_in_session
 @required_parameters(['domain', 'trailname'])
 def add_trail(trailname, domain, traildescription=u''):
     tangelo.log('datawake_trails POST trailname=%s traildescription=%s domain=%s' % (trailname, traildescription, domain))
@@ -63,7 +76,9 @@ def add_trail(trailname, domain, traildescription=u''):
 
 post_actions = {
     'get': get_trails,
-    'create': add_trail
+    'create': add_trail,
+    'entity': add_trail_based_entity,
+    'entities': get_trail_based_entities
 }
 
 

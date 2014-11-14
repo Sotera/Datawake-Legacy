@@ -306,20 +306,6 @@ class MySqlEntityDataConnector(DataConnector):
             self.close()
             raise
 
-    def add_extractor_feedback(self, domain, raw_text, entity_type, entity_value, url):
-        self._check_conn()
-        cursor = self.cnx.cursor()
-        params = [domain, raw_text, entity_type, entity_value, url]
-        sql = "insert into scraping_feedback(domain, raw_text, entity_type, entity_value, url) value (%s,%s,%s,%s,%s)"
-        try:
-            cursor.execute(sql, params)
-            self.cnx.commit()
-            return cursor.lastrowid
-        except:
-            raise
-        finally:
-            self.close()
-
     def add_new_domain_items(self, domain_items):
         self._check_conn()
         cursor = self.cnx.cursor()
@@ -335,50 +321,4 @@ class MySqlEntityDataConnector(DataConnector):
         except:
             self.close()
             return False
-
-    def get_feedback_entities(self, domain, url):
-        self._check_conn()
-        cursor = self.cnx.cursor()
-        sql = "select entity_type, entity_value from scraping_feedback where url=%s and domain=%s"
-        params = [url, domain]
-        try:
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-        except:
-            self.close()
-            raise
-        return map(lambda x: dict(type=x[0], value=x[1]), rows)
-
-    def get_invalid_extracted_entity_count(self, user_name, entity_type, entity_value, domain):
-        self._check_conn()
-        cursor = self.cnx.cursor()
-        sql = "select count(*) from invalid_extracted_entity where userName=%s and entity_type=%s and entity_value=%s and domain=%s"
-        params = [user_name, entity_type, entity_value, domain]
-        try:
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-            return rows[0][0]
-        except:
-            self.close()
-            raise
-
-    def mark_invalid_extracted_entity(self, user_name, entity_type, entity_value, domain):
-        count = self.get_invalid_extracted_entity_count(user_name, entity_type, entity_value, domain)
-        if count == 0:
-            self._check_conn()
-            cursor = self.cnx.cursor()
-            params = [user_name, entity_type, entity_value, domain]
-            sql = "insert into invalid_extracted_entity(userName, entity_type, entity_value, domain) value (%s,%s,%s,%s)"
-            try:
-                cursor.execute(sql, params)
-                self.cnx.commit()
-                return cursor.lastrowid
-            except:
-                raise
-            finally:
-                self.close()
-        else:
-            return 0
-
-
 

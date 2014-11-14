@@ -66,27 +66,79 @@ var advanceSearchIgnore = ["http://lakitu:8080/", "chrome:", "http://localhost",
 function createContextMenus() {
     chrome.contextMenus.create({id: "capture", title: "Capture Selection", contexts: ["selection"], onclick: captureSelectedText});
     chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], onclick: getSelections});
+    chrome.contextMenus.create({id: "hide", title: "Hide user selections", contexts: ["all"], onclick: hideSelections});
     chrome.contextMenus.create({id: "line-break", contexts: ["all"], type: "separator"});
     chrome.contextMenus.create({id: "report-extractor-feedback", title: "Report Extraction Error", contexts: ["selection"], onclick: reportFeedback});
+    chrome.contextMenus.create({id: "line-break", contexts: ["selection"], type: "separator"});
+    chrome.contextMenus.create({id: "trail-based-selections", title: "Add Trail Based Entity", contexts: ["selection"], onclick: addTrailBasedEntity});
+    chrome.contextMenus.create({id: "trail-based-selections-show", title: "Show Trail Based Entities", contexts: ["all"], onclick: showTrailBasedEntities});
+    chrome.contextMenus.create({id: "trail-based-selections-hide", title: "Hide Trail Based Entities", contexts: ["all"], onclick: hideTrailBasedEntities});
 
 
 }
+function hideSelections(info, tab){
+    chrome.tabs.sendMessage(tab.id, {operation: 'removeHighlight', highlight_class: "selections"}, function (response) {
+        if (response.success) {
+            console.log("hightlight trail entities message to %s recv.", tab.id);
+        } else {
+            console.log("highlight trail entities message error %s", response.error);
+        }
+    });
+}
+function hideTrailBasedEntities(info, tab){
+    chrome.tabs.sendMessage(tab.id, {operation: 'removeHighlight', highlight_class: "trailentities"}, function (response) {
+        if (response.success) {
+            console.log("hightlight trail entities message to %s recv.", tab.id);
+        } else {
+            console.log("highlight trail entities message error %s", response.error);
+        }
+    });
+}
 
-function reportFeedback(info, tab){
+function showTrailBasedEntities(info, tab){
+    var trail_entities_object = {};
+    trail_entities_object.domain = dwState.tabToDomain[tab.id];
+    trail_entities_object.trail = dwState.tabToTrail[tab.id];
+    function highlightEntities(response) {
+        chrome.tabs.sendMessage(tab.id, {operation: 'showTrailSelections', entities: response.entities}, function (response) {
+            if (response.success) {
+                console.log("hightlight trail entities message to %s recv.", tab.id);
+            } else {
+                console.log("highlight trail entities message error %s", response.error);
+            }
+        });
+    }
+    postContents(config.datawake_serviceUrl + "/trails/entities", JSON.stringify(trail_entities_object), highlightEntities, logError);
+}
+
+function addTrailBasedEntity(info, tab) {
+    var trail_selection_object = {};
+    trail_selection_object.domain = dwState.tabToDomain[tab.id];
+    trail_selection_object.trail = dwState.tabToTrail[tab.id];
+    trail_selection_object.entity = info.selectionText;
+    function logSuccess(response) {
+        console.log("%s was successfully saved as an entity.", trail_selection_object.entity);
+    }
+    postContents(config.datawake_serviceUrl + "/trails/entity", JSON.stringify(trail_selection_object), logSuccess, logError);
+}
+
+function reportFeedback(info, tab) {
     var selectedText = info.selectionText;
-    function logSuccess(response){
+
+    function logSuccess(response) {
         console.log("%s was successfully saved as feedback.", selectedText);
     }
+
     var extractedValue = prompt("What should have been extracted?", selectedText);
     var type = prompt("What type of entity is this? (phone, email, etc)");
 
-    var post_obj = {};
-    post_obj.raw_text = selectedText;
-    post_obj.entity_value = extractedValue;
-    post_obj.entity_type = type;
-    post_obj.url = tab.url;
-    post_obj.domain = dwState.tabToDomain[tab.id];
-    postContents(config.datawake_serviceUrl + "/feedback/good", JSON.stringify(post_obj), logSuccess, logError);
+    var feedback_object = {};
+    feedback_object.raw_text = selectedText;
+    feedback_object.entity_value = extractedValue;
+    feedback_object.entity_type = type;
+    feedback_object.url = tab.url;
+    feedback_object.domain = dwState.tabToDomain[tab.id];
+    postContents(config.datawake_serviceUrl + "/feedback/good", JSON.stringify(feedback_object), logSuccess, logError);
 }
 
 

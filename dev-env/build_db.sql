@@ -118,7 +118,7 @@ CREATE TABLE domain_extractor_runtimes (
 DROP TABLE IF EXISTS scraping_feedback;
 CREATE TABLE scraping_feedback (
   entity_type varchar(100),
-  entity_value varchar(100),
+  entity_value varchar(1024),
   raw_text varchar (100),
   url TEXT,
   domain varchar (300),
@@ -127,12 +127,19 @@ CREATE TABLE scraping_feedback (
 
 DROP TABLE IF EXISTS invalid_extracted_entity;
 CREATE TABLE invalid_extracted_entity (
-  entity_value varchar (100),
+  entity_value varchar (1024),
   entity_type varchar (100),
   domain varchar (300),
   userName TEXT,
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   index(domain(300), entity_type(100), entity_value(100))
+);
+
+DROP TABLE IF EXISTS trail_based_entities;
+CREATE TABLE trail_based_entities (
+  domain varchar(300),
+  trail varchar(100) NOT NULL,
+  entity varchar(1024)
 );
 
 \q

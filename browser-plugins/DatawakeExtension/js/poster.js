@@ -36,7 +36,9 @@ window.setTimeout(function () {
 
 var messageListenerMethods = {
     "highlighttext": highlightText,
-    "selections": highlightSelections
+    "selections": highlightSelections,
+    "showTrailSelections": showTrailSelections,
+    "removeHighlight": removeHighlight
 };
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -45,6 +47,18 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         callMethod(request, sender, sendResponse);
     }
 });
+
+function showTrailSelections(request, sender, sendResponse) {
+    try {
+        var entities = request.entities;
+        $.each(entities, function (index, selection) {
+            $('body').highlight(selection, "selections");
+        });
+        sendResponse({success: true});
+    } catch (e) {
+        sendResponse({success: false, error: e.message})
+    }
+}
 
 function highlightText(request, sender, sendResponse) {
     var entities_in_domain = request.entities_in_domain;
@@ -103,11 +117,21 @@ function highlightSelections(request, sender, sendResponse) {
     try {
         var selections = request.selections;
         $.each(selections, function (index, selection) {
-            $('body').highlight(selection);
+            $('body').highlight(selection, "trailentities");
         });
         sendResponse({success: true});
     } catch (e) {
         sendResponse({success: false, error: e.message})
     }
 
+}
+
+function removeHighlight(request, sender, sendResponse) {
+    try {
+        var highlight_class = request.highlight_class;
+        $("body").removeHighlight(highlight_class);
+        sendResponse({success: true});
+    } catch (e) {
+        sendResponse({success: false, error: e.message})
+    }
 }
