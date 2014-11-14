@@ -52,7 +52,7 @@ function showTrailSelections(request, sender, sendResponse) {
     try {
         var entities = request.entities;
         $.each(entities, function (index, selection) {
-            $('body').highlight(selection, "selections");
+            $('body').highlight(selection, "trailentities");
         });
         sendResponse({success: true});
     } catch (e) {
@@ -117,7 +117,7 @@ function highlightSelections(request, sender, sendResponse) {
     try {
         var selections = request.selections;
         $.each(selections, function (index, selection) {
-            $('body').highlight(selection, "trailentities");
+            $('body').highlight(selection, "selections");
         });
         sendResponse({success: true});
     } catch (e) {

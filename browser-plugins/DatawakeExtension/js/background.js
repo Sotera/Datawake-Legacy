@@ -69,7 +69,7 @@ function createContextMenus() {
     chrome.contextMenus.create({id: "hide", title: "Hide user selections", contexts: ["all"], onclick: hideSelections});
     chrome.contextMenus.create({id: "line-break", contexts: ["all"], type: "separator"});
     chrome.contextMenus.create({id: "report-extractor-feedback", title: "Report Extraction Error", contexts: ["selection"], onclick: reportFeedback});
-    chrome.contextMenus.create({id: "line-break", contexts: ["selection"], type: "separator"});
+    chrome.contextMenus.create({id: "line-break-2", contexts: ["all"], type: "separator"});
     chrome.contextMenus.create({id: "trail-based-selections", title: "Add Trail Based Entity", contexts: ["selection"], onclick: addTrailBasedEntity});
     chrome.contextMenus.create({id: "trail-based-selections-show", title: "Show Trail Based Entities", contexts: ["all"], onclick: showTrailBasedEntities});
     chrome.contextMenus.create({id: "trail-based-selections-hide", title: "Hide Trail Based Entities", contexts: ["all"], onclick: hideTrailBasedEntities});
