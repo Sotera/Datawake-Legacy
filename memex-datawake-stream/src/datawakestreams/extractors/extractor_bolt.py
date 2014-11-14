@@ -40,18 +40,23 @@ class ExtractorBolt(Bolt):
         :return:    (attribute,value,extracted_raw,extracted_metadata,context)
         """
         (url, status, headers, flags, body, timestamp, source,context) = tup.values
-        tuples = self.extractor.extract(url, status, headers, flags, body, timestamp, source)
+        try:
+            tuples = self.extractor.extract(url, status, headers, flags, body, timestamp, source)
+        except:
+            self.log(traceback.format_exc()+", "+self.name)
+            self.fail(tup)
+            return
         tuples = map(lambda x: x.to_list(),tuples)
         for t in tuples:
             t.append(context)
         if len(tuples) > 0:
             self.emit_many(tuples)
-            self.log(self.name+" emited "+str(len(tuples))+" from url: "+url.encode('utf-8'),level='debug')
+            #self.log(self.name+" emited "+str(len(tuples))+" from url: "+url.encode('utf-8'),level='debug')
 
             values = map(lambda x: x[1],tuples)
             type = tuples[0][0]
             self.connector.insert_entities(context['url'], type, values)
-            self.log("WROTE attribute: "+type+" values: "+str(values))
+            #self.log("WROTE attribute: "+type+" values: "+str(values))
 
 
 
