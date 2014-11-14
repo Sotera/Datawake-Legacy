@@ -17,6 +17,7 @@ var preferenceValidator = require("./preference-validator");
 exports.useDatawake = useDatawake;
 
 var newtabPageMod;
+var signedIn = false;
 /**
  * Gets the domains from the server.
  * @param callback Response callback.
@@ -67,6 +68,7 @@ function setupNewTabListener(worker) {
                 //SEE: https://bugzilla.mozilla.org/show_bug.cgi?id=942511
                 if (authHelper.authType() == 1) {
                     tabs.open("about:newtab");
+                    signedIn = true;
                     worker.tab.close();
                     worker.destroy();
                 } else {
@@ -82,6 +84,7 @@ function setupNewTabListener(worker) {
         worker.port.emit("versionNumber", self.version);
 
         worker.port.on("signOut", function () {
+            signedIn = false;
             authHelper.signOut(function (response) {
                 worker.port.emit("signOutComplete");
             });
@@ -117,14 +120,17 @@ function setupNewTabListener(worker) {
 
         //Sends the domains to the newtab overlay
         //Commented out for now
-//        authHelper.getLoggedInUser(function (user) {
-//            if (!(user.status == 501)) {
-//                getDomains(function (response) {
-//                    console.debug("Emitting Domains");
-//                    worker.port.emit("sendDomains", response.json);
-//                });
-//            }
-//        });
+        if (auth.type == 1 && signedIn) {
+            authHelper.getLoggedInUser(function (user) {
+                if (!(user.status == 501)) {
+                    worker.port.emit("sendUserInfo", user.json.user);
+                    getDomains(function (response) {
+                        console.debug("Emitting Domains");
+                        worker.port.emit("sendDomains", response.json);
+                    });
+                }
+            });
+        }
     } else {
         worker.port.emit("invalidPreferences");
     }
