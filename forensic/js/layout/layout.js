@@ -2,14 +2,24 @@ function Layout() {
 	this._nodes = null;
 	this._linkMap = null;
 	this._nodeMap = null;
-	this._tweenTime = 250;
+	this._duration = 250;
+	this._easing = 'ease-in-out';
 }
 
-Layout.prototype.tweenTime = function(tweenTime) {
-	if (tweenTime) {
-		this._tweenTime = tweenTime;
+Layout.prototype.duration = function(duration) {
+	if (duration) {
+		this._duration = duration;
 	} else {
-		return this._tweenTime;
+		return this._duration;
+	}
+	return this;
+};
+
+Layout.prototype.easing = function(easing) {
+	if (easing) {
+		this._easing = easing;
+	}	 else {
+		return this._easing;
 	}
 	return this;
 };
@@ -43,9 +53,6 @@ Layout.prototype.nodeMap = function(nodeMap) {
 
 Layout.prototype._setNodePosition = function(node,x,y) {
 
-	// Update the original data
-	node.x = x;
-	node.y = y;
 
 	// Update the node render object
 	var circle = this._nodeMap[node.index];
@@ -53,24 +60,29 @@ Layout.prototype._setNodePosition = function(node,x,y) {
 		x: x,
 		y: y
 	}, {
-		duration: this._tweenTime,
-		easing: 'ease-in-out'
+		duration: this._duration,
+		easing: this._easing
 	});
 
 	// Update the link render object
 	var that = this;
 	this._linkMap[node.index].forEach(function(link) {
 		if (link.source.index === node.index) {
-			link.source.tweenAttr({
+			link.tweenObj('source',{
 				x: x,
 				y: y
 			}, {
-				duration: that._tweenTime,
-				easing: 'ease-in-out'
+				duration: that._duration,
+				easing: that._easing
 			});
 		} else {
-
-			lineObj = link.target;
+			link.tweenObj('target',{
+				x: x,
+				y: y
+			}, {
+				duration: that._duration,
+				easing: that._easing
+			});
 		}
 
 	});
