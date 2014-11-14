@@ -27,10 +27,16 @@ function useContextMenu(tab) {
             contentScriptFile: data.url("js/datawake/selections.js"),
             context: contextMenu.URLContext(url),
             items: [
-                contextMenu.Item({ label: "Selection", data: "selection", context: contextMenu.SelectionContext()}),
-                contextMenu.Item({ label: "Highlight All Selections", data: "highlight"}),
+                contextMenu.Item({ label: "Capture Selection", data: "selection", context: contextMenu.SelectionContext()}),
+                contextMenu.Item({ label: "Report Extraction Error", data: "feedback", context: contextMenu.SelectionContext()}),
+                contextMenu.Item({ label: "Add Trail Based Entity", data: "add-trail-entity", context: contextMenu.SelectionContext()}),
                 contextMenu.Separator(),
-                contextMenu.Item({ label: "Report Extraction Error", data: "feedback", context: contextMenu.SelectionContext()})
+                contextMenu.Item({ label: "Hide Selections", data: "hide"}),
+                contextMenu.Item({ label: "Show Selections", data: "highlight"}),
+                contextMenu.Separator(),
+                contextMenu.Item({ label: "Show Trail Based Selections", data: "show-trail"}),
+                contextMenu.Item({ label: "Hide Trail Based Selections", data: "hide-trail"})
+
             ],
             onMessage: function (message) {
                 var tabId = tabs.activeTab.id;
@@ -45,10 +51,41 @@ function useContextMenu(tab) {
                     case "feedback":
                         saveFeedback(message.text, tabs.activeTab.url, datawakeInfo.domain.name);
                         break;
+                    case "hide":
+                        hideSelections("selections");
+                        break;
+                    case "hide-trail":
+                        hideSelections("trailentities");
+                        break;
+                    case "add-trail-entity":
+                        addTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+                        break;
+                    case "show-trail":
+                        showTrailEntities(datawakeInfo.domain.name, datawakeInfo.trail.name);
+                        break;
                 }
             }
         });
     }
+}
+
+function hideSelections(className) {
+    tracking.hideSelections(className);
+}
+
+function showTrailEntities(domain, trail) {
+    var post_obj = JSON.stringify({domain: domain, trail: trail});
+    requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entities", post_obj, function (response) {
+        var entities = response.json.entities;
+        tracking.highlightTrailEntities(entities);
+    });
+}
+
+function addTrailEntity(domain, trail, entity) {
+    var post_obj = JSON.stringify({domain: domain, trail: trail, entity: entity});
+    requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function (response) {
+        console.debug("Success");
+    });
 }
 
 /**
