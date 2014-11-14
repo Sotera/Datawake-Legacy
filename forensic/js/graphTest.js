@@ -69,24 +69,6 @@ function main() {
 	var onNodeOut = function(node) {
 		node.strokeStyle = null;
 	};
-	var onNodeClick = function(node) {
-		node.tweenAttr({
-			radius: node.radius+10
-		}, {
-			duration: 250,
-			easing: 'ease-in-out',
-			callback : function(node,attr) {
-				node.tweenAttr({
-					radius: node.radius-10
-				},
-					{
-						duration: 250,
-						easing: 'ease-in-out'
-					});
-			}
-		});
-	};
-
 	var jqCanvas = $('canvas')
 		.css('border', '1px solid black')
 		.attr({width:WIDTH,height:HEIGHT})
@@ -99,7 +81,6 @@ function main() {
 		.links(links)
 		.canvas(canvas)
 		.nodeHover(onNodeOver,onNodeOut)
-		.nodeClick(onNodeClick)
 		.pannable()
 		.zoomable()
 		.draggable()
@@ -107,7 +88,7 @@ function main() {
 
 	var layoutBtn = $('<button/>').click(function() {
 		var radialLayouter = new RadialLayout(nodes[0], 200)
-			.duration(2000)
+			.duration(750)
 			.easing('elasticInOut');
 		graph.layout(radialLayouter);
 		graph.update();
