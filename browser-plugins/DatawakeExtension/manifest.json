@@ -21,6 +21,7 @@
     "permissions": [
         "tabs",
         "identity",
+        "notifications",
         "contextMenus",
         "storage",
         "activeTab",

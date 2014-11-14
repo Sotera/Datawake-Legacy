@@ -32,7 +32,57 @@ dwstream:
   volumes:
     - /Users/.../code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
 
+dwsearch:
+  build: ../trail-specific-search
+  working_dir: /trail-specific-search
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+  environment:
+    DW_DB_USER: root
+    DW_DB_PASSWORD: root
+    DW_DB_JDBC: jdbc:mysql://192.168.59.103:3336/memex_sotera
+    DW_BING_KEY: YOUR_KEY_HERE
+    DW_GOOGLE_PUBLIC_KEY: YOUR_KEY_HERE
+    DW_GOOGLE_CUSTOM_SEARCH_CX: YOUR_CUSTOM_SEARCH_HERE
+    DW_KAFKA_BROKERS: 192.168.59.103:9092
+    DW_ZK_QUORUM: 192.168.59.103:2181
+    DW_SEARCH_API: localhost:8787/search?term=
+  command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.search.SearchTopology
 
+
+dwurlrank:
+  build: ../trail-specific-search
+  working_dir: /trail-specific-search
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+
+  environment:
+      DW_DB_USER: root
+      DW_DB_PASSWORD: root
+      DW_DB_JDBC: jdbc:mysql://192.168.59.103:3336/memex_sotera
+      DW_KAFKA_BROKERS: 192.168.59.103:9092
+      DW_ZK_QUORUM: 192.168.59.103:2181
+
+  command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.rank.UrlRankTopology
+
+dwurlcontents:
+  build: ../trail-specific-search
+  working_dir: /trail-specific-search
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+  environment:
+    DW_DB_USER: root
+    DW_DB_PASSWORD: root
+    DW_DB_JDBC: jdbc:mysql://192.168.59.103:3336/memex_sotera
+    DW_KAFKA_BROKERS: 192.168.59.103:9092
+    DW_ZK_QUORUM: 192.168.59.103:2181
+  command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.save.UrlContentsTopology
 
 datawake:
   build: ../server

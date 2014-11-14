@@ -1,6 +1,6 @@
 <div class="tab-pane active" id="all_extracted_entities">
     <div>
-        <h3>Extracted Features</h3>
+        <h3>Extracted Features <button class="btn btn-default btn-small" ng-click="refresh();"><span class="glyphicon glyphicon-refresh"></span></button></h3>
 
         <div ng-repeat="(entityType, entities) in extracted_entities_dict">
             <h3>{{entityType}}</h3>

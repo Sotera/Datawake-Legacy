@@ -1,6 +1,6 @@
 <div class="tab-pane" id="domain_extracted_entities" ng-show="showDomainFeatures">
     <div>
-        <h3>Features in Domain</h3>
+        <h3>Features in Domain <button class="btn btn-default btn-small" ng-click="refresh();"><span class="glyphicon glyphicon-refresh"></span></button></h3>
         <table class="table table-bordered" ng-repeat="(type, entities) in entities_in_domain">
             <thead>
             <tr>

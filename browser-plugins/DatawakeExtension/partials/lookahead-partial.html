@@ -1,5 +1,5 @@
 <div class="tab-pane" id="lookahead" style="margin-bottom: 15px; margin-top: 15px;" ng-show="lookaheadEnabled">
-    <h3>Link Lookahead</h3>&nbsp<span id="lookahead_progress"></span>
+    <h3>Link Lookahead <button class="btn btn-default btn-small" ng-click="refresh();"><span class="glyphicon glyphicon-refresh"></span></button></h3>&nbsp<span id="lookahead_progress"></span>
 
     <div id="lookahead_results">
         <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matches.length', 'domain_search_matches.length']:true">

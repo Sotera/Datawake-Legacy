@@ -20,7 +20,7 @@ class CrawlerSpout(Spout):
             self.conn_pool = settings['conn_pool'].encode()
             self.log('CrawlerSpout initialized with topic ='+self.topic+' conn_pool='+self.conn_pool)
             self.kafka = KafkaClient(self.conn_pool)
-            self.consumer = SimpleConsumer(self.kafka,self.group,self.topic,max_buffer_size=None)
+            self.consumer = SimpleConsumer(self.kafka,self.group,self.topic,max_buffer_size=None, fetch_size_bytes=2000000)
             self.consumer.seek(0,2) # move to the tail of the queue
         except:
             self.log("CrawlerSpout initialize error",level='error')

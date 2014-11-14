@@ -69,6 +69,30 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         });
     });
 
+    addon.port.on("trailEntities", function (entities_obj) {
+        $scope.irrelevantEntities = entities_obj.irrelevantEntities;
+        $scope.trailEntities = entities_obj.entities;
+        $scope.$apply();
+    });
+
+    addon.port.on("trailLinks", function (links_obj) {
+        $scope.visitedLinks = links_obj.visited;
+        $scope.notVisitedLinks = links_obj.notVisited;
+        $scope.$apply();
+    });
+
+    addon.port.on("trailEntities", function (entities_obj) {
+        $scope.irrelevantEntities = entities_obj.irrelevantEntities;
+        $scope.trailEntities = entities_obj.entities;
+        $scope.$apply();
+    });
+
+    addon.port.on("trailLinks", function (links_obj) {
+        $scope.visitedLinks = links_obj.visited;
+        $scope.notVisitedLinks = links_obj.notVisited;
+        $scope.$apply();
+    });
+
 
     $scope.searchHitsToggle = function (lookaheadObj) {
         lookaheadObj.searchHitsShow = !lookaheadObj.searchHitsShow;
@@ -90,6 +114,11 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         addon.port.emit("markInvalid", postObj);
     };
 
+    $scope.getHostName = function (url) {
+        return new URL(url).hostname
+    };
+
+
     addon.port.on("marked", function (entity) {
         $scope.$apply(function () {
             $scope.invalid[entity] = true;
@@ -100,6 +129,74 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         if ($scope.entities_in_domain.hasOwnProperty(type)) {
             return $scope.entities_in_domain[type].indexOf(name) >= 0;
         }
+    };
+
+    $scope.showEntities = function (link) {
+        if (!link.show) {
+            var data = {};
+            data.domain = $scope.datawake.domain.name;
+            data.trail = $scope.datawake.trail.name;
+            data.url = link.url;
+            addon.port.emit("getUrlEntities", data);
+            function updateLink(entities) {
+                link.entities = entities;
+                link.show = !link.show;
+                $scope.$apply();
+            }
+
+            addon.port.once("urlEntities", updateLink);
+        } else {
+            link.show = !link.show;
+        }
+    };
+
+
+    $scope.removeLink = function (link) {
+        var data = {};
+        data.domain = $scope.datawake.domain.name;
+        data.trail = $scope.datawake.trail.name;
+        data.url = link.url;
+        addon.port.once("removeTrailLink", function () {
+
+            $scope.notVisitedLinks.splice($scope.notVisitedLinks.indexOf(link), 1);
+            $scope.$apply();
+        });
+        addon.port.emit("removeLink", data);
+
+    };
+
+    $scope.showEntities = function (link) {
+        if (!link.show) {
+            var data = {};
+            data.domain = $scope.datawake.domain.name;
+            data.trail = $scope.datawake.trail.name;
+            data.url = link.url;
+            addon.port.emit("getUrlEntities", data);
+            function updateLink(entities) {
+                link.entities = entities;
+                link.show = !link.show;
+                $scope.$apply();
+            }
+
+            addon.port.once("urlEntities", updateLink);
+        } else {
+            link.show = !link.show;
+        }
+    };
+
+
+    $scope.removeLink = function (link) {
+        var data = {};
+        data.domain = $scope.datawake.domain.name;
+        data.trail = $scope.datawake.trail.name;
+        data.url = link.url;
+        addon.port.once("removeTrailLink", function () {
+
+            $scope.notVisitedLinks.splice($scope.notVisitedLinks.indexOf(link), 1);
+            $scope.$apply();
+        });
+        addon.port.emit("removeLink", data);
+
     };
 
     function createStarRating(starUrl) {

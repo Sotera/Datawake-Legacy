@@ -24,16 +24,10 @@ RUN add-apt-repository -y ppa:chris-lea/node.js \
 
 
 # install tangelo from sessions branch
-
-RUN git clone https://github.com/Kitware/tangelo.git \
-    && cd tangelo \
-    && git checkout sessions \
-    && cd .. \
-    && mkdir tangelo-build \
-    && cd tangelo-build \
-    && cmake -DNPM_EXECUTABLE=/usr/bin/npm  -DBUILD_DOCUMENTATION=OFF -DBUILD_TESTING=OFF ../tangelo \
-    && make \
-    && pip install sdist/tangelo-0.7.tar.gz
+RUN apt-get install libffi-dev
+RUN pip install girder
+RUN pip install twisted
+RUN pip install tangelo
 
 
 
@@ -102,4 +96,4 @@ ENV PYTHONPATH /usr/local/share/tangelo/web:$PYTHONPATH
 
 # set the default container command to run tangelo
 
-CMD ["tangelo","-nd","start"]
+CMD ["tangelo", "-c", "/etc/tangelo.conf"]

@@ -56,7 +56,6 @@ function overrideActiveTab() {
  */
 function setupListeners() {
     try {
-
         mainPanel.port.on("startLookaheadTimer", function (lookaheadTimerObject) {
             var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
             startLookaheadTimer(datawakeInfo, lookaheadTimerObject.links, 0, 1000);
@@ -123,12 +122,28 @@ function onToggle(state) {
 
 }
 
-function getEntities(domain, callback) {
-    if (tracking.isTabWorkerAttached(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
-        service.getEntities(domain, tabs.activeTab.url, callback);
-    } else {
-        console.debug("The Datawake is not on for this tab.");
-    }
+function getUrlEntities(data) {
+    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/urlEntities";
+    requestHelper.post(url, JSON.stringify(data), function (response) {
+        mainPanel.port.emit("urlEntities", response.json.entities);
+    });
+}
+
+function emitTrailBasedSearching(domain, trail) {
+    emitTrailEntities(domain, trail);
+    emitTrailBasedLinks(domain, trail);
+    mainPanel.port.on("removeLink", removeTrailBasedLink)
+}
+
+function removeTrailBasedLink(data) {
+    var post_data = {};
+    post_data.domain = data.domain;
+    post_data.trail = data.trail;
+    post_data.url = data.url;
+    var post_url = addOnPrefs.datawakeDeploymentUrl + "/trails/deleteLink";
+    requestHelper.post(post_url, JSON.stringify(post_data), function (response) {
+        mainPanel.port.emit("removeTrailLink");
+    });
 }
 /**
  * Marks an entity as in valid
@@ -146,7 +161,7 @@ function emitMarkedEntities(domain) {
     requestHelper.post(post_url, JSON.stringify({domain: domain}), function (response) {
         var marked_entities = response.json.marked_entities;
         for (var index in marked_entities)
-            if (marked_entities.hasOwnProperty(index))
+            if(marked_entities.hasOwnProperty(index))
                 mainPanel.port.emit("marked", marked_entities[index].value);
     });
 }
@@ -165,6 +180,34 @@ function emitFeedbackEntities(domain) {
         var entities = response.json.entities;
         mainPanel.port.emit("feedbackEntities", entities);
     });
+}
+
+function emitTrailEntities(domain, trail) {
+    var post_url = addOnPrefs.datawakeDeploymentUrl + "/trails/entities";
+    var post_data = JSON.stringify({
+        domain: domain,
+        trail: trail
+    });
+    requestHelper.post(post_url, post_data, function (response) {
+        mainPanel.port.emit("trailEntities", response.json);
+    });
+}
+function emitTrailBasedLinks(domain, trail) {
+    var post_url = addOnPrefs.datawakeDeploymentUrl + "/trails/links";
+    var post_data = JSON.stringify({
+        domain: domain,
+        trail: trail
+    });
+    requestHelper.post(post_url, post_data, function (response) {
+        mainPanel.port.emit("trailLinks", response.json);
+    });
+}
+/**
+ * Resets the ToggleButton and Panel to an invalid state.
+ */
+function resetToggleButton() {
+    //TODO: When badges get added, insert reset here.
+    mainPanel.port.emit("invalidTab");
 }
 
 function openExternalTool(externalUrlObject) {

@@ -19,6 +19,7 @@ import json
 
 import tangelo
 
+import datawake.util.kafka.kafka_producer as kafka_producer
 import datawake.util.db.datawake_mysql as db
 from datawake.util.session.helper import is_in_session
 from datawake.util.session import helper
@@ -49,6 +50,29 @@ def get_trails_for_domain_and_org(org, domain):
 
 
 @is_in_session
+@required_parameters(['domain', 'trail', 'entity'])
+def add_trail_based_entity(domain, trail, entity):
+    org = helper.get_org()
+    # entity = entity.encode('ascii', 'ignore')
+    if not db.does_trail_entity_exist(org, domain, trail, entity):
+        success = db.add_trail_based_entity(org, domain, trail, entity) == 0
+        if success:
+            kafka_producer.send_trail_term_message(org.encode("utf-8"), domain.encode("utf-8"), trail.encode("utf-8"), entity.encode("utf-8"))
+
+        return json.dumps(dict(success=success))
+    return json.dumps(dict(success=True))
+
+
+
+@is_in_session
+@required_parameters(['domain', 'trail'])
+def get_trail_based_entities(domain, trail):
+    entities = db.get_trail_based_entities(helper.get_org(), domain, trail)
+    irrelevantEntities = db.get_irrelevant_trail_based_entities(helper.get_org(), domain, trail)
+    return json.dumps(dict(entities=entities, irrelevantEntities=irrelevantEntities))
+
+
+@is_in_session
 @required_parameters(['domain', 'trailname'])
 def add_trail(trailname, domain, traildescription=u''):
     tangelo.log('datawake_trails POST trailname=%s traildescription=%s domain=%s' % (trailname, traildescription, domain))
@@ -61,9 +85,48 @@ def add_trail(trailname, domain, traildescription=u''):
     return json.dumps(dict(success=last_row >= 0))
 
 
+@is_in_session
+@required_parameters(['domain', 'trail'])
+def get_trail_entity_links(domain, trail):
+    org = helper.get_org()
+    return json.dumps(dict(visited=db.get_visited_trail_entity_links(org, domain, trail), notVisited=db.get_not_visited_trail_entity_links(org, domain, trail)))
+
+
+@is_in_session
+@required_parameters(['domain', 'trail', 'url'])
+def delete_link_from_trail(domain, trail, url):
+    org = helper.get_org()
+    success = db.delete_link_from_trail(org, domain, trail, url) == 0
+    return json.dumps(dict(success=success))
+
+
+@is_in_session
+@required_parameters(['domain', 'trail', 'entity'])
+def add_irrelevant_trail_entity(domain, trail, entity):
+    org = helper.get_org()
+    if not db.does_irrelevant_entity_exist(org, domain, trail, entity):
+        success = db.add_irrelevant_trail_entity(org, domain, trail, entity) == 0
+        if success:
+            kafka_producer.send_trail_term_message(org.encode("utf-8"), domain.encode("utf-8"), trail.encode("utf-8"), entity.encode("utf-8"), False)
+        return json.dumps(dict(success=success))
+    return json.dumps(dict(success=True))
+
+
+@is_in_session
+@required_parameters(['domain', 'trail', 'url'])
+def get_url_entities(domain, trail, url):
+    return json.dumps(dict(entities=db.get_entities_on_url(helper.get_org(), domain, trail, url)))
+
+
 post_actions = {
     'get': get_trails,
-    'create': add_trail
+    'create': add_trail,
+    'entity': add_trail_based_entity,
+    'entities': get_trail_based_entities,
+    'links': get_trail_entity_links,
+    'irrelevant': add_irrelevant_trail_entity,
+    'deleteLink': delete_link_from_trail,
+    'urlEntities': get_url_entities
 }
 
 

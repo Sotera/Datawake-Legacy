@@ -2,23 +2,20 @@
 CREATE DATABASE IF NOT EXISTS memex_sotera;
 USE memex_sotera;
 
-DROP TABLE IF EXISTS datawake_org;
-CREATE TABLE datawake_org (
+CREATE TABLE IF NOT EXISTS datawake_org (
   email VARCHAR(300),
   org VARCHAR(300)
 );
 
 
-DROP TABLE IF EXISTS datawake_domains;
-CREATE TABLE datawake_domains (
+CREATE TABLE IF NOT EXISTS datawake_domains (
   name VARCHAR(300),
   description TEXT,
   PRIMARY KEY(name)
 );
 
 
-DROP TABLE IF EXISTS datawake_selections;
-CREATE TABLE datawake_selections (
+CREATE TABLE IF NOT EXISTS datawake_selections (
   id INT NOT NULL AUTO_INCREMENT,
   postId INT NOT NULL,
   selection TEXT,
@@ -27,8 +24,7 @@ CREATE TABLE datawake_selections (
 );
 
 
-DROP TABLE IF EXISTS datawake_data;
-CREATE TABLE datawake_data (
+CREATE TABLE IF NOT EXISTS datawake_data (
   id INT NOT NULL AUTO_INCREMENT,
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   url TEXT,
@@ -42,8 +38,7 @@ CREATE TABLE datawake_data (
 );
 
 
-DROP TABLE IF EXISTS datawake_trails;
-CREATE TABLE datawake_trails (
+CREATE TABLE IF NOT EXISTS datawake_trails (
   name VARCHAR(100) NOT NULL,
   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   created_by TEXT,
@@ -54,8 +49,7 @@ CREATE TABLE datawake_trails (
 );
 
 
-DROP TABLE IF EXISTS starred_features;
-CREATE TABLE starred_features (
+CREATE TABLE IF NOT EXISTS starred_features (
   org VARCHAR(300),
   trail VARCHAR(100) NOT NULL,
   type VARCHAR(100),
@@ -64,8 +58,7 @@ CREATE TABLE starred_features (
 );
 
 
-DROP TABLE IF EXISTS datawake_url_rank;
-CREATE TABLE datawake_url_rank (
+CREATE TABLE IF NOT EXISTS datawake_url_rank (
   id INT NOT NULL AUTO_INCREMENT,
   url TEXT,
   userId TEXT,
@@ -78,15 +71,13 @@ CREATE TABLE datawake_url_rank (
 );
 
 
-DROP TABLE IF EXISTS datawake_domain_entities;
-CREATE TABLE datawake_domain_entities (
+CREATE TABLE IF NOT EXISTS datawake_domain_entities (
   rowkey varchar(1024),
   INDEX(rowkey(300))
 );
 
 
-DROP TABLE IF EXISTS general_extractor_web_index;
-CREATE TABLE general_extractor_web_index (
+CREATE TABLE IF NOT EXISTS general_extractor_web_index (
   url varchar(1024),
   entity_type varchar(100),
   entity_value varchar(1024),
@@ -95,8 +86,7 @@ CREATE TABLE general_extractor_web_index (
 );
 
 
-DROP TABLE IF EXISTS domain_extractor_web_index;
-CREATE TABLE domain_extractor_web_index (
+CREATE TABLE IF NOT EXISTS domain_extractor_web_index (
   domain VARCHAR(300),
   url varchar(1024),
   entity_type varchar(100),
@@ -106,8 +96,7 @@ CREATE TABLE domain_extractor_web_index (
 );
 
 
-DROP TABLE IF EXISTS domain_extractor_runtimes;
-CREATE TABLE domain_extractor_runtimes (
+CREATE TABLE IF NOT EXISTS domain_extractor_runtimes (
   domain VARCHAR(300),
   url varchar(1024),
   entity_type varchar(100),
@@ -115,19 +104,17 @@ CREATE TABLE domain_extractor_runtimes (
   index(domain(300),url(300))
 );
 
-DROP TABLE IF EXISTS scraping_feedback;
-CREATE TABLE scraping_feedback (
+CREATE TABLE IF NOT EXISTS scraping_feedback (
   entity_type varchar(100),
   entity_value varchar(1024),
   raw_text varchar (100),
-  url TEXT,
+  url varchar(1024),
   domain varchar (300),
   org VARCHAR(300),
   index(org(300),domain(300))
 );
 
-DROP TABLE IF EXISTS invalid_extracted_entity;
-CREATE TABLE invalid_extracted_entity (
+CREATE TABLE IF NOT EXISTS invalid_extracted_entity (
   entity_value varchar (1024),
   entity_type varchar (100),
   domain varchar (300),
@@ -137,4 +124,49 @@ CREATE TABLE invalid_extracted_entity (
   index(org(300),domain(300), entity_type(100), entity_value(100))
 );
 
-\q
+CREATE TABLE IF NOT EXISTS trail_based_entities (
+  org VARCHAR(300),
+  domain varchar(300),
+  trail varchar(100) NOT NULL,
+  entity varchar(1024),
+  google_result_count varchar(100),
+  index(org(300), domain(300), trail(100))
+);
+
+CREATE TABLE IF NOT EXISTS irrelevant_trail_based_entities (
+  org VARCHAR(300),
+  domain varchar(300),
+  trail varchar(100) NOT NULL,
+  entity varchar(1024),
+  google_result_count varchar(100),
+  index(org(300), domain(300), trail(100))
+);
+
+CREATE TABLE IF NOT EXISTS trail_term_rank (
+  org VARCHAR(300),
+  domain varchar(300),
+  trail varchar(100),
+  url varchar(1024),
+  title varchar(1024),
+  rank DOUBLE,
+  pageRank INT,
+  removed INT DEFAULT 0,
+  index(org(300), domain(300), trail(100), url(1024))
+);
+
+CREATE TABLE IF NOT EXISTS entities_on_url (
+  org VARCHAR(300),
+  domain varchar(300),
+  trail varchar(100),
+  url varchar(1024),
+  entity varchar(1024),
+  relevant INT DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS trail_entities_contents(
+  url varchar(1024),
+  html MEDIUMBLOB,
+  index(url(1024))
+);
+
+exit;

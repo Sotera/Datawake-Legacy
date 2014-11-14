@@ -37,6 +37,7 @@ window.setTimeout(function () {
 var messageListenerMethods = {
     "highlighttext": highlightText,
     "selections": highlightSelections,
+    "showTrailSelections": showTrailSelections,
     "removeHighlight": removeHighlight
 };
 
@@ -47,11 +48,23 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
 });
 
+function showTrailSelections(request, sender, sendResponse) {
+    try {
+        var entities = request.entities;
+        $.each(entities, function (index, selection) {
+            $('body').highlight(selection.entity, "trailentities");
+        });
+        sendResponse({success: true});
+    } catch (e) {
+        sendResponse({success: false, error: e.message})
+    }
+}
+
 function highlightText(request, sender, sendResponse) {
     var entities_in_domain = request.entities_in_domain;
     if (entities_in_domain.length > 0) {
         chrome.runtime.sendMessage({operation: "get-external-links"}, function (data) {
-            var links = data.links
+            var links = data.links;
             $.each(entities_in_domain, function (index, e) {
                 var i = index;
                 var entity = {};
@@ -107,7 +120,7 @@ function highlightSelections(request, sender, sendResponse) {
         var selections = request.selections;
         var className = request.highlight_class;
         $.each(selections, function (index, selection) {
-            $('body').highlight(selection, className);
+            $('body').highlight(selection, "selections");
         });
         sendResponse({success: true});
     } catch (e) {

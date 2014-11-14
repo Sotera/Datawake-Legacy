@@ -16,18 +16,18 @@ because it can't open any more.  Instead i use a constant in this file to keep a
 
 """
 
-class KafkaProducer:
 
-    def __init__(self,conn_pool,topic):
+class KafkaProducer:
+    def __init__(self, conn_pool, topic):
         self.conn_pool = conn_pool
         self.topic = topic
         self.kafka = KafkaClient(self.conn_pool)
         self.producer = SimpleProducer(self.kafka, async=True)
 
-    def send(self,message):
+    def send(self, message):
         self.producer.send_messages(self.topic, message)
 
-    def sendBulk(self,messages):
+    def sendBulk(self, messages):
         self.producer.send_messages(self.topic, *messages)
 
     def close(self):
@@ -37,12 +37,10 @@ class KafkaProducer:
         self.producer = None
 
 
-
-
 VISITING_PRODUCER = None
 
 
-def sendVisitingMessage(org,domain,userId,url,html):
+def sendVisitingMessage(org, domain, userId, url, html):
     global VISITING_PRODUCER
     if VISITING_PRODUCER is None:
         VISITING_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL, datawakeconfig.KAFKA_PUBLISH_TOPIC)
@@ -55,7 +53,7 @@ def sendVisitingMessage(org,domain,userId,url,html):
         message.append(url)
         message.append(html)
 
-        message = map(lambda x: x.replace('\0',''),message)
+        message = map(lambda x: x.replace('\0', ''), message)
         message = '\0'.join(message)
 
         VISITING_PRODUCER.send(message)
@@ -68,4 +66,22 @@ def sendVisitingMessage(org,domain,userId,url,html):
         raise
 
 
+TRAIL_PRODUCER = None
+
+
+def send_trail_term_message(org, domain, trail, term, validEntity=True):
+    global TRAIL_PRODUCER
+    if TRAIL_PRODUCER is None:
+        TRAIL_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL, datawakeconfig.KAFKA_TRAIL_TOPIC)
+
+    try:
+        message = "%s\0%s\0%s\0%s\0%s" % (org, domain, trail, term, str(validEntity))
+        TRAIL_PRODUCER.send(message)
+    except:
+        try:
+            TRAIL_PRODUCER.close()
+        except:
+            pass
+        TRAIL_PRODUCER = None
+        raise
 

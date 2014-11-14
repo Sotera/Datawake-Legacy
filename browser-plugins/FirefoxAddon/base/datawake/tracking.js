@@ -17,6 +17,8 @@ exports.highlightTrailEntities = highlightTrailEntities;
 exports.hideSelections = hideSelections;
 exports.highlightTextWithToolTips = highlightTextWithToolTips;
 exports.promptForExtractedFeedback = promptForExtractedFeedback;
+exports.promptTrailBasedEntity = promptTrailBasedEntity;
+exports.promptIrrelevantTrailBasedEntity = promptIrrelevantTrailBasedEntity;
 exports.isTabWorkerAttached = isTabWorkerAttached;
 
 /**
@@ -60,12 +62,60 @@ function promptForExtractedFeedback(highlightedText, callback) {
     });
 }
 
-function hideSelections(className) {
+function promptTrailBasedEntity(entity, callback){
+    var obj = {};
+    obj.raw_text = entity.trim();
+    obj.prompt = "Add trail based entity?";
+    obj.callback = "trailEntity";
+    promptForInput(obj, callback);
+}
+
+function promptIrrelevantTrailBasedEntity(entity, callback){
+    var obj = {};
+    obj.raw_text = entity.trim();
+    obj.prompt = "Add irrelevant trail entity?";
+    obj.callback = "irrelevantEntity";
+    promptForInput(obj, callback);
+}
+
+function promptForInput(obj, callback){
+    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+    currentTrackingTabWorker.port.emit("promptTrailBasedEntity", obj);
+    currentTrackingTabWorker.port.on(obj.callback, function(text){
+        callback(text);
+    });
+}
+
+function promptTrailBasedEntity(entity, callback){
+    var obj = {};
+    obj.raw_text = entity.trim();
+    obj.prompt = "Add trail based entity?";
+    obj.callback = "trailEntity";
+    promptForInput(obj, callback);
+}
+
+function promptIrrelevantTrailBasedEntity(entity, callback){
+    var obj = {};
+    obj.raw_text = entity.trim();
+    obj.prompt = "Add irrelevant trail entity?";
+    obj.callback = "irrelevantEntity";
+    promptForInput(obj, callback);
+}
+
+function promptForInput(obj, callback){
+    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+    currentTrackingTabWorker.port.emit("promptTrailBasedEntity", obj);
+    currentTrackingTabWorker.port.on(obj.callback, function(text){
+        callback(text);
+    });
+}
+
+function hideSelections(className){
     var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
     currentTrackingTabWorker.port.emit("removeSelections", className);
 }
 
-function highlightTrailEntities(entities) {
+function highlightTrailEntities(entities){
     var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
     currentTrackingTabWorker.port.emit("highlightTrailEntities", entities);
 }

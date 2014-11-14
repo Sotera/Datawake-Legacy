@@ -69,6 +69,14 @@ function createContextMenus() {
     chrome.contextMenus.create({id: "hide", title: "Hide user selections", contexts: ["all"], onclick: hideSelections});
     chrome.contextMenus.create({id: "line-break", contexts: ["all"], type: "separator"});
     chrome.contextMenus.create({id: "report-extractor-feedback", title: "Report Extraction Error", contexts: ["selection"], onclick: reportFeedback});
+    chrome.contextMenus.create({id: "line-break-2", contexts: ["all"], type: "separator"});
+    chrome.contextMenus.create({id: "trail-based-custom-selections", title: "Add Custom Trail Based Entity", contexts: ["all"], onclick: addCustomTrailBasedEntity});
+    chrome.contextMenus.create({id: "trail-based-custom-selections-irrelevant", title: "Add Custom Irrelevant Trail Based Entity", contexts: ["all"], onclick: addCustomIrrelevantTrailBasedEntity});
+    chrome.contextMenus.create({id: "line-break-3", contexts: ["all"], type: "separator"});
+    chrome.contextMenus.create({id: "trail-based-selections", title: "Add Trail Based Entity", contexts: ["selection"], onclick: addSelectedTrailBasedEntity});
+    chrome.contextMenus.create({id: "trail-based-selections-irrelevant", title: "Add Irrelevant Trail Based Entity", contexts: ["selection"], onclick: addSelectedIrrelevantTrailBasedEntity});
+    chrome.contextMenus.create({id: "trail-based-selections-show", title: "Show Trail Based Entities", contexts: ["all"], onclick: showTrailBasedEntities});
+    chrome.contextMenus.create({id: "trail-based-selections-hide", title: "Hide Trail Based Entities", contexts: ["all"], onclick: hideTrailBasedEntities});
 
 
 }
@@ -81,24 +89,129 @@ function hideSelections(info, tab) {
         }
     });
 }
+function hideTrailBasedEntities(info, tab) {
+    chrome.tabs.sendMessage(tab.id, {operation: 'removeHighlight', highlight_class: "trailentities"}, function (response) {
+        if (response.success) {
+            console.log("hightlight trail entities message to %s recv.", tab.id);
+        } else {
+            console.log("highlight trail entities message error %s", response.error);
+        }
+    });
+}
 
+function showTrailBasedEntities(info, tab) {
+    var trail_entities_object = {};
+    trail_entities_object.domain = dwState.tabToDomain[tab.id];
+    trail_entities_object.trail = dwState.tabToTrail[tab.id];
+    function highlightEntities(response) {
+        var entities = [];
+        for (var entity in response.entities)
+            entities.push({entity: entity});
+        console.log(entities);
+        chrome.tabs.sendMessage(tab.id, {operation: 'showTrailSelections', entities: entities}, function (response) {
+            if (response.success) {
+                console.log("hightlight trail entities message to %s recv.", tab.id);
+            } else {
+                console.log("highlight trail entities message error %s", response.error);
+            }
+        });
+    }
+
+    postContents(config.datawake_serviceUrl + "/trails/entities", JSON.stringify(trail_entities_object), highlightEntities, logError);
+}
+
+function addSelectedTrailBasedEntity(info, tab) {
+    addTrailBasedEntity(info, tab);
+}
+
+function addCustomTrailBasedEntity(info, tab) {
+    if (!info.selectionText)
+        info.selectionText = "";
+    info.selectionText = prompt("Add trail based entity?", info.selectionText.trim());
+    addTrailBasedEntity(info, tab);
+}
+
+function addSelectedIrrelevantTrailBasedEntity(info, tab) {
+    addIrrelevantTrailBasedEntity(info, tab);
+}
+
+function addCustomIrrelevantTrailBasedEntity(info, tab) {
+    if (!info.selectionText)
+        info.selectionText = "";
+    info.selectionText = prompt("Add irrelevant entity?", info.selectionText.trim());
+    addIrrelevantTrailBasedEntity(info, tab);
+}
+
+function addTrailBasedEntity(info, tab) {
+    var trail_selection_object = {};
+    trail_selection_object.domain = dwState.tabToDomain[tab.id];
+    trail_selection_object.trail = dwState.tabToTrail[tab.id];
+    trail_selection_object.entity = info.selectionText.trim();
+    function logSuccess(response) {
+        console.log("%s was successfully saved as an entity.", trail_selection_object.entity);
+        var options = {};
+        options.type = "basic";
+        options.message = trail_selection_object.entity + " was successfully saved as an entity!";
+        options.title = "Success!";
+        options.iconUrl = "images/waveicon38.png";
+        options.isClickable = false;
+        chrome.notifications.create("trail-entity-notification", options, function (notificationId) {
+        });
+
+    }
+
+    if (trail_selection_object.entity) {
+        chrome.notifications.clear("trail-entity-notification", function () {
+        });
+        console.log(JSON.stringify(trail_selection_object));
+        postContents(config.datawake_serviceUrl + "/trails/entity", JSON.stringify(trail_selection_object), logSuccess, logError);
+    }
+}
+function addIrrelevantTrailBasedEntity(info, tab) {
+    var trail_selection_object = {};
+    trail_selection_object.domain = dwState.tabToDomain[tab.id];
+    trail_selection_object.trail = dwState.tabToTrail[tab.id];
+    trail_selection_object.entity = info.selectionText.trim();
+    function logSuccess(response) {
+        console.log("%s was successfully saved as an irrelevant entity.", trail_selection_object.entity);
+        var options = {};
+        options.type = "basic";
+        options.isClickable = false;
+        options.iconUrl = "images/waveicon38.png";
+        options.message = trail_selection_object.entity + " was successfully saved as an irrelevant entity!";
+        options.title = "Success!";
+        chrome.notifications.create("irrelevant-trail-entity-notification", options, function () {
+        });
+    }
+
+    if (trail_selection_object.entity) {
+        chrome.notifications.clear("irrelevant-trail-entity-notification", function () {
+        });
+        console.log(JSON.stringify(trail_selection_object));
+        postContents(config.datawake_serviceUrl + "/trails/irrelevant", JSON.stringify(trail_selection_object), logSuccess, logError);
+    }
+}
 function reportFeedback(info, tab) {
-    var selectedText = info.selectionText;
+    var selectedText = info.selectionText.trim();
 
     function logSuccess(response) {
         console.log("%s was successfully saved as feedback.", selectedText);
     }
 
     var extractedValue = prompt("What should have been extracted?", selectedText);
-    var type = prompt("What type of entity is this? (phone, email, etc)");
+    if (extractedValue) {
+        var type = prompt("What type of entity is this? (phone, email, etc)");
+        if (type) {
+            var feedback_object = {};
+            feedback_object.raw_text = selectedText;
+            feedback_object.entity_value = extractedValue;
+            feedback_object.entity_type = type;
+            feedback_object.url = tab.url;
+            feedback_object.domain = dwState.tabToDomain[tab.id];
 
-    var feedback_object = {};
-    feedback_object.raw_text = selectedText;
-    feedback_object.entity_value = extractedValue;
-    feedback_object.entity_type = type;
-    feedback_object.url = tab.url;
-    feedback_object.domain = dwState.tabToDomain[tab.id];
-    postContents(config.datawake_serviceUrl + "/feedback/good", JSON.stringify(feedback_object), logSuccess, logError);
+            postContents(config.datawake_serviceUrl + "/feedback/good", JSON.stringify(feedback_object), logSuccess, logError);
+        }
+    }
 }
 
 
@@ -363,7 +476,7 @@ function getExtractedPageAttributes(tabId, url, delay) {
             console.log("Highlight feature disabled");
         }
         if (onOff.scraper) {
-            chrome.tabs.query({active: true}, function (tabs) {
+            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                 if (url == tabs[0].url) {
 
                     if (entities_in_domain.length > 0) {

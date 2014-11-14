@@ -29,9 +29,14 @@ function useContextMenu(tab) {
             items: [
                 contextMenu.Item({ label: "Capture Selection", data: "selection", context: contextMenu.SelectionContext()}),
                 contextMenu.Item({ label: "Report Extraction Error", data: "feedback", context: contextMenu.SelectionContext()}),
+                contextMenu.Item({ label: "Add Trail Based Entity", data: "add-trail-entity", context: contextMenu.SelectionContext()}),
+                contextMenu.Item({ label: "Add Irrelevant Trail Based Entity", data: "add-irrelevant-trail-entity", context: contextMenu.SelectionContext()}),
                 contextMenu.Separator(),
                 contextMenu.Item({ label: "Hide Selections", data: "hide"}),
                 contextMenu.Item({ label: "Show Selections", data: "highlight"}),
+                contextMenu.Separator(),
+                contextMenu.Item({ label: "Show Trail Based Selections", data: "show-trail"}),
+                contextMenu.Item({ label: "Hide Trail Based Selections", data: "hide-trail"})
 
             ],
             onMessage: function (message) {
@@ -50,6 +55,18 @@ function useContextMenu(tab) {
                     case "hide":
                         hideSelections("selections");
                         break;
+                    case "hide-trail":
+                        hideSelections("trailentities");
+                        break;
+                    case "add-trail-entity":
+                        addTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+                        break;
+                    case "add-irrelevant-trail-entity":
+                        addIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+                        break;
+                    case "show-trail":
+                        showTrailEntities(datawakeInfo.domain.name, datawakeInfo.trail.name);
+                        break;
                 }
             }
         });
@@ -58,6 +75,34 @@ function useContextMenu(tab) {
 
 function hideSelections(className) {
     tracking.hideSelections(className);
+}
+
+function showTrailEntities(domain, trail) {
+    var post_obj = JSON.stringify({domain: domain, trail: trail});
+    requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entities", post_obj, function (response) {
+        var entities = [];
+        for (var entity in response.json.entities)
+            entities.push({entity: entity});
+        tracking.highlightTrailEntities(entities);
+    });
+}
+
+function addTrailEntity(domain, trail, entity) {
+    tracking.promptTrailBasedEntity(entity, function (text) {
+        var post_obj = JSON.stringify({domain: domain, trail: trail, entity: text});
+        requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function (response) {
+            console.debug("Success");
+        });
+    });
+}
+
+function addIrrelevantTrailEntity(domain, trail, entity) {
+    tracking.promptIrrelevantTrailBasedEntity(entity, function (text) {
+        var post_obj = JSON.stringify({domain: domain, trail: trail, entity: text});
+        requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/irrelevant", post_obj, function (response) {
+            console.debug("Success");
+        });
+    });
 }
 
 /**

@@ -35,24 +35,31 @@ addon.port.on("loadToolTips", function (urls) {
     }
 });
 
-addon.port.on("removeSelections", function(className){
+addon.port.on("removeSelections", function (className) {
     $("body").removeHighlight(className);
 });
 
 
 addon.port.on("highlight", function (selectionObject) {
-    $.each(selectionObject.selections, function(index, item){
+    $.each(selectionObject.selections, function (index, item) {
         $('body').highlight(item, "selections");
     });
 });
 
-addon.port.on("highlightTrailEntities", function(trailEntities){
-    $.each(trailEntities, function(index, entity){
+addon.port.on("highlightTrailEntities", function (trailEntities) {
+    $.each(trailEntities, function (index, entity) {
         $("body").highlight(entity, "trailentities");
     });
 });
 
-addon.port.on("promptForFeedback", function(obj){
+addon.port.on("promptTrailBasedEntity", function (obj) {
+    var text = prompt(obj.prompt, obj.raw_text);
+    if (text) {
+        addon.port.emit(obj.callback, text);
+    }
+});
+
+addon.port.on("promptForFeedback", function (obj) {
     var extractedValue = prompt("What should have been extracted?", obj.raw_text);
     var type = prompt("What type of entity is this? (phone, email, etc)");
     var response = {};

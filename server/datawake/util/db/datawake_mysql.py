@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import sys
+import math
 
 import mysql.connector
 from mysql.connector import errorcode
@@ -391,7 +392,7 @@ def getActiveUsers(org):
     return result
 
 
-### TRAILS ###
+# ## TRAILS ###
 
 
 #
@@ -488,7 +489,7 @@ def getStarredFeaturesForTrail(org, trail):
         return map(lambda x: {'type': x[0], 'value': x[1]}, rows)
 
 
-####   URL RANKS   ####
+# ###   URL RANKS   ####
 
 
 #
@@ -555,7 +556,7 @@ def getUserUrlRanks(org, userId, trail, domain='default'):
     return ranks
 
 
-####  URL Counts ####
+# ###  URL Counts ####
 
 
 #
@@ -573,7 +574,7 @@ def getUrlCount(org, url, domain='default'):
         return rows[0][0]
 
 
-#### Datawake Domains ####
+# ### Datawake Domains ####
 
 
 
@@ -606,8 +607,96 @@ def domain_exists(name):
     return rows[0] == 1
 
 
+def does_trail_entity_exist(org, domain, trail, entity):
+    sql = "select count(*) from trail_based_entities where org=%s and domain=%s and trail=%s and entity=%s"
+    return dbGetRows(sql, [org, domain, trail, entity])[0][0] >= 1
+
+
+def does_irrelevant_entity_exist(org, domain, trail, entity):
+    sql = "select count(*) from irrelevant_trail_based_entities where org=%s and domain=%s and trail=%s and entity=%s"
+    return dbGetRows(sql, [org, domain, trail, entity])[0][0] >= 1
+
+
+def add_trail_based_entity(org, domain, trail, entity):
+    sql = "insert into trail_based_entities(org, domain, trail, entity, google_result_count) value (%s, %s,%s,%s, %s)"
+    return dbCommitSQL(sql, [org, domain, trail, entity, "0"])
+
+
+def add_irrelevant_trail_entity(org, domain, trail, entity):
+    sql = "insert into irrelevant_trail_based_entities(org, domain, trail, entity, google_result_count) value (%s, %s,%s,%s, %s)"
+    return dbCommitSQL(sql, [org, domain, trail, entity, "0"])
+
+
+def add_irrelevant_trail_entity(org, domain, trail, entity):
+    sql = "insert into irrelevant_trail_based_entities(org, domain, trail, entity, google_result_count) value (%s, %s,%s,%s, %s)"
+    return dbCommitSQL(sql, [org, domain, trail, entity, "0"])
+
+
+def get_trail_based_entities(org, domain, trail):
+    sql = "select entity,google_result_count from trail_based_entities " \
+          "where org=%s and " \
+          "domain=%s and " \
+          "trail=%s and " \
+          "google_result_count != '0' and google_result_count != '1' " \
+          "order by google_result_count"
+    params = [org, domain, trail]
+    return build_dictionary_of_entities(dbGetRows(sql, params))
+
+def build_dictionary_of_entities(rows):
+    entities = {}
+    for x in rows:
+        entities[x[0]] = 1.0 / math.log(float(x[1]), 2)
+    return entities
+
+def get_irrelevant_trail_based_entities(org, domain, trail):
+    sql = "select entity,google_result_count from irrelevant_trail_based_entities " \
+          "where org=%s and " \
+          "domain=%s and " \
+          "trail=%s and " \
+          "google_result_count != '0' and google_result_count != '1' " \
+          "order by google_result_count"
+    params = [org, domain, trail]
+    return build_dictionary_of_entities(dbGetRows(sql, params))
+
+
+def get_trail_entity_links(org, domain, trail):
+    sql = "select url, title, rank from trail_term_rank where org=%s and domain=%s and trail=%s order by rank desc"
+    params = [org, domain, trail]
+    return map(lambda x: dict(url=x[0], title=x[1], rank=x[2]), dbGetRows(sql, params))
+
+
+def get_visited_trail_entity_links(org, domain, trail):
+    sql = "select distinct lower(a.url), a.title, a.rank from trail_term_rank as a " \
+          "join datawake_data as b " \
+          "on lower(a.url) = lower(b.url) " \
+          "where a.org=%s and a.domain=%s and a.trail=%s and a.removed=0 " \
+          " and b.org=%s and b.domain=%s and b.trail=%s"
+    params = [org, domain, trail, org, domain, trail]
+    return map(lambda x: dict(url=x[0], title=x[1], rank=x[2]), dbGetRows(sql, params))
+
+
+def get_not_visited_trail_entity_links(org, domain, trail):
+    sql = "select a.url, a.title, a.rank from trail_term_rank as a " \
+          "left join datawake_data as b " \
+          "on lower(a.url) = lower(b.url) " \
+          "where a.org=%s and a.domain=%s and a.trail=%s and b.url is NULL and a.removed=0 "
+    params = [org, domain, trail]
+    return map(lambda x: dict(url=x[0], title=x[1], rank=x[2]), dbGetRows(sql, params))
+
+
+def get_entities_on_url(org, domain, trail, url):
+    sql = "select entity, relevant from entities_on_url where org=%s and domain=%s and trail=%s and url=%s"
+    params = [org, domain, trail, url]
+    return map(lambda x: dict(entity=x[0], relevant=x[1] == 0), dbGetRows(sql, params))
+
+
+def delete_link_from_trail(org, domain, trail, url):
+    sql = "UPDATE trail_term_rank SET removed=1 WHERE org=%s and domain=%s and trail=%s and url=%s"
+    return dbCommitSQL(sql, [org, domain, trail, url])
+
+
 def add_extractor_feedback(org, domain, raw_text, entity_type, entity_value, url):
-    sql = "insert into scraping_feedback(org, domain, raw_text, entity_type, entity_value, url) value (%s,%s,%s,%s,%s,%s)"
+    sql = "insert into scraping_feedback(org, domain, raw_text, entity_type, entity_value, url) value (%s,%s,%s,%s,%s)"
     return dbCommitSQL(sql, [org, domain, raw_text, entity_type, entity_value, url])
 
 
@@ -640,7 +729,7 @@ def get_marked_entities(org, domain, user_name):
     return map(lambda x: dict(value=x[0]), rows)
 
 
-#### OLD STUFF, needs cleaned and updated ####
+# ### OLD STUFF, needs cleaned and updated ####
 
 
 
@@ -687,7 +776,7 @@ def drop_and_create_tables():
 
 
 #
-#  Main function allows to run as a script to drop and create tables.
+# Main function allows to run as a script to drop and create tables.
 #
 if __name__ == '__main__':
     if sys.argv[1] == 'create-db':

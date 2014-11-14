@@ -101,9 +101,10 @@ class CrawlerBolt(Bolt):
         opener = urllib2.build_opener()
         headers = [("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0")]
         opener.addheaders = headers
+        output = None
         try:
             response = opener.open(url)
-            html = response.read()#.encode('ascii', 'ignore')
+            html = response.read().decode('latin-1')
 
             links = self.linkExtractor.extract(url, response.getcode(), '', '', html, response.info()['date'], 'datawake-local-crawler')
             links = map(lambda x: x.value,links)
@@ -129,6 +130,9 @@ class CrawlerBolt(Bolt):
             self.lastfetch = datetime.datetime.now()
         except:
             self.log("CrawlerBolt "+traceback.format_exc())
+            self.log("CrawlerBolt: URL: " + url)
+            if output is not None:
+                self.log("CrawlerBolt: Output Length: " + str(len(json.dumps(output))))
             #self.fail(tup)
 
 
