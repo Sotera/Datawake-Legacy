@@ -39,9 +39,7 @@ var authHelper = (function () {
                 $.ajax({
                     type: 'POST',
                     url: '/datawake/forensic/session',
-                    data: jsonData,
-                    dataType: 'json',
-                    contentType: 'application/json',
+                    data: {token: authResult['access_token']},
                     success: function (response) {
                         console.log("datawake server login: " + response);
                         onLoggedIn();
@@ -86,7 +84,7 @@ var authHelper = (function () {
                     url: revokeUrl,
                     async: false,
                     contentType: "application/json",
-                    dataType: 'json',
+                    dataType: 'jsonp',
                     success: function (nullResponse) {
                         gapi.auth.signOut();
                         this.authResult = undefined;
