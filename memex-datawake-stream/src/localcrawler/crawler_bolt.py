@@ -82,7 +82,6 @@ class CrawlerBolt(Bolt):
         input = tup.values[0]
 
         url = input['url']
-        safeurl = url.encode('utf-8','ignore')
 
         now = datetime.datetime.now()
         if url in self.seen:
@@ -90,7 +89,6 @@ class CrawlerBolt(Bolt):
             delta = now - lastSeen
             if delta.total_seconds() < 3600:
                 # seen less than an hour ago, don't fetch again
-                self.log("CrawlerBolt ignoring "+url+" last seen"+str(delta.total_seconds()))
                 return
         self.seen[url] = now
 
@@ -99,7 +97,7 @@ class CrawlerBolt(Bolt):
             #self.log("CrawlerBolt sleeping")
             time.sleep(.25)
 
-        #self.log("CrawlerBolt fetching: "+safeurl)
+
         opener = urllib2.build_opener()
         headers = [("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0")]
         opener.addheaders = headers
@@ -113,37 +111,30 @@ class CrawlerBolt(Bolt):
             #self.log("CrawlerBolt extracted links: "+str(links))
 
             output = dict(
-                 id = input['id'],
-                 appid = input['appid'],
-                 url = url,
-                 status_code = response.getcode(),
-                 status_msg = 'Success',
-                 timestamp = response.info()['date'],
-                 links_found = links,
-                 raw_html =  html,
-                 attrs = input['attrs']
+                id = input['id'],
+                appid = input['appid'],
+                url = url,
+                status_code = response.getcode(),
+                status_msg = 'Success',
+                timestamp = response.info()['date'],
+                links_found = links,
+                raw_html =  html,
+                attrs = input['attrs']
             )
 
 
             #self.emit([json.dumps(output)])
             self.producer.send_messages(self.topic, json.dumps(output))
 
-            #self.log("CrawlerBolt fetched: "+safeurl+" status: "+str(response.getcode()),level='debug')
             self.lastfetch = datetime.datetime.now()
         except:
-            self.log("CrawlerBolt error fetching url: "+safeurl,level='error')
             self.log("CrawlerBolt "+traceback.format_exc())
+            #self.fail(tup)
 
 
         if len(self.seen) > self.MAX_LRU_SIZE:
             self.log("CrawlerBolt truncating LRU cache",level='trace')
             sorted_x = sorted(self.seen.items(), key=operator.itemgetter(1))[0:self.TRUNCATE]
             self.seen = dict(sorted_x)
-
-
-
-
-
-
 
 

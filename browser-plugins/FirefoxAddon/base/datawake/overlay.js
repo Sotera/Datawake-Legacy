@@ -17,6 +17,7 @@ var preferenceValidator = require("./preference-validator");
 exports.useDatawake = useDatawake;
 
 var newtabPageMod;
+var signedIn = false;
 /**
  * Gets the domains from the server.
  * @param callback Response callback.
@@ -65,6 +66,7 @@ function setupNewTabListener(worker) {
             authHelper.signIn(function (response) {
                 //Just a work around due to the activeTab issue.
                 //SEE: https://bugzilla.mozilla.org/show_bug.cgi?id=942511
+                signedIn = true;
                 if (authHelper.authType() == 1) {
                     tabs.open("about:newtab");
                     worker.tab.close();
@@ -82,6 +84,7 @@ function setupNewTabListener(worker) {
         worker.port.emit("versionNumber", self.version);
 
         worker.port.on("signOut", function () {
+            signedIn = false;
             authHelper.signOut(function (response) {
                 worker.port.emit("signOutComplete");
             });
@@ -117,14 +120,18 @@ function setupNewTabListener(worker) {
 
         //Sends the domains to the newtab overlay
         //Commented out for now
-//        authHelper.getLoggedInUser(function (user) {
-//            if (!(user.status == 501)) {
-//                getDomains(function (response) {
-//                    console.debug("Emitting Domains");
-//                    worker.port.emit("sendDomains", response.json);
-//                });
-//            }
-//        });
+        //A work around due to a bug in firefox SEE: Line 68
+        if (auth.type == 1 && signedIn) {
+            authHelper.getLoggedInUser(function (user) {
+                if (!(user.status == 501)) {
+                    worker.port.emit("sendUserInfo", user.json.user);
+                    getDomains(function (response) {
+                        console.debug("Emitting Domains");
+                        worker.port.emit("sendDomains", response.json);
+                    });
+                }
+            });
+        }
     } else {
         worker.port.emit("invalidPreferences");
     }
@@ -176,6 +183,6 @@ function useDatawake() {
         onAttach: setupNewTabListener
     });
     //Sets the override for a new tab.
-    tabs.on("ready", overrideNewTab);
+    tabs.on("open", overrideNewTab);
 }
 
