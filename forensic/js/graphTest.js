@@ -56,7 +56,7 @@ function main() {
 
 	var WIDTH = 1024;
 	var HEIGHT = 760;
-	var NUM_NODES = 2;
+	var NUM_NODES = 1000;
 	var MAX_RADIUS = 5;
 
 

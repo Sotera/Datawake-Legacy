@@ -217,7 +217,7 @@ Graph.prototype.draw = function() {
 		that._scene.addChild(circle);
 
 		if (node.label) {
-			var labelAttrs = that._layouter.layoutLabel(node);
+			var labelAttrs = that._layouter.layoutLabel(node.x,node.y,node.radius);
 
 			var fontSize = typeof(this._fontSize) === 'function' ? this._fontSize(node) : this._fontSize;
 			if (!fontSize) {

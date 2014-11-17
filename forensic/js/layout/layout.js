@@ -84,7 +84,7 @@ Layout.prototype._setNodePosition = function(node,x,y,bImmediate) {
 	// Update the label render object
 	var label = this._labelMap[node.index];
 	if (label) {
-		var labelPos = this.layoutLabel(node);
+		var labelPos = this.layoutLabel(x,y,node.radius);
 		if (bImmediate!==true) {
 			label.tweenAttr(labelPos, {
 				duration: this._duration,
@@ -128,9 +128,9 @@ Layout.prototype.layout = function() {
 
 };
 
-Layout.prototype.layoutLabel = function(node) {
+Layout.prototype.layoutLabel = function(nodeX,nodeY,radius) {
 	return {
-		x: node.x + 5,
-		y: node.y + 5
+		x: nodeX + radius + 5,
+		y: nodeY + radius + 5
 	};
 };
