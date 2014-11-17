@@ -4,7 +4,7 @@ var data = self.data;
 exports.isValidUrl = isValidUrl;
 exports.isOverrideUrl = isOverrideUrl;
 
-var urlsToIgnore = ["about:blank", "about:newtab", "about:tor", "http://lakitu:8080/", "chrome:", "http://localhost", "https://sotweb.istresearch.com", "https://ocweb.istresearch.com", "about:", "datawake-tab-panel.html"];
+var urlsToIgnore = ["about:blank", "about:newtab", "about:tor", "http://lakitu:8080/", "chrome:", "http://localhost", "https://sotweb.istresearch.com", "https://ocweb.istresearch.com", "datawake-tab-panel.html"];
 
 /**
  * Checks to see if a url is in the set of links to ignore.
