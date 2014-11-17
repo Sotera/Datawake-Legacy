@@ -35,10 +35,12 @@ function trackTab(tab, datawakeInfo) {
         tab.on('close', function (other) {
             close(tabId);
         });
+        widgetHelper.activeIcon();
     } else {
         tab.removeListener('ready', setupTabWorkerAndServices);
         tab.removeListener('activate', switchTab);
         tab.removeListener('close', close);
+        widgetHelper.resetIcon();
     }
 }
 

@@ -158,16 +158,6 @@ function createTrail(domain, trailname, traildescription, callback) {
 }
 
 /**
- * Function that overrides a new tab.
- * @param tab Tab to override.
- */
-function overrideNewTab(tab) {
-    if (constants.isOverrideUrl(tab.url)) {
-        tab.url = data.url("html/datawake-tab-panel.html");
-    }
-}
-
-/**
  * Triggers the datawake and the page modification for a new tab.
  */
 function useDatawake() {
@@ -182,7 +172,5 @@ function useDatawake() {
         ],
         onAttach: setupNewTabListener
     });
-    //Sets the override for a new tab.
-    tabs.on("open", overrideNewTab);
 }
 
