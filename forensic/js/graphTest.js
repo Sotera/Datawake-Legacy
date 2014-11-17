@@ -25,6 +25,7 @@ var randomNodes = function(maxX, maxY, maxRadius, num) {
 			x : Math.floor(Math.random() * maxX),
 			y : Math.floor(Math.random() * maxY),
 			radius : Math.floor(5 + (Math.random() * (maxRadius))),
+			label : 'Index: '+i,
 			index : i,
 			fillStyle : prettyPalette[ Math.floor(prettyPalette.length * Math.random())]
 		};
@@ -32,6 +33,7 @@ var randomNodes = function(maxX, maxY, maxRadius, num) {
 	}
 	return nodes;
 };
+
 
 var radialLinks = function(nodes,focusIdx) {
 	var focusNode = nodes[focusIdx];
@@ -54,7 +56,7 @@ function main() {
 
 	var WIDTH = 1024;
 	var HEIGHT = 760;
-	var NUM_NODES = 50;
+	var NUM_NODES = 2;
 	var MAX_RADIUS = 5;
 
 

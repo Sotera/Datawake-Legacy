@@ -6,6 +6,29 @@ function RadialLayout(focus,distance) {
 }
 $.extend(RadialLayout.prototype, Layout.prototype);
 
+RadialLayout.prototype.layoutLabel = function(node) {
+	var x, y, align;
+
+	// Right of center
+	if (node.x > this._focus) {
+		x = node.x + (node.radius + 10);
+		align = 'start';
+	} else {
+		x = node.x - (node.radius + 10);
+		align = 'end';
+	}
+
+	if (node.y > this._focus) {
+		y = node.y + (node.radius + 10);
+	} else {
+		y = node.y - (node.radius + 10);
+	}
+	return {
+		x: x,
+		y: y,
+		align: align
+	};
+};
 
 RadialLayout.prototype.layout = function() {
 	var nodes = this.nodes();
