@@ -66,9 +66,9 @@ function setupNewTabListener(worker) {
             authHelper.signIn(function (response) {
                 //Just a work around due to the activeTab issue.
                 //SEE: https://bugzilla.mozilla.org/show_bug.cgi?id=942511
+                signedIn = true;
                 if (authHelper.authType() == 1) {
                     tabs.open("about:newtab");
-                    signedIn = true;
                     worker.tab.close();
                     worker.destroy();
                 } else {
@@ -120,6 +120,7 @@ function setupNewTabListener(worker) {
 
         //Sends the domains to the newtab overlay
         //Commented out for now
+        //A work around due to a bug in firefox SEE: Line 68
         if (auth.type == 1 && signedIn) {
             authHelper.getLoggedInUser(function (user) {
                 if (!(user.status == 501)) {
@@ -182,6 +183,6 @@ function useDatawake() {
         onAttach: setupNewTabListener
     });
     //Sets the override for a new tab.
-    tabs.on("ready", overrideNewTab);
+    tabs.on("open", overrideNewTab);
 }
 
