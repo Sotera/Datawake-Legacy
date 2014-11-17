@@ -35,7 +35,7 @@ function addValidTabAndData(datawakeInfo) {
 }
 
 /**
- * Does the advanced search for any entities that were pulled out.
+ * Gets all entities associated for this url
  * @param delay Timeout delay between each call.
  */
 function getAllEntities(delay) {
@@ -83,7 +83,6 @@ function getAllEntities(delay) {
  */
 function highlightExtractedLinks(entitiesInDomain) {
     externalLinkHelper.getExternalLinks(function (response) {
-
         var highlightObject = {};
         highlightObject.entities = entitiesInDomain;
         mainPanel.port.emit("externalLinks", response.json);
