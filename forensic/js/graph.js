@@ -12,16 +12,25 @@ function Graph() {
 	this._currentOverNode = null;
 	this._currentMoveState = null;
 
+	this._fontSize = null;
+	this._fontFamily = null;
+	this._fontColor = null;
+	this._fontStroke = null;
+	this._fontStrokeWidth = null;
+
 	// Data to render object maps
 	this._nodeIndexToLinkLine = null;
 	this._nodeIndexToCircle = null;
+	this._nodeIndexToLabel = null;
 }
+
 
 Graph.prototype.nodes = function(nodes) {
 	if (nodes) {
 		this._nodes = nodes;
 		this._nodeIndexToLinkLine = {};
 		this._nodeIndexToCircle = {};
+		this._nodeIndexToLabel = {};
 		var that = this;
 		nodes.forEach(function(node) {
 			that._nodeIndexToLinkLine[node.index] = [];
@@ -115,6 +124,7 @@ Graph.prototype.layout = function(layouter) {
 			.nodes(this._nodes)
 			.linkMap(this._nodeIndexToLinkLine)
 			.nodeMap(this._nodeIndexToCircle)
+			.labelMap(this._nodeIndexToLabel)
 			.layout();
 	} else {
 		this._layouter.layout();
@@ -122,6 +132,34 @@ Graph.prototype.layout = function(layouter) {
 	}
 	return this;
 };
+
+Graph.prototype.fontSize = function(fontSize) {
+	if (fontSize) {
+		this._fontSize = fontSize;
+	} else {
+		return this._fontSize;
+	}
+	return this;
+};
+
+Graph.prototype.fontColour = function(fontColour) {
+	if (fontColour) {
+		this._fontColor = fontColour;
+	} else {
+		return this._fontColor;
+	}
+	return this;
+};
+
+Graph.prototype.fontFamily = function(fontFamily) {
+	if (fontFamily) {
+		this._fontFamily = fontFamily;
+	} else {
+		return this._fontFamily;
+	}
+	return this;
+};
+
 
 Graph.prototype.update = function() {
 	this._scene.update();
@@ -132,6 +170,13 @@ Graph.prototype.draw = function() {
 	var that = this;
 	if (!this._scene) {
 		this._scene = path(this._canvas);
+	}
+	if (!this._layouter) {
+		var defaulLayout = new Layout()
+			.nodeMap(this._nodeIndexToCircle)
+			.linkMap(this._nodeIndexToLinkLine)
+			.labelMap(this._nodeIndexToLabel);
+		this.layout(defaulLayout);
 	}
 	this._links.forEach(function(link) {
 		var line = path.line(link);
@@ -170,6 +215,44 @@ Graph.prototype.draw = function() {
 			});
 		}
 		that._scene.addChild(circle);
+
+		if (node.label) {
+			var labelAttrs = that._layouter.layoutLabel(node.x,node.y,node.radius);
+
+			var fontSize = typeof(this._fontSize) === 'function' ? this._fontSize(node) : this._fontSize;
+			if (!fontSize) {
+				fontSize = 10;
+			}
+
+			var fontFamily = typeof(this._fontFamily) === 'function' ? this._fontFamily(node) : this._fontFamily;
+			if (!fontFamily) {
+				fontFamily = 'sans-serif';
+			}
+			var fontStr = fontSize + 'px ' + fontFamily;
+
+			var fontFill = typeof(this._fontColor) === 'function' ? this._fontColor(node) : this._fontColor;
+			if (!fontFill) {
+				fontFill = '#000000';
+			}
+			var fontStroke = typeof(this._fontStroke) === 'function' ? this._fontStroke(node) : this._fontStroke;
+			var fontStrokeWidth = typeof(this._fontStroke) === 'function' ? this._fontStrokeWidth : this._fontStrokeWidth;
+
+			var labelSpec = {
+				font: fontStr,
+				fillStyle: fontFill,
+				strokeStyle: fontStroke,
+				lineWidth: fontStrokeWidth,
+				text : node.label
+			};
+			for (var key in labelAttrs) {
+				if (labelAttrs.hasOwnProperty(key)) {
+					labelSpec[key] = labelAttrs[key];
+				}
+			}
+			var label = path.text(labelSpec);
+			that._nodeIndexToLabel[node.index] = label;
+			that._scene.addChild(label);
+		}
 	});
 
 	var x,y;
@@ -184,19 +267,20 @@ Graph.prototype.draw = function() {
 				that._currentMoveState = 'dragging';
 
 				// Move the node
-				that._currentOverNode.x -= dx;
-				that._currentOverNode.y -= dy;
-
-				// Move any links that contain that node
-				that._nodeIndexToLinkLine[that._currentOverNode.index].forEach(function(line) {
-					if (line.source.index === that._currentOverNode.index) {
-						line.source.x = that._currentOverNode.x;
-						line.source.y = that._currentOverNode.y;
-					} else {
-						line.target.x = that._currentOverNode.x;
-						line.target.y = that._currentOverNode.y;
-					}
-				});
+				that._layouter._setNodePositionImmediate(that._currentOverNode, that._currentOverNode.x - dx, that._currentOverNode.y - dy);
+//				that._currentOverNode.x -= dx;
+//				that._currentOverNode.y -= dy;
+//
+//				// Move any links that contain that node
+//				that._nodeIndexToLinkLine[that._currentOverNode.index].forEach(function(line) {
+//					if (line.source.index === that._currentOverNode.index) {
+//						line.source.x = that._currentOverNode.x;
+//						line.source.y = that._currentOverNode.y;
+//					} else {
+//						line.target.x = that._currentOverNode.x;
+//						line.target.y = that._currentOverNode.y;
+//					}
+//				});
 				that.update();
 			} else if (that._pannable && (that._currentMoveState === null || that._currentMoveState === 'panning')) {
 				that._pan(dx,dy);
