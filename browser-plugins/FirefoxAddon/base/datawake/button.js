@@ -1,7 +1,7 @@
 var self = require("sdk/self");
 var data = self.data;
 var addOnPrefs = require("sdk/simple-prefs").prefs;
-var { ToggleButton } = require('sdk/ui/button/toggle');
+var ui = require('sdk/ui');
 var tabs = require("sdk/tabs");
 var timer = require("sdk/timers");
 
@@ -15,6 +15,8 @@ exports.useButton = useButton;
 exports.switchToTab = switchToTab;
 exports.resetToggleButton = resetToggleButton;
 exports.cleanUpTab = cleanUpTab;
+exports.resetIcon = resetIcon;
+exports.activeIcon = activeIcon;
 
 var datawakeButton;
 var mainPanel;
@@ -32,6 +34,7 @@ function addValidTabAndData(datawakeInfo) {
     mainPanel.port.emit("useLookahead", addOnPrefs.useLookahead);
     mainPanel.port.emit("useRanking", addOnPrefs.useRanking);
     mainPanel.port.emit("versionNumber", self.version)
+
 }
 
 /**
@@ -100,7 +103,7 @@ function highlightExtractedLinks(entitiesInDomain) {
 function getEntitiesInDomain(domainExtracted) {
     var entitiesInDomain = [];
     for (var type in domainExtracted) {
-        for(var index in domainExtracted[type]){
+        for (var index in domainExtracted[type]) {
             var typeObject = {};
             typeObject.type = type;
             typeObject.name = domainExtracted[type][index];
@@ -125,15 +128,11 @@ function useButton() {
             starUrl: data.url("css/icons/")
         }
     });
-    datawakeButton = ToggleButton({
+    datawakeButton = ui.ActionButton({
         id: "datawake-widget",
         label: "Datawake Widget",
-        icon: {
-            "16": data.url("img/waveicon16.png"),
-            "32": data.url("img/waveicon19.png"),
-            "64": data.url("img/waveicon38.png")
-        },
-        onChange: onToggle
+        icon: data.url("img/waveicon38_bw.png"),
+        onClick: onToggle
     });
 
     setupTimerListeners();
@@ -144,6 +143,13 @@ function useButton() {
  */
 function handleHide() {
     datawakeButton.state('window', {checked: false});
+}
+
+/**
+ * Function that overrides a new tab.
+ */
+function overrideActiveTab() {
+    tabs.activeTab.url = data.url("html/datawake-tab-panel.html");
 }
 
 /**
@@ -176,14 +182,16 @@ function onToggle(state) {
         emitRanks(datawakeInfo);
         mainPanel.port.on("setUrlRank", setUrlRank);
         mainPanel.port.on("openExternalLink", openExternalTool);
+        mainPanel.show({position: datawakeButton});
         mainPanel.port.on("markInvalid", markInvalid);
     }
     else {
         //Emit that it is not a valid tab.
+        overrideActiveTab();
         resetToggleButton();
         console.debug("Invalid Tab");
     }
-    mainPanel.show({position: datawakeButton});
+
 }
 /**
  * Marks an entity as in valid
@@ -300,7 +308,7 @@ function startLookaheadTimer(datawakeInfo, links, index, delay) {
                 }, 1);
             }
         }
-    }, function(err){
+    }, function (err) {
         console.info("lookahead error");
     });
 }
@@ -342,6 +350,13 @@ function switchToTab(tabId, datawakeInfo, badgeCount) {
         getAllEntities(1000);
     }
 }
+function activeIcon(){
+    datawakeButton.icon = data.url("img/waveicon38.png");
+}
+
+function resetIcon(){
+    datawakeButton.icon = data.url("img/waveicon38_bw.png");
+}
 
 function deleteBadgeForTab(tabId) {
     if (badgeForTab.hasOwnProperty(tabId))
@@ -351,3 +366,12 @@ function deleteBadgeForTab(tabId) {
 function cleanUpTab(tabId) {
     deleteBadgeForTab(tabId);
 }
+
+tabs.on("activate", function(tab){
+    var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
+    if(datawakeInfoForTab != null && datawakeInfoForTab.isDatawakeOn){
+        activeIcon();
+    } else {
+        resetIcon();
+    }
+});
