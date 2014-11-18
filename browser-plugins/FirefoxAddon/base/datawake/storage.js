@@ -2,8 +2,10 @@ exports.getDatawakeInfo = getDatawakeInfo;
 exports.setDatawakeInfo = setDatawakeInfo;
 exports.deleteDatawakeInfo = deleteDatawakeInfo;
 exports.hasDatawakeInfoForTab = hasDatawakeInfoForTab;
+exports.getRecentlyUsedDatawakeInfo = getRecentlyUsedDatawakeInfo;
 
 var datawakeInfoStorage = {};
+var lastUsedDatawakeInfo = null;
 
 /**
  * Function for getting the datawake information associated with a tab.
@@ -24,6 +26,11 @@ function getDatawakeInfo(tabId) {
 function setDatawakeInfo(tabId, datawakeInfo) {
     deleteDatawakeInfo(tabId);
     datawakeInfoStorage[tabId] = datawakeInfo;
+    lastUsedDatawakeInfo = datawakeInfo;
+}
+
+function getRecentlyUsedDatawakeInfo(){
+    return lastUsedDatawakeInfo;
 }
 
 /**

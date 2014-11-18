@@ -172,5 +172,12 @@ function useDatawake() {
         ],
         onAttach: setupNewTabListener
     });
+
+    tabs.on("open", function (tab) {
+        var datawakeInfo = storage.getRecentlyUsedDatawakeInfo();
+        if (datawakeInfo != null) {
+            trackingHelper.trackTab(tab, datawakeInfo);
+        }
+    });
 }
 
