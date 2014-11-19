@@ -60,9 +60,9 @@ class KafkaDatawakeLookaheadSpout(Spout):
 
     def initialize(self, stormconf, context):
         try:
-            settings = all_settings.get_settings(stormconf['topology.deployment'])
-            self.topic = settings['crawler-out-topic'].encode()
-            self.conn_pool = settings['conn_pool'].encode()
+            self.settings = all_settings.get_settings(stormconf['topology.deployment'])
+            self.topic = self.settings['crawler-out-topic'].encode()
+            self.conn_pool = self.settings['conn_pool'].encode()
             self.log('KafkaDatawakeLookaheadSpout initialized with topic =' + self.topic + ' conn_pool=' + self.conn_pool)
             self.kafka = KafkaClient(self.conn_pool)
             self.consumer = SimpleConsumer(self.kafka, self.group, self.topic, max_buffer_size=None)
@@ -94,16 +94,17 @@ class KafkaDatawakeLookaheadSpout(Spout):
         message = offsetAndMessage.message.value
 
         crawled = json.loads(message)
-        safeurl = crawled['url'].encode('utf-8', 'ignore')
-        self.log("Lookahead spout received id: " + crawled['id'] + " url: " + safeurl)
-        context = {
-            'source': 'datawake-lookahead',
-            'userId': crawled['attrs']['userId'],
-            'org': crawled['attrs']['org'],
-            'domain': crawled['attrs']['domain'],
-            'url': crawled['url']
-        }
-        self.emit([crawled['url'], crawled['status_code'], '', '', crawled['raw_html'], crawled['timestamp'], context['source'], context])
+        if crawled['appid'] == self.settings["appid"]:
+            safeurl = crawled['url'].encode('utf-8', 'ignore')
+            self.log("Lookahead spout received id: " + crawled['id'] + " url: " + safeurl)
+            context = {
+                'source': 'datawake-lookahead',
+                'userId': crawled['attrs']['userId'],
+                'org': crawled['attrs']['org'],
+                'domain': crawled['attrs']['domain'],
+                'url': crawled['url']
+            }
+            self.emit([crawled['url'], crawled['status_code'], '', '', crawled['raw_html'], crawled['timestamp'], context['source'], context])
 
 
 
