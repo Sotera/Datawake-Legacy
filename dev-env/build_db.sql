@@ -142,4 +142,14 @@ CREATE TABLE trail_based_entities (
   entity varchar(1024)
 );
 
-\q
+DROP TABLE IF EXISTS trail_term_rank;
+CREATE TABLE trail_term_rank (
+  org VARCHAR(300),
+  domain varchar(300),
+  trail varchar(100),
+  url varchar (1024),
+  title varchar(100),
+  rank INTEGER
+);
+
+exit;

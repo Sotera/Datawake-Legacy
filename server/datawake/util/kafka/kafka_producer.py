@@ -72,11 +72,11 @@ TRAIL_PRODUCER = None
 def send_trail_term_message(org, domain, trail, term):
     global TRAIL_PRODUCER
     if TRAIL_PRODUCER is None:
-        TRAIL_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL, "trail-search")
+        TRAIL_PRODUCER = KafkaProducer("172.21.10.41:9092", "trail-search")
 
     try:
         message = "%s\0%s\0%s\0%s" % (org, domain, trail, term)
-        TRAIL_PRODUCER.send(message)
+        TRAIL_PRODUCER.send(str(message))
     except:
         try:
             TRAIL_PRODUCER.close()
