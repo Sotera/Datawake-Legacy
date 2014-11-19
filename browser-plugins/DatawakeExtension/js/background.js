@@ -469,7 +469,7 @@ chrome.tabs.onActivated.addListener(function (activeinfo) {
     } else {
         dwState.lastDomain = dwState.tabToDomain[tabId];
     }
-    console.log("datawake - New tab created tab.id=%s trail: %s domain: %s", tabId, dwState.lastTrail, dwState.lastDomain);
+    console.log("datawake - tab activated tab.id=%s trail: %s domain: %s", tabId, dwState.lastTrail, dwState.lastDomain);
 });
 
 function postContents(url, post_data, successCallback, errorCallback) {
