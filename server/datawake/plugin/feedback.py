@@ -25,8 +25,7 @@ def good_extraction(raw_text, entity_type, entity_value, url, domain):
 @session_helper.is_in_session
 def fetch_entities(domain, url):
     tangelo.log(domain)
-    data_connector = factory.get_entity_data_connector()
-    entities = data_connector.get_feedback_entities(domain, url)
+    entities = db.get_feedback_entities(domain, url)
     return json.dumps(dict(entities=entities))
 
 

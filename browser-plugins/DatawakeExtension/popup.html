@@ -24,207 +24,233 @@
 </head>
 <body ng-controller="PopUpCtrl">
 <div class="container" style="margin-top: 10px">
-    <div ng-hide="invalidTab">
+<div ng-hide="invalidTab">
 
 
-        <table class="table table-bordered">
-            <tbody>
-            <tr>
-                <td>
-                    <div id="user_info">{{user.displayName}}</div>
-                    <button id="signin">Sign in</button>
-                    <button id="revoke">Sign out</button>
-                </td>
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <td>
+            <div id="user_info">{{user.displayName}}</div>
+            <button id="signin">Sign in</button>
+            <button id="revoke">Sign out</button>
+        </td>
 
 
-                <td>
-                    <b>Org:</b> {{org}}
-                </td>
-                <td>
-                    <b>Version:</b> {{versionNumber}}
-                </td>
-            </tr>
-            </tbody>
-        </table>
+        <td>
+            <b>Org:</b> {{org}}
+        </td>
+        <td>
+            <b>Version:</b> {{versionNumber}}
+        </td>
+    </tr>
+    </tbody>
+</table>
 
-        <table class="table table-bordered">
-            <tbody>
-            <tr>
-                <td>
-                    <b>Domain:</b>
-                </td>
-                <td>
-                    {{domain}}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <b>Trail:</b>
-                </td>
-                <td>
-                    {{trail}}
-                </td>
-            </tr>
-            <tr>
-                <td><b>URL: </b></td>
-                <td>{{current_url}}</td>
-            </tr>
-            <tr ng-if="showRanking">
-                <td>
-                    <b>URL Ranking:</b>
-                </td>
-                <td>
-                    <div id="star_rating"></div>
-                    <span id="url_rank_text">{{ranking}} / 10</span>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <td>
+            <b>Domain:</b>
+        </td>
+        <td>
+            {{domain}}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Trail:</b>
+        </td>
+        <td>
+            {{trail}}
+        </td>
+    </tr>
+    <tr>
+        <td><b>URL: </b></td>
+        <td>{{current_url}}</td>
+    </tr>
+    <tr ng-if="showRanking">
+        <td>
+            <b>URL Ranking:</b>
+        </td>
+        <td>
+            <div id="star_rating"></div>
+            <span id="url_rank_text">{{ranking}} / 10</span>
+        </td>
+    </tr>
+    </tbody>
+</table>
 
-        <div class="row">
-            <ul class="nav nav-tabs nav-pills" role="tablist">
-                <li class="active"><a href="#all_extracted_entities" role="tab" data-toggle="tab">Extracted Features</a></li>
-                <li><a href="#domain_extracted_entities" role="tab" data-toggle="tab" ng-show="showDomainFeatures">Features in Domain</a></li>
-                <li><a href="#lookahead" role="tab" data-toggle="tab" ng-show="lookaheadEnabled">Lookahead</a></li>
-                <li><a href="#feedback" role="tab" data-toggle="tab">Extractor Feedback</a></li>
-            </ul>
-            <div class="tab-content">
+<div class="row">
+    <ul class="nav nav-tabs nav-pills" role="tablist">
+        <li class="active"><a href="#all_extracted_entities" role="tab" data-toggle="tab">Extracted Features</a></li>
+        <li><a href="#domain_extracted_entities" role="tab" data-toggle="tab" ng-show="showDomainFeatures">Features in Domain</a></li>
+        <li><a href="#lookahead" role="tab" data-toggle="tab" ng-show="lookaheadEnabled">Lookahead</a></li>
+        <li><a href="#feedback" role="tab" data-toggle="tab">Extractor Feedback</a></li>
+        <li><a href="#trail-search" role="tab" data-toggle="tab">Trail Search</a></li>
+    </ul>
+    <div class="tab-content">
 
-                <div class="tab-pane active" id="all_extracted_entities">
-                    <div>
-                        <h3>Extracted Features</h3>
+        <div class="tab-pane active" id="all_extracted_entities">
+            <div>
+                <h3>Extracted Features</h3>
 
-                        <div ng-repeat="(entityType, entities) in extracted_entities_dict">
-                            <h3>{{entityType}}</h3>
-                            <table class="table table-bordered">
-                                <tr ng-repeat="name in entities track by $index">
-                                    <td>
+                <div ng-repeat="(entityType, entities) in extracted_entities_dict">
+                    <h3>{{entityType}}</h3>
+                    <table class="table table-bordered">
+                        <tr ng-repeat="name in entities track by $index">
+                            <td>
                                         <span ng-switch on="isExtracted(entityType, name)">
                                             <span ng-switch-when="true" style="font-weight: bold">{{name}}</span>
                                             <span ng-switch-default style="font-weight: normal">{{name}}</span>
                                         </span>
-                                    </td>
-                                </tr>
-                            </table>
+                            </td>
+                        </tr>
+                    </table>
 
-                        </div>
-                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="tab-pane" id="domain_extracted_entities" ng-show="showDomainFeatures">
-                    <div>
-                        <h3>Features in Domain</h3>
-                        <table class="table table-bordered" ng-repeat="(type, entities) in entities_in_domain">
-                            <thead>
-                            <tr>
-                                <th>
-                                    <span>{{type}}</span>
-                                </th>
-                                <th colspan=42>
-                                    External Tools
-                                </th>
-                                <th>
-                                    Remove
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="entity in entities">
-                                <td>
+        <div class="tab-pane" id="domain_extracted_entities" ng-show="showDomainFeatures">
+            <div>
+                <h3>Features in Domain</h3>
+                <table class="table table-bordered" ng-repeat="(type, entities) in entities_in_domain">
+                    <thead>
+                    <tr>
+                        <th>
+                            <span>{{type}}</span>
+                        </th>
+                        <th colspan=42>
+                            External Tools
+                        </th>
+                        <th>
+                            Remove
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="entity in entities">
+                        <td>
                                     <span>
                                         {{entity}}
                                     </span>
-                                </td>
-                                <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
-                                    <a target="_blank" ng-href="{{tools.link.replace('$ATTR',type).replace('$VALUE',entity)}}">{{tools.display}}</a>
-                                </td>
-                                <td ng-show="extracted_tools.length == 0">
-                                    <span>No External Tools Available</span>
-                                </td>
+                        </td>
+                        <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
+                            <a target="_blank" ng-href="{{tools.link.replace('$ATTR',type).replace('$VALUE',entity)}}">{{tools.display}}</a>
+                        </td>
+                        <td ng-show="extracted_tools.length == 0">
+                            <span>No External Tools Available</span>
+                        </td>
+                        <td>
+                            <button ng-hide="invalid[entity]" class="btn btn-danger" ng-click="markInvalid(type, entity);">Invalid Extraction?</button>
+                            <span ng-hide="!invalid[entity]">Marked</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane" id="lookahead" style="margin-bottom: 15px; margin-top: 15px;" ng-show="lookaheadEnabled">
+            <h3>Link Lookahead</h3>&nbsp<span id="lookahead_progress"></span>
+
+            <div id="lookahead_results">
+                <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matches.length', 'domain_search_matches.length']:true">
+                    <a target="_blank" ng-href="{{lookaheadObj.url}}">{{lookaheadObj.url}}</a>
+
+                    <div id="domain_search_hits_container" ng-if="lookaheadObj.domain_search_matches.length > 0">
+                        <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="searchHitsToggle(lookaheadObj);">domain search hits:
+                            {{lookaheadObj.domain_search_matches.length}}
+                        </button>
+                        <table class="table table-bordered" ng-show="lookaheadObj.searchHitsShow">
+                            <tr ng-repeat="searchMatches in lookaheadObj.domain_search_matches">
                                 <td>
-                                    <button ng-hide="invalid[entity]" class="btn btn-danger" ng-click="markInvalid(type, entity);">Invalid Extraction?</button>
-                                    <span ng-hide="!invalid[entity]">Marked</span>
+                                    <span>{{searchMatches}}</span>
                                 </td>
                             </tr>
-                            </tbody>
+                        </table>
+                    </div>
+                    <div id="lookahead_matches" ng-if="lookaheadObj.matches.length > 0">
+                        <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="matchesToggle(lookaheadObj);">shared entities: {{lookaheadObj.matches.length}}</button>
+                        <table class="table table-bordered" ng-show="lookaheadObj.matchesShow">
+                            <tr ng-repeat="matches in lookaheadObj.matches">
+                                <td>
+                                    <span>{{matches}}</span>
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>
-                <div class="tab-pane" id="lookahead" style="margin-bottom: 15px; margin-top: 15px;" ng-show="lookaheadEnabled">
-                    <h3>Link Lookahead</h3>&nbsp<span id="lookahead_progress"></span>
-
-                    <div id="lookahead_results">
-                        <div ng-repeat="lookaheadObj in lookaheadLinks | orderBy:['matches.length', 'domain_search_matches.length']:true">
-                            <a target="_blank" ng-href="{{lookaheadObj.url}}">{{lookaheadObj.url}}</a>
-
-                            <div id="domain_search_hits_container" ng-if="lookaheadObj.domain_search_matches.length > 0">
-                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="searchHitsToggle(lookaheadObj);">domain search hits:
-                                    {{lookaheadObj.domain_search_matches.length}}
-                                </button>
-                                <table class="table table-bordered" ng-show="lookaheadObj.searchHitsShow">
-                                    <tr ng-repeat="searchMatches in lookaheadObj.domain_search_matches">
-                                        <td>
-                                            <span>{{searchMatches}}</span>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div id="lookahead_matches" ng-if="lookaheadObj.matches.length > 0">
-                                <button class="btn btn-primary" style="display:block; margin-left: 25px;" ng-click="matchesToggle(lookaheadObj);">shared entities: {{lookaheadObj.matches.length}}</button>
-                                <table class="table table-bordered" ng-show="lookaheadObj.matchesShow">
-                                    <tr ng-repeat="matches in lookaheadObj.matches">
-                                        <td>
-                                            <span>{{matches}}</span>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="tab-pane"  id="feedback">
-                    <h3>Extractor Feedback</h3>
-
-                    <div>
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr>
-                                <th>
-                                    Entity Type
-                                </th>
-                                <th>
-                                    Extracted Value
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="entity in feedbackEntities">
-                                <td>
-                                    {{entity.type}}
-                                </td>
-                                <td>
-                                    {{entity.value}}
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
             </div>
 
         </div>
+        <div class="tab-pane" id="feedback">
+            <h3>Extractor Feedback</h3>
+
+            <div>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>
+                            Entity Type
+                        </th>
+                        <th>
+                            Extracted Value
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="entity in feedbackEntities">
+                        <td>
+                            {{entity.type}}
+                        </td>
+                        <td>
+                            {{entity.value}}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane" id="trail-search">
+            <h3>Trail Based Links</h3>
+
+            <div>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <td>Links</td>
+                        <td>Rank</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="link in trailLinks">
+                        <td>
+                            <a target="_blank" ng-href="{{link.url}}"><span ng-bind-html="link.title"></span></a>
+                        </td>
+                        <td>
+                            <span>{{link.rank}}</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
-    <div class="alert alert-danger" ng-hide="!invalidTab">
-        <h3>The Datawake is not enabled with this tab.</h3>
-    </div>
+</div>
+</div>
+
+<div class="alert alert-danger" ng-hide="!invalidTab">
+    <h3>The Datawake is not enabled with this tab.</h3>
+</div>
 </div>
 <script src="js/jquery-1.11.0.min.js"></script>
 <script src="js/jRating.jquery.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script src="js/angular.min.js"></script>
+<script src="js/angular-sanitize.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/signin.js"></script>
 <script src="js/popup.js"></script>

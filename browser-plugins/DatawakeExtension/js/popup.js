@@ -1,4 +1,4 @@
-var datawakePopUpApp = angular.module("datawakePopUpApp", []);
+var datawakePopUpApp = angular.module("datawakePopUpApp", ['ngSanitize']);
 
 datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpService) {
 
@@ -14,7 +14,6 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.current_url = "";
     $scope.versionNumber = chrome.runtime.getManifest().version;
     $scope.invalid = {};
-
 
 
     function linkLookahead(tabUrl, extractedLinks, index, domain, delay) {
@@ -72,18 +71,26 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function getDomainAndTrail() {
-        chrome.tabs.query({active: true,currentWindow: true}, function (tabs) {
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (response) {
                 $scope.trail = response.trail;
                 $scope.domain = response.domain;
                 $scope.org = response.org;
                 fetchExtractorFeedbackEntities(response.domain, tabs[0].url);
+                fetchTrailSearchEntities(response.org, response.domain, response.trail);
             });
         });
     }
 
+    function fetchTrailSearchEntities(org, domain, trail) {
+        var post_data = JSON.stringify({domain: domain, trail: trail});
+        popUpService.post(chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/trails/links", post_data).then(function (response) {
+            $scope.trailLinks = response.links;
+        });
+    }
+
     function fetchEntities(delay) {
-        chrome.tabs.query({active: true ,currentWindow: true}, function (tabs) {
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/visited/entities";
             var domain = chrome.extension.getBackgroundPage().dwState.tabToDomain[tabs[0].id];
             var tabUrl = tabs[0].url;
@@ -173,27 +180,27 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         lookaheadObj.matchesShow = !lookaheadObj.matchesShow;
     };
 
-    $scope.markInvalid = function(type, entity){
+    $scope.markInvalid = function (type, entity) {
         var postObj = {};
         postObj.entity_type = type;
         postObj.entity_value = entity;
         postObj.domain = $scope.domain;
         popUpService.post(chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/feedback/bad", JSON.stringify(postObj))
-            .then(function(response){
-                if(response.success){
+            .then(function (response) {
+                if (response.success) {
                     console.log("Successfully marked %s as invalid", entity);
                     $scope.invalid[entity] = true;
                 }
             })
     };
 
-    function fetchExtractorFeedbackEntities(domain, url){
+    function fetchExtractorFeedbackEntities(domain, url) {
         var postObj = {};
         postObj.domain = domain;
         postObj.url = url;
         popUpService.post(chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/feedback/entities", JSON.stringify(postObj))
-            .then(function(response){
-               $scope.feedbackEntities = response.entities;
+            .then(function (response) {
+                $scope.feedbackEntities = response.entities;
             });
     }
 
@@ -263,6 +270,10 @@ $(document).ready(function () {
     });
 
     $('#feedback').find('a').first().click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+    $('#trail-search').find('a').first().click(function (e) {
         e.preventDefault();
         $(this).tab('show');
     });

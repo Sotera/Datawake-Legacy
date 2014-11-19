@@ -18,6 +18,7 @@ import re
 import json
 
 import tangelo
+
 import datawake.util.kafka.kafka_producer as kafka_producer
 import datawake.util.db.datawake_mysql as db
 from datawake.util.session.helper import is_in_session
@@ -57,6 +58,7 @@ def add_trail_based_entity(domain, trail, entity):
 
     return json.dumps(dict(success=success))
 
+
 @is_in_session
 @required_parameters(['domain', 'trail'])
 def get_trail_based_entities(domain, trail):
@@ -77,11 +79,20 @@ def add_trail(trailname, domain, traildescription=u''):
     return json.dumps(dict(success=last_row >= 0))
 
 
+@is_in_session
+@required_parameters(['domain', 'trail'])
+def get_trail_entity_links(domain, trail):
+    org = helper.get_org()
+
+    return json.dumps(dict(links=db.get_trail_entity_links(org, domain, trail)))
+
+
 post_actions = {
     'get': get_trails,
     'create': add_trail,
     'entity': add_trail_based_entity,
-    'entities': get_trail_based_entities
+    'entities': get_trail_based_entities,
+    'links': get_trail_entity_links
 }
 
 

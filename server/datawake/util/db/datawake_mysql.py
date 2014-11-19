@@ -617,6 +617,11 @@ def get_trail_based_entities(domain, trail):
     params = [domain, trail]
     return map(lambda x: x[0], dbGetRows(sql, params))
 
+def get_trail_entity_links(org, domain, trail):
+    sql = "select url, title, rank from trail_term_rank where org=%s and domain=%s and trail=%s order by rank desc"
+    params = [org, domain, trail]
+    return map(lambda x: dict(url=x[0], title=x[1], rank=x[2]), dbGetRows(sql, params))
+
 
 def add_extractor_feedback(domain, raw_text, entity_type, entity_value, url):
     sql = "insert into scraping_feedback(domain, raw_text, entity_type, entity_value, url) value (%s,%s,%s,%s,%s)"
