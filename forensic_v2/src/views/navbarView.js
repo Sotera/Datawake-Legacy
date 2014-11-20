@@ -1,4 +1,4 @@
-define(['hbs!templates/navbar','events'], function(navbarTemplate,events) {
+define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events) {
 	return {
 		insert : function(element,context) {
 			var navbarElement = $(navbarTemplate(context));
@@ -35,10 +35,15 @@ define(['hbs!templates/navbar','events'], function(navbarTemplate,events) {
 			trailSelectLinks.click(function() {
 				var trailName = $(this).html();
 				trailSearchDropdownToggle.html(trailName);
-				events.publish(events.messages.TRAIL_CHANGE,{
+				events.publish(events.topics.TRAIL_CHANGE,{
 					name:trailName
 				});
 			});
+
+			navbarElement.find('.refreshAll').click(function() {
+				events.publish(events.topics.REFRESH);
+			});
+
 			navbarElement.appendTo(element);
 		}
 	};

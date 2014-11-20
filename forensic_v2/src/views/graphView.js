@@ -1,10 +1,10 @@
-define(['hbs!templates/graph','events'], function(graphTemplate,events) {
+define(['hbs!templates/graph','../util/events'], function(graphTemplate,events) {
 	return {
 		insert : function(element,context) {
-			var graphElement = $(graphTemplate());
+			var graphElement = $(graphTemplate(context));
 
-			events.subscribe(events.messages.TRAIL_CHANGE, function(data) {
-				$('.currentTrailLabel').html(data.name);
+			events.subscribe(events.topics.TRAIL_CHANGE, function(data) {
+				// TODO:  handle trail change!
 			});
 
 			graphElement.appendTo(element);

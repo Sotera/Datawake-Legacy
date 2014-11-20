@@ -1,4 +1,4 @@
-define('templates/helpers/guid', ['hbs/handlebars','guid'], function ( Handlebars, guidModule ) {
+define('templates/helpers/guid', ['hbs/handlebars','../../src/util/guid'], function ( Handlebars, guidModule ) {
 
 	function guid() {
 		return guidModule.generate();

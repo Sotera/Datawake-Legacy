@@ -27,8 +27,9 @@ define([], function() {
 				item(info || {});
 			});
 		},
-		messages: {
-			'TRAIL_CHANGE' : 'trail_change'
+		topics: {
+			'TRAIL_CHANGE' : 'trail_change',
+			'REFRESH' : 'refresh'
 		}
 	};
 });
