@@ -15,6 +15,7 @@ class LinkTrailDataDecoder extends Decoder[LinkTrailData] with Serializable {
     val appid = jValue.extract[AppIdHelper]
     if (appid.appid.equals(DatawakeConstants.APPID)) {
       val results = jValue.extract[LinkTrailDataHelper]
+      println("Updating: " + results.attrs.term)
       new LinkTrailData(results.attrs.org, results.attrs.domain, results.attrs.trail, results.attrs.term, results.url, results.raw_html, results.attrs.title)
     } else {
       null

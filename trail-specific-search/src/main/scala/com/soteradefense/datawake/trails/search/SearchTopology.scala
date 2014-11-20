@@ -21,7 +21,7 @@ object SearchTopology {
       "trail-search")
 
     topologyBuilder.setSpout("search-term-spout", kafkaConsumer)
-    topologyBuilder.setBolt("google-search", new GoogleSearchBolt(new Fields("org", "datawake/domain", "trail", "url", "title", "term")))
+    topologyBuilder.setBolt("google-search", new GoogleSearchBolt(new Fields("org", "domain", "trail", "url", "title", "term")))
       .shuffleGrouping("search-term-spout")
     topologyBuilder.setBolt("scrape-kafka", new HighLevelKafkaProducer(kafkaBrokers, "crawler-in"))
       .shuffleGrouping("google-search")

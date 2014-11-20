@@ -31,7 +31,7 @@ object EntityCountTopology {
       kafkaConsumer)
 
     topologyBuilder.setBolt("search-term",
-      new SearchTermSumBolt(new Fields("org", "datawake/domain", "trail", "link", "title", "sum")))
+      new SearchTermSumBolt(new Fields("org", "domain", "trail", "link", "title", "sum")))
       .shuffleGrouping("html-contents-spout")
 
     topologyBuilder.setBolt("db-write",

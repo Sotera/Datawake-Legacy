@@ -23,7 +23,7 @@ class HighLevelKafkaProducer(kafkaBrokers: String, topic: String) extends BaseBa
   override def execute(input: Tuple, collector: BasicOutputCollector): Unit = {
     val builder = new StringBuilder
     val org = input.getStringByField("org")
-    val domain = input.getStringByField("datawake/domain")
+    val domain = input.getStringByField("domain")
     val trail = input.getStringByField("trail")
     val url = input.getStringByField("url")
     val title = input.getStringByField("title")

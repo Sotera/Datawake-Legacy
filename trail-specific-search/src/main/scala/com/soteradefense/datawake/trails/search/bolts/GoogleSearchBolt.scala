@@ -13,8 +13,9 @@ import net.liftweb.json._
 
 class GoogleSearchBolt(outputFields: Fields) extends BaseBasicBolt {
 
-  var GOOGLE_API: String = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q="
-  var DEFAULT_CHARSET: String = "UTF-8"
+  val GOOGLE_API: String = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q="
+  val DEFAULT_CHARSET: String = "UTF-8"
+  val RESULT_SET: String = "&rsz=8"
 
   override def prepare(stormConf: util.Map[_, _], context: TopologyContext): Unit = {
     super.prepare(stormConf, context)
@@ -25,7 +26,7 @@ class GoogleSearchBolt(outputFields: Fields) extends BaseBasicBolt {
     val org: String = input.getStringByField("kafkaOrg")
     val domain: String = input.getStringByField("kafkaDomain")
     val trail: String = input.getStringByField("kafkaTrail")
-    val url: URL = new URL(GOOGLE_API + URLEncoder.encode(searchTerm, DEFAULT_CHARSET))
+    val url: URL = new URL(GOOGLE_API + searchTerm + RESULT_SET)
     val reader = new InputStreamReader(url.openStream(), DEFAULT_CHARSET)
     implicit val formats = DefaultFormats
     val jValue = JsonParser.parse(reader)
