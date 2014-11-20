@@ -27,6 +27,7 @@
 		"_":true,
 		"activityLogger":true,
 		"console":true,
-		"path":true
+		"path":true,
+		"alert":true
 	}
 }

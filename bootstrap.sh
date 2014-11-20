@@ -147,6 +147,7 @@ pip install pyodbc &> /dev/null
 echo "linking tangelo web server"
 ln -s /vagrant/datawake/ /usr/local/share/tangelo/web/
 ln -s /vagrant/forensic/ /usr/local/share/tangelo/web/
+ln -s /vagrant/forensic_v2/ /usr/local/share/tangelo/web/
 ln -s /vagrant/domain/ /usr/local/share/tangelo/web/
 
 echo "installing datawake tools and setting up empty database"
