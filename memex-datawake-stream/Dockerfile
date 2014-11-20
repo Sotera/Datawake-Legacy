@@ -87,4 +87,6 @@ COPY . /memex-datawake-stream
 
 ADD dev_container_start.sh /usr/bin/dev_container_start.sh
 WORKDIR /memex-datawake-stream
+
 CMD dev_container_start.sh
+
