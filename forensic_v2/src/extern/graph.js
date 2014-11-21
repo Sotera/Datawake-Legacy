@@ -160,6 +160,13 @@ Graph.prototype.fontFamily = function(fontFamily) {
 	return this;
 };
 
+Graph.prototype.resize = function(w,h) {
+	$(this._canvas).attr({width:w,height:h})
+		.width(w)
+		.height(h);
+	this._scene.resize(w,h);
+	return this;
+};
 
 Graph.prototype.update = function() {
 	this._scene.update();

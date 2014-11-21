@@ -6,6 +6,24 @@ function RadialLayout(focus,distance) {
 }
 $.extend(RadialLayout.prototype, Layout.prototype);
 
+RadialLayout.prototype.distance = function(distance) {
+	if (distance) {
+		this._distance = distance;
+	} else {
+		return this._distance;
+	}
+	return this;
+};
+
+RadialLayout.prototype.focus = function(focus) {
+	if (focus) {
+		this._focus = focus;
+	} else {
+		return this._focus;
+	}
+	return this;
+};
+
 RadialLayout.prototype.layoutLabel = function(nodeX,nodeY,radius) {
 	var x, y, align;
 
