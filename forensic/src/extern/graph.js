@@ -122,12 +122,13 @@ Graph.prototype.layout = function(layouter) {
 		this._layouter = layouter;
 		this._layouter
 			.nodes(this._nodes)
+			.canvas(this._canvas)
 			.linkMap(this._nodeIndexToLinkLine)
 			.nodeMap(this._nodeIndexToCircle)
 			.labelMap(this._nodeIndexToLabel)
-			.layout();
+			.layout(this._canvas.width,this._canvas.height);
 	} else {
-		this._layouter.layout();
+		this._layouter.layout(this._canvas.width,this._canvas.height);
 		this._scene.update();
 	}
 	return this;
@@ -176,7 +177,7 @@ Graph.prototype.draw = function() {
 			.nodeMap(this._nodeIndexToCircle)
 			.linkMap(this._nodeIndexToLinkLine)
 			.labelMap(this._nodeIndexToLabel);
-		this.layout(defaulLayout);
+		this.layouter(defaulLayout);
 	}
 	this._links.forEach(function(link) {
 		var line = path.line(link);

@@ -117,7 +117,7 @@ Graph.prototype.zoomable = function() {
 	return this;
 };
 
-Graph.prototype.layout = function(layouter) {
+Graph.prototype.layouter = function(layouter) {
 	if (layouter) {
 		this._layouter = layouter;
 		this._layouter
@@ -125,9 +125,15 @@ Graph.prototype.layout = function(layouter) {
 			.linkMap(this._nodeIndexToLinkLine)
 			.nodeMap(this._nodeIndexToCircle)
 			.labelMap(this._nodeIndexToLabel)
-			.layout();
 	} else {
-		this._layouter.layout();
+		return this._layouter;
+	}
+	return this;
+};
+
+Graph.prototype.layout = function() {
+	if (this._layouter) {
+		this._layouter.layout(this._canvas.width,this._canvas.height);
 		this._scene.update();
 	}
 	return this;
@@ -165,6 +171,7 @@ Graph.prototype.resize = function(w,h) {
 		.width(w)
 		.height(h);
 	this._scene.resize(w,h);
+	this.layout();
 	return this;
 };
 
@@ -183,7 +190,7 @@ Graph.prototype.draw = function() {
 			.nodeMap(this._nodeIndexToCircle)
 			.linkMap(this._nodeIndexToLinkLine)
 			.labelMap(this._nodeIndexToLabel);
-		this.layout(defaulLayout);
+		this.layouter(defaulLayout);
 	}
 	this._links.forEach(function(link) {
 		var line = path.line(link);

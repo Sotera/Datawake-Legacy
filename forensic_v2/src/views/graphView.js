@@ -60,29 +60,18 @@ define(['hbs!templates/graph','../util/events'], function(graphTemplate,events) 
 
 			var nodes = randomNodes(5,75);
 			var links = radialLinks(nodes,0);
-			var radialLayouter = new RadialLayout(nodes[0],1)
-				.duration(750)
-				.easing('elasticInOut');
-
 			var graph = new Graph()
 				.nodes(nodes)
 				.links(links)
 				.canvas(jqCanvas[0])
-				//.nodeHover(onNodeOver,onNodeOut)
 				.pannable()
-				.zoomable()
-				.draggable()
 				.draw();
 
 			$(window).resize(function() {
 				var width = $(window).width();
 				var height = $(window).height() - jqCanvas.offset().top;
 
-				radialLayouter.distance(Math.min(width,height) * 0.8);
-
-				graph.resize(width,height)
-					.layout(radialLayouter)
-					.update();
+				graph.resize(width,height);
 			});
 
 			events.subscribe(events.topics.TRAIL_CHANGE, function(data) {

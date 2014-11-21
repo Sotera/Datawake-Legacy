@@ -124,8 +124,31 @@ Layout.prototype._setNodePosition = function(node,x,y,bImmediate) {
 	});
 };
 
-Layout.prototype.layout = function() {
+Layout.prototype.layout = function(w,h) {
+	var x = 0;
+	var y = 0;
+	var maxRadiusRow = 0;
+	var that = this;
+	this._nodes.forEach(function(node) {
 
+		if (x === 0) {
+			x += node.radius;
+		}
+		if (y === 0) {
+			y += node.radius;
+		}
+
+		that._setNodePositionImmediate(node,x,y);
+
+		maxRadiusRow = Math.max(maxRadiusRow,node.radius);
+
+		x+= node.radius + 40;
+		if (x > w) {
+			x = 0;
+			y += maxRadiusRow + 40;
+			maxRadiusRow = 0;
+		}
+	});
 };
 
 Layout.prototype.layoutLabel = function(nodeX,nodeY,radius) {

@@ -48,7 +48,7 @@ RadialLayout.prototype.layoutLabel = function(nodeX,nodeY,radius) {
 	};
 };
 
-RadialLayout.prototype.layout = function() {
+RadialLayout.prototype.layout = function(w,h) {
 	var nodes = this.nodes();
 	var that = this;
 	var angleDelta = Math.PI * 2 / (nodes.length - 1);
