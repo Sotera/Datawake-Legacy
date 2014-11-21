@@ -120,7 +120,7 @@ CREATE TABLE scraping_feedback (
   entity_type varchar(100),
   entity_value varchar(1024),
   raw_text varchar (100),
-  url TEXT,
+  url varchar(1024),
   domain varchar (300),
   index(domain(300))
 );
@@ -137,9 +137,11 @@ CREATE TABLE invalid_extracted_entity (
 
 DROP TABLE IF EXISTS trail_based_entities;
 CREATE TABLE trail_based_entities (
+  org VARCHAR(300),
   domain varchar(300),
   trail varchar(100) NOT NULL,
-  entity varchar(1024)
+  entity varchar(1024),
+  index(org(300), domain(300), trail(100))
 );
 
 DROP TABLE IF EXISTS trail_term_rank;
@@ -147,9 +149,17 @@ CREATE TABLE trail_term_rank (
   org VARCHAR(300),
   domain varchar(300),
   trail varchar(100),
-  url varchar (1024),
+  url varchar(1024),
   title varchar(100),
-  rank INTEGER
+  rank INTEGER,
+  index(org(300), domain(300), trail(100), url(1024))
+);
+
+DROP TABLE IF EXISTS trail_entities_contents;
+CREATE TABLE trail_entities_contents(
+  url varchar(1024),
+  html MEDIUMBLOB,
+  index(url(1024))
 );
 
 exit;
