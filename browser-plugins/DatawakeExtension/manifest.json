@@ -15,7 +15,7 @@
         }
     ],
     "background": {
-        "scripts": ["js/jquery-1.11.0.min.js", "js/config.js", "js/background.js"]
+        "scripts": ["js/datawakeinfo.js","js/jquery-1.11.0.min.js", "js/config.js", "js/background.js"]
     },
 
     "permissions": [

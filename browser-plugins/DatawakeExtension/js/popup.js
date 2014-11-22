@@ -83,7 +83,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     function fetchEntities(delay) {
         chrome.tabs.query({active: true ,currentWindow: true}, function (tabs) {
             var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/visited/entities";
-            var domain = chrome.extension.getBackgroundPage().dwState.tabToDomain[tabs[0].id];
+            var domain = chrome.extension.getBackgroundPage().dwState.tabToDatawakeInfo[tabs[0].id].getDomain();
             var tabUrl = tabs[0].url;
             var fetch_entities_post_data = JSON.stringify({ url: tabUrl, domain: domain});
             popUpService.post(post_url, fetch_entities_post_data).then(function (extracted_entities_dict) {
