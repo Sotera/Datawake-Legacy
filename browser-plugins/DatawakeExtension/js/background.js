@@ -68,36 +68,7 @@ function createContextMenus() {
     chrome.contextMenus.create({id: "show", title: "Show user selections", contexts: ["all"], "onclick": getSelections});
 }
 
-
-function getPosterData(request, sender, sendResponse) {
-    console.log('get-poster-data');
-    if (!dwState.tracking) {
-        sendResponse({domain: dwState.tabToDatawakeInfo[sender.tab.id], tracking: dwState.tracking });
-    } else if (chrome.runtime.getManifest().hasOwnProperty("oauth2")) {
-        chrome.identity.getAuthToken({ 'interactive': false }, function (token) {
-            //now that we have a token get the user id and name
-
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "https://www.googleapis.com/plus/v1/people/me");
-            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            xhr.onload = function () {
-                var user_info = JSON.parse(this.response);
-                var tab = sender.tab.id;
-                var trail = dwState.tabToDatawakeInfo[tab].getTrail();
-                sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: user_info.id, userName: user_info.displayName, serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: dwState.tabToDatawakeInfo[tab].getDomain()});
-            };
-            xhr.send();
-        });
-    } else {
-        var tabId = sender.tab.id;
-        var trail = dwState.tabToDatawakeInfo[tabId].getTrail();
-        var domain = dwState.tabToDatawakeInfo[tabId].getDomain();
-        sendResponse({tracking: dwState.tracking, url: sender.tab.url, userId: "", userName: "", serviceUrl: config.datawake_serviceUrl + "/scraper", trail: trail, domain: domain});
-
-    }
-}
-
-function lastId(request, sender, sendResponse) {
+function setBadgeCount(request, sender, sendResponse) {
     console.log("Datawake background post response: last-id: %s url count: %d", request.id, request.count);
     var tabId = sender.tab.id;
     if (tabId) {
@@ -113,7 +84,6 @@ function lastId(request, sender, sendResponse) {
 
 function getPopupData(request, sender, sendResponse) {
     var tabId = request.tab.id;
-    var last = -1;
     var popUpDataResponse = {
         serviceUrl: config.datawake_serviceUrl + "/scraper",
         rankUrl: config.datawake_serviceUrl + "/ranks",
@@ -130,7 +100,7 @@ function getDomainAndTrail(request, sender, sendResponse) {
     var tab = sender.tab.id;
     response.trail = dwState.tabToDatawakeInfo[tab].getTrail();
     response.domain = dwState.tabToDatawakeInfo[tab].getDomain();
-    console.log("Datawake-background get-domain_and_trail -> %s", response);
+    console.log("Datawake-background get-domain_and_trail -> %s", JSON.stringify(response));
     sendResponse(response);
 }
 
@@ -139,7 +109,7 @@ function setTrail(request, sender, sendResponse) {
     var tab = sender.tab.id;
     dwState.lastDatawakeInfo.setTrail(trail);
     dwState.tabToDatawakeInfo[tab].setTrail(trail);
-    console.log("Datawake-background set-trail tab: %s trail: %s", tab, name);
+    console.log("Datawake-background set-trail tab: %s trail: %s", tab, trail);
     sendResponse({success: true});
 }
 
@@ -148,7 +118,7 @@ function setDomain(request, sender, sendResponse) {
     var tab = sender.tab.id;
     dwState.lastDatawakeInfo.setDomain(domain);
     dwState.tabToDatawakeInfo[tab].setDomain(domain);
-    console.log("Datawake-background set-domain tab: %s domain: %s", tab, name);
+    console.log("Datawake-background set-domain tab: %s domain: %s", tab, domain);
     sendResponse({success: true});
 }
 
@@ -175,9 +145,14 @@ function postPageContents(request, sender, sendResponse) {
         sendResponse({success: true, contents: response});
     }
 
+    var datawakeInfo = dwState.tabToDatawakeInfo[sender.tab.id];
+
     var pageContents = request.contents;
-    if (onOff.scraper) {
-        postContents(config.datawake_serviceUrl + "/scraper/scrape", pageContents, onSuccess, logError);
+    pageContents.domain = datawakeInfo.getDomain();
+    pageContents.trail = datawakeInfo.getTrail();
+    pageContents.url = sender.tab.url;
+    if (onOff.scraper && dwState.tracking) {
+        postContents(config.datawake_serviceUrl + "/scraper/scrape", JSON.stringify(pageContents), onSuccess, logError);
     } else {
         sendResponse({success: true, contents: {count: 0, id: -1}});
     }
@@ -198,8 +173,7 @@ function getExternalLinks(request, sender, sendResponse) {
 }
 
 var messageOperations = {
-    "get-poster-data": getPosterData,
-    "last-id": lastId,
+    "last-id": setBadgeCount,
     "get-popup-data": getPopupData,
     "get-domain-and-trail": getDomainAndTrail,
     "set-trail": setTrail,
@@ -386,9 +360,10 @@ chrome.tabs.onCreated.addListener(function (tab) {
  */
 chrome.tabs.onActivated.addListener(function (activeinfo) {
     var tabId = activeinfo.tabId;
-    if (!dwState.tabToDatawakeInfo.hasOwnProperty(tabId)) {
-        if(dwState.lastDatawakeInfo != null)
+    if (!dwState.tabToDatawakeInfo.hasOwnProperty(tabId) || dwState.tabToDatawakeInfo[tabId] == null) {
+        if (dwState.lastDatawakeInfo != null) {
             dwState.tabToDatawakeInfo[tabId] = dwState.lastDatawakeInfo;
+        }
         else {
             dwState.tabToDatawakeInfo[tabId] = new DatawakeInfo();
             dwState.lastDatawakeInfo = new DatawakeInfo();

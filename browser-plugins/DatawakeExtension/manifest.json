@@ -10,6 +10,7 @@
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
+            "exclude_matches":["http://lakitu:8080/*", "http://localhost/*", "https://sotweb.istresearch.com/*", "https://ocweb.istresearch.com/*", "*://192.168.59.103/*"],
             "js": ["js/jquery-1.11.0.min.js", "js/jquery.highlight-4.js", "js/jquery.tooltipster.min.js", "js/d3.min.js", "js/jquery-ui.js", "js/poster.js", "js/jquery.urlive.js", "js/image-service.js"],
             "css": ["css/highlight.css", "css/tooltipster.css", "css/tooltipster-noir.css", "css/jquery.urlive.css", "css/jquery-ui.css"]
         }

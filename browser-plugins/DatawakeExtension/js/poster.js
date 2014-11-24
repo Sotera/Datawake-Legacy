@@ -1,37 +1,22 @@
-var dwPoster = function () {
-    var publicMethods = {};
+function scrapePage() {
 
-    publicMethods.scrapePage = function scrapePage() {
-        chrome.runtime.sendMessage({operation: "get-poster-data"}, function (response) {
-
-            console.log("Sending Page Contents..");
-            if (!response.tracking) {
-                console.log("Datawake - tracking disabled. Not posting data.");
-                return;
-            }
-            var data = JSON.stringify({
-                html: $('body').html(),
-                url: response.url,
-                domain: response.domain,
-                trail: response.trail
-            });
-            chrome.runtime.sendMessage({operation: "post-page-contents", contents: data}, function (response) {
-                if (response.success) {
-                    var contents = response.contents;
-                    chrome.runtime.sendMessage({operation: "last-id", id: contents.id, count: contents.count}, null);
-                }
-            });
-        });
+    console.log("Sending Page Contents..");
+    var data = {
+        html: $('body').html()
     };
+    chrome.runtime.sendMessage({operation: "post-page-contents", contents: data}, function (response) {
+        if (response.success) {
+            var contents = response.contents;
+            chrome.runtime.sendMessage({operation: "last-id", id: contents.id, count: contents.count}, null);
+        }
+    });
 
+}
 
-    return publicMethods;
-
-}();
 
 // delay the post to get slow loading content
 window.setTimeout(function () {
-    dwPoster.scrapePage();
+    scrapePage();
 }, 1000);
 
 var messageListenerMethods = {
@@ -50,17 +35,15 @@ function highlightText(request, sender, sendResponse) {
     var entities_in_domain = request.entities_in_domain;
     if (entities_in_domain.length > 0) {
         chrome.runtime.sendMessage({operation: "get-external-links"}, function (data) {
-            var links = data.links
+            var links = data.links;
             $.each(entities_in_domain, function (index, e) {
                 var i = index;
                 var entity = {};
                 entity.name = e.name.trim();
                 entity.type = e.type.trim();
                 $('body').highlight(entity.name, 'datawake-highlight-' + i);
-
-                console.log(links)
+                var content = '<div> <h4>' + entity.type + ":" + entity.name + '</h4>';
                 if (links.length > 0) {
-                    var content = '<div> <h4>' + entity.type + ":" + entity.name + '</h4>';
                     $.each(links, function (index, linkObj) {
                         var link = linkObj.link;
                         link = link.replace("$ATTR", encodeURI(entity.type));
@@ -80,11 +63,7 @@ function highlightText(request, sender, sendResponse) {
                 }
                 else {
                     $('.datawake-highlight-' + i).tooltipster({
-                        content: $('<div>' +
-                                '<h4>' + entity.type + ":" + entity.name + '</h4>' +
-                                'no external tools available' +
-                                '</div>'
-                        ),
+                        content: $(content + 'no external tools available' + '</div>'),
                         animation: 'fade',
                         interactive: true,
                         delapy: 200,
