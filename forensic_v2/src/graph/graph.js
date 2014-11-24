@@ -91,6 +91,39 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	Graph.prototype.canvas = function(canvas) {
 		if (canvas) {
 			this._canvas = canvas;
+
+			var x,y;
+			var that = this;
+			$(this._canvas).on('mousedown',function(e) {
+				x = e.clientX;
+				y = e.clientY;
+				$(that._canvas).on('mousemove',function(e) {
+					var dx = x - e.clientX;
+					var dy = y - e.clientY;
+					if (that._draggable && that._currentOverNode && (that._currentMoveState === null || that._currentMoveState === 'dragging'))  {
+						that._currentMoveState = 'dragging';
+
+						// Move the node
+						that._layouter._setNodePositionImmediate(that._currentOverNode, that._currentOverNode.x - dx, that._currentOverNode.y - dy);
+						that.update();
+					} else if (that._pannable && (that._currentMoveState === null || that._currentMoveState === 'panning')) {
+						that._pan(-dx*that._invertedPan,-dy*that._invertedPan);
+						that._currentMoveState = 'panning';
+					}
+					x = e.clientX;
+					y = e.clientY;
+				});
+			});
+
+			$(this._canvas).on('mouseup',function() {
+				$(that._canvas).off('mousemove');
+				if (that._currentMoveState === 'dragging') {
+					that._currentOverNode = null;
+				}
+				that._currentMoveState = null;
+			});
+
+
 		} else {
 			return this._canvas;
 		}
@@ -442,34 +475,6 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 				that.addLabel(node,node.label);
 			}
 		});
-
-		var x,y;
-		$(this._canvas).on('mousedown',function(e) {
-			x = e.clientX;
-			y = e.clientY;
-			$(that._canvas).on('mousemove',function(e) {
-				var dx = x - e.clientX;
-				var dy = y - e.clientY;
-				if (that._draggable && that._currentOverNode && (that._currentMoveState === null || that._currentMoveState === 'dragging'))  {
-					that._currentMoveState = 'dragging';
-
-					// Move the node
-					that._layouter._setNodePositionImmediate(that._currentOverNode, that._currentOverNode.x - dx, that._currentOverNode.y - dy);
-					that.update();
-				} else if (that._pannable && (that._currentMoveState === null || that._currentMoveState === 'panning')) {
-					that._pan(-dx*that._invertedPan,-dy*that._invertedPan);
-					that._currentMoveState = 'panning';
-				}
-				x = e.clientX;
-				y = e.clientY;
-			});
-		});
-
-		$(this._canvas).on('mouseup',function() {
-			$(that._canvas).off('mousemove');
-			that._currentMoveState = null;
-		});
-
 
 		this._layouter.linkMap(this._nodeIndexToLinkLine)
 			.nodeMap(this._nodeIndexToCircle)
