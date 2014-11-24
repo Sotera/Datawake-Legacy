@@ -8,8 +8,8 @@ define(['layout/layout'],function(Layout) {
 	 * @constructor
 	 */
 	function Graph() {
-		this._nodes = null;
-		this._links = null;
+		this._nodes = [];
+		this._links = [];
 		this._canvas = null;
 		this._scene = null;
 		this._pannable = null;
@@ -17,6 +17,7 @@ define(['layout/layout'],function(Layout) {
 		this._draggable = null;
 		this._currentOverNode = null;
 		this._currentMoveState = null;
+		this._invertedPan = 1;
 
 		this._fontSize = null;
 		this._fontFamily = null;
@@ -25,9 +26,9 @@ define(['layout/layout'],function(Layout) {
 		this._fontStrokeWidth = null;
 
 		// Data to render object maps
-		this._nodeIndexToLinkLine = null;
-		this._nodeIndexToCircle = null;
-		this._nodeIndexToLabel = null;
+		this._nodeIndexToLinkLine = {};
+		this._nodeIndexToCircle = {};
+		this._nodeIndexToLabel = {};
 	}
 
 
@@ -157,6 +158,15 @@ define(['layout/layout'],function(Layout) {
 	 */
 	Graph.prototype.pannable = function() {
 		this._pannable = true;
+		return this;
+	};
+
+	/**
+	 * Makes the graph pan in the opposite direction of the mouse as opposed to with it
+	 * @returns {Graph}
+	 */
+	Graph.prototype.invertPan = function() {
+		this._invertedPan = -1;
 		return this;
 	};
 
@@ -299,12 +309,6 @@ define(['layout/layout'],function(Layout) {
 		if (!this._scene) {
 			this._scene = path(this._canvas);
 		}
-		if (!this._nodes) {
-			this.nodes([]);
-		}
-		if (!this._links) {
-			this.links([]);
-		}
 		if (!this._layouter) {
 			var defaulLayout = new Layout()
 				.nodes(this._nodes)
@@ -392,7 +396,6 @@ define(['layout/layout'],function(Layout) {
 
 		var x,y;
 		$(this._canvas).on('mousedown',function(e) {
-			console.log('mousedown');
 			x = e.clientX;
 			y = e.clientY;
 			$(that._canvas).on('mousemove',function(e) {
@@ -405,7 +408,7 @@ define(['layout/layout'],function(Layout) {
 					that._layouter._setNodePositionImmediate(that._currentOverNode, that._currentOverNode.x - dx, that._currentOverNode.y - dy);
 					that.update();
 				} else if (that._pannable && (that._currentMoveState === null || that._currentMoveState === 'panning')) {
-					that._pan(dx,dy);
+					that._pan(-dx*that._invertedPan,-dy*that._invertedPan);
 					that._currentMoveState = 'panning';
 				}
 				x = e.clientX;
@@ -414,7 +417,6 @@ define(['layout/layout'],function(Layout) {
 		});
 
 		$(this._canvas).on('mouseup',function() {
-			console.log('mouseup');
 			$(that._canvas).off('mousemove');
 			that._currentMoveState = null;
 		});

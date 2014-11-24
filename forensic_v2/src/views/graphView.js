@@ -1,5 +1,5 @@
-define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','../util/testData', '../layout/radialLayout'],
-		function(graphTemplate,events,Graph,Layout,testData,RadialLayout) {
+define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','../util/testData', '../layout/columnLayout'],
+		function(graphTemplate,events,Graph,Layout,testData,ColumnLayout) {
 
 
 	/**
@@ -105,6 +105,7 @@ define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','.
 			var graph = new Graph()
 				.canvas(jqCanvas[0])
 				.pannable()
+				.layouter(new ColumnLayout())
 				.draw();
 
 
