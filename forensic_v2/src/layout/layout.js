@@ -184,26 +184,26 @@ define([],function() {
 	Layout.prototype.layout = function(w,h) {
 		var x = 0;
 		var y = 0;
-		var maxRadiusRow = 0;
+		var maxRadiusCol = 0;
 		var that = this;
 		this._nodes.forEach(function(node) {
 
-			if (x === 0) {
-				x += node.radius;
-			}
 			if (y === 0) {
 				y += node.radius;
+			}
+			if (x === 0) {
+				x += node.radius;
 			}
 
 			that._setNodePositionImmediate(node,x,y);
 
-			maxRadiusRow = Math.max(maxRadiusRow,node.radius);
+			maxRadiusCol = Math.max(maxRadiusCol,node.radius);
 
-			x+= node.radius + 40;
-			if (x > w) {
-				x = 0;
-				y += maxRadiusRow + 40;
-				maxRadiusRow = 0;
+			y+= node.radius + 40;
+			if (y > h) {
+				y = 0;
+				x += maxRadiusCol + 40;
+				maxRadiusCol = 0;
 			}
 		});
 		return this;
