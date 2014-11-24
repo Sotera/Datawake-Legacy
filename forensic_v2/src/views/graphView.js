@@ -42,8 +42,7 @@ define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','.
 					fillStyle:'#ff0000',
 					strokeStyle:'#232323',
 					strokeSize:2,
-					radius : 10,
-					label : node.id
+					radius : 10
 				};
 				for (var key in node) {
 					if (node.hasOwnProperty(key)) {
@@ -107,9 +106,18 @@ define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','.
 			var graphViewElement = $(graphTemplate(context));
 			var jqCanvas = graphViewElement;
 
+			var nodeOver = function(node) {
+				graph.addLabel(node,node.id);
+			};
+
+			var nodeOut = function(node) {
+				graph.removeLabel(node);
+			};
+
 			var graph = new Graph()
 				.canvas(jqCanvas[0])
 				.pannable()
+				.nodeHover(nodeOver,nodeOut)
 				.layouter(new ColumnLayout())
 				.draw();
 

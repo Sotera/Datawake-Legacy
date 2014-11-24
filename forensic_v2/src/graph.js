@@ -98,6 +98,71 @@ define(['layout/layout'],function(Layout) {
 		return this;
 	};
 
+
+	/**
+	 * Adds a label for a node
+	 * @param node
+	 * @param text
+	 * @returns {Graph}
+	 */
+	Graph.prototype.addLabel = function(node,text) {
+		if (this._nodeIndexToLabel[node.index]) {
+			this.removeLabel(node);
+		}
+		var labelAttrs = this._layouter.layoutLabel(node.x,node.y,node.radius);
+
+		var fontSize = typeof(this._fontSize) === 'function' ? this._fontSize(node) : this._fontSize;
+		if (!fontSize) {
+			fontSize = 10;
+		}
+
+		var fontFamily = typeof(this._fontFamily) === 'function' ? this._fontFamily(node) : this._fontFamily;
+		if (!fontFamily) {
+			fontFamily = 'sans-serif';
+		}
+		var fontStr = fontSize + 'px ' + fontFamily;
+
+		var fontFill = typeof(this._fontColor) === 'function' ? this._fontColor(node) : this._fontColor;
+		if (!fontFill) {
+			fontFill = '#000000';
+		}
+		var fontStroke = typeof(this._fontStroke) === 'function' ? this._fontStroke(node) : this._fontStroke;
+		var fontStrokeWidth = typeof(this._fontStroke) === 'function' ? this._fontStrokeWidth : this._fontStrokeWidth;
+
+		var labelSpec = {
+			font: fontStr,
+			fillStyle: fontFill,
+			strokeStyle: fontStroke,
+			lineWidth: fontStrokeWidth,
+			text : text
+		};
+		for (var key in labelAttrs) {
+			if (labelAttrs.hasOwnProperty(key)) {
+				labelSpec[key] = labelAttrs[key];
+			}
+		}
+		var label = path.text(labelSpec);
+		this._nodeIndexToLabel[node.index] = label;
+		this._scene.addChild(label);
+
+		return this;
+	};
+
+	/**
+	 * Removes a label for a node
+	 * @param node
+	 * @returns {Graph}
+	 */
+	Graph.prototype.removeLabel = function(node) {
+		var textObject = this._nodeIndexToLabel[node.index];
+		if (textObject) {
+			this._scene.removeChild(textObject);
+			delete this._nodeIndexToLabel[node.index];
+		}
+
+		return this;
+	};
+
 	/**
 	 * Event handler for mouseover of a node
 	 * @param callback(node)
@@ -356,41 +421,7 @@ define(['layout/layout'],function(Layout) {
 			that._scene.addChild(circle);
 
 			if (node.label) {
-				var labelAttrs = that._layouter.layoutLabel(node.x,node.y,node.radius);
-
-				var fontSize = typeof(this._fontSize) === 'function' ? this._fontSize(node) : this._fontSize;
-				if (!fontSize) {
-					fontSize = 10;
-				}
-
-				var fontFamily = typeof(this._fontFamily) === 'function' ? this._fontFamily(node) : this._fontFamily;
-				if (!fontFamily) {
-					fontFamily = 'sans-serif';
-				}
-				var fontStr = fontSize + 'px ' + fontFamily;
-
-				var fontFill = typeof(this._fontColor) === 'function' ? this._fontColor(node) : this._fontColor;
-				if (!fontFill) {
-					fontFill = '#000000';
-				}
-				var fontStroke = typeof(this._fontStroke) === 'function' ? this._fontStroke(node) : this._fontStroke;
-				var fontStrokeWidth = typeof(this._fontStroke) === 'function' ? this._fontStrokeWidth : this._fontStrokeWidth;
-
-				var labelSpec = {
-					font: fontStr,
-					fillStyle: fontFill,
-					strokeStyle: fontStroke,
-					lineWidth: fontStrokeWidth,
-					text : node.label
-				};
-				for (var key in labelAttrs) {
-					if (labelAttrs.hasOwnProperty(key)) {
-						labelSpec[key] = labelAttrs[key];
-					}
-				}
-				var label = path.text(labelSpec);
-				that._nodeIndexToLabel[node.index] = label;
-				that._scene.addChild(label);
+				that.addLabel(node,node.label);
 			}
 		});
 
