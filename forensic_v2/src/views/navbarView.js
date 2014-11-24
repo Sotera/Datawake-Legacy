@@ -34,10 +34,11 @@ define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events
 
 			trailSelectLinks.click(function() {
 				var trailId = $(this).attr('trailId');
+				var that = this;
 				context.trails.forEach(function(trail) {
 					if (trail.id === trailId) {
 						events.publish(events.topics.TRAIL_CHANGE,trail);
-						var trailLabel = $(this).html();
+						var trailLabel = $(that).html();
 						trailSearchDropdownToggle.html(trailLabel);
 					}
 				});

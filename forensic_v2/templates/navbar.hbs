@@ -20,7 +20,7 @@
                         <li><input type="text" class="trailSearchInput" placeholder="Search"></li>
                         <li class="divider"></li>
 						{{#each trails}}
-                            <li class="trailSelect"><a trailId="{{this.id}}" class="trailSelectLink" href="#">{{this.domain}}-->{{this.trail}}</a></li>
+                            <li class="trailSelect"><a trailId="{{this.id}}" class="trailSelectLink" href="#">{{this.trail}}<span class="domainLabel">({{this.domain}})</span></a></li>
 						{{/each}}
                     </ul>
                 </li>
