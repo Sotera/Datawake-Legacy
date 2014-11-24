@@ -87,7 +87,14 @@
         <li><a href="#domain_extracted_entities" role="tab" data-toggle="tab" ng-show="showDomainFeatures">Features in Domain</a></li>
         <li><a href="#lookahead" role="tab" data-toggle="tab" ng-show="lookaheadEnabled">Lookahead</a></li>
         <li><a href="#feedback" role="tab" data-toggle="tab">Extractor Feedback</a></li>
-        <li><a href="#trail-search" role="tab" data-toggle="tab">Trail Search</a></li>
+
+        <li role="presentation" class="dropdown">
+            <a href="#" id="myTabDrop1" class="dropdown-toggle" data-toggle="dropdown" aria-controls="myTabDrop1-contents">Trail Based <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="myTabDrop1" id="myTabDrop1-contents">
+                <li><a href="#trail-search" role="tab" data-toggle="tab">Search</a></li>
+                <li><a href="#trail-entities" role="tab" data-toggle="tab">Entities</a></li>
+            </ul>
+        </li>
     </ul>
     <div class="tab-content">
 
@@ -192,10 +199,10 @@
                     <thead>
                     <tr>
                         <th>
-                            Entity Type
+                            <b>Entity Type</b>
                         </th>
                         <th>
-                            Extracted Value
+                            <b>Extracted Value</b>
                         </th>
                     </tr>
                     </thead>
@@ -219,8 +226,8 @@
                 <table class="table table-bordered">
                     <thead>
                     <tr>
-                        <td>Links</td>
-                        <td>Rank</td>
+                        <td><b>Links</b></td>
+                        <td><b>Rank</b></td>
                     </tr>
                     </thead>
                     <tbody>
@@ -230,6 +237,26 @@
                         </td>
                         <td>
                             <span>{{link.rank}}</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane" id="trail-entities">
+            <h3>Trail Based Entities</h3>
+
+            <div>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <td><b>Entities</b></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="entity in trailEntities">
+                        <td>
+                            {{entity}}
                         </td>
                     </tr>
                     </tbody>

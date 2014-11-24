@@ -613,7 +613,7 @@ def add_trail_based_entity(org, domain, trail, entity):
 
 
 def get_trail_based_entities(org, domain, trail):
-    sql = "select entity from trail_based_entities where org=%s domain=%s and trail=%s"
+    sql = "select entity from trail_based_entities where org=%s and domain=%s and trail=%s"
     params = [org, domain, trail]
     return map(lambda x: x[0], dbGetRows(sql, params))
 

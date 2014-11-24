@@ -77,15 +77,23 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
                 $scope.domain = response.domain;
                 $scope.org = response.org;
                 fetchExtractorFeedbackEntities(response.domain, tabs[0].url);
-                fetchTrailSearchEntities(response.org, response.domain, response.trail);
+                fetchTrailSearchEntities(response.domain, response.trail);
+                fetchTrailEntities(response.domain, response.trail);
             });
         });
     }
 
-    function fetchTrailSearchEntities(org, domain, trail) {
+    function fetchTrailSearchEntities(domain, trail) {
         var post_data = JSON.stringify({domain: domain, trail: trail});
         popUpService.post(chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/trails/links", post_data).then(function (response) {
             $scope.trailLinks = response.links;
+        });
+    }
+
+    function fetchTrailEntities(domain, trail){
+        var post_data = JSON.stringify({domain: domain, trail: trail});
+        popUpService.post(chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/trails/entities", post_data).then(function (response) {
+            $scope.trailEntities = response.entities;
         });
     }
 
@@ -274,6 +282,11 @@ $(document).ready(function () {
         $(this).tab('show');
     });
     $('#trail-search').find('a').first().click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
+    $('#trail-entities').find('a').first().click(function (e) {
         e.preventDefault();
         $(this).tab('show');
     });
