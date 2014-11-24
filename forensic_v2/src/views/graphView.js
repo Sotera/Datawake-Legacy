@@ -96,12 +96,6 @@ define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','.
 			var graphViewElement = $(graphTemplate(context));
 			var jqCanvas = graphViewElement;
 
-			//var testNodes = testData.randomNodes(10,20);
-			//var testLinks = testData.radialLinks(testNodes,0);
-			//var radialLayouter = new RadialLayout()
-			//	.focus(testNodes[0])
-			//	.distance(300);
-
 			var graph = new Graph()
 				.canvas(jqCanvas[0])
 				.pannable()
