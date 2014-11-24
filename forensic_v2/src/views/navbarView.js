@@ -33,10 +33,13 @@ define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events
 			});
 
 			trailSelectLinks.click(function() {
-				var trailName = $(this).html();
-				trailSearchDropdownToggle.html(trailName);
-				events.publish(events.topics.TRAIL_CHANGE,{
-					name:trailName
+				var trailId = $(this).attr('trailId');
+				context.trails.forEach(function(trail) {
+					if (trail.id === trailId) {
+						events.publish(events.topics.TRAIL_CHANGE,trail);
+						var trailLabel = $(this).html();
+						trailSearchDropdownToggle.html(trailLabel);
+					}
 				});
 			});
 
