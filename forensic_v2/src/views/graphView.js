@@ -1,5 +1,5 @@
-define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','../util/testData', '../layout/columnLayout'],
-		function(graphTemplate,events,Graph,Layout,testData,ColumnLayout) {
+define(['hbs!templates/graph','../util/events', '../graph', '../linkType','../layout/layout','../util/testData', '../layout/columnLayout'],
+		function(graphTemplate,events,Graph,LINK_TYPE,Layout,testData,ColumnLayout) {
 
 
 	/**
@@ -71,7 +71,8 @@ define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','.
 				var forensicLink = {
 					source : nodeMap[link.source],
 					target : nodeMap[link.target],
-					strokeStyle : '#343434'
+					strokeStyle : '#343434',
+					type: LINK_TYPE.ARROW
 				};
 				links.push(forensicLink);
 			}

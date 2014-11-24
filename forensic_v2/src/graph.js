@@ -1,7 +1,7 @@
 /**
  * Created by chrisdickson on 14-11-06.
  */
-define(['layout/layout'],function(Layout) {
+define(['layout/layout','linkType'],function(Layout,LINK_TYPE) {
 
 	/**
 	 * Creates a Graph render object
@@ -30,7 +30,6 @@ define(['layout/layout'],function(Layout) {
 		this._nodeIndexToCircle = {};
 		this._nodeIndexToLabel = {};
 	}
-
 
 	/**
 	 * Gets/sets the nodes for the graph
@@ -383,12 +382,31 @@ define(['layout/layout'],function(Layout) {
 			this.layouter(defaulLayout);
 		}
 		this._links.forEach(function(link) {
-			var line = path.line(link);
 
-			that._nodeIndexToLinkLine[link.source.index].push(line);
-			that._nodeIndexToLinkLine[link.target.index].push(line);
+			var linkObject;
+			if (!link.type) {
+				link.type = LINK_TYPE.DEFAULT;
+			}
+			switch(link.type) {
+				case LINK_TYPE.ARROW:
+					link.headOffset = link.target.radius;
+					linkObject = path.arrow(link);
+					break;
+				case LINK_TYPE.ARC:
+					linkObject = path.arc(link);
+					break;
+				case LINK_TYPE.LINE:
+				case LINK_TYPE.DEFAULT:
+					linkObject = path.line(link);
+					break;
+				default:
+					linkObject = path.line(link);
+					break;
+			}
+			that._nodeIndexToLinkLine[link.source.index].push(linkObject);
+			that._nodeIndexToLinkLine[link.target.index].push(linkObject);
 
-			that._scene.addChild(line);
+			that._scene.addChild(linkObject);
 		});
 
 		this._nodes.forEach(function(node) {
