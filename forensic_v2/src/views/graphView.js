@@ -55,6 +55,17 @@ define(['hbs!templates/graph','../util/events', '../graph','../layout/layout','.
 			}
 		});
 
+		// Sort nodes by date
+		nodes.sort(function(node1,node2) {
+			if (node1.timestamps[0] < node2.timestamps[0]) {
+				return -1;
+			} else if (node1.timestamps[0] > node2.timestamps[0]) {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
 		var links = [];
 		response.links.forEach(function(link) {
 			if (nodeMap[link.source] && nodeMap[link.target]) {
