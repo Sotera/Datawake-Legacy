@@ -27,7 +27,7 @@ object UrlRankTopology {
 
     topologyBuilder.setSpout("update-link-spout",
       kafkaConsumer)
-    val termsSql: String = """SELECT entity from trail_based_entities WHERE org = ? AND domain = ? AND trail = ?"""
+    val termsSql: String = """SELECT entity, google_result_count from trail_based_entities WHERE org = ? AND domain = ? AND trail = ?"""
     val htmlSql: String = """SELECT html from trail_entities_contents WHERE url = ?"""
     topologyBuilder.setBolt("count-entities", new ComputeUrlRankBolt(sqlCredentials, termsSql, htmlSql, new Fields("org", "domain", "trail", "url", "count")))
       .shuffleGrouping("update-link-spout")

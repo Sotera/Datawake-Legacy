@@ -13,7 +13,7 @@ import com.soteradefense.datawake.trails.sql.{SQLExecutor, SqlCredentials}
 import com.soteradefense.datawake.trails.topology.search.json.SearchResults
 import net.liftweb.json._
 
-class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields, selectSql: String) extends BaseBasicBolt {
+class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields, selectSql: String, resultUpdateSql: String) extends BaseBasicBolt {
 
   val GOOGLE_API: String = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q="
   val DEFAULT_CHARSET: String = "UTF-8"
@@ -36,6 +36,7 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
     implicit val formats = DefaultFormats
     val jValue = JsonParser.parse(reader)
     val results = jValue.extract[SearchResults]
+    updateResultCount(org, domain, trail, searchTerm, results.responseData.cursor.estimatedResultCount)
     if (results.responseData != null) {
       results.responseData.results.foreach(f => {
         if (!isInDatabase(org, domain, trail, f.url)) {
@@ -45,6 +46,23 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
     }
     //EMIT TO UrlFilterBolt
     collector.emit("new-term", new Values(org, domain, trail))
+  }
+
+  def updateResultCount(org: String, domain: String, trail: String, term:String, estimatedResultCount: String) = {
+    var countPrepare: PreparedStatement = null
+    try {
+      countPrepare = connection.prepareStatement(resultUpdateSql)
+      countPrepare.setString(1, estimatedResultCount)
+      countPrepare.setString(2, org)
+      countPrepare.setString(3, domain)
+      countPrepare.setString(4, trail)
+      countPrepare.setString(5, term)
+      countPrepare.executeUpdate()
+
+    } finally {
+      if (countPrepare != null)
+        countPrepare.close()
+    }
   }
 
   def isInDatabase(org: String, domain: String, trail: String, url: String): Boolean = {

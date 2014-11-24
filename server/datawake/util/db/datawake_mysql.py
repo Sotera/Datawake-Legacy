@@ -244,7 +244,7 @@ def getBrowsePathData(org, id, domain='default'):
 
 #
 # Get all time stamps from the selected trail,users,org
-#  returns a dictionary of the form  {'min':0,'max':0,'data':[]}
+# returns a dictionary of the form  {'min':0,'max':0,'data':[]}
 #
 def getTimeWindow(org, users, trail='*', domain='default'):
     sql = 'SELECT unix_timestamp(ts) as ts from datawake_data WHERE org = %s AND domain = %s '
@@ -607,15 +607,16 @@ def domain_exists(name):
 
 
 #TODO: May Need to Add org
-def add_trail_based_entity(domain, trail, entity):
-    sql = "insert into trail_based_entities(domain, trail, entity) value (%s,%s,%s)"
-    return dbCommitSQL(sql, [domain, trail, entity])
+def add_trail_based_entity(org, domain, trail, entity):
+    sql = "insert into trail_based_entities(org, domain, trail, entity, google_result_count) value (%s, %s,%s,%s, %s)"
+    return dbCommitSQL(sql, [org, domain, trail, entity, "0"])
 
 
-def get_trail_based_entities(domain, trail):
-    sql = "select entity from trail_based_entities where domain=%s and trail=%s"
-    params = [domain, trail]
+def get_trail_based_entities(org, domain, trail):
+    sql = "select entity from trail_based_entities where org=%s domain=%s and trail=%s"
+    params = [org, domain, trail]
     return map(lambda x: x[0], dbGetRows(sql, params))
+
 
 def get_trail_entity_links(org, domain, trail):
     sql = "select url, title, rank from trail_term_rank where org=%s and domain=%s and trail=%s order by rank desc"

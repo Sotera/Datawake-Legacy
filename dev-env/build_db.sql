@@ -141,6 +141,7 @@ CREATE TABLE trail_based_entities (
   domain varchar(300),
   trail varchar(100) NOT NULL,
   entity varchar(1024),
+  google_result_count varchar(100),
   index(org(300), domain(300), trail(100))
 );
 

@@ -25,9 +25,9 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, termsSql: String, htmlS
       termsPrepare.setString(2, domain)
       termsPrepare.setString(3, trail)
       val resultSet = termsPrepare.executeQuery()
-      val listBuffer = new ListBuffer[String]
+      val listBuffer = new ListBuffer[(String, String)]
       while (resultSet.next()) {
-        listBuffer += resultSet.getString(0)
+        listBuffer += Tuple2(resultSet.getString("entity"), resultSet.getString("google_result_count"))
       }
       htmlPrepare = connection.prepareStatement(htmlSql)
       htmlPrepare.setString(1, url)

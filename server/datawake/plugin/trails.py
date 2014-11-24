@@ -52,7 +52,7 @@ def get_trails_for_domain_and_org(org, domain):
 @is_in_session
 @required_parameters(['domain', 'trail', 'entity'])
 def add_trail_based_entity(domain, trail, entity):
-    success = db.add_trail_based_entity(domain, trail, entity) == 0
+    success = db.add_trail_based_entity(helper.get_org(), domain, trail, entity) == 0
     if success:
         kafka_producer.send_trail_term_message(helper.get_org().encode("utf-8"), domain.encode("utf-8"), trail.encode("utf-8"), entity.encode("utf-8"))
 
@@ -62,7 +62,7 @@ def add_trail_based_entity(domain, trail, entity):
 @is_in_session
 @required_parameters(['domain', 'trail'])
 def get_trail_based_entities(domain, trail):
-    entities = db.get_trail_based_entities(domain, trail)
+    entities = db.get_trail_based_entities(helper.get_org(), domain, trail)
     return json.dumps(dict(entities=entities))
 
 
