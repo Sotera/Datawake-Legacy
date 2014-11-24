@@ -1,4 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../graph', '../linkType','../layout/layout','../util/testData', '../layout/columnLayout'],
+define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/columnLayout'],
 		function(graphTemplate,events,Graph,LINK_TYPE,Layout,testData,ColumnLayout) {
 
 

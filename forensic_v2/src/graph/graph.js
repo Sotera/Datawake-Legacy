@@ -1,7 +1,7 @@
 /**
  * Created by chrisdickson on 14-11-06.
  */
-define(['layout/layout','linkType'],function(Layout,LINK_TYPE) {
+define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 
 	/**
 	 * Creates a Graph render object
