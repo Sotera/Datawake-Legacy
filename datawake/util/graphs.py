@@ -70,6 +70,7 @@ def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
     command = command + " ORDER BY userId,t1.ts asc"
     rows = datawake_db.dbGetRows(command,commandArgs)
 
+
     edges = []
     nodes = {}
     edge_buffer = []
@@ -116,8 +117,6 @@ def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
         nodes = addUrlRankstoNodes(org,nodes,userlist[0],trail,domain=domain)
 
     return {'nodes':nodes,'edges':edges}
-
-
 
 
 def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,userlist=[],trail='*',domain=''):
@@ -186,9 +185,76 @@ def getBrowsePathAndAdjacentPhoneEdgesWithLimit(org,startdate,enddate,limit,user
 def getBrowsePathAndAdjacentEmailEdgesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['email'],limit,userlist,trail,domain)
 
+def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
+    entityDataConnector.close()
+    org = org.upper()
+    command = """SELECT datawake_data.id,unix_timestamp(datawake_data.ts) as ts,datawake_data.url,entity_type,entity_value
+                 FROM memex_sotera.datawake_data INNER JOIN general_extractor_web_index ON memex_sotera.datawake_data.url = memex_sotera.general_extractor_web_index.url
+                 WHERE datawake_data.org=%s AND domain=%s
+                  """
+    commandArgs = [org,domain]
+
+    # add the time filter to the query
+    if (startdate == '' and enddate == ''):
+        pass
+    elif (startdate != '' and enddate == ''):
+        command = command +" AND unix_timestamp(datawake_data.ts) >= %s "
+        commandArgs.append(startdate)
+    elif (startdate == '' and enddate != ''):
+        command = command + "  AND unix_timestamp(datawake_data.ts) <= %s "
+        commandArgs.append(enddate)
+    else:
+        command = command + " AND unix_timestamp(datawake_data.ts) >= %s and unix_timestamp(datawake_data.ts) <= %s "
+        commandArgs.append(startdate)
+        commandArgs.append(enddate)
+
+    # add the user filter
+    if (len(userlist) > 0):
+        command = command +" AND "
+        params = ['%s' for i in range(len(userlist))]
+        params = ','.join(params)
+        command = command + "  userId in ("+params+") "
+        commandArgs.extend(userlist)
+
+    # add the trail filter
+    if trail != '*':
+        command = command +" AND "
+        command = command + " trail = %s"
+        commandArgs.append(trail)
+
+    command = command + " ORDER BY datawake_data.ts asc"
+
+    tangelo.log("SQL COMMAND: " + command)
+    tangelo.log("SQL PARAMS : " + str(commandArgs))
+
+    db_rows = datawake_db.dbGetRows(command,commandArgs)
+
+    tangelo.log("SQL RETURNED " + str(len(db_rows)) + " rows")
+    browsePath = {}
+    entities = []
+    for row in db_rows:
+        (id,ts,url,entity_type,entity_value) = row
+        if trail is None or trail.strip() == '': trail = "default"
+
+        if id not in browsePath:
+            browsePath[id] = {'id':id,
+                              'url':url,
+                              'timestamp':ts
+
+            }
+
+        entities.append({
+            'id':id,
+            'type':entity_type,
+            'value':entity_value
+        })
 
 
-
+    entityDataConnector.close()
+    return {
+        'browsePath':browsePath,
+        'entities':entities
+    }
 
 def getBrowsePathWithTextSelections(org,startdate,enddate,userlist=[],trail='*',domain=''):
     # first get the browse path
