@@ -2,9 +2,13 @@
  * Created by cdickson on 10/17/2014.
  */
 
-require(['config','views/navbarView', 'views/graphView', 'util/util', 'util/guid'], function(config,navbarView,graphView,util,guid) {
+require(['config','views/navbarView', 'views/graphView', 'util/util', 'util/guid'], function(config,navbarView,GraphView,util,guid) {
 	require([],
 		function() {
+			var _graphView = null;
+			var _navbarView = null;
+
+
 			$.get('/datawake/forensic/graphservice/trails')
 				.then(function(response) {
 					var trails = [];
@@ -26,6 +30,6 @@ require(['config','views/navbarView', 'views/graphView', 'util/util', 'util/guid
 				.fail(function(err) {
 					alert('failed!');
 				});
-			graphView.insert($('#graphContainer'),{});
+			_graphView = new GraphView($('#graphContainer'),{});
 		});
 });
