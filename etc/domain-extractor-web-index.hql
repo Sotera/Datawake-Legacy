@@ -1,7 +1,7 @@
 CREATE TABLE domain_extractor_web_index(
     rowkey STRING,
-    c STRING
+    dt STRING
 )
 STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
-WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,colFam:c')
+WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,colFam:dt')
 TBLPROPERTIES ('hbase.table.name' = 'domain_extractor_web_index_hbase');

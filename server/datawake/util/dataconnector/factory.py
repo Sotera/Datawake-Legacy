@@ -37,9 +37,17 @@ def get_entity_data_connector():
         config = datawakeconfig.DATAWAKE_CORE_DB
         return MySqlEntityDataConnector(config)
     elif datawakeconfig.ENTITY_CONNECTION == 'cluster-hbase':
-        return HBASEDataConnector(datawakeconfig.HBASE_HOST)
+        prefix = '' if datawakeconfig.HBASE_NAMESPACE == 'default' or datawakeconfig.HBASE_NAMESPACE == '' else datawakeconfig.HBASE_NAMESPACE+':'
+        config = {
+            'host': datawakeconfig.HBASE_HOST,
+            'port': datawakeconfig.HBASE_PORT,
+            'domain_table': prefix+datawakeconfig.HBASE_DOMAIN_ENTITIES_TABLE,
+            'extracted_all_table': prefix+datawakeconfig.HBASE_EXTRACTED_ALL_TABLE,
+            'extracted_domain_table': prefix+datawakeconfig.HBASE_EXTRACTED_DOMAIN_TABLE
+        }
+        return HBASEDataConnector(config)
     else:
-        raise ValueError("ENTITY_CONNECTION must be 'mysql' or 'cluster', not " + datawakeconfig.ENTITY_CONNECTION)
+        raise ValueError("ENTITY_CONNECTION must be mysql, cluster-impala, or cluster-hbase, not " + datawakeconfig.ENTITY_CONNECTION)
 
 
 
