@@ -1,5 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/columnLayout'],
-		function(graphTemplate,events,Graph,LINK_TYPE,Layout,testData,ColumnLayout) {
+define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/columnLayout'], function(graphTemplate,events,Graph,LINK_TYPE,Layout,testData,ColumnLayout) {
 
 
 	/**
@@ -27,15 +26,17 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	}
 
 	/**
-	 * Renders a graph from the response to a POST request with a trail
-	 * @param response - Response from '/datawake/forensic/graphservice/get' with a trail as input
+	 * Creates nodes and links corresponding to the left hand column in the layout (browse path)
+	 * @param response
+	 * @returns {{nodes: Array, links: Array}}
 	 */
-	function getForensicGraph(response) {
-		var d = new $.Deferred();
+	function getBrowsePathGraph(response) {
 		var nodes = [];
+
 
 		var browsePath = response.browsePath;
 		var i = 0;
+		var browsePathNodeMap = {};
 		for (var id in browsePath) {
 			if (browsePath.hasOwnProperty(id)) {
 				var node = {
@@ -45,10 +46,19 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 					strokeStyle:'#232323',
 					strokeSize:2,
 					radius : 10,					// TODO:   radius == number of times visited?
-					index : i++,
+					index : i,
 					url : browsePath[id].url,
-					ts : browsePath[id].ts
+					type : 'browse_path',
+					ts : browsePath[id].ts,
+					column : 0,
+					row : i,
+					id : browsePath[id].id,
+					domain : browsePath[id].domain,
+					subdomain : browsePath[id].subdomain,
+					suffix : browsePath[id].suffix
 				};
+				i++;
+				browsePathNodeMap[browsePath[id].id] = node;
 				nodes.push(node);
 			}
 		}
@@ -66,8 +76,89 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 
 		var graph = {
 			nodes : nodes,
+			links : links,
+			browsePathNodeMap : browsePathNodeMap
+		};
+		return graph;
+	}
+
+	function getEntitiesGraph(response, browsePathGraph) {
+		var nodeIndex = browsePathGraph.nodes.length;
+
+		var nodes = [];
+		var links = [];
+		for (var i = 0; i < response.entities.length; i++) {
+			var entity = response.entities[i];
+			var browsePathNode = browsePathGraph.browsePathNodeMap[entity.id];
+			if (entity.type === 'email' || entity.type === 'phone') {
+				var node = {
+					x : 0,
+					y : 0,
+					fillStyle: entity.type === 'email' ? '#00ff00' : '#0000ff',
+					strokeStyle:'#232323',
+					strokeSize:2,
+					radius : 10,
+					index : nodeIndex,
+					type: entity.type,
+					value : entity.value,
+					column : 1,
+					row : browsePathNode.row
+				};
+				nodes.push(node);
+				var link = {
+					source : browsePathNode,
+					target : node,
+					strokeStyle : '#343434',
+					type: LINK_TYPE.LINE
+				};
+				links.push(link);
+				nodeIndex++;
+			}
+		}
+
+
+
+		var graph = {
+			nodes : nodes,
 			links : links
 		};
+		return graph;
+	}
+
+	function getRelatedLinksGraph(response, browsePathGraph, entitiesGraph) {
+		var i = browsePathGraph.nodes.length + entitiesGraph.nodes.length;
+		var graph = {
+			nodes : [],
+			links : []
+		};
+		return graph;
+	}
+
+
+			/**
+	 * Renders a graph from the response to a POST request with a trail
+	 * @param response - Response from '/datawake/forensic/graphservice/get' with a trail as input
+	 */
+	function getForensicGraph(response) {
+		var d = new $.Deferred();
+
+		var graph = {
+			nodes : [],
+			links : []
+		};
+
+		var browsePathGraph = getBrowsePathGraph(response);
+		graph.nodes = graph.nodes.concat(browsePathGraph.nodes);
+		graph.links = graph.links.concat(browsePathGraph.links);
+
+		var entitiesGraph = getEntitiesGraph(response, browsePathGraph);
+		graph.nodes = graph.nodes.concat(entitiesGraph.nodes);
+		graph.links = graph.links.concat(entitiesGraph.links);
+
+		var relatedLinksGraph = getRelatedLinksGraph(response, browsePathGraph, entitiesGraph);
+		graph.nodes = graph.nodes.concat(relatedLinksGraph.nodes);
+		graph.links = graph.links.concat(relatedLinksGraph.links);
+
 		return d.resolve(graph);
 	}
 
@@ -94,7 +185,12 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 			var jqCanvas = graphViewElement;
 
 			var nodeOver = function(node) {
-				graph.addLabel(node,node.url);
+				if (node.type === 'browse_path') {
+					graph.addLabel(node,node.url);
+				} else {
+					graph.addLabel(node,node.value);
+				}
+
 			};
 
 			var nodeOut = function(node) {
