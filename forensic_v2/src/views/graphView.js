@@ -1,5 +1,11 @@
 define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/forensicColumnLayout'], function(graphTemplate,events,Graph,LINK_TYPE,Layout,testData,ForensicColumnLayout) {
 
+	/**
+	 *
+	 * @param element - the parent DOM element
+	 * @param context - the context for the graph view template
+	 * @constructor
+	 */
 	function GraphView(element,context) {
 		this._graph = null;
 		this._jqCanvas = null;
@@ -9,6 +15,12 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 		this._initialize(element,context);
 	}
 
+	/**
+	 * Initializes the view.   Creates a canvas context and a initializes a graph in it.
+	 * @param element - the parent DOM element
+	 * @param context - the context for the graph view template
+	 * @private
+	 */
 	GraphView.prototype._initialize = function(element,context) {
 		this._jqCanvas = $(graphTemplate(context));
 		this._graph = new Graph()
@@ -29,6 +41,11 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 		$(window).resize();
 	};
 
+	/**
+	 * Mouseover event handler.   Adds a label/tooltip
+	 * @param node
+	 * @private
+	 */
 	GraphView.prototype._onNodeOver = function(node) {
 		if (node.type === 'browse_path') {
 			this.addLabel(node,node.url);
@@ -37,16 +54,29 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 		}
 	};
 
+	/**
+	 * Node out handler.   Removes the label displayed
+	 * @param node
+	 * @private
+	 */
 	GraphView.prototype._onNodeOut = function(node) {
 		this.removeLabel(node);
 	};
 
+	/**
+	 * Handles resizing
+	 * @private
+	 */
 	GraphView.prototype._onResize = function() {
 		var width = $(window).width();
 		var height = $(window).height() - this._jqCanvas.offset().top;
 		this._graph.resize(width,height);
 	};
 
+	/**
+	 * Adds any event handlers for custom message passing
+	 * @private
+	 */
 	GraphView.prototype._bindEventHandlers = function() {
 		var self = this;
 

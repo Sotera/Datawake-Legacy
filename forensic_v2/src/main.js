@@ -2,7 +2,7 @@
  * Created by cdickson on 10/17/2014.
  */
 
-require(['config','views/navbarView', 'views/graphView', 'util/util', 'util/guid'], function(config,navbarView,GraphView,util,guid) {
+require(['config','views/navbarView', 'views/graphView', 'util/util', 'util/guid'], function(config,NavbarView,GraphView,util,guid) {
 	require([],
 		function() {
 			var _graphView = null;
@@ -23,7 +23,7 @@ require(['config','views/navbarView', 'views/graphView', 'util/util', 'util/guid
 					} catch(err){
 						console.error('Server returned no trails!');
 					}
-					navbarView.insert($('#navbarContainer'),{
+					_navbarView = new NavbarView($('#navbarContainer'),{
 						trails:trails
 					});
 				})
