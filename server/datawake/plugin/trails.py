@@ -63,7 +63,8 @@ def add_trail_based_entity(domain, trail, entity):
 @required_parameters(['domain', 'trail'])
 def get_trail_based_entities(domain, trail):
     entities = db.get_trail_based_entities(helper.get_org(), domain, trail)
-    return json.dumps(dict(entities=entities))
+    irrelevantEntities = db.get_irrelevant_trail_based_entities(helper.get_org(), domain, trail)
+    return json.dumps(dict(entities=entities, irrelevantEntities=irrelevantEntities))
 
 
 @is_in_session

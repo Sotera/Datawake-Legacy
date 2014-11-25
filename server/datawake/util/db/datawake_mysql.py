@@ -621,6 +621,11 @@ def get_trail_based_entities(org, domain, trail):
     params = [org, domain, trail]
     return map(lambda x: x[0], dbGetRows(sql, params))
 
+def get_irrelevant_trail_based_entities(org, domain, trail):
+    sql = "select entity from irrelevant_trail_based_entities where org=%s and domain=%s and trail=%s"
+    params = [org, domain, trail]
+    return map(lambda x: x[0], dbGetRows(sql, params))
+
 
 def get_trail_entity_links(org, domain, trail):
     sql = "select url, title, rank from trail_term_rank where org=%s and domain=%s and trail=%s order by rank desc"

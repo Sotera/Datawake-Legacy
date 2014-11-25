@@ -22,7 +22,7 @@ object SearchTopology {
       new Fields("kafkaOrg", "kafkaDomain", "kafkaTrail", "kafkaTerm", "kafkaValid"),
       new DatawakeTermDecoder,
       DatawakeConstants.ZK_NODES,
-      "trail-search", "trail-search-consumer")
+      DatawakeConstants.TRAIL_SEARCH_TOPIC, "trail-search-consumer")
 
     val selectAllUrlsSql = "SELECT url from trail_term_rank WHERE org = ? AND domain = ? AND trail = ?"
     val selectUrlExistsCountSql = "SELECT EXISTS (SELECT 1 from trail_term_rank WHERE org = ? AND domain = ? AND trail = ? AND url = ?) as doesExist"

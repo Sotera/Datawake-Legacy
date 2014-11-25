@@ -10,7 +10,7 @@ import com.soteradefense.datawake.trails.sql.SqlCredentials
 
 import scala.collection.mutable.ListBuffer
 
-class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, htmlSql: String,invalidTermsSql: String, outputFields: Fields) extends SqlUpdateBolt(sqlCredentials) {
+class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, htmlSql: String, invalidTermsSql: String, outputFields: Fields, searchFields: Fields) extends SqlUpdateBolt(sqlCredentials) {
 
   override def execute(input: Tuple, collector: BasicOutputCollector): Unit = {
     val org = input.getStringByField("kafkaOrg")
@@ -19,15 +19,15 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
     val url = input.getStringByField("kafkaLink")
     var htmlPrepare: PreparedStatement = null
     try {
-      val validTermList = getValidTerms(validTermsSql, org, domain, trail)
-      val invalidTermList = getValidTerms(invalidTermsSql, org, domain, trail)
+      val validTermList = getTerms(validTermsSql, org, domain, trail).toList
+      val invalidTermList = getTerms(invalidTermsSql, org, domain, trail).toList
       htmlPrepare = connection.prepareStatement(htmlSql)
       htmlPrepare.setString(1, url)
       val htmlSet = htmlPrepare.executeQuery()
       if (htmlSet.next()) {
         val html = htmlSet.getString("html")
-        val termCount = RegexWords.getRank(validTermList,invalidTermList, html)
-        collector.emit(new Values(org, domain, trail, url, termCount.asInstanceOf[java.lang.Double]))
+        val termCount = RegexWords.getRank(validTermList, invalidTermList, html)
+        collector.emit("count", new Values(org, domain, trail, url, termCount.asInstanceOf[java.lang.Double]))
       }
 
     } finally {
@@ -37,7 +37,7 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
     }
   }
 
-  def getValidTerms(sql: String, org: String, domain: String, trail: String) = {
+  def getTerms(sql: String, org: String, domain: String, trail: String) = {
     var termsPrepare: PreparedStatement = null
     try {
       termsPrepare = connection.prepareStatement(sql)
@@ -47,7 +47,7 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
       val resultSet = termsPrepare.executeQuery()
       val validTermList = new ListBuffer[(String, Double)]
       while (resultSet.next()) {
-        validTermList += Tuple2(resultSet.getString("entity"), resultSet.getString("google_result_count").toDouble)
+        validTermList += Tuple2(resultSet.getString("entity"), 1.0 / RegexWords.log2(resultSet.getString("google_result_count").toDouble))
       }
       validTermList
     } finally {
@@ -57,6 +57,7 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
   }
 
   override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {
-    declarer.declare(outputFields)
+    declarer.declareStream("count", outputFields)
+    declarer.declareStream("search", searchFields)
   }
 }

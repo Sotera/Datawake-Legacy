@@ -9,7 +9,7 @@ import backtype.storm.task.TopologyContext
 import backtype.storm.topology.base.BaseBasicBolt
 import backtype.storm.topology.{BasicOutputCollector, OutputFieldsDeclarer}
 import backtype.storm.tuple.{Fields, Tuple, Values}
-import com.soteradefense.datawake.trails.sql.{SQLExecutor, SqlCredentials}
+import com.soteradefense.datawake.trails.sql.SqlCredentials
 import com.soteradefense.datawake.trails.topology.search.json.SearchResults
 import net.liftweb.json._
 
@@ -36,23 +36,30 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
     val reader = new InputStreamReader(url.openStream(), DEFAULT_CHARSET)
     implicit val formats = DefaultFormats
     val jValue = JsonParser.parse(reader)
-    val results = jValue.extract[SearchResults]
-    if(valid)
-      updateResultCount(resultUpdateSql, org, domain, trail, searchTerm, results.responseData.cursor.estimatedResultCount)
-    else
-      updateResultCount(invalidResultUpdateSql, org, domain, trail, searchTerm, results.responseData.cursor.estimatedResultCount)
-    if (results.responseData != null && valid) {
-      results.responseData.results.foreach(f => {
-        if (!isInDatabase(org, domain, trail, f.url)) {
-          collector.emit("new-url", new Values(org, domain, trail, f.url, f.title))
-        }
-      })
+    var results: SearchResults = null
+    try {
+      results = jValue.extract[SearchResults]
+
+      if (valid)
+        updateResultCount(resultUpdateSql, org, domain, trail, searchTerm, results.responseData.cursor.estimatedResultCount)
+      else
+        updateResultCount(invalidResultUpdateSql, org, domain, trail, searchTerm, results.responseData.cursor.estimatedResultCount)
+      if (results.responseData != null && valid) {
+        results.responseData.results.foreach(f => {
+          if (!isInDatabase(org, domain, trail, f.url)) {
+            collector.emit("new-url", new Values(org, domain, trail, f.url, f.title))
+          }
+        })
+      }
+    } catch {
+      case _: Throwable =>
+        println("No Results Found")
     }
     //EMIT TO UrlFilterBolt
     collector.emit("new-term", new Values(org, domain, trail))
   }
 
-  def updateResultCount(sql: String, org: String, domain: String, trail: String, term:String, estimatedResultCount: String) = {
+  def updateResultCount(sql: String, org: String, domain: String, trail: String, term: String, estimatedResultCount: String) = {
     var countPrepare: PreparedStatement = null
     try {
       countPrepare = connection.prepareStatement(sql)
@@ -78,7 +85,7 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
       countPrepare.setString(3, trail)
       countPrepare.setString(4, url)
       val resultSet = countPrepare.executeQuery()
-      if(resultSet.next())
+      if (resultSet.next())
         resultSet.getInt("doesExist") != 0
       false
     } finally {

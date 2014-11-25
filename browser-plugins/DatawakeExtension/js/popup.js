@@ -90,10 +90,11 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         });
     }
 
-    function fetchTrailEntities(domain, trail){
+    function fetchTrailEntities(domain, trail) {
         var post_data = JSON.stringify({domain: domain, trail: trail});
         popUpService.post(chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/trails/entities", post_data).then(function (response) {
             $scope.trailEntities = response.entities;
+            $scope.irrelevantEntities = response.irrelevantEntities;
         });
     }
 

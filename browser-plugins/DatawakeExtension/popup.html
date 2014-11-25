@@ -93,6 +93,7 @@
             <ul class="dropdown-menu" role="menu" aria-labelledby="myTabDrop1" id="myTabDrop1-contents">
                 <li><a href="#trail-search" role="tab" data-toggle="tab">Search</a></li>
                 <li><a href="#trail-entities" role="tab" data-toggle="tab">Entities</a></li>
+                <li><a href="#irrelevant-trail-entities" role="tab" data-toggle="tab">Irrelevant Entities</a></li>
             </ul>
         </li>
     </ul>
@@ -255,6 +256,26 @@
                     </thead>
                     <tbody>
                     <tr ng-repeat="entity in trailEntities">
+                        <td>
+                            {{entity}}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane" id="irrelevant-trail-entities">
+            <h3>Irrelevant Trail Based Entities</h3>
+
+            <div>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <td><b>Entities</b></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="entity in irrelevantEntities">
                         <td>
                             {{entity}}
                         </td>
