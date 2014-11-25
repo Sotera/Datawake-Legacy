@@ -3,12 +3,12 @@ package com.soteradefense.datawake.trails.sql
 import java.sql.{Connection, PreparedStatement}
 
 class SQLExecutor(conn: Connection) {
-  def updateCount(sql: String, count: Int, org: String, domain: String, trail: String, link: String): Unit = {
+  def updateCount(sql: String, count: Double, org: String, domain: String, trail: String, link: String): Unit = {
 
     var sqlPrepare: PreparedStatement = null
     try {
       sqlPrepare = this.conn.prepareStatement(sql)
-      sqlPrepare.setInt(1, count)
+      sqlPrepare.setDouble(1, count)
       sqlPrepare.setString(2, org)
       sqlPrepare.setString(3, domain)
       sqlPrepare.setString(4, trail)
@@ -20,7 +20,7 @@ class SQLExecutor(conn: Connection) {
     }
   }
 
-  def insertCount(sql: String, count: Int, org: String, domain: String, trail: String, link: String, title: String): Unit = {
+  def insertCount(sql: String, count: Double, org: String, domain: String, trail: String, link: String, title: String): Unit = {
     var sqlPrepare: PreparedStatement = null
     try {
       sqlPrepare = this.conn.prepareStatement(sql)
@@ -29,7 +29,7 @@ class SQLExecutor(conn: Connection) {
       sqlPrepare.setString(3, trail)
       sqlPrepare.setString(4, link)
       sqlPrepare.setString(5, title)
-      sqlPrepare.setInt(6, count)
+      sqlPrepare.setDouble(6, count)
       sqlPrepare.executeUpdate()
     } finally {
       if (sqlPrepare != null)
@@ -48,9 +48,9 @@ class SQLExecutor(conn: Connection) {
       selectPrepare.setString(5, title)
       val rs = selectPrepare.executeQuery()
       if (rs.next())
-        rs.getInt("rank")
+        rs.getDouble("rank")
       else
-        -1
+        -1.0
     } finally {
       if (selectPrepare != null)
         selectPrepare.close()

@@ -22,7 +22,7 @@ class SaveRawHtmlBolt(sqlCredentials: SqlCredentials, htmlInsertSql: String, ent
       preparedStatement.setString(2, html)
       preparedStatement.executeUpdate()
       val sqlWrapper = new SQLExecutor(connection)
-      val rowsChanged = sqlWrapper.insertCount(entityCountInsertSql, 0, org, domain, trail, url, title)
+      val rowsChanged = sqlWrapper.insertCount(entityCountInsertSql, 0.0, org, domain, trail, url, title)
       println("Emitting to Rank Count: " + rowsChanged)
       collector.emit(new Values(org, domain, trail, url))
     } finally {

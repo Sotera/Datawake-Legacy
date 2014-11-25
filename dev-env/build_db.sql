@@ -152,7 +152,7 @@ CREATE TABLE trail_term_rank (
   trail varchar(100),
   url varchar(1024),
   title varchar(100),
-  rank INTEGER,
+  rank DOUBLE,
   index(org(300), domain(300), trail(100), url(1024))
 );
 

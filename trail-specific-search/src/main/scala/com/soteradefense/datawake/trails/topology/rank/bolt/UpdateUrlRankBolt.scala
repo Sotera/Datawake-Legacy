@@ -14,7 +14,7 @@ class UpdateUrlRankBolt(sqlCredentials: SqlCredentials, updateSql: String) exten
     val domain = input.getStringByField("domain")
     val trail = input.getStringByField("trail")
     val link = input.getStringByField("url")
-    val count = input.getIntegerByField("count")
+    val count = input.getDoubleByField("count")
     //Get Existing Count
     val sqlHelper = new SQLExecutor(this.connection)
 

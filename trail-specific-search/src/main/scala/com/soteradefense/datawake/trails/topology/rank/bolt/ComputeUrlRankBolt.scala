@@ -25,9 +25,9 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, termsSql: String, htmlS
       termsPrepare.setString(2, domain)
       termsPrepare.setString(3, trail)
       val resultSet = termsPrepare.executeQuery()
-      val listBuffer = new ListBuffer[(String, String)]
+      val listBuffer = new ListBuffer[(String, Double)]
       while (resultSet.next()) {
-        listBuffer += Tuple2(resultSet.getString("entity"), resultSet.getString("google_result_count"))
+        listBuffer += Tuple2(resultSet.getString("entity"), resultSet.getString("google_result_count").toDouble)
       }
       htmlPrepare = connection.prepareStatement(htmlSql)
       htmlPrepare.setString(1, url)
@@ -35,7 +35,7 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, termsSql: String, htmlS
       if (htmlSet.next()) {
         val html = htmlSet.getString("html")
         val termCount = RegexWords.getWordCount(listBuffer, html)
-        collector.emit(new Values(org, domain, trail, url, termCount.asInstanceOf[java.lang.Integer]))
+        collector.emit(new Values(org, domain, trail, url, termCount.asInstanceOf[java.lang.Double]))
       }
 
     } finally {
