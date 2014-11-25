@@ -10,7 +10,7 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	 */
 	function fetchDatawakeGraphFor(trail) {
 		var requestData = {
-			name : 'browse path - with adjacent urls min degree 2',
+			name : 'browse path - with connected entities min degree 2',
 			startdate : 1416459600,
 			enddate : 1416546000
 		};
@@ -33,50 +33,36 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	function getForensicGraph(response) {
 		var d = new $.Deferred();
 		var nodes = [];
-		var nodeMap = {};
-		response.nodes.forEach(function(node) {
-			if (node.type.trim() === 'browse path') {
-				var forensicNode = {
-					x:0,
-					y:0,
-					fillStyle:'#ff0000',
+
+		var browsePath = response.browsePath;
+		var i = 0;
+		for (var id in browsePath) {
+			if (browsePath.hasOwnProperty(id)) {
+				var node = {
+					x : 0,
+					y : 0,
+					fillStyle: '#ff0000',
 					strokeStyle:'#232323',
 					strokeSize:2,
-					radius : 10
+					radius : 10,					// TODO:   radius == number of times visited?
+					index : i++,
+					url : browsePath[id].url,
+					ts : browsePath[id].ts
 				};
-				for (var key in node) {
-					if (node.hasOwnProperty(key)) {
-						forensicNode[key] = node[key];
-					}
-				}
-				nodes.push(forensicNode);
-				nodeMap[forensicNode.index] = forensicNode;
+				nodes.push(node);
 			}
-		});
-
-		// Sort nodes by date
-		nodes.sort(function(node1,node2) {
-			if (node1.timestamps[0] < node2.timestamps[0]) {
-				return -1;
-			} else if (node1.timestamps[0] > node2.timestamps[0]) {
-				return 1;
-			} else {
-				return 0;
-			}
-		});
+		}
 
 		var links = [];
-		response.links.forEach(function(link) {
-			if (nodeMap[link.source] && nodeMap[link.target]) {
-				var forensicLink = {
-					source : nodeMap[link.source],
-					target : nodeMap[link.target],
-					strokeStyle : '#343434',
-					type: LINK_TYPE.ARROW
-				};
-				links.push(forensicLink);
-			}
-		});
+		for (i = 0; i < nodes.length-1; i++) {
+			var link = {
+				source : nodes[i],
+				target : nodes[i+1],
+				strokeStyle : '#343434',
+				type: LINK_TYPE.ARROW
+			};
+			links.push(link);
+		}
 
 		var graph = {
 			nodes : nodes,
@@ -108,7 +94,7 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 			var jqCanvas = graphViewElement;
 
 			var nodeOver = function(node) {
-				graph.addLabel(node,node.id);
+				graph.addLabel(node,node.url);
 			};
 
 			var nodeOut = function(node) {
@@ -120,6 +106,7 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 				.pannable()
 				.nodeHover(nodeOver,nodeOut)
 				.layouter(new ColumnLayout())
+				.draggable()
 				.draw();
 
 
