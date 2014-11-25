@@ -1,4 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/columnLayout'], function(graphTemplate,events,Graph,LINK_TYPE,Layout,testData,ColumnLayout) {
+define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/forensicColumnLayout'], function(graphTemplate,events,Graph,LINK_TYPE,Layout,testData,ForensicColumnLayout) {
 
 
 	/**
@@ -50,7 +50,7 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 					url : browsePath[id].url,
 					type : 'browse_path',
 					ts : browsePath[id].ts,
-					column : 0,
+					col : 0,
 					row : i,
 					id : browsePath[id].id,
 					domain : browsePath[id].domain,
@@ -101,7 +101,7 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 					index : nodeIndex,
 					type: entity.type,
 					value : entity.value,
-					column : 1,
+					col : 1,
 					row : browsePathNode.row
 				};
 				nodes.push(node);
@@ -201,7 +201,7 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 				.canvas(jqCanvas[0])
 				.pannable()
 				.nodeHover(nodeOver,nodeOut)
-				.layouter(new ColumnLayout())
+				.layouter(new ForensicColumnLayout())
 				.draggable()
 				.draw();
 

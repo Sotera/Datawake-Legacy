@@ -63,6 +63,7 @@ Layout.prototype.labelMap = function(labelMap) {
 
 Layout.prototype._setNodePositionImmediate = function(node,x,y) {
 	this._setNodePosition(node,x,y,true);
+	this._scene.update();					// Debug!!  Remove me!
 };
 
 Layout.prototype._setNodePosition = function(node,x,y,bImmediate) {
