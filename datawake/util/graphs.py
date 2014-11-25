@@ -19,6 +19,7 @@ import igraph
 import datawake.util.entity_data_connector_factory as factory
 from datawake.util import datawake_db
 import tangelo
+import tldextract
 
 """
 
@@ -195,18 +196,18 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
     commandArgs = [org,domain]
 
     # add the time filter to the query
-    if (startdate == '' and enddate == ''):
-        pass
-    elif (startdate != '' and enddate == ''):
-        command = command +" AND unix_timestamp(datawake_data.ts) >= %s "
-        commandArgs.append(startdate)
-    elif (startdate == '' and enddate != ''):
-        command = command + "  AND unix_timestamp(datawake_data.ts) <= %s "
-        commandArgs.append(enddate)
-    else:
-        command = command + " AND unix_timestamp(datawake_data.ts) >= %s and unix_timestamp(datawake_data.ts) <= %s "
-        commandArgs.append(startdate)
-        commandArgs.append(enddate)
+    # if (startdate == '' and enddate == ''):
+    #     pass
+    # elif (startdate != '' and enddate == ''):
+    #     command = command +" AND unix_timestamp(datawake_data.ts) >= %s "
+    #     commandArgs.append(startdate)
+    # elif (startdate == '' and enddate != ''):
+    #     command = command + "  AND unix_timestamp(datawake_data.ts) <= %s "
+    #     commandArgs.append(enddate)
+    # else:
+    #     command = command + " AND unix_timestamp(datawake_data.ts) >= %s and unix_timestamp(datawake_data.ts) <= %s "
+    #     commandArgs.append(startdate)
+    #     commandArgs.append(enddate)
 
     # add the user filter
     if (len(userlist) > 0):
@@ -237,12 +238,20 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
         if trail is None or trail.strip() == '': trail = "default"
 
         if id not in browsePath:
+
+            ext = tldextract.extract(url)
+
             browsePath[id] = {'id':id,
                               'url':url,
-                              'timestamp':ts
+                              'timestamp':ts,
+                              'subdomain':ext.subdomain,
+                              'domain':ext.domain,
+                              'suffix':ext.suffix
 
             }
 
+
+        # TODO: domain extraction on email addresses and linked website entity_values
         entities.append({
             'id':id,
             'type':entity_type,
