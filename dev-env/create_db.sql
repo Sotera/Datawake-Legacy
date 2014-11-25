@@ -131,6 +131,15 @@ CREATE TABLE IF NOT EXISTS trail_based_entities (
   index(org(300), domain(300), trail(100))
 );
 
+CREATE TABLE IF NOT EXISTS irrelevant_trail_based_entities (
+  org VARCHAR(300),
+  domain varchar(300),
+  trail varchar(100) NOT NULL,
+  entity varchar(1024),
+  google_result_count varchar(100),
+  index(org(300), domain(300), trail(100))
+);
+
 CREATE TABLE IF NOT EXISTS trail_term_rank (
   org VARCHAR(300),
   domain varchar(300),

@@ -87,12 +87,22 @@ def get_trail_entity_links(domain, trail):
     return json.dumps(dict(links=db.get_trail_entity_links(org, domain, trail)))
 
 
+@is_in_session
+@required_parameters(['domain', 'trail', 'entity'])
+def add_irrelevant_trail_entity(domain, trail, entity):
+    success = db.add_irrelevant_trail_entity(helper.get_org(), domain, trail, entity) == 0
+    if success:
+        kafka_producer.send_trail_term_message(helper.get_org().encode("utf-8"), domain.encode("utf-8"), trail.encode("utf-8"), entity.encode("utf-8"), False)
+    return json.dumps(dict(success=success))
+
+
 post_actions = {
     'get': get_trails,
     'create': add_trail,
     'entity': add_trail_based_entity,
     'entities': get_trail_based_entities,
-    'links': get_trail_entity_links
+    'links': get_trail_entity_links,
+    'irrelevant': add_irrelevant_trail_entity
 }
 
 

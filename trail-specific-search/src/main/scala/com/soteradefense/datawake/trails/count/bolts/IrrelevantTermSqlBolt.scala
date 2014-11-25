@@ -16,9 +16,9 @@ class IrrelevantTermSqlBolt(sqlCredentials: SqlCredentials, insertSql: String) e
     val title = input.getStringByField("title")
     //Get Existing Count
     val sqlHelper = new SQLExecutor(this.connection)
-    val count = -1000
+    val count = 0.0
     try {
-      sqlHelper.insertCount(insertSql, count, org, domain, trail, link, title)
+      sqlHelper.updateCount(insertSql, count, org, domain, trail, link)
     } catch {
       case e: SQLException =>
         println(e.getMessage)

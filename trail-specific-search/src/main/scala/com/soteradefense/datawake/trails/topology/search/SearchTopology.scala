@@ -19,7 +19,7 @@ object SearchTopology {
 
 
     val kafkaConsumer = new HighLevelKafkaConsumer[DatawakeTerm](
-      new Fields("kafkaOrg", "kafkaDomain", "kafkaTrail", "kafkaTerm"),
+      new Fields("kafkaOrg", "kafkaDomain", "kafkaTrail", "kafkaTerm", "kafkaValid"),
       new DatawakeTermDecoder,
       DatawakeConstants.ZK_NODES,
       "trail-search", "trail-search-consumer")
@@ -28,11 +28,12 @@ object SearchTopology {
     val selectUrlExistsCountSql = "SELECT EXISTS (SELECT 1 from trail_term_rank WHERE org = ? AND domain = ? AND trail = ? AND url = ?) as doesExist"
     topologyBuilder.setSpout("search-term-spout", kafkaConsumer)
     val updateResultCountSql = """UPDATE trail_based_entities SET google_result_count = ? WHERE org = ? AND domain = ? AND trail = ? AND entity = ?"""
+    val invalidUpdateResultSql = """UPDATE irrelevant_trail_based_entities SET google_result_count = ? WHERE org = ? AND domain = ? AND trail = ? AND entity = ?"""
     val googleSearchBolt = new SearchBolt(
       sqlCredentials,
       new Fields("org", "domain", "trail", "url", "title"),
       new Fields("updateOrg", "updateDomain", "updateTrail"),
-      selectUrlExistsCountSql, updateResultCountSql)
+      selectUrlExistsCountSql, updateResultCountSql,invalidUpdateResultSql)
 
     //QUERIES GOOGLE FOR SEARCH RESULTS
     topologyBuilder.setBolt("google-search", googleSearchBolt)

@@ -49,6 +49,8 @@ DROP TABLE IF EXISTS invalid_extracted_entity;
 
 DROP TABLE IF EXISTS trail_based_entities;
 
+DROP TABLE IF EXISTS irrelevant_trail_based_entities;
+
 
 DROP TABLE IF EXISTS trail_term_rank;
 

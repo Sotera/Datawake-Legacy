@@ -10,8 +10,8 @@ class DatawakeTermDecoder extends Decoder[DatawakeTerm] with Serializable {
     val str = new String(bytes)
     val data = str.split("\u0000")
     println(str)
-    if (data == null || data.length != 4)
+    if (data == null || data.length != 5)
       return null
-    new DatawakeTerm(data(0), data(1), data(2), data(3))
+    new DatawakeTerm(data(0), data(1), data(2), data(3), data(4).toBoolean)
   }
 }

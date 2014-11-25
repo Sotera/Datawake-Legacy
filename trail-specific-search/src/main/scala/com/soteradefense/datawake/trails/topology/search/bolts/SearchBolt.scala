@@ -13,7 +13,7 @@ import com.soteradefense.datawake.trails.sql.{SQLExecutor, SqlCredentials}
 import com.soteradefense.datawake.trails.topology.search.json.SearchResults
 import net.liftweb.json._
 
-class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields, selectSql: String, resultUpdateSql: String) extends BaseBasicBolt {
+class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields, selectSql: String, resultUpdateSql: String, invalidResultUpdateSql: String) extends BaseBasicBolt {
 
   val GOOGLE_API: String = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q="
   val DEFAULT_CHARSET: String = "UTF-8"
@@ -31,13 +31,17 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
     val org: String = input.getStringByField("kafkaOrg")
     val domain: String = input.getStringByField("kafkaDomain")
     val trail: String = input.getStringByField("kafkaTrail")
+    val valid: Boolean = input.getBooleanByField("kafkaValid")
     val url: URL = new URL(GOOGLE_API + URLEncoder.encode(searchTerm, DEFAULT_CHARSET) + RESULT_SET)
     val reader = new InputStreamReader(url.openStream(), DEFAULT_CHARSET)
     implicit val formats = DefaultFormats
     val jValue = JsonParser.parse(reader)
     val results = jValue.extract[SearchResults]
-    updateResultCount(org, domain, trail, searchTerm, results.responseData.cursor.estimatedResultCount)
-    if (results.responseData != null) {
+    if(valid)
+      updateResultCount(resultUpdateSql, org, domain, trail, searchTerm, results.responseData.cursor.estimatedResultCount)
+    else
+      updateResultCount(invalidResultUpdateSql, org, domain, trail, searchTerm, results.responseData.cursor.estimatedResultCount)
+    if (results.responseData != null && valid) {
       results.responseData.results.foreach(f => {
         if (!isInDatabase(org, domain, trail, f.url)) {
           collector.emit("new-url", new Values(org, domain, trail, f.url, f.title))
@@ -48,10 +52,10 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
     collector.emit("new-term", new Values(org, domain, trail))
   }
 
-  def updateResultCount(org: String, domain: String, trail: String, term:String, estimatedResultCount: String) = {
+  def updateResultCount(sql: String, org: String, domain: String, trail: String, term:String, estimatedResultCount: String) = {
     var countPrepare: PreparedStatement = null
     try {
-      countPrepare = connection.prepareStatement(resultUpdateSql)
+      countPrepare = connection.prepareStatement(sql)
       countPrepare.setString(1, estimatedResultCount)
       countPrepare.setString(2, org)
       countPrepare.setString(3, domain)

@@ -10,39 +10,49 @@ import com.soteradefense.datawake.trails.sql.SqlCredentials
 
 import scala.collection.mutable.ListBuffer
 
-class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, termsSql: String, htmlSql: String, outputFields: Fields) extends SqlUpdateBolt(sqlCredentials) {
+class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, htmlSql: String,invalidTermsSql: String, outputFields: Fields) extends SqlUpdateBolt(sqlCredentials) {
 
   override def execute(input: Tuple, collector: BasicOutputCollector): Unit = {
     val org = input.getStringByField("kafkaOrg")
     val domain = input.getStringByField("kafkaDomain")
     val trail = input.getStringByField("kafkaTrail")
     val url = input.getStringByField("kafkaLink")
-    var termsPrepare: PreparedStatement = null
     var htmlPrepare: PreparedStatement = null
     try {
-      termsPrepare = connection.prepareStatement(termsSql)
-      termsPrepare.setString(1, org)
-      termsPrepare.setString(2, domain)
-      termsPrepare.setString(3, trail)
-      val resultSet = termsPrepare.executeQuery()
-      val listBuffer = new ListBuffer[(String, Double)]
-      while (resultSet.next()) {
-        listBuffer += Tuple2(resultSet.getString("entity"), resultSet.getString("google_result_count").toDouble)
-      }
+      val validTermList = getValidTerms(validTermsSql, org, domain, trail)
+      val invalidTermList = getValidTerms(invalidTermsSql, org, domain, trail)
       htmlPrepare = connection.prepareStatement(htmlSql)
       htmlPrepare.setString(1, url)
       val htmlSet = htmlPrepare.executeQuery()
       if (htmlSet.next()) {
         val html = htmlSet.getString("html")
-        val termCount = RegexWords.getWordCount(listBuffer, html)
+        val termCount = RegexWords.getRank(validTermList,invalidTermList, html)
         collector.emit(new Values(org, domain, trail, url, termCount.asInstanceOf[java.lang.Double]))
       }
 
     } finally {
-      if (termsPrepare != null)
-        termsPrepare.close()
+
       if (htmlPrepare != null)
         htmlPrepare.close()
+    }
+  }
+
+  def getValidTerms(sql: String, org: String, domain: String, trail: String) = {
+    var termsPrepare: PreparedStatement = null
+    try {
+      termsPrepare = connection.prepareStatement(sql)
+      termsPrepare.setString(1, org)
+      termsPrepare.setString(2, domain)
+      termsPrepare.setString(3, trail)
+      val resultSet = termsPrepare.executeQuery()
+      val validTermList = new ListBuffer[(String, Double)]
+      while (resultSet.next()) {
+        validTermList += Tuple2(resultSet.getString("entity"), resultSet.getString("google_result_count").toDouble)
+      }
+      validTermList
+    } finally {
+      if (termsPrepare != null)
+        termsPrepare.close()
     }
   }
 

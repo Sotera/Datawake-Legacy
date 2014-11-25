@@ -69,13 +69,13 @@ def sendVisitingMessage(org, domain, userId, url, html):
 TRAIL_PRODUCER = None
 
 
-def send_trail_term_message(org, domain, trail, term):
+def send_trail_term_message(org, domain, trail, term, valid=True):
     global TRAIL_PRODUCER
     if TRAIL_PRODUCER is None:
         TRAIL_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL, datawakeconfig.KAFKA_TRAIL_TOPIC)
 
     try:
-        message = "%s\0%s\0%s\0%s" % (org, domain, trail, term)
+        message = "%s\0%s\0%s\0%s\0%s" % (org, domain, trail, term, str(valid))
         TRAIL_PRODUCER.send(str(message))
     except:
         try:
