@@ -8,7 +8,7 @@ define(['layout/layout'],function(Layout) {
 		margin : 100
 	});
 
-	var NODE_PADDING = 10;
+	var NODE_PADDING = 5;
 
 	/**
 	 *
@@ -59,21 +59,19 @@ define(['layout/layout'],function(Layout) {
 
 	/**
 	 * Calculates the height of a laid-out array of nodes
-	 * @param columnNodes - an array of node objects
+	 * @param nodeList - an array of node objects
 	 * @returns {Height} of column in pixels
 	 * @private
 	 */
-	ForensicColumnLayout.prototype._getRowHeight = function(columnNodes) {
+	var getGridCellHeight = function(nodeList) {
 		var height = 0;
-		if (columnNodes) {
-			columnNodes.forEach(function (node) {
-				height += node.radius;
-			});
-			height += columnNodes.length * NODE_PADDING;
+		if (nodeList) {
+			for (var i = 0; i < nodeList.length; i++) {
+				height+= (2*nodeList[i].radius) + NODE_PADDING;
+			}
 		}
 		return height;
 	};
-
 
 	/**
 	 * Perform a 3-column layout.   On the left is the browse path.   Center column
@@ -86,7 +84,6 @@ define(['layout/layout'],function(Layout) {
 	ForensicColumnLayout.prototype.layout = function (w, h) {
 		var x = 0;
 		var y = 0;
-		var that = this;
 		var nodeGridMap = {};
 		this._positionedObjects = 0;
 
@@ -118,27 +115,29 @@ define(['layout/layout'],function(Layout) {
 
 		// Layout each row one by one
 		var top = NODE_PADDING;
-		for (var i = 0; i < maxRow; i++) {
-
+		this._positionedObjects = 0;
+		for (var i = 0; i <= maxRow; i++) {
 			var columns = [nodeGridMap[i+',0']||[],nodeGridMap[i+',1']||[],nodeGridMap[i+',2']||[]];
+			var cellHeights = [getGridCellHeight(columns[0]),getGridCellHeight(columns[1]),getGridCellHeight(columns[2])];
+			var rowHeight = Math.max.apply(Math,cellHeights);
 
 			// layout each column
 			for (var j = 0; j < columns.length; j++) {
-				var colTop = top;
-
-				// Place each node in the column
+				var cellHeight = cellHeights[j];
+				var cellTop = top + ((rowHeight - cellHeight) / 2.0);
 				for (var k = 0; k < columns[j].length; k++) {
 					var node = columns[j][k];
 					x = getXPosition(j);
-					y = colTop + node.radius;
-					colTop += y + NODE_PADDING;
-					that._setNodePositionImmediate(node, x, y);
+					y = cellTop + node.radius;
+					this._setNodePositionImmediate(node,x,0);
+					this._setNodePosition(node,x,y);
 					this._positionedObjects++;
+					cellTop += (2*node.radius) + NODE_PADDING;
 				}
 			}
-			var rowHeight = Math.max(this._getRowHeight(columns[0]),Math.max(this._getRowHeight(columns[1]),this._getRowHeight(columns[2])));
 			top += rowHeight;
 		}
+
 		this._renderHeight = top;
 		return this;
 	};
