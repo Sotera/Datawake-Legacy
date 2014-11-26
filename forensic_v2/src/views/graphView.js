@@ -34,8 +34,8 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 		this._bindEventHandlers();
 
 		var self = this;
-		$(window).resize(function() {
-			self._onResize();
+		$(window).resize(function(e) {
+			self._onResize(e);
 		});
 		this._jqCanvas.appendTo(element);
 		$(window).resize();
@@ -68,8 +68,8 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	 * @private
 	 */
 	GraphView.prototype._onResize = function() {
-		var width = $(window).width();
-		var height = $(window).height() - this._jqCanvas.offset().top;
+		var width = window.innerWidth;
+		var height = window.innerHeight - this._jqCanvas.offset().top;
 		this._graph.resize(width,height);
 	};
 
