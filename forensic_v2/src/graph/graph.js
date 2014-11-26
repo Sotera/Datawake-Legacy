@@ -444,7 +444,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 				.labelMap(this._nodeIndexToLabel);
 			this.layouter(defaulLayout);
 		}
-		this._prerenderGroup = path.group();
+		this._prerenderGroup = path.group({noHit:true});
 		this._scene.addChild(this._prerenderGroup);
 		this._links.forEach(function(link) {
 
@@ -512,10 +512,10 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 			.nodeMap(this._nodeIndexToCircle)
 			.labelMap(this._nodeIndexToLabel);
 
-		this._postrenderGroup = path.group();
+		this._postrenderGroup = path.group({noHit:true});
 		this._scene.addChild(this._postrenderGroup);
 		this.update();
-		
+
 		return this;
 	};
 
