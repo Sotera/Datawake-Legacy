@@ -121,13 +121,15 @@ class ClusterEntityDataConnector(DataConnector):
 
         return results
 
+
     def get_extracted_entities_from_urls(self, urls, type=None):
 
         def work_item_iterator():
-            sql = "select rowkey from general_extractor_web_index "
+            sql = "select rowkey from "+self.config['extracted_all_table']
             for url in urls:
                 work_item = {}
-                rowkey = "%s\0" % url
+                rowkey = ("%s\0" % url).encode('utf-8') if type == None else ("%s\0%s\0" % (url,type)).encode('utf-8')
+
                 work_item['sql'] = sql + " where rowkey >= %(startkey)s and rowkey < %(endkey)s "
                 work_item['params'] = {'startkey': rowkey, 'endkey': rowkey + "~"}
                 yield work_item
@@ -135,7 +137,7 @@ class ClusterEntityDataConnector(DataConnector):
         # define the work function
 
         def append_to_list(row, lock, results):
-            tokens = row[0].split("\0")
+            tokens = row[0].decode('utf-8').split("\0")
             url = tokens[0]
             attr = tokens[1]
             value = tokens[2]
@@ -152,18 +154,49 @@ class ClusterEntityDataConnector(DataConnector):
 
 
     def get_extracted_entities_with_domain_check(self, urls, types=[], domain='default'):
-        return DataConnector.get_extracted_entities_with_domain_check(self, urls, types, domain)
+        all_entities = {}
+        if len(types) > 0:
+            for type in types:
+                all_entities.update( self.get_extracted_entities_from_urls(urls,type=type) )
+        else:
+            all_entities.update( self.get_extracted_entities_from_urls(urls) )
+
+        domain_entities = {}
+        if len(types) > 0:
+            for type in types:
+                domain_entities.update( self.get_extracted_domain_entities_from_urls(domain,urls,type=type))
+        else:
+            domain_entities.update( self.get_extracted_domain_entities_from_urls(domain,urls))
+
+
+        merged = {}
+        for url in all_entities:
+            for type,values in all_entities[url].iteritems():
+                if url not in merged: merged[url] = {}
+                if type not in merged[url]: merged[url][type] = {}
+                for value in values:
+                    if value not in merged[url][type]: merged[url][type][value] = 'n'
+
+        for url in domain_entities:
+            for type,values in domain_entities[url].iteritems():
+                if url not in merged: merged[url] = {}
+                if type not in merged[url]: merged[url][type] = {}
+                for value in values:
+                    if value not in merged[url][type]: merged[url][type][value] = 'y'
+
+        return merged
+
+
 
     # # DOMAINS  ####
     def get_domain_items(self, name, limit):
         self._check_conn()
         cursor = self.cnx.cursor()
-        sql = "select rowkey from %(table)s where rowkey >= %(startkey)s and rowkey < %(endkey)s limit %(limit)s"
+        sql = "select rowkey from "+self.config['domain_table']+" where rowkey >= %(startkey)s and rowkey < %(endkey)s limit %(limit)s"
         params = {
             'startkey': name + '\0',
             'endkey': name + '\0~',
-            'limit': limit,
-            'table': datawakeconfig.DOMAIN_VALUES_TABLE
+            'limit': limit
         }
         try:
             cursor.execute(sql, params)
@@ -175,17 +208,18 @@ class ClusterEntityDataConnector(DataConnector):
 
 
     def get_domain_entity_matches(self, domain, type, values):
+
         def work_item_iterator():
-            sql = "select rowkey from datawake_domain_entities "
+            sql = "select rowkey from "+self.config['domain_table']
             for value in values:
                 work_item = {}
-                rowkey = "%s\0%s\0%s" % (domain, type, value)
+                rowkey = ("%s\0%s\0%s" % (domain, type, value)).encode('utf-8')
                 work_item['sql'] = sql + " where rowkey >= %(startkey)s and rowkey < %(endkey)s "
-                work_item['params'] = {'startkey': rowkey, 'endkey': rowkey + "~"}
+                work_item['params'] = {'startkey': rowkey,'endkey': rowkey + "~"}
                 yield work_item
 
         def append_to_list(row, lock, results):
-            tokens = row[0].split("\0")
+            tokens = row[0].decode('utf-8').split("\0")
             value = tokens[2]
             with lock:
                 results.append(value)
@@ -196,16 +230,16 @@ class ClusterEntityDataConnector(DataConnector):
 
     def get_extracted_domain_entities_from_urls(self, domain, urls, type=None):
         def work_item_iterator():
-            sql = "select rowkey from datawake_domain_entities "
+            sql = "select rowkey from "+self.config['extracted_domain_table']
             for url in urls:
                 work_item = {}
-                rowkey = "%s\0%s\0" % (domain, url)
+                rowkey = ("%s\0%s\0" % (domain, url)).encode('utf-8') if type == None else ("%s\0%s\0%s\0" % (domain, url,type)).encode('utf-8')
                 work_item['sql'] = sql + " where rowkey >= %(startkey)s and rowkey < %(endkey)s "
                 work_item['params'] = {'startkey': rowkey, 'endkey': rowkey + "~"}
                 yield work_item
 
         def append_to_list(row, lock, results):
-            tokens = row[0].split("\0")
+            tokens = row[0].decode('utf-8').split("\0")
             url = tokens[1]
             type = tokens[2]
             value = tokens[3]
@@ -220,18 +254,18 @@ class ClusterEntityDataConnector(DataConnector):
         results = {}
         return self.queue_impala_query(append_to_list, results, work_item_iterator)
 
+
     def get_extracted_domain_entities_for_urls(self, domain, urls):
         def work_item_iterator():
-            sql = "select rowkey from datawake_domain_entities "
+            sql = "select rowkey from "+self.config['extracted_domain_table']
             for url in urls:
                 work_item = {}
-                rowkey = "%s\0%s\0" % (domain, url)
+                rowkey = ("%s\0%s\0" % (domain, url)).encode('utf-8')
                 work_item['sql'] = sql + " where rowkey >= %(startkey)s and rowkey < %(endkey)s "
-                work_item['params'] = {'startkey': rowkey, 'endkey': rowkey + "~"}
-                yield work_item
+                work_item['params'] = { 'startkey': rowkey, 'endkey': rowkey + "~"}
 
         def append_to_list(row, lock, results):
-            tokens = row[0].split("\0")
+            tokens = row[0].decode('utf-8').split("\0")
             value = tokens[3]
             with lock:
                 results.append(value)
@@ -239,9 +273,11 @@ class ClusterEntityDataConnector(DataConnector):
         results = []
         return self.queue_impala_query(append_to_list, results, work_item_iterator)
 
+
+
     def get_extracted_entities_list_from_urls(self, urls):
         def work_item_iterator():
-            sql = "select rowkey from datawake_domain_entities "
+            sql = "select rowkey from "+self.config['extracted_all_table']
             for url in urls:
                 work_item = {}
                 rowkey = "%s\0" % url
@@ -251,13 +287,15 @@ class ClusterEntityDataConnector(DataConnector):
 
         def append_to_list(row, lock, results):
             with lock:
-                results.append(row[0])
+                results.append(row[0].decode('utf-8'))
 
         results = []
         return self.queue_impala_query(append_to_list, results, work_item_iterator)
 
+
+
     def get_matching_entities_from_url(self, urls):
-        entities = self.get_matching_entities_from_url(urls)
+        entities = self.get_extracted_entities_list_from_urls(urls)
         url_dict = dict()
         for url in urls:
             url_dict[url] = set()
@@ -271,13 +309,4 @@ class ClusterEntityDataConnector(DataConnector):
 
         map(lambda x: new_entity(x), entities)
         vals = url_dict.values()
-        return map(lambda entity: entity.item["name"], set.intersection(*vals))
-
-
-    # TODO: Might be able to remove this.  No inserts or deletions through Impala
-    def delete_domain_items(self, domain_name):
-        return DataConnector.delete_domain_items(self, domain_name)
-
-    def add_new_domain_items(self, domain_items):
-        return DataConnector.add_new_domain_items(self, domain_items)
 

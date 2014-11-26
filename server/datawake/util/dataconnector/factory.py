@@ -28,9 +28,13 @@ elif datawakeconfig.ENTITY_CONNECTION == 'mysql':
 
 def get_entity_data_connector():
     if datawakeconfig.ENTITY_CONNECTION == 'cluster-impala':
+        prefix = datawakeconfig.IMPALA_DB+'.' if datawakeconfig.IMPALA_DB != 'default' and datawakeconfig.IMPALA_DB != '' else ''
         config = {
             'hosts': datawakeconfig.IMPALA_HOSTS,
-            'port': datawakeconfig.IMPALA_PORT
+            'port': datawakeconfig.IMPALA_PORT,
+            'domain_table': prefix+datawakeconfig.IMPALA_DOMAIN_ENTITIES_TABLE,
+            'extracted_all_table': prefix+datawakeconfig.IMPALA_EXTRACTED_ALL_TABLE,
+            'extracted_domain_table': prefix+datawakeconfig.IMPALA_EXTRACTED_DOMAIN_TABLE
         }
         return ClusterEntityDataConnector(config)
     elif datawakeconfig.ENTITY_CONNECTION == 'mysql':

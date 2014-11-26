@@ -93,13 +93,12 @@ if ENTITY_CONNECTION != 'mysql' and ENTITY_CONNECTION != 'cluster-impala' and EN
     raise ValueError("DW_CONN_TYPE must be 'mysql' or 'cluster-impala', or 'cluster-hbase' if set. ")
 
 
-IMPALA_HOSTS = []
-if 'DW_IMPALA_HOSTS' in os.environ:
-    IMPALA_HOSTS = os.environ['DW_IMPALA_HOSTS'].strip().split(',')
-
-IMPALA_PORT = '21050'
-if 'DW_IMPALA_PORT' in os.environ:
-    IMPALA_PORT = os.environ['DW_IMPALA_PORT']
+IMPALA_HOSTS = os.environ['DW_IMPALA_HOSTS'].strip().split(',') if 'DW_IMPALA_HOSTS' in os.environ else []
+IMPALA_PORT = os.environ['DW_IMPALA_PORT'] if 'DW_IMPALA_PORT' in os.environ else '21050'
+IMPALA_DB = os.environ['DW_IMPALA_DB'] if 'DW_IMPALA_DB' in os.environ else 'default'
+IMPALA_DOMAIN_ENTITIES_TABLE = os.environ['DW_IMPALA_DOMAIN_ENTITIES_TABLE'] if 'DW_IMPALA_DOMAIN_ENTITIES_TABLE' in os.environ else 'datawake_domain_entities'
+IMPALA_EXTRACTED_ALL_TABLE = os.environ['DW_IMPALA_EXTRACTED_ALL_TABLE'] if 'DW_IMPALA_EXTRACTED_ALL_TABLE' in os.environ else 'general_extractor_web_index'
+IMPALA_EXTRACTED_DOMAIN_TABLE = os.environ['DW_IMPALA_EXTRACTED_DOMAIN_TALBE'] if 'DW_IMPALA_EXTRACTED_DOMAIN_TABLE' in os.environ else 'domain_extractor_web_index'
 
 
 HBASE_HOST = os.environ['DW_HBASE_HOST'] if 'DW_HBASE_HOST' in os.environ else 'NO HBASE HOST SET'
