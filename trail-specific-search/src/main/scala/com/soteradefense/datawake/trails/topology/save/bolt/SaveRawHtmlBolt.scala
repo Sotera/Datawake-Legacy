@@ -5,9 +5,9 @@ import java.sql.PreparedStatement
 import backtype.storm.topology.{BasicOutputCollector, OutputFieldsDeclarer}
 import backtype.storm.tuple.{Fields, Tuple, Values}
 import com.soteradefense.datawake.trails.bolts.SqlUpdateBolt
-import com.soteradefense.datawake.trails.sql.{SQLExecutor, SqlCredentials}
+import com.soteradefense.datawake.trails.sql.SqlCredentials
 
-class SaveRawHtmlBolt(sqlCredentials: SqlCredentials, htmlInsertSql: String, entityCountInsertSql: String, outputFields: Fields) extends SqlUpdateBolt(sqlCredentials) {
+class SaveRawHtmlBolt(sqlCredentials: SqlCredentials, htmlInsertSql: String, outputFields: Fields) extends SqlUpdateBolt(sqlCredentials) {
   override def execute(input: Tuple, collector: BasicOutputCollector): Unit = {
     var preparedStatement: PreparedStatement = null
     try {
@@ -21,10 +21,7 @@ class SaveRawHtmlBolt(sqlCredentials: SqlCredentials, htmlInsertSql: String, ent
       preparedStatement.setString(1, url)
       preparedStatement.setString(2, html)
       preparedStatement.executeUpdate()
-      val sqlWrapper = new SQLExecutor(connection)
-      val rowsChanged = sqlWrapper.insertCount(entityCountInsertSql, 0.0, org, domain, trail, url, title)
-      logger.info("Emitting to Rank Count: %s", rowsChanged)
-      collector.emit(new Values(org, domain, trail, url))
+      collector.emit(new Values(org, domain, trail, url, title))
     } finally {
       if (preparedStatement != null)
         preparedStatement.close()
