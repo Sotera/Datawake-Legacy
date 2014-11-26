@@ -9,6 +9,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	function GraphView(element,context) {
 		this._graph = null;
 		this._jqCanvas = null;
+		this._layouter = null;
 		this._browsePathComponents = null;
 		this._entitiesComponents = null;
 		this._relatedLinksComponents = null;
@@ -23,12 +24,15 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	 */
 	GraphView.prototype._initialize = function(element,context) {
 		this._jqCanvas = $(graphTemplate(context));
+
+		this._layouter = new ForensicColumnLayout()
+			.duration(750);
+
 		this._graph = new Graph()
 			.canvas(this._jqCanvas[0])
 			.pannable()
 			.nodeHover(this._onNodeOver,this._onNodeOut)
-			.layouter(new ForensicColumnLayout())
-			.draggable()
+			.layouter(this._layouter)
 			.draw();
 
 		this._bindEventHandlers();
@@ -223,12 +227,34 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	 * @private
 	 */
 	GraphView.prototype._getRelatedLinksGraph = function(response) {
-		//var i = this._browsePathComponents.nodes.length + this._entitiesGraphComponents.nodes.length;
-		var graph = {
-			nodes : [],
+		var nodeIndex = this._browsePathComponents.nodes.length + this._entitiesComponents.nodes.length;
+
+		var nodes = [];
+		for (var i = 0; i < response.entities.length; i++) {
+			var entity = response.entities[i];
+			var browsePathNode = this._browsePathComponents.browsePathNodeMap[entity.id];
+			if (entity.type === 'website') {
+				var node = {
+					x: 0,
+					y: 0,
+					fillStyle: '#ff0000',
+					strokeStyle: '#232323',
+					strokeSize: 2,
+					radius: 10,
+					index: nodeIndex,
+					type: entity.type,
+					value: entity.value,
+					col: 2,
+					row: browsePathNode.row
+				};
+				nodes.push(node);
+				nodeIndex++;
+			}
+		}
+		return {
+			nodes : nodes,
 			links : []
 		};
-		return graph;
 	};
 
 	/**
