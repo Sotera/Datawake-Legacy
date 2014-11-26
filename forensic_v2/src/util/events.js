@@ -1,6 +1,13 @@
 define([], function() {
 	var topics = {};
 	return {
+		/**
+		 * Subscribe to a message channel
+		 * @param topic - the channel to subscribe to
+		 * @param listener - the callback function
+		 * @param self - option parameter.   Will be 'this' in the callback
+		 * @returns {{remove: Function}}
+		 */
 		subscribe: function(topic, listener, self) {
 			// Create the topic's object if not yet created
 			if(!topics[topic]) {
@@ -20,6 +27,12 @@ define([], function() {
 				}
 			};
 		},
+
+		/**
+		 * Publishes a message on the given channel
+		 * @param topic - the message channel publishing to
+		 * @param info - data object passed to the handler
+		 */
 		publish: function(topic, info) {
 			// If the topic doesn't exist, or there's no listeners in queue, just leave
 			if(!topics[topic] || !topics[topic].queue.length) {
@@ -36,6 +49,10 @@ define([], function() {
 				}
 			});
 		},
+
+		/**
+		 * An enum of topics that can be pub/subbed
+		 */
 		topics: {
 			'TRAIL_CHANGE' : 'trail_change',
 			'REFRESH' : 'refresh'

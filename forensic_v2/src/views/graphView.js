@@ -109,8 +109,8 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	};
 
 	/**
-	 * Creates nodes and links corresponding to the left hand column in the layout (browse path)
-	 * @param response
+	 * Creates nodes and links corresponding to the left hand column in the layout (browse path).
+	 * @param response - the raw response from the server
 	 * @returns {{nodes: Array, links: Array}}
 	 */
 	GraphView.prototype._getBrowsePathGraph = function(response) {
