@@ -29,7 +29,7 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
         val termCount = RegexWords.getRank(validTermList, invalidTermList, html)
         collector.emit("count", new Values(org, domain, trail, url, termCount.asInstanceOf[java.lang.Double]))
       }
-
+      //TODO: Emit two lowest terms
     } finally {
 
       if (htmlPrepare != null)

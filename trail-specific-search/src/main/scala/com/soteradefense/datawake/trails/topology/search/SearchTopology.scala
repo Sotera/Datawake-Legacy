@@ -49,6 +49,7 @@ object SearchTopology {
 
     val localCluster = new LocalCluster()
     val config = new Config
+    config.put(DatawakeConstants.BING_KEY_ID, args(0))
     localCluster.submitTopology("search-crawler", config, topologyBuilder.createTopology())
   }
 

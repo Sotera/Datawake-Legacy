@@ -32,7 +32,35 @@ dwstream:
   volumes:
     - /Users/.../code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
 
+dwsearch:
+  build: ../trail-specific-search
+  working_dir: /trail-specific-search
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+  command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.search.SearchTopology [BING KEY]
 
+
+dwurlrank:
+  build: ../trail-specific-search
+  working_dir: /trail-specific-search
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+
+  command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.rank.UrlRankTopology
+
+dwurlcontents:
+  build: ../trail-specific-search
+  working_dir: /trail-specific-search
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+
+  command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.save.UrlContentsTopology
 
 datawake:
   build: ../server

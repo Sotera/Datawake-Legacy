@@ -8,4 +8,5 @@ object DatawakeConstants {
   val SQL_PASSWORD: String = "root"
   val KAFKA_BROKERS: String = "192.168.59.103:9092"
   val TRAIL_SEARCH_TOPIC: String = "trail-search"
+  val BING_KEY_ID: String = "bing.search.key"
 }
