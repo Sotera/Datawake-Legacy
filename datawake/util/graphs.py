@@ -251,12 +251,31 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
             }
 
 
-        # TODO: domain extraction on email addresses and linked website entity_values
-        entities.append({
+        entity = {
             'id':id,
             'type':entity_type,
             'value':entity_value
-        })
+        }
+        bAdd = True;
+        if (entity_type=='email'):
+            emailPieces = entity_value.split('@');
+            entity['user_name'] = emailPieces[0];
+            emailExt = tldextract.extract('mailto://'+emailPieces[1]);
+            entity['domain'] = emailExt.domain;
+            entity['subdomain'] = emailExt.subdomain;
+        elif (entity_type=='phone'):
+            if (len(entity_value) < 3):
+                bAdd = False
+            else:
+                entity['area_code'] = entity_value[:3]
+        else:
+            webExt = tldextract.extract(entity_value)
+            entity['subdomain']=webExt.subdomain
+            entity['domain']=webExt.domain
+            entity['suffix']=webExt.suffix
+
+        if (bAdd):
+            entities.append(entity)
 
 
     entityDataConnector.close()
