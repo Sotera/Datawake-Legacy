@@ -1,4 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/forensicColumnLayout'], function(graphTemplate,events,Graph,LINK_TYPE,Layout,testData,ForensicColumnLayout) {
+define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/forensicColumnLayout'], function(graphTemplate,events,TrailGraphService,Graph,LINK_TYPE,Layout,testData,ForensicColumnLayout) {
 
 	/**
 	 *
@@ -80,7 +80,7 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	 */
 	GraphView.prototype._onTrailChange = function(trailInfo) {
 		var self = this;
-		this._fetchDatawakeGraphFor(trailInfo)
+		TrailGraphService.get(trailInfo)
 			.then(function(response) {
 				return self._getForensicGraph(response);
 			})
@@ -229,31 +229,6 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 			links : []
 		};
 		return graph;
-	};
-
-
-	/**
-	 * Requests a graph from a trail specification.   Automatically uses the browse path with adjacent URLS as the
-	 * analytic.
-	 * @param trail - A trail object as returned from DataWake server
-	 * @returns A jQuery promise for the POST request that fetches the graph for the requested trail
-	 */
-	GraphView.prototype._fetchDatawakeGraphFor = function(trail) {
-		var requestData = {
-			name : 'browse path - with connected entities min degree 2',
-			startdate : 1416459600,
-			enddate : 1416546000
-		};
-		requestData.users = trail.users;
-		requestData.domain = trail.domain;
-		requestData.trail = trail.trail;
-		return $.ajax({
-			type: 'POST',
-			url: '/datawake/forensic/graphservice/get',
-			data: JSON.stringify(requestData),
-			contentType: 'application/json',
-			dataType: 'json'
-		});
 	};
 
 	/**

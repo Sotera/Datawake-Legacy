@@ -2,7 +2,7 @@
  * Created by cdickson on 10/17/2014.
  */
 
-require(['config','views/navbarView', 'views/graphView', 'rest/trails'], function(config,NavbarView,GraphView,Trails) {
+require(['config','views/navbarView', 'views/graphView', 'rest/trails'], function(config,NavbarView,GraphView,TrailsService) {
 	require([],
 		function() {
 			/*----------------------------------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ require(['config','views/navbarView', 'views/graphView', 'rest/trails'], functio
 			 *--------------------------------------------------------------------------------------------------------*/
 			var _graphView = null;
 			var _navbarView = null;
-			Trails.get().then(function(trails) {
+			TrailsService.get().then(function(trails) {
 				_navbarView = new NavbarView($('#navbarContainer'),{
 					trails:trails
 				});
