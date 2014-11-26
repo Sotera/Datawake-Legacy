@@ -330,7 +330,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	Graph.prototype.layout = function() {
 		if (this._layouter) {
 			this._layouter.layout(this._canvas.width,this._canvas.height);
-			this._scene.update();
+			this.update();
 		}
 		return this;
 	};
