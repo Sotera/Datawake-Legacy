@@ -19,8 +19,8 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
     val url = input.getStringByField("kafkaLink")
     var htmlPrepare: PreparedStatement = null
     try {
-      val validTermList = getTerms(validTermsSql, org, domain, trail).toList
-      val invalidTermList = getTerms(invalidTermsSql, org, domain, trail).toList
+      val validTermList = getTerms(validTermsSql, org, domain, trail).toArray
+      val invalidTermList = getTerms(invalidTermsSql, org, domain, trail).toArray
       htmlPrepare = connection.prepareStatement(htmlSql)
       htmlPrepare.setString(1, url)
       val htmlSet = htmlPrepare.executeQuery()
@@ -29,7 +29,14 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
         val termCount = RegexWords.getRank(validTermList, invalidTermList, html)
         collector.emit("count", new Values(org, domain, trail, url, termCount.asInstanceOf[java.lang.Double]))
       }
-      //TODO: Emit two lowest terms
+      if (validTermList.length >= 2) {
+        //TODO: Add a threshhold?
+        val orderedTerms = validTermList.sortBy(f => f._2)(new Ordering[Double]() {
+          override def compare(x: Double, y: Double): Int = x.compare(y)
+        })
+        val newTerm: String = orderedTerms(0)._1 + " + " + orderedTerms(1)._1
+        collector.emit("search", new Values(org + "\0" + domain + "\0" + trail, newTerm))
+      }
     } finally {
 
       if (htmlPrepare != null)

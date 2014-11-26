@@ -33,14 +33,14 @@ object UrlRankTopology {
     topologyBuilder.setBolt("count-entities",
       new ComputeUrlRankBolt(sqlCredentials, termsSql, htmlSql, irrelevantTermsSql,
         new Fields("org", "domain", "trail", "url", "count"),
-        new Fields("org", "domain", "trail", "term")))
+        new Fields("domainTriplet", "term")))
       .shuffleGrouping("update-link-spout")
 
     topologyBuilder.setBolt("update-count-in-db", new UpdateUrlRankBolt(sqlCredentials, updateSql))
       .shuffleGrouping("count-entities", "count")
 
     topologyBuilder.setBolt("search-concatenated-terms", new GoogleSearchKafkaProducer(DatawakeConstants.KAFKA_BROKERS, DatawakeConstants.TRAIL_SEARCH_TOPIC))
-      .shuffleGrouping("count-entities", "search")
+      .fieldsGrouping("count-entities", "search", new Fields("domainTriplet"))
 
 
     val localCluster = new LocalCluster()

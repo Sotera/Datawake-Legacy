@@ -37,38 +37,44 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
     val trail: String = input.getStringByField("kafkaTrail")
     val valid: Boolean = input.getBooleanByField("kafkaValid")
     try {
-      val estimatedResultCount = getEstimatedResultCount(searchTerm)
-      if (valid) {
-        updateResultCount(resultUpdateSql, org, domain, trail, searchTerm, estimatedResultCount)
-        val bingResults = new Bingerator(bingKey).SearchWeb(searchTerm).take(10)
-        bingResults.foreach(f => {
-          if (!isInDatabase(org, domain, trail, f.url)) {
-            collector.emit("new-url", new Values(org, domain, trail, f.url, f.title))
-          }
-        })
-      } else {
-        updateResultCount(invalidResultUpdateSql, org, domain, trail, searchTerm, estimatedResultCount)
+      val googleResults: SearchResults = getGoogleResults(searchTerm)
+      if(googleResults != null) {
+        if (valid) {
+          updateResultCount(resultUpdateSql, org, domain, trail, searchTerm, googleResults.responseData.cursor.estimatedResultCount)
+          val bingResults = new Bingerator(bingKey).SearchWeb(searchTerm).take(10)
+          bingResults.foreach(f => {
+            if (!isInDatabase(org, domain, trail, f.url)) {
+              collector.emit("new-url", new Values(org, domain, trail, f.url, f.title))
+            }
+          })
+          googleResults.responseData.results.foreach(f => {
+            if (!isInDatabase(org, domain, trail, f.url)) {
+              collector.emit("new-url", new Values(org, domain, trail, f.url, f.titleNoFormatting))
+            }
+          })
+        } else {
+          updateResultCount(invalidResultUpdateSql, org, domain, trail, searchTerm, googleResults.responseData.cursor.estimatedResultCount)
+        }
       }
     } catch {
       case _: Throwable =>
         println("No Results Found")
     }
-    //EMIT TO UrlFilterBolt
     collector.emit("new-term", new Values(org, domain, trail))
   }
 
-  def getEstimatedResultCount(term: String): String = {
+  def getGoogleResults(term: String): SearchResults = {
     try {
       val url: URL = new URL(GOOGLE_API + URLEncoder.encode(term, DEFAULT_CHARSET) + RESULT_SET)
       val reader = new InputStreamReader(url.openStream(), DEFAULT_CHARSET)
       implicit val formats = DefaultFormats
       val jValue = JsonParser.parse(reader)
       val results: SearchResults = jValue.extract[SearchResults]
-      results.responseData.cursor.estimatedResultCount
+      results
     } catch{
       case e: Throwable =>
         println("Exception")
-        "1000000000"
+        null
     }
   }
 
