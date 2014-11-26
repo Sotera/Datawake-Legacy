@@ -23,5 +23,5 @@ define(['../util/util', '../util/guid'], function(util,guid) {
 				dataType: 'json'
 			});
 		}
-	}
+	};
 });

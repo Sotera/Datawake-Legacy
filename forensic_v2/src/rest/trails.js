@@ -1,6 +1,5 @@
 define(['../util/util', '../util/guid'], function(util,guid) {
 	return {
-
 		/**
 		 * Ask the DataWake server for a list of all trails (domains, users, etc)
 		 * @returns {*}
@@ -28,5 +27,5 @@ define(['../util/util', '../util/guid'], function(util,guid) {
 				});
 			return d.promise();
 		}
-	}
+	};
 });
