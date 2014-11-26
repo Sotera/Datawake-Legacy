@@ -11,7 +11,11 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		this._nodes = [];
 		this._links = [];
 		this._canvas = null;
+		this._width = 0;
+		this._height = 0;
 		this._scene = null;
+		this._prerenderGroup = null;
+		this._postrenderGroup = null;
 		this._pannable = null;
 		this._zoomable = null;
 		this._draggable = null;
@@ -47,6 +51,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	Graph.prototype.nodes = function(nodes) {
 		if (nodes) {
 			this._nodes = nodes;
+
 			this._nodeIndexToLinkLine = {};
 			this._nodeIndexToCircle = {};
 			this._nodeIndexToLabel = {};
@@ -191,7 +196,6 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 			this._scene.removeChild(textObject);
 			delete this._nodeIndexToLabel[node.index];
 		}
-
 		return this;
 	};
 
@@ -380,6 +384,8 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	 * @returns {Graph}
 	 */
 	Graph.prototype.resize = function(w,h) {
+		this._width = w;
+		this._height = h;
 		$(this._canvas).attr({width:w,height:h})
 			.width(w)
 			.height(h);
@@ -389,10 +395,34 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	};
 
 	/**
+	 * Gets a list of pre/post render objects from the layouter (if any)
+	 * @private
+	 */
+	Graph.prototype._addPreAndPostRenderObjects = function() {
+		this._prerenderGroup.removeAll();
+		var objs = this._layouter.prerender(this._width,this._height);
+		var that = this;
+		if (objs) {
+			objs.forEach(function(renderObject) {
+				that._prerenderGroup.addChild(renderObject);
+			});
+		}
+
+		this._postrenderGroup.removeAll();
+		objs = this._layouter.postrender(this._width,this._height);
+		if (objs) {
+			objs.forEach(function(renderObject) {
+				that._postrenderGroup.addChild(renderObject);
+			});
+		}
+	};
+
+	/**
 	 * Redraw the graph
 	 * @returns {Graph}
 	 */
 	Graph.prototype.update = function() {
+		this._addPreAndPostRenderObjects();
 		this._scene.update();
 		return this;
 	};
@@ -414,6 +444,8 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 				.labelMap(this._nodeIndexToLabel);
 			this.layouter(defaulLayout);
 		}
+		this._prerenderGroup = path.group();
+		this._scene.addChild(this._prerenderGroup);
 		this._links.forEach(function(link) {
 
 			var linkObject;
@@ -479,8 +511,42 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		this._layouter.linkMap(this._nodeIndexToLinkLine)
 			.nodeMap(this._nodeIndexToCircle)
 			.labelMap(this._nodeIndexToLabel);
-		this._scene.update();
 
+		this._postrenderGroup = path.group();
+		this._scene.addChild(this._postrenderGroup);
+		this.update();
+		
+		return this;
+	};
+
+	/**
+	 * Removes all render objects associated with a graph.
+	 */
+	Graph.prototype.clear = function() {
+		var removeRenderObjects = function(indexToObject) {
+			for (var key in indexToObject) {
+				if (indexToObject.hasOwnProperty(key)) {
+					var obj = indexToObject[key];
+					if ($.isArray(obj)) {
+						for (var i = 0; i < obj.length; i++) {
+							this._scene.removeChild(obj[i]);
+						}
+					} else {
+						this._scene.removeChild(obj);
+					}
+					delete indexToObject[key];
+				}
+			}
+		};
+		removeRenderObjects.call(this,this._nodeIndexToCircle);
+		removeRenderObjects.call(this,this._nodeIndexToLinkLine);
+		removeRenderObjects.call(this,this._nodeIndexToLabel);
+		if (this._prerenderGroup) {
+			this._scene.removeChild(this._prerenderGroup);
+		}
+		if (this._postrenderGroup) {
+			this._scene.removeChild(this._postrenderGroup);
+		}
 		return this;
 	};
 

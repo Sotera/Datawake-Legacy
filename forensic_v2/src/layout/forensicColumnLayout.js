@@ -15,6 +15,40 @@ define(['layout/layout'],function(Layout) {
 
 	$.extend(ForensicColumnLayout.prototype, Layout.prototype);
 
+	ForensicColumnLayout.prototype.prerender = function(w,h) {
+		var rects = [];
+		rects.push(path.rect({
+			x : 0,
+			y : 0,
+			width : 100,
+			height : 100,
+			fillStyle : '#ff0000',
+			opacity : 0.3
+		}));
+
+		return rects;
+	};
+
+	ForensicColumnLayout.prototype.postrender = function(w,h) {
+		var rects = [];
+		rects.push(path.rect({
+			x : 400,
+			y : 400,
+			width : 100,
+			height : 100,
+			fillStyle : '#0000ff',
+			opacity : 0.8
+		}));
+
+		return rects;
+	};
+
+	/**
+	 * Calculates the height of a laid-out array of nodes
+	 * @param columnNodes - an array of node objects
+	 * @returns {Height} of column in pixels
+	 * @private
+	 */
 	ForensicColumnLayout.prototype._getRowHeight = function(columnNodes) {
 		var height = 0;
 		if (columnNodes) {
@@ -27,6 +61,14 @@ define(['layout/layout'],function(Layout) {
 	};
 
 
+	/**
+	 * Perform a 3-column layout.   On the left is the browse path.   Center column
+	 * contains any entities (email/phone) from the nodes in the browse path.  On the
+	 * right column is a set of linked websites from the browse path.
+	 * @param w - width of the canvas
+	 * @param h - height of the canvas
+	 * @returns {ForensicColumnLayout}
+	 */
 	ForensicColumnLayout.prototype.layout = function (w, h) {
 		var x = 0;
 		var y = 0;
@@ -49,13 +91,17 @@ define(['layout/layout'],function(Layout) {
 			nodeGridMap[key] = nodes;
 		});
 
+		// Layout each row one by one
 		var top = this._NODE_VERTICAL_PADDING;
 		for (var i = 0; i < maxRow; i++) {
+
 			var columns = [nodeGridMap[i+',0']||[],nodeGridMap[i+',1']||[],nodeGridMap[i+',2']||[]];
 
 			// layout each column
 			for (var j = 0; j < columns.length; j++) {
 				var colTop = top;
+
+				// Place each node in the column
 				for (var k = 0; k < columns[j].length; k++) {
 					var node = columns[j][k];
 					x = this._COLUMN_OFFSETS[j] * w;

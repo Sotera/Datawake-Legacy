@@ -185,6 +185,30 @@ define([],function() {
 		return this;
 	};
 
+
+	/**
+	 * 	/**
+	 * Hook for doing any drawing before rendering of the graph that is layout specific
+	 * ie/ Backgrounds, etc
+	 * @param w - the width of the canvas
+	 * @param h - the height of the canvas
+	 * @returns {Array} - a list of path.js render objects to be added to the scene
+	 */
+	Layout.prototype.prerender = function(w,h) {
+		return [];
+	};
+
+	/**
+	 * Hook for doing any drawing after rendering of the graph that is layout specific
+	 * ie/ Overlays, etc
+	 * @param w - the width of the canvas
+	 * @param h - the height of the canvas
+	 * @returns {Array} - a list of path.js render objects to be added to the scene
+	 */
+	Layout.prototype.postrender = function(w,h) {
+		return [];
+	};
+
 	/**
 	 * Sets the label position for a node
 	 * @param nodeX - the x position of the node

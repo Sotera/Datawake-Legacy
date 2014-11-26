@@ -286,6 +286,7 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	 */
 	GraphView.prototype._renderForensicGraph = function(forensicGraph) {
 		this._graph
+			.clear()
 			.nodes(forensicGraph.nodes)
 			.links(forensicGraph.links)
 			.draw()
