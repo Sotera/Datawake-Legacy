@@ -7,7 +7,7 @@ import kafka.producer.KeyedMessage
 
 import scala.collection.mutable
 
-class GoogleSearchKafkaProducer(kafkaBrokers: String, topic: String) extends HighLevelKafkaProducer(kafkaBrokers, topic) {
+class SearchKafkaProducer(kafkaBrokers: String, topic: String) extends HighLevelKafkaProducer(kafkaBrokers, topic) {
   val termsSearched: mutable.Map[String, mutable.HashSet[String]] = new mutable.HashMap[String, mutable.HashSet[String]]
 
   override def execute(input: Tuple, collector: BasicOutputCollector): Unit = {

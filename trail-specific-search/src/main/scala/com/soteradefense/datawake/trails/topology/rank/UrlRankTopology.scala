@@ -6,7 +6,7 @@ import backtype.storm.{Config, LocalCluster}
 import com.soteradefense.datawake.trails.constants.DatawakeConstants
 import com.soteradefense.datawake.trails.spouts.HighLevelKafkaConsumer
 import com.soteradefense.datawake.trails.sql.SqlCredentials
-import com.soteradefense.datawake.trails.topology.rank.bolt.{ComputeUrlRankBolt, GoogleSearchKafkaProducer, UpdateUrlRankBolt}
+import com.soteradefense.datawake.trails.topology.rank.bolt.{ComputeUrlRankBolt, SearchKafkaProducer, UpdateUrlRankBolt}
 import com.soteradefense.datawake.trails.topology.rank.data.DatawakeLink
 import com.soteradefense.datawake.trails.topology.rank.decoder.DatawakeLinkDecoder
 
@@ -39,7 +39,7 @@ object UrlRankTopology {
     topologyBuilder.setBolt("update-count-in-db", new UpdateUrlRankBolt(sqlCredentials, updateSql))
       .shuffleGrouping("count-entities", "count")
 
-    topologyBuilder.setBolt("search-concatenated-terms", new GoogleSearchKafkaProducer(DatawakeConstants.KAFKA_BROKERS, DatawakeConstants.TRAIL_SEARCH_TOPIC))
+    topologyBuilder.setBolt("search-concatenated-terms", new SearchKafkaProducer(DatawakeConstants.KAFKA_BROKERS, DatawakeConstants.TRAIL_SEARCH_TOPIC))
       .fieldsGrouping("count-entities", "search", new Fields("domainTriplet"))
 
 

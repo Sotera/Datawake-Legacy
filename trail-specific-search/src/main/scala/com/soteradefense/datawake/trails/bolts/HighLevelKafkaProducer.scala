@@ -7,13 +7,15 @@ import backtype.storm.task.TopologyContext
 import backtype.storm.topology.OutputFieldsDeclarer
 import backtype.storm.topology.base.BaseBasicBolt
 import kafka.producer.{Producer, ProducerConfig}
+import org.slf4j.{LoggerFactory, Logger}
 
 abstract class HighLevelKafkaProducer(kafkaBrokers: String, topic: String) extends BaseBasicBolt {
   var kafkaProducer: Producer[String, String] = null
-
+  var logger: Logger = null
   override def prepare(stormConf: util.Map[_, _], context: TopologyContext): Unit = {
     super.prepare(stormConf, context)
     kafkaProducer = new Producer[String, String](createProducerConfig)
+    logger = LoggerFactory.getLogger(this.getClass)
   }
 
   override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {

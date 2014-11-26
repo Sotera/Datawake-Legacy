@@ -20,7 +20,7 @@ class UpdateUrlKafkaProducer(kafkaBrokers:String, topic: String) extends HighLev
     builder.append("\0")
     builder.append(url)
     val messageContents = builder.toString()
-    println(messageContents)
+    logger.info(messageContents)
     val message = new KeyedMessage[String, String](topic, messageContents)
     kafkaProducer.send(message)
   }

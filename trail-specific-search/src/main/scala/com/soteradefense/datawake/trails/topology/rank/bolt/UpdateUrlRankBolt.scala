@@ -22,7 +22,7 @@ class UpdateUrlRankBolt(sqlCredentials: SqlCredentials, updateSql: String) exten
       sqlHelper.updateCount(updateSql, count, org, domain, trail, link)
     } catch {
       case e: SQLException =>
-        println(e.getMessage)
+        logger.error(e.getMessage)
     }
 
   }
