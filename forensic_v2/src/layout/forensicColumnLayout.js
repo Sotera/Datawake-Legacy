@@ -1,5 +1,14 @@
 define(['layout/layout'],function(Layout) {
 
+	var COLUMN_STYLE = new Object({
+		fillStyle: '#efefef',
+		strokeStyle : '#121212',
+		lineWidth : 1,
+		lineDash : [5,5],
+		margin : 100
+	});
+
+	var NODE_PADDING = 10;
 
 	/**
 	 *
@@ -7,9 +16,6 @@ define(['layout/layout'],function(Layout) {
 	 */
 	function ForensicColumnLayout(columnOffsets,nodeVerticalPadding) {
 		Layout.apply(this);
-
-		// Constants
-		this._NODE_VERTICAL_PADDING = nodeVerticalPadding || 40;
 		this._renderHeight = 0;
 		this._positionedObjects = 0;
 	}
@@ -25,32 +31,26 @@ define(['layout/layout'],function(Layout) {
 	ForensicColumnLayout.prototype.prerender = function(w,h) {
 		var rects = [];
 		if (this._positionedObjects > 0) {
-			rects.push(path.rect({
-				x: 0,
+			rects.push(path.rect($.extend(COLUMN_STYLE,{
+				x: COLUMN_STYLE.lineWidth + COLUMN_STYLE.margin/4.0,
 				y: 0,
-				width: w * 1/3.0,
-				height: this._renderHeight,
-				fillStyle: '#ff0000',
-				opacity: 0.3
-			}));
+				width: w * 1/3.0 - COLUMN_STYLE.lineWidth - COLUMN_STYLE.margin/2.0,
+				height: this._renderHeight
+			})));
 
-			rects.push(path.rect({
-				x: w * 1/3.0,
+			rects.push(path.rect($.extend(COLUMN_STYLE,{
+				x: w * 1/3.0 + COLUMN_STYLE.lineWidth + COLUMN_STYLE.margin/4.0,
 				y: 0,
-				width: w * 1/3.0,
-				height: this._renderHeight,
-				fillStyle: '#00ff00',
-				opacity: 0.3
-			}));
+				width: w * 1/3.0 - COLUMN_STYLE.lineWidth - COLUMN_STYLE.margin/2.0,
+				height: this._renderHeight
+			})));
 
-			rects.push(path.rect({
-				x: w * 2/3.0,
+			rects.push(path.rect($.extend(COLUMN_STYLE,{
+				x: w * 2/3.0 + COLUMN_STYLE.lineWidth + COLUMN_STYLE.margin/4.0,
 				y: 0,
-				width: w * 1/3.0,
-				height: this._renderHeight,
-				fillStyle: '#0000ff',
-				opacity: 0.3
-			}));
+				width: w * 1/3.0 - COLUMN_STYLE.lineWidth - COLUMN_STYLE.margin/2.0,
+				height: this._renderHeight
+			})));
 		}
 
 		return rects;
@@ -69,7 +69,7 @@ define(['layout/layout'],function(Layout) {
 			columnNodes.forEach(function (node) {
 				height += node.radius;
 			});
-			height += columnNodes.length * this._NODE_VERTICAL_PADDING;
+			height += columnNodes.length * NODE_PADDING;
 		}
 		return height;
 	};
@@ -117,7 +117,7 @@ define(['layout/layout'],function(Layout) {
 		});
 
 		// Layout each row one by one
-		var top = this._NODE_VERTICAL_PADDING;
+		var top = NODE_PADDING;
 		for (var i = 0; i < maxRow; i++) {
 
 			var columns = [nodeGridMap[i+',0']||[],nodeGridMap[i+',1']||[],nodeGridMap[i+',2']||[]];
@@ -131,7 +131,7 @@ define(['layout/layout'],function(Layout) {
 					var node = columns[j][k];
 					x = getXPosition(j);
 					y = colTop + node.radius;
-					colTop += y + this._NODE_VERTICAL_PADDING;
+					colTop += y + NODE_PADDING;
 					that._setNodePositionImmediate(node, x, y);
 					this._positionedObjects++;
 				}
