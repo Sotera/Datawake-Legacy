@@ -74,21 +74,27 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	};
 
 	/**
+	 * Event handler for changing the active trail
+	 * @param trailInfo
+	 * @private
+	 */
+	GraphView.prototype._onTrailChange = function(trailInfo) {
+		var self = this;
+		this._fetchDatawakeGraphFor(trailInfo)
+			.then(function(response) {
+				return self._getForensicGraph(response);
+			})
+			.then(function(forensicGraph) {
+				self._renderForensicGraph(forensicGraph);
+			});
+	};
+
+	/**
 	 * Adds any event handlers for custom message passing
 	 * @private
 	 */
 	GraphView.prototype._bindEventHandlers = function() {
-		var self = this;
-
-		events.subscribe(events.topics.TRAIL_CHANGE, function(trailInfo) {
-			self._fetchDatawakeGraphFor(trailInfo)
-				.then(function(response) {
-					return self._getForensicGraph(response);
-				})
-				.then(function(forensicGraph) {
-					self._renderForensicGraph(forensicGraph);
-				});
-		});
+		events.subscribe(events.topics.TRAIL_CHANGE,this._onTrailChange,this);
 	};
 
 	/**
@@ -279,7 +285,8 @@ define(['hbs!templates/graph','../util/events', '../graph/graph', '../graph/link
 	 * @param graphInstance - the graph object being drawn
 	 */
 	GraphView.prototype._renderForensicGraph = function(forensicGraph) {
-		this._graph.nodes(forensicGraph.nodes)
+		this._graph
+			.nodes(forensicGraph.nodes)
 			.links(forensicGraph.links)
 			.draw()
 			.layout();
