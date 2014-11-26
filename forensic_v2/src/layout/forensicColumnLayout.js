@@ -18,6 +18,7 @@ define(['layout/layout'],function(Layout) {
 		Layout.apply(this);
 		this._renderHeight = 0;
 		this._positionedObjects = 0;
+		this._firstLayout = true;
 	}
 
 	$.extend(ForensicColumnLayout.prototype, Layout.prototype);
@@ -129,13 +130,23 @@ define(['layout/layout'],function(Layout) {
 					var node = columns[j][k];
 					x = getXPosition(j);
 					y = cellTop + node.radius;
-					this._setNodePositionImmediate(node,x,0);
-					this._setNodePosition(node,x,y);
+					if (this._firstLayout) {
+						this._setNodePositionImmediate(node, x, 0);
+					}
+
+					if (this._firstLayout) {
+						this._setNodePosition(node, x, y);
+					} else {
+						this._setNodePositionImmediate(node,x,y);
+					}
 					this._positionedObjects++;
 					cellTop += (2*node.radius) + NODE_PADDING;
 				}
 			}
 			top += rowHeight;
+		}
+		if (this._positionedObjects>0) {
+			this._firstLayout = false;
 		}
 
 		this._renderHeight = top;

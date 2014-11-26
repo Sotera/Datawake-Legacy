@@ -24,15 +24,10 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	 */
 	GraphView.prototype._initialize = function(element,context) {
 		this._jqCanvas = $(graphTemplate(context));
-
-		this._layouter = new ForensicColumnLayout()
-			.duration(750);
-
 		this._graph = new Graph()
 			.canvas(this._jqCanvas[0])
 			.pannable()
 			.nodeHover(this._onNodeOver,this._onNodeOut)
-			.layouter(this._layouter)
 			.draw();
 
 		this._bindEventHandlers();
@@ -286,10 +281,15 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	 * @param graphInstance - the graph object being drawn
 	 */
 	GraphView.prototype._renderForensicGraph = function(forensicGraph) {
+
+		this._layouter = new ForensicColumnLayout()
+			.duration(750);
+
 		this._graph
 			.clear()
 			.nodes(forensicGraph.nodes)
 			.links(forensicGraph.links)
+			.layouter(this._layouter)
 			.draw()
 			.layout();
 	};
