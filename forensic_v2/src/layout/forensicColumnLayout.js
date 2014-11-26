@@ -9,39 +9,53 @@ define(['layout/layout'],function(Layout) {
 		Layout.apply(this);
 
 		// Constants
-		this._COLUMN_OFFSETS = columnOffsets || [0.1,0.4,0.7];
 		this._NODE_VERTICAL_PADDING = nodeVerticalPadding || 40;
+		this._renderHeight = 0;
+		this._positionedObjects = 0;
 	}
 
 	$.extend(ForensicColumnLayout.prototype, Layout.prototype);
 
+	/**
+	 * Draw boxes behind the nodes that represent the columns
+	 * @param w
+	 * @param h
+	 * @returns {Array}
+	 */
 	ForensicColumnLayout.prototype.prerender = function(w,h) {
 		var rects = [];
-		rects.push(path.rect({
-			x : 0,
-			y : 0,
-			width : 100,
-			height : 100,
-			fillStyle : '#ff0000',
-			opacity : 0.3
-		}));
+		if (this._positionedObjects > 0) {
+			rects.push(path.rect({
+				x: 0,
+				y: 0,
+				width: w * 1/3.0,
+				height: this._renderHeight,
+				fillStyle: '#ff0000',
+				opacity: 0.3
+			}));
+
+			rects.push(path.rect({
+				x: w * 1/3.0,
+				y: 0,
+				width: w * 1/3.0,
+				height: this._renderHeight,
+				fillStyle: '#00ff00',
+				opacity: 0.3
+			}));
+
+			rects.push(path.rect({
+				x: w * 2/3.0,
+				y: 0,
+				width: w * 1/3.0,
+				height: this._renderHeight,
+				fillStyle: '#0000ff',
+				opacity: 0.3
+			}));
+		}
 
 		return rects;
 	};
 
-	ForensicColumnLayout.prototype.postrender = function(w,h) {
-		var rects = [];
-		rects.push(path.rect({
-			x : 400,
-			y : 400,
-			width : 100,
-			height : 100,
-			fillStyle : '#0000ff',
-			opacity : 0.8
-		}));
-
-		return rects;
-	};
 
 	/**
 	 * Calculates the height of a laid-out array of nodes
@@ -74,6 +88,17 @@ define(['layout/layout'],function(Layout) {
 		var y = 0;
 		var that = this;
 		var nodeGridMap = {};
+		this._positionedObjects = 0;
+
+		function getXPosition(col) {
+			if (col === 0) {
+				return 1/6.0 * w;
+			} else if (col === 1) {
+				return 3/6.0 * w;
+			} else if (col === 2) {
+				return 5/6.0 * w;
+			}
+		}
 
 		// Make a lookup of rows and columns for each grid cell
 		var maxRow = -1;
@@ -104,15 +129,17 @@ define(['layout/layout'],function(Layout) {
 				// Place each node in the column
 				for (var k = 0; k < columns[j].length; k++) {
 					var node = columns[j][k];
-					x = this._COLUMN_OFFSETS[j] * w;
+					x = getXPosition(j);
 					y = colTop + node.radius;
 					colTop += y + this._NODE_VERTICAL_PADDING;
 					that._setNodePositionImmediate(node, x, y);
+					this._positionedObjects++;
 				}
 			}
 			var rowHeight = Math.max(this._getRowHeight(columns[0]),Math.max(this._getRowHeight(columns[1]),this._getRowHeight(columns[2])));
 			top += rowHeight;
 		}
+		this._renderHeight = top;
 		return this;
 	};
 	return ForensicColumnLayout;
