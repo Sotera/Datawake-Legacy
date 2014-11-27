@@ -1,4 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/forensicColumnLayout'], function(graphTemplate,events,TrailGraphService,Graph,LINK_TYPE,Layout,testData,ForensicColumnLayout) {
+define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager'], function(graphTemplate,events,TrailGraphService,Graph,LINK_TYPE,Layout,testData,ForensicColumnLayout,ForensicGroupingManager) {
 
 
 	var DEFAULT_NODE_RADIUS = 20;
@@ -16,6 +16,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 		this._browsePathComponents = null;
 		this._entitiesComponents = null;
 		this._relatedLinksComponents = null;
+		this._groupingManager = new ForensicGroupingManager();
 		this._initialize(element,context);
 	}
 
@@ -50,9 +51,27 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	 */
 	GraphView.prototype._onNodeOver = function(node) {
 		if (node.type === 'browse_path') {
-			this.addLabel(node,node.url);
+			if (node.children) {
+				this.addLabel(node, node.children[0].domain)
+			} else {
+				this.addLabel(node, node.url);
+			}
 		} else {
-			this.addLabel(node,node.value);
+			if (node.children) {
+				switch(node.type) {
+					case 'email':
+						this.addLabel(node,'Emails');
+						break;
+					case 'website':
+						this.addLabel(node,'Website');
+						break;
+					case 'phone':
+						this.addLabel(node,'Phone Numbers');
+						break;
+				}
+			} else {
+				this.addLabel(node, node.value);
+			}
 		}
 	};
 
@@ -276,12 +295,15 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 		this._relatedLinksComponents = this._getRelatedLinksGraph(response);
 		this._mergeComponents(graph,this._relatedLinksComponents);
 
-		// Debug:   Test inner labelling
-		graph.nodes.forEach(function(node) {
-			node.innerLabel = '(' + node.col + ',' + node.row + ')';
-		});
+		this._groupingManager
+			.nodes(graph.nodes)
+			.links(graph.links)
+			.initializeHeirarchy();
 
-		return d.resolve(graph);
+		return d.resolve({
+			nodes : this._groupingManager.aggregatedNodes(),
+			links : this._groupingManager.links()		// TODO:  replace with aggregatedLinks
+		});
 	};
 
 	/**
