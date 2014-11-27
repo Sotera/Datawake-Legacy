@@ -1,5 +1,8 @@
 define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/forensicColumnLayout'], function(graphTemplate,events,TrailGraphService,Graph,LINK_TYPE,Layout,testData,ForensicColumnLayout) {
 
+
+	var DEFAULT_NODE_RADIUS = 20;
+
 	/**
 	 *
 	 * @param element - the parent DOM element
@@ -126,7 +129,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 					fillStyle: '#ff0000',
 					strokeStyle:'#232323',
 					strokeSize:2,
-					radius : 10,					// TODO:   radius == number of times visited?
+					radius : DEFAULT_NODE_RADIUS,					// TODO:   radius == number of times visited?
 					index : i,
 					url : browsePath[id].url,
 					type : 'browse_path',
@@ -185,7 +188,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 					fillStyle: entity.type === 'email' ? '#00ff00' : '#0000ff',
 					strokeStyle:'#232323',
 					strokeSize:2,
-					radius : 10,
+					radius : DEFAULT_NODE_RADIUS,
 					index : nodeIndex,
 					type: entity.type,
 					value : entity.value,
@@ -235,7 +238,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 					fillStyle: '#ff0000',
 					strokeStyle: '#232323',
 					strokeSize: 2,
-					radius: 10,
+					radius: DEFAULT_NODE_RADIUS,
 					index: nodeIndex,
 					type: entity.type,
 					value: entity.value,
@@ -272,6 +275,12 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 
 		this._relatedLinksComponents = this._getRelatedLinksGraph(response);
 		this._mergeComponents(graph,this._relatedLinksComponents);
+
+		// Debug:   Test inner labelling
+		graph.nodes.forEach(function(node) {
+			node.innerLabel = '(' + node.col + ',' + node.row + ')';
+		});
+
 		return d.resolve(graph);
 	};
 
