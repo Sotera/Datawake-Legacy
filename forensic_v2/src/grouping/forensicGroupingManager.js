@@ -9,22 +9,7 @@ define(['../grouping/groupingManager'], function(GroupingManager) {
 	}
 	$.extend(ForensicGroupingManager.prototype, GroupingManager.prototype);
 
-	// TODO:   remove this when aggregated links is working!
-	ForensicGroupingManager.prototype.links = function(links) {
-		if (links) {
-			this._links = [];
-		} else {
-			return [];
-		}
-		return this;
-	};
-
-	/**
-	 *
-	 */
-	ForensicGroupingManager.prototype.initializeHeirarchy = function() {
-
-
+	ForensicGroupingManager.prototype.aggregateNodes = function() {
 		// aggregate the browse path
 		var lastAggregatedDomain = '';
 		var browsePathAggregates = [];
@@ -143,8 +128,42 @@ define(['../grouping/groupingManager'], function(GroupingManager) {
 			}
 		}
 		this._aggregatedNodes = aggregatedNodes;
+	};
 
-		// TODO: aggregate links
+	ForensicGroupingManager.prototype.aggregateLinks = function() {
+		var nodeIndexToAggreagateNode = {};
+		this._aggregatedNodes.forEach(function(aggregate) {
+			if (aggregate.children) {
+				aggregate.children.forEach(function(node) {
+					nodeIndexToAggreagateNode[node.index] = aggregate;
+				});
+			}
+		});
+
+		var areAggregatesLinked = {};
+		var aggregatedLinks = [];
+		this._links.forEach(function(link) {
+			var sourceAggregate = nodeIndexToAggreagateNode[link.source.index];
+			var targetAggregate = nodeIndexToAggreagateNode[link.target.index];
+			var key = sourceAggregate.index + ',' + targetAggregate.index;
+			if (!areAggregatesLinked[key]) {
+				var aggregatedLink = {
+					source : sourceAggregate,
+					target : targetAggregate
+				};
+				aggregatedLinks.push(aggregatedLink);
+				areAggregatesLinked[key] = true;
+			}
+		});
+		this._aggregatedLinks = aggregatedLinks;
+	};
+
+	/**
+	 *
+	 */
+	ForensicGroupingManager.prototype.initializeHeirarchy = function() {
+		this.aggregateNodes();
+		this.aggregateLinks();
 	};
 
 	return ForensicGroupingManager;

@@ -302,7 +302,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 
 		return d.resolve({
 			nodes : this._groupingManager.aggregatedNodes(),
-			links : this._groupingManager.links()		// TODO:  replace with aggregatedLinks
+			links : this._groupingManager.aggregatedLinks()
 		});
 	};
 
