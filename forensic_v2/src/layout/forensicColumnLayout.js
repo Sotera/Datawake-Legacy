@@ -134,7 +134,7 @@ define(['layout/layout'],function(Layout) {
 						this._setNodePositionImmediate(node, x, 0);
 					}
 
-					if (this._firstLayout) {
+					if (this._firstLayout || this._isUpdate) {
 						this._setNodePosition(node, x, y);
 					} else {
 						this._setNodePositionImmediate(node,x,y);
@@ -150,6 +150,7 @@ define(['layout/layout'],function(Layout) {
 		}
 
 		this._renderHeight = top;
+		this._isUpdate = false;
 		return this;
 	};
 	return ForensicColumnLayout;

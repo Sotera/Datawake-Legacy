@@ -11,6 +11,7 @@ define([],function() {
 		this._labelMap = null;
 		this._duration = 250;
 		this._easing = 'ease-in-out';
+		this._isUpdate = false;
 	}
 
 	/**
@@ -48,6 +49,7 @@ define([],function() {
 	 */
 	Layout.prototype.nodes = function(nodes) {
 		if (nodes) {
+			this._isUpdate = nodes ? true : false;
 			this._nodes = nodes;
 		} else {
 			return this._nodes;
@@ -130,6 +132,10 @@ define([],function() {
 		} else {
 			circle.x = x;
 			circle.y = y;
+		}
+		if (this._linkMap[node.index].length === 0) {
+			node.x = x;
+			node.y = y;
 		}
 
 		// Update the label render object

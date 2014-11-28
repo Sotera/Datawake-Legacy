@@ -1,4 +1,4 @@
-define(['../grouping/groupingManager'], function(GroupingManager) {
+define(['../grouping/groupingManager','../util/guid','../graph/linkType'], function(GroupingManager,guid,LINK_TYPE) {
 
 	/**
 	 *
@@ -9,7 +9,11 @@ define(['../grouping/groupingManager'], function(GroupingManager) {
 	}
 	$.extend(ForensicGroupingManager.prototype, GroupingManager.prototype);
 
-	ForensicGroupingManager.prototype.aggregateNodes = function() {
+	/**
+	 * Perform node aggregation for Datawake Forensic.   Group browse path by domain and entities by type
+	 * @private
+	 */
+	ForensicGroupingManager.prototype._aggregateNodes = function() {
 		// aggregate the browse path
 		var lastAggregatedDomain = '';
 		var browsePathAggregates = [];
@@ -59,12 +63,11 @@ define(['../grouping/groupingManager'], function(GroupingManager) {
 		});
 
 		var aggregatedNodes = [];
-		var idx = 0;
 		for (var row = 0; row < browsePathAggregates.length; row++) {
 			aggregatedNodes.push({
 				x : 0,
 				y : 0,
-				index : idx++,
+				index : guid.generate(),
 				fillStyle : '#ff0000',
 				type : 'browse_path',
 				strokeStyle : '#232323',
@@ -80,7 +83,7 @@ define(['../grouping/groupingManager'], function(GroupingManager) {
 				aggregatedNodes.push({
 					x: 0,
 					y: 0,
-					index: idx++,
+					index: guid.generate(),
 					fillStyle: '#00ff00',
 					strokeSize: 2,
 					type: 'email',
@@ -97,7 +100,7 @@ define(['../grouping/groupingManager'], function(GroupingManager) {
 				aggregatedNodes.push({
 					x: 0,
 					y: 0,
-					index: idx++,
+					index: guid.generate(),
 					fillStyle: '#0000ff',
 					strokeSize: 2,
 					type: 'phone',
@@ -114,10 +117,10 @@ define(['../grouping/groupingManager'], function(GroupingManager) {
 				aggregatedNodes.push({
 					x: 0,
 					y: 0,
-					index: idx++,
+					index: guid.generate(),
 					fillStyle: '#ff0000',
 					strokeSize: 2,
-					type: 'phone',
+					type: 'website',
 					strokeStyle: '#232323',
 					radius: 20,
 					children: aggregatedRelatedLinks[row],
@@ -130,40 +133,37 @@ define(['../grouping/groupingManager'], function(GroupingManager) {
 		this._aggregatedNodes = aggregatedNodes;
 	};
 
-	ForensicGroupingManager.prototype.aggregateLinks = function() {
-		var nodeIndexToAggreagateNode = {};
-		this._aggregatedNodes.forEach(function(aggregate) {
-			if (aggregate.children) {
-				aggregate.children.forEach(function(node) {
-					nodeIndexToAggreagateNode[node.index] = aggregate;
-				});
-			}
-		});
-
-		var areAggregatesLinked = {};
-		var aggregatedLinks = [];
-		this._links.forEach(function(link) {
-			var sourceAggregate = nodeIndexToAggreagateNode[link.source.index];
-			var targetAggregate = nodeIndexToAggreagateNode[link.target.index];
-			var key = sourceAggregate.index + ',' + targetAggregate.index;
-			if (!areAggregatesLinked[key]) {
-				var aggregatedLink = {
-					source : sourceAggregate,
-					target : targetAggregate
-				};
-				aggregatedLinks.push(aggregatedLink);
-				areAggregatesLinked[key] = true;
-			}
-		});
-		this._aggregatedLinks = aggregatedLinks;
+	/**
+	 * Aggregate link specialization for Forensic.   Make sure we draw arrows between browse path nodes.
+	 * @param sourceAggregate
+	 * @param targetAggregate
+	 * @returns {{source: *, target: *}}
+	 * @private
+	 */
+	ForensicGroupingManager.prototype._createAggregateLink = function(sourceAggregate,targetAggregate) {
+		var link = {
+			source : sourceAggregate,
+			target : targetAggregate
+		};
+		if (sourceAggregate.type === 'browse_path' && targetAggregate.type === 'browse_path') {
+			link.type = LINK_TYPE.ARROW;
+		}
+		return link;
 	};
 
+
 	/**
-	 *
+	 * Ensure position/row/col are all set correctly for children when ungrouping
+	 * @param aggregate
+	 * @private
 	 */
-	ForensicGroupingManager.prototype.initializeHeirarchy = function() {
-		this.aggregateNodes();
-		this.aggregateLinks();
+	ForensicGroupingManager.prototype._updateChildren = function(aggregate) {
+		// Set all childrens position to that of their parent
+		aggregate.children.forEach(function(child){
+			child.x = aggregate.x;
+			child.y = aggregate.y;
+			child.row = aggregate.row;
+		});
 	};
 
 	return ForensicGroupingManager;

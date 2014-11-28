@@ -32,6 +32,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 			.canvas(this._jqCanvas[0])
 			.pannable()
 			.nodeHover(this._onNodeOver,this._onNodeOut)
+			.nodeClick(this._onNodeClick,this)
 			.draw();
 
 		this._bindEventHandlers();
@@ -42,6 +43,21 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 		});
 		this._jqCanvas.appendTo(element);
 		$(window).resize();
+	};
+
+	GraphView.prototype._onNodeClick = function(node) {
+		this._groupingManager.ungroup(node);
+
+		var currentDur = this._graph.layouter().duration();
+		this._graph.layouter().duration(250);
+
+		this._graph.clear()
+			.nodes(this._groupingManager.aggregatedNodes())
+			.links(this._groupingManager.aggregatedLinks())
+			.draw()
+			.layout();
+
+		this._graph.layouter().duration(currentDur);
 	};
 
 	/**

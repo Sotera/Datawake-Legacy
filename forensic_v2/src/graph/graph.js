@@ -202,20 +202,28 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	/**
 	 * Event handler for mouseover of a node
 	 * @param callback(node)
+	 * @param self - the object to be bound as 'this' in the callback
 	 * @returns {Graph}
 	 */
-	Graph.prototype.nodeOver = function(callback) {
-		this._nodeOver = callback;
+	Graph.prototype.nodeOver = function(callback,self) {
+		if (!self) {
+			self = this;
+		}
+		this._nodeOver = callback.bind(self);
 		return this;
 	};
 
 	/**
 	 * Event handler for mouseout of a node
 	 * @param callback(node)
+ 	 * @param self - the object to be bound as 'this' in the callback
 	 * @returns {Graph}
 	 */
-	Graph.prototype.nodeOut = function(callback) {
-		this._nodeOut = callback;
+	Graph.prototype.nodeOut = function(callback,self) {
+		if (!self) {
+			self = this;
+		}
+		this._nodeOut = callback.bind(self);
 		return this;
 	};
 
@@ -223,21 +231,26 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	 * Convenience function for setting nodeOver/nodeOut in a single call
 	 * @param over - the nodeOver event handler
 	 * @param out - the nodeOut event handler
+	 * @param self - the object to be bound as 'this' in the callback
 	 * @returns {Graph}
 	 */
-	Graph.prototype.nodeHover = function(over,out) {
-		this.nodeOver(over);
-		this.nodeOut(out);
+	Graph.prototype.nodeHover = function(over,out,self) {
+		this.nodeOver(over,self);
+		this.nodeOut(out,self);
 		return this;
 	};
 
 	/**
 	 * Event handler for click of a node
 	 * @param callback(node)
+	 * @param self - the object to be bound as 'this'.   Defaults to the graph object
 	 * @returns {Graph}
 	 */
-	Graph.prototype.nodeClick = function(callback) {
-		this._nodeClick = callback;
+	Graph.prototype.nodeClick = function(callback,self) {
+		if (!self) {
+			self = this;
+		}
+		this._nodeClick = callback.bind(self);
 		return this;
 	};
 
@@ -547,6 +560,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		if (this._postrenderGroup) {
 			this._scene.removeChild(this._postrenderGroup);
 		}
+		this._scene.update();
 		return this;
 	};
 
