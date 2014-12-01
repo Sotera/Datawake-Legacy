@@ -45,8 +45,8 @@ jQuery.fn.highlight = function(pat,className) {
     }) : this;
 };
 
-jQuery.fn.removeHighlight = function() {
-    return this.find("span.highlight").each(function() {
+jQuery.fn.removeHighlight = function(className) {
+    return this.find(".datawake-highlight." + className).each(function() {
         this.parentNode.firstChild.nodeName;
         with (this.parentNode) {
             replaceChild(this.firstChild, this);

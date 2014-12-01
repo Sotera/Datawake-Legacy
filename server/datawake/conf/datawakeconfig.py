@@ -66,7 +66,7 @@ DATAWAKE_CORE_DB = {
 
 KAFKA_CONN_POOL=os.environ['DW_KAFKA_CONN_POOL']
 KAFKA_PUBLISH_TOPIC=os.environ['DW_KAFKA_PUB_TOPIC']
-
+KAFKA_TRAIL_TOPIC=os.environ['DW_KAFKA_TRAIL_TOPIC']
 
 
 # read optional params

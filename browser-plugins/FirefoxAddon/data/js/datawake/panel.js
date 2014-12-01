@@ -8,6 +8,7 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
     $scope.extracted_tools = [];
     $scope.datawake = null;
     $scope.current_url = "";
+    $scope.invalid = {};
 
     addon.port.on("datawakeInfo", function (datawakeInfo) {
         $scope.datawake = datawakeInfo;
@@ -15,14 +16,21 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         $scope.lookaheadLinks = [];
         $scope.extracted_tools = [];
         $scope.entities_in_domain = [];
+        $scope.feedbackEntities = [];
         $scope.extracted_entities_dict = {};
         $scope.lookaheadTimerStarted = false;
         $scope.lookaheadEnabled = true;
         $scope.domainFeaturesEnabled = true;
         $scope.rankingEnabled = true;
+        $scope.invalid = {};
         //Trigger the starting tab.
         var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
         domainExtractedEntities.trigger('click');
+        $scope.$apply();
+    });
+
+    addon.port.on("feedbackEntities", function (entities) {
+        $scope.feedbackEntities = entities;
         $scope.$apply();
     });
 
@@ -105,6 +113,7 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         $scope.$apply();
     });
 
+
     $scope.searchHitsToggle = function (lookaheadObj) {
         lookaheadObj.searchHitsShow = !lookaheadObj.searchHitsShow;
     };
@@ -116,6 +125,20 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
     $scope.openExternalLink = function (externalUrl) {
         addon.port.emit("openExternalLink", {externalUrl: externalUrl});
     };
+
+    $scope.markInvalid = function(type, entity){
+        var postObj = {};
+        postObj.entity_type = type;
+        postObj.entity_value = entity;
+        postObj.domain = $scope.datawake.domain.name;
+        addon.port.emit("markInvalid", postObj);
+
+    };
+
+    addon.port.on("marked", function(entity){
+        $scope.invalid[entity] = true;
+        $scope.$apply();
+    });
 
     $scope.isExtracted = function (type, name) {
         if ($scope.entities_in_domain.hasOwnProperty(type)) {
@@ -167,6 +190,10 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         });
 
         $('#all_extracted_entities').find('a').first().click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+        $('#feedback').find('a').first().click(function (e) {
             e.preventDefault();
             $(this).tab('show');
         });

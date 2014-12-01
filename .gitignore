@@ -11,6 +11,8 @@ fig.yml
 #vagrant
 .vagrant
 .vagrant/*
+.gradle
+*.iml
 
 # C extensions
 *.so

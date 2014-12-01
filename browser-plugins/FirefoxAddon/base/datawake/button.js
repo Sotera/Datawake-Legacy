@@ -178,10 +178,12 @@ function onToggle(state) {
         console.debug("Valid Tab");
         mainPanel.port.emit("validTab", tabs.activeTab.url);
         //Get the rank info and listen for someone ranking the page.
+        emitFeedbackEntities(datawakeInfo.domain.name);
         emitRanks(datawakeInfo);
         mainPanel.port.on("setUrlRank", setUrlRank);
         mainPanel.port.on("openExternalLink", openExternalTool);
         mainPanel.show({position: datawakeButton});
+        mainPanel.port.on("markInvalid", markInvalid);
     }
     else {
         //Emit that it is not a valid tab.
@@ -191,7 +193,33 @@ function onToggle(state) {
     }
 
 }
+/**
+ * Marks an entity as in valid
+ * @param entity Object(entity_value, entity_type, domain)
+ */
+function markInvalid(entity){
+    var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/bad";
+    requestHelper.post(post_url, JSON.stringify(entity), function (response) {
+        if(response.json.success)
+            mainPanel.port.emit("marked", entity.entity_value);
+    });
+}
 
+/**
+ * Emits feedback entities
+ * @param domain domainName
+ */
+function emitFeedbackEntities(domain){
+    var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/entities";
+    var post_data = JSON.stringify({
+        domain: domain,
+        url: tabs.activeTab.url
+    });
+    requestHelper.post(post_url, post_data, function (response) {
+        var entities = response.json.entities;
+        mainPanel.port.emit("feedbackEntities", entities);
+    });
+}
 
 /**
  * Resets the ToggleButton and Panel to an invalid state.

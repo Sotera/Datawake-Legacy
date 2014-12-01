@@ -16,8 +16,10 @@ limitations under the License.
 
 """
 
-from datawake.util.dataconnector.data_connector import DataConnector
 import mysql.connector
+
+from datawake.util.dataconnector.data_connector import DataConnector
+
 
 class MySqlEntityDataConnector(DataConnector):
     """Provides connection to local mysql database for extracted entity data"""
@@ -48,7 +50,7 @@ class MySqlEntityDataConnector(DataConnector):
         pw = self.config['password']
         host = self.config['host']
         port = self.config['port']
-        self.cnx = mysql.connector.connect(user=user, password=pw, host=host, database=db,port=port)
+        self.cnx = mysql.connector.connect(user=user, password=pw, host=host, database=db, port=port)
 
 
     def close(self):
@@ -319,7 +321,4 @@ class MySqlEntityDataConnector(DataConnector):
         except:
             self.close()
             return False
-
-
-
 
