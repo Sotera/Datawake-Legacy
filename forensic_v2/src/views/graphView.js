@@ -30,6 +30,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 		this._jqCanvas = $(graphTemplate(context));
 		this._graph = new Graph()
 			.canvas(this._jqCanvas[0])
+			.groupingManager(new ForensicGroupingManager())
 			.pannable()
 			.nodeHover(this._onNodeOver,this._onNodeOut)
 			.nodeClick(this._onNodeClick,this)
@@ -46,15 +47,12 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	};
 
 	GraphView.prototype._onNodeClick = function(node) {
-		this._groupingManager.ungroup(node);
+		this._graph.ungroup(node);
 
 		var currentDur = this._graph.layouter().duration();
 		this._graph.layouter().duration(250);
 
-		this._graph.clear()
-			.nodes(this._groupingManager.aggregatedNodes())
-			.links(this._groupingManager.aggregatedLinks())
-			.draw()
+		this._graph.draw()
 			.layout();
 
 		this._graph.layouter().duration(currentDur);
@@ -311,14 +309,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 		this._relatedLinksComponents = this._getRelatedLinksGraph(response);
 		this._mergeComponents(graph,this._relatedLinksComponents);
 
-		this._groupingManager
-			.nodes(graph.nodes)
-			.links(graph.links)
-			.initializeHeirarchy();
-
 		return d.resolve({
-			nodes : this._groupingManager.aggregatedNodes(),
-			links : this._groupingManager.aggregatedLinks()
+			nodes : graph.nodes,
+			links : graph.links
 		});
 	};
 
@@ -336,6 +329,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 			.clear()
 			.nodes(forensicGraph.nodes)
 			.links(forensicGraph.links)
+			.initializeGrouping()
 			.layouter(this._layouter)
 			.draw()
 			.layout();

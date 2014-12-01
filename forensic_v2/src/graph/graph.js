@@ -11,6 +11,8 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		this._nodes = [];
 		this._links = [];
 		this._canvas = null;
+		this._layouter = null;
+		this._groupingManager = null;
 		this._width = 0;
 		this._height = 0;
 		this._scene = null;
@@ -348,6 +350,38 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		return this;
 	};
 
+
+	Graph.prototype.groupingManager = function(groupingManager) {
+		if (groupingManager) {
+			this._groupingManager = groupingManager;
+
+		} else {
+			return this._groupingManager;
+		}
+		return this;
+	};
+
+	Graph.prototype.initializeGrouping = function() {
+		if (this._groupingManager) {
+			this._groupingManager.nodes(this._nodes)
+				.links(this._links)
+				.initializeHeirarchy();
+
+			this.nodes(this._groupingManager.aggregatedNodes());
+			this.links(this._groupingManager.aggregatedLinks());
+		}
+		return this;
+	};
+
+	Graph.prototype.ungroup = function(node) {
+		if (this._groupingManager) {
+			this._groupingManager.ungroup(node);
+			this.clear()
+				.nodes(this._groupingManager.aggregatedNodes())
+				.links(this._groupingManager.aggregatedLinks());
+		}
+	};
+
 	/**
 	 * Gets/sets the font size for labels
 	 * @param fontSize - size of the font in pixels
@@ -446,6 +480,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	 */
 	Graph.prototype.draw = function() {
 		var that = this;
+
 		if (!this._scene) {
 			this._scene = path(this._canvas);
 		}
