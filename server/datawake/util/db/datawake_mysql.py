@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import sys
+import math
 
 import mysql.connector
 from mysql.connector import errorcode
@@ -391,7 +392,7 @@ def getActiveUsers(org):
     return result
 
 
-### TRAILS ###
+# ## TRAILS ###
 
 
 #
@@ -488,7 +489,7 @@ def getStarredFeaturesForTrail(org, trail):
         return map(lambda x: {'type': x[0], 'value': x[1]}, rows)
 
 
-####   URL RANKS   ####
+# ###   URL RANKS   ####
 
 
 #
@@ -611,20 +612,22 @@ def add_trail_based_entity(org, domain, trail, entity):
     sql = "insert into trail_based_entities(org, domain, trail, entity, google_result_count) value (%s, %s,%s,%s, %s)"
     return dbCommitSQL(sql, [org, domain, trail, entity, "0"])
 
+
 def add_irrelevant_trail_entity(org, domain, trail, entity):
     sql = "insert into irrelevant_trail_based_entities(org, domain, trail, entity, google_result_count) value (%s, %s,%s,%s, %s)"
     return dbCommitSQL(sql, [org, domain, trail, entity, "0"])
 
 
 def get_trail_based_entities(org, domain, trail):
-    sql = "select entity from trail_based_entities where org=%s and domain=%s and trail=%s"
+    sql = "select entity,google_result_count from trail_based_entities where org=%s and domain=%s and trail=%s"
     params = [org, domain, trail]
-    return map(lambda x: x[0], dbGetRows(sql, params))
+    return map(lambda x: dict(entity=x[0], rank=1.0 / math.log(float(x[1]), 2)), dbGetRows(sql, params))
+
 
 def get_irrelevant_trail_based_entities(org, domain, trail):
-    sql = "select entity from irrelevant_trail_based_entities where org=%s and domain=%s and trail=%s"
+    sql = "select entity,google_result_count from irrelevant_trail_based_entities where org=%s and domain=%s and trail=%s"
     params = [org, domain, trail]
-    return map(lambda x: x[0], dbGetRows(sql, params))
+    return map(lambda x: dict(entity=x[0], rank=1.0 / math.log(float(x[1]), 2)), dbGetRows(sql, params))
 
 
 def get_trail_entity_links(org, domain, trail):

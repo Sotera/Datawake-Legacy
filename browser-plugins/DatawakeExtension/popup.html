@@ -252,12 +252,16 @@
                     <thead>
                     <tr>
                         <td><b>Entities</b></td>
+                        <td><b>Rank</b></td>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="entity in trailEntities">
                         <td>
-                            {{entity}}
+                            {{entity.entity}}
+                        </td>
+                        <td>
+                            {{entity.rank}}
                         </td>
                     </tr>
                     </tbody>
@@ -272,12 +276,16 @@
                     <thead>
                     <tr>
                         <td><b>Entities</b></td>
+                        <td><b>Rank</b></td>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="entity in irrelevantEntities">
                         <td>
-                            {{entity}}
+                            {{entity.entity}}
+                        </td>
+                        <td>
+                            {{entity.rank}}
                         </td>
                     </tr>
                     </tbody>
