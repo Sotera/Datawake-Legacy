@@ -23,25 +23,39 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
     val url = input.getStringByField("kafkaLink")
     var htmlPrepare: PreparedStatement = null
     try {
-      val validTermList = getTerms(validTermsSql, org, domain, trail)
-      val invalidTermList = getTerms(invalidTermsSql, org, domain, trail)
+      val validTerms = getTerms(validTermsSql, org, domain, trail)
+      val irrelevantTerms = getTerms(invalidTermsSql, org, domain, trail)
       htmlPrepare = connection.prepareStatement(htmlSql)
       htmlPrepare.setString(1, url)
       val htmlSet = htmlPrepare.executeQuery()
       if (htmlSet.next()) {
         val html = htmlSet.getString("html")
-        val termCount = RegexWords.getRank(validTermList, invalidTermList, html)
+        val termCount = RegexWords.getRank(validTerms, irrelevantTerms, html)
         collector.emit("count", new Values(org, domain, trail, url, termCount.asInstanceOf[java.lang.Double]))
       }
-      if (validTermList.length >= 2) {
-        val lowestPair = Tuple2(validTermList.dequeue()._1, validTermList.dequeue()._1)
-        val newTerm: String = lowestPair._1 + " + " + lowestPair._2
-        collector.emit("search", new Values(org + "\0" + domain + "\0" + trail, newTerm))
+      if (validTerms.length >= 2) {
+        val domainTriplet = org + "\0" + domain + "\0" + trail
+        emitConcatenatedTermSearch(collector, validTerms, domainTriplet)
       }
     } finally {
       if (htmlPrepare != null)
         htmlPrepare.close()
     }
+  }
+
+  def emitConcatenatedTermSearch(collector: BasicOutputCollector, searchTerms: mutable.PriorityQueue[(String, Double)], domainTriplet: String) = {
+    val searchSeparator = " + "
+    val newTermBuilder: StringBuilder = new StringBuilder()
+    newTermBuilder.append(searchTerms.dequeue()._1)
+    newTermBuilder.append(searchSeparator)
+    newTermBuilder.append(searchTerms.dequeue()._1)
+    collector.emit("search", new Values(domainTriplet, newTermBuilder.toString()))
+    while (searchTerms.nonEmpty) {
+      newTermBuilder.append(searchTerms.dequeue()._1)
+      newTermBuilder.append(searchSeparator)
+    }
+    newTermBuilder.setLength(newTermBuilder.length - searchSeparator.length)
+    collector.emit("search", new Values(domainTriplet, newTermBuilder.toString()))
   }
 
   def getTerms(sql: String, org: String, domain: String, trail: String): mutable.PriorityQueue[(String, Double)] = {

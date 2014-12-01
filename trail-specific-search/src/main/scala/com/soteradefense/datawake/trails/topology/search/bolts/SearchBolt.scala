@@ -90,8 +90,8 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
       new DatawakeSearchResults(buffer, results.responseData.cursor.estimatedResultCount)
     } catch {
       case e: Throwable =>
-        logger.info("Exception: {}", e.getMessage)
-        null
+        logger.info("Exception Returning Default: {}", e.getMessage)
+        new DatawakeSearchResults(new ListBuffer[DatawakeInternetResult], "100")
     }
   }
 

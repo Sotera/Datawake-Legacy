@@ -117,7 +117,7 @@ function addTrailBasedEntity(info, tab) {
     var trail_selection_object = {};
     trail_selection_object.domain = dwState.tabToDomain[tab.id];
     trail_selection_object.trail = dwState.tabToTrail[tab.id];
-    trail_selection_object.entity = info.selectionText;
+    trail_selection_object.entity = info.selectionText.trim();
     function logSuccess(response) {
         console.log("%s was successfully saved as an entity.", trail_selection_object.entity);
     }
@@ -128,7 +128,7 @@ function addIrrelevantTrailBasedEntity(info, tab) {
     var trail_selection_object = {};
     trail_selection_object.domain = dwState.tabToDomain[tab.id];
     trail_selection_object.trail = dwState.tabToTrail[tab.id];
-    trail_selection_object.entity = info.selectionText;
+    trail_selection_object.entity = info.selectionText.trim();
     function logSuccess(response) {
         console.log("%s was successfully saved as an entity.", trail_selection_object.entity);
     }
@@ -136,7 +136,7 @@ function addIrrelevantTrailBasedEntity(info, tab) {
     postContents(config.datawake_serviceUrl + "/trails/irrelevant", JSON.stringify(trail_selection_object), logSuccess, logError);
 }
 function reportFeedback(info, tab) {
-    var selectedText = info.selectionText;
+    var selectedText = info.selectionText.trim();
 
     function logSuccess(response) {
         console.log("%s was successfully saved as feedback.", selectedText);
