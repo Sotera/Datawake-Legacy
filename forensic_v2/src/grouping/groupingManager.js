@@ -13,6 +13,7 @@ define([], function() {
 		this._aggregatedLinks = [];
 
 		this._ungroupedAggregates = {};
+		this._ungroupedNodeGroups = {};
 	}
 
 	/**
@@ -49,6 +50,19 @@ define([], function() {
 	GroupingManager.prototype.initializeHeirarchy = function() {
 		this._aggregateNodes();
 		this._aggregateLinks();
+
+		var setParentPointers = function(node,parent) {
+			if (node.children) {
+				node.children.forEach(function(child) {
+					setParentPointers(child,node);
+				});
+			}
+			node.parentNode = parent;
+		};
+
+		this._aggregatedNodes.forEach(function(node) {
+			setParentPointers(node,null);
+		});
 	};
 
 	/**
@@ -126,6 +140,18 @@ define([], function() {
 		return this._aggregatedLinks;
 	};
 
+	GroupingManager.prototype.remove = function(node) {
+		var index = -1;
+		for (var i = 0; i < this._aggregatedNodes.length && index === -1; i++) {
+			if (this._aggregatedNodes[i].index === node.index) {
+				index = i;
+			}
+		}
+		if (index !== -1) {
+			this._aggregatedNodes.splice(index,1);
+		}
+	};
+
 
 	/**
 	 * Do any updates on children before layout  (ie/ set position, row/col info, etc).   Should be defined
@@ -162,6 +188,7 @@ define([], function() {
 
 			var first = this._aggregatedNodes.slice(0,index);
 			var middle = node.children;
+			this._ungroupedNodeGroups[parentKey] = node.children;
 			var end = this._aggregatedNodes.slice(index+1);
 
 			this._aggregatedNodes = first.concat(middle).concat(end);
@@ -169,6 +196,40 @@ define([], function() {
 			// Recompute aggregated links
 			this._aggregateLinks();
 		}
+	};
+	GroupingManager.prototype.getAggregate = function(aggregateKey) {
+		return this._ungroupedAggregates[aggregateKey];
+	};
+
+	GroupingManager.prototype.regroup = function(aggregateKey) {
+		var aggregateNode = this._ungroupedAggregates[aggregateKey];
+		var nodesToRemove = aggregateNode.children;
+		var that = this;
+		nodesToRemove.forEach(function(node) {
+			that.remove(node);
+		});
+		that._aggregatedNodes.push(aggregateNode);
+		this._aggregateLinks();
+	};
+
+	/**
+	 * Returns an array of node groups that are expanded
+	 * @returns {Array}
+	 */
+	GroupingManager.prototype.getUngroupedNodes = function() {
+		var info = [];
+		var that = this;
+		Object.keys(this._ungroupedNodeGroups).forEach(function(key) {
+			var nodes = that._ungroupedNodeGroups[key];
+			var nodeIndices = nodes.map(function(node) {
+				return node.index;
+			});
+			info.push({
+				indices : nodeIndices,
+				key : key
+			});
+		});
+		return info;
 	};
 
 	return GroupingManager;

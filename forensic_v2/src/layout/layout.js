@@ -1,5 +1,7 @@
 define([],function() {
 
+	var BOUNDING_BOX_PADDING = 5;
+
 	/**
 	 * Layout constructor
 	 * @constructor
@@ -100,14 +102,48 @@ define([],function() {
 	};
 
 	/**
+	 * Returns a bounding box for an array of node indices
+	 * @param nodeIndexArray - array of node indicies
+	 * @returns {{min: {x: Number, y: Number}, max: {x: number, y: number}}}
+	 */
+	Layout.prototype.getBoundingBox = function(nodeIndexArray) {
+		var min = {
+			x : Number.MAX_VALUE,
+			y : Number.MAX_VALUE
+		};
+		var max = {
+			x : -Number.MAX_VALUE,
+			y : -Number.MAX_VALUE
+		};
+		
+		var that = this;
+		nodeIndexArray.forEach(function(index) {
+			var circle = that._nodeMap[index];
+			min.x = Math.min(min.x, (circle.finalX || circle.x) - circle.radius);
+			min.y = Math.min(min.y, (circle.finalY || circle.y) - circle.radius);
+			max.x = Math.max(max.x, (circle.finalX || circle.x) + circle.radius);
+			max.y = Math.max(max.y, (circle.finalY || circle.y) + circle.radius);
+		});
+		return {
+			x : min.x - BOUNDING_BOX_PADDING,
+			y : min.y - BOUNDING_BOX_PADDING,
+			width : (max.x - min.y)+BOUNDING_BOX_PADDING,
+			height : (max.y - min.y)+BOUNDING_BOX_PADDING
+		};
+	};
+
+	/**
 	 * Sets the position of a node and all attached links and labels without animation
 	 * @param node - the node object being positioned
 	 * @param x - the new x position for the node
 	 * @param y - the new y position for the node
 	 * @private
 	 */
-	Layout.prototype._setNodePositionImmediate = function(node,x,y) {
+	Layout.prototype._setNodePositionImmediate = function(node,x,y,callback) {
 		this._setNodePosition(node,x,y,true);
+		if (callback) {
+			callback();
+		}
 	};
 
 	/**
@@ -118,7 +154,7 @@ define([],function() {
 	 * @param bImmediate - if true, sets without animation.
 	 * @private
 	 */
-	Layout.prototype._setNodePosition = function(node,x,y,bImmediate) {
+	Layout.prototype._setNodePosition = function(node,x,y,bImmediate,callback) {
 		// Update the node render object
 		var circle = this._nodeMap[node.index];
 		if (bImmediate!==true) {
@@ -127,8 +163,17 @@ define([],function() {
 				y: y
 			}, {
 				duration: this._duration,
-				easing: this._easing
+				easing: this._easing,
+				callback : function() {
+					delete circle.finalX;
+					delete circle.finalY;
+					if (callback) {
+						callback();
+					}
+				}
 			});
+			circle.finalX = x;
+			circle.finalY = y;
 		} else {
 			circle.x = x;
 			circle.y = y;

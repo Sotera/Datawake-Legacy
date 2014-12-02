@@ -66,7 +66,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	GraphView.prototype._onNodeOver = function(node) {
 		if (node.type === 'browse_path') {
 			if (node.children) {
-				this.addLabel(node, node.children[0].domain)
+				this.addLabel(node, node.children[0].domain);
 			} else {
 				this.addLabel(node, node.url);
 			}

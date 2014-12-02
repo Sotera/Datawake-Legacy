@@ -382,6 +382,42 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		}
 	};
 
+	Graph.prototype.regroup = function(ungroupedAggregateKey) {
+		// Animate the regroup
+		var that = this;
+		var parentAggregate = this._groupingManager.getAggregate(ungroupedAggregateKey);
+
+		var avgPos = { x: 0, y : 0};
+		parentAggregate.children.forEach(function(child) {
+			avgPos.x += child.x;
+			avgPos.y += child.y;
+		});
+		avgPos.x /= parentAggregate.children.length;
+		avgPos.y /= parentAggregate.children.length;
+
+		var currentDuration = this._layouter.duration();
+		this._layouter.duration(250);
+
+		var animatedRegrouped = 0;
+		parentAggregate.children.forEach(function(child) {
+			that._layouter._setNodePosition(child,avgPos.x,avgPos.y,false,function() {
+				animatedRegrouped++;
+				if (animatedRegrouped === parentAggregate.children.length) {
+					if (that._groupingManager) {
+						that._groupingManager.regroup(ungroupedAggregateKey);
+						that.clear()
+							.nodes(that._groupingManager.aggregatedNodes())
+							.links(that._groupingManager.aggregatedLinks());
+						that.draw();
+						that.layout();
+					}
+				}
+			});
+		});
+		this.update();
+		this._layouter.duration(currentDuration);
+	};
+
 	/**
 	 * Gets/sets the font size for labels
 	 * @param fontSize - size of the font in pixels
@@ -447,11 +483,37 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	 */
 	Graph.prototype._addPreAndPostRenderObjects = function() {
 		this._prerenderGroup.removeAll();
+
+		// Get the background objects from the layouter
 		var objs = this._layouter.prerender(this._width,this._height);
 		var that = this;
 		if (objs) {
 			objs.forEach(function(renderObject) {
 				that._prerenderGroup.addChild(renderObject);
+			});
+		}
+
+		// Draw any ungrouped node bounding boxes
+		if (this._groupingManager) {
+			var ungroupedNodeInfo = this._groupingManager.getUngroupedNodes();
+			ungroupedNodeInfo.forEach(function(ungroupedNode) {
+				var indices = ungroupedNode.indices;
+				var key = ungroupedNode.key;
+				var bbox = that._layouter.getBoundingBox(indices);
+				var boundingBoxRenderObject = path.rect({
+					x : bbox.x,
+					y : bbox.y,
+					width : bbox.width,
+					height : bbox.height,
+					strokeStyle : '#232323',
+					fillStyle : '#000000',
+					opacity : 0.1
+				});
+				boundingBoxRenderObject.on('click',function() {
+					console.log('Regroup nodes ' + key);
+					that.regroup(key);
+				});
+				that._prerenderGroup.addChild(boundingBoxRenderObject);
 			});
 		}
 
@@ -492,7 +554,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 				.labelMap(this._nodeIndexToLabel);
 			this.layouter(defaulLayout);
 		}
-		this._prerenderGroup = path.group({noHit:true});
+		this._prerenderGroup = path.group();
 		this._scene.addChild(this._prerenderGroup);
 		this._links.forEach(function(link) {
 
