@@ -11,6 +11,8 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		this._nodes = [];
 		this._links = [];
 		this._canvas = null;
+		this._layouter = null;
+		this._groupingManager = null;
 		this._width = 0;
 		this._height = 0;
 		this._scene = null;
@@ -202,20 +204,28 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	/**
 	 * Event handler for mouseover of a node
 	 * @param callback(node)
+	 * @param self - the object to be bound as 'this' in the callback
 	 * @returns {Graph}
 	 */
-	Graph.prototype.nodeOver = function(callback) {
-		this._nodeOver = callback;
+	Graph.prototype.nodeOver = function(callback,self) {
+		if (!self) {
+			self = this;
+		}
+		this._nodeOver = callback.bind(self);
 		return this;
 	};
 
 	/**
 	 * Event handler for mouseout of a node
 	 * @param callback(node)
+ 	 * @param self - the object to be bound as 'this' in the callback
 	 * @returns {Graph}
 	 */
-	Graph.prototype.nodeOut = function(callback) {
-		this._nodeOut = callback;
+	Graph.prototype.nodeOut = function(callback,self) {
+		if (!self) {
+			self = this;
+		}
+		this._nodeOut = callback.bind(self);
 		return this;
 	};
 
@@ -223,21 +233,26 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	 * Convenience function for setting nodeOver/nodeOut in a single call
 	 * @param over - the nodeOver event handler
 	 * @param out - the nodeOut event handler
+	 * @param self - the object to be bound as 'this' in the callback
 	 * @returns {Graph}
 	 */
-	Graph.prototype.nodeHover = function(over,out) {
-		this.nodeOver(over);
-		this.nodeOut(out);
+	Graph.prototype.nodeHover = function(over,out,self) {
+		this.nodeOver(over,self);
+		this.nodeOut(out,self);
 		return this;
 	};
 
 	/**
 	 * Event handler for click of a node
 	 * @param callback(node)
+	 * @param self - the object to be bound as 'this'.   Defaults to the graph object
 	 * @returns {Graph}
 	 */
-	Graph.prototype.nodeClick = function(callback) {
-		this._nodeClick = callback;
+	Graph.prototype.nodeClick = function(callback,self) {
+		if (!self) {
+			self = this;
+		}
+		this._nodeClick = callback.bind(self);
 		return this;
 	};
 
@@ -335,6 +350,74 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		return this;
 	};
 
+
+	Graph.prototype.groupingManager = function(groupingManager) {
+		if (groupingManager) {
+			this._groupingManager = groupingManager;
+
+		} else {
+			return this._groupingManager;
+		}
+		return this;
+	};
+
+	Graph.prototype.initializeGrouping = function() {
+		if (this._groupingManager) {
+			this._groupingManager.nodes(this._nodes)
+				.links(this._links)
+				.initializeHeirarchy();
+
+			this.nodes(this._groupingManager.aggregatedNodes());
+			this.links(this._groupingManager.aggregatedLinks());
+		}
+		return this;
+	};
+
+	Graph.prototype.ungroup = function(node) {
+		if (this._groupingManager) {
+			this._groupingManager.ungroup(node);
+			this.clear()
+				.nodes(this._groupingManager.aggregatedNodes())
+				.links(this._groupingManager.aggregatedLinks());
+		}
+	};
+
+	Graph.prototype.regroup = function(ungroupedAggregateKey) {
+		// Animate the regroup
+		var that = this;
+		var parentAggregate = this._groupingManager.getAggregate(ungroupedAggregateKey);
+
+		var avgPos = { x: 0, y : 0};
+		parentAggregate.children.forEach(function(child) {
+			avgPos.x += child.x;
+			avgPos.y += child.y;
+		});
+		avgPos.x /= parentAggregate.children.length;
+		avgPos.y /= parentAggregate.children.length;
+
+		var currentDuration = this._layouter.duration();
+		this._layouter.duration(250);
+
+		var animatedRegrouped = 0;
+		parentAggregate.children.forEach(function(child) {
+			that._layouter._setNodePosition(child,avgPos.x,avgPos.y,false,function() {
+				animatedRegrouped++;
+				if (animatedRegrouped === parentAggregate.children.length) {
+					if (that._groupingManager) {
+						that._groupingManager.regroup(ungroupedAggregateKey);
+						that.clear()
+							.nodes(that._groupingManager.aggregatedNodes())
+							.links(that._groupingManager.aggregatedLinks());
+						that.draw();
+						that.layout();
+					}
+				}
+			});
+		});
+		this.update();
+		this._layouter.duration(currentDuration);
+	};
+
 	/**
 	 * Gets/sets the font size for labels
 	 * @param fontSize - size of the font in pixels
@@ -400,11 +483,37 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	 */
 	Graph.prototype._addPreAndPostRenderObjects = function() {
 		this._prerenderGroup.removeAll();
+
+		// Get the background objects from the layouter
 		var objs = this._layouter.prerender(this._width,this._height);
 		var that = this;
 		if (objs) {
 			objs.forEach(function(renderObject) {
 				that._prerenderGroup.addChild(renderObject);
+			});
+		}
+
+		// Draw any ungrouped node bounding boxes
+		if (this._groupingManager) {
+			var ungroupedNodeInfo = this._groupingManager.getUngroupedNodes();
+			ungroupedNodeInfo.forEach(function(ungroupedNode) {
+				var indices = ungroupedNode.indices;
+				var key = ungroupedNode.key;
+				var bbox = that._layouter.getBoundingBox(indices);
+				var boundingBoxRenderObject = path.rect({
+					x : bbox.x,
+					y : bbox.y,
+					width : bbox.width,
+					height : bbox.height,
+					strokeStyle : '#232323',
+					fillStyle : '#000000',
+					opacity : 0.1
+				});
+				boundingBoxRenderObject.on('click',function() {
+					console.log('Regroup nodes ' + key);
+					that.regroup(key);
+				});
+				that._prerenderGroup.addChild(boundingBoxRenderObject);
 			});
 		}
 
@@ -433,6 +542,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 	 */
 	Graph.prototype.draw = function() {
 		var that = this;
+
 		if (!this._scene) {
 			this._scene = path(this._canvas);
 		}
@@ -444,7 +554,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 				.labelMap(this._nodeIndexToLabel);
 			this.layouter(defaulLayout);
 		}
-		this._prerenderGroup = path.group({noHit:true});
+		this._prerenderGroup = path.group();
 		this._scene.addChild(this._prerenderGroup);
 		this._links.forEach(function(link) {
 
@@ -547,6 +657,7 @@ define(['../layout/layout','../graph/linkType'],function(Layout,LINK_TYPE) {
 		if (this._postrenderGroup) {
 			this._scene.removeChild(this._postrenderGroup);
 		}
+		this._scene.update();
 		return this;
 	};
 
