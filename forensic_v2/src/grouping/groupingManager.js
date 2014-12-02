@@ -210,6 +210,8 @@ define([], function() {
 		});
 		that._aggregatedNodes.push(aggregateNode);
 		this._aggregateLinks();
+		delete this._ungroupedAggregates[aggregateKey];
+		delete this._ungroupedNodeGroups[aggregateKey];
 	};
 
 	/**
