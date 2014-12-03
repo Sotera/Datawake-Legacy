@@ -36,7 +36,7 @@ class ImpalaQueryThread(threading.Thread):
     def __init__(self, host, port, q, do_work):
         threading.Thread.__init__(self)
         self.host = host
-        self.port = port
+        self.port = int(port)
         self.q = q
         self.do_work = do_work
 
@@ -66,7 +66,7 @@ class ClusterEntityDataConnector(DataConnector):
 
     def open(self):
         host = random.choice(self.config['hosts'])
-        self.cnx = connect(host=host, port=self.config['port'])
+        self.cnx = connect(host=host, port=int(self.config['port']))
 
 
     def close(self):

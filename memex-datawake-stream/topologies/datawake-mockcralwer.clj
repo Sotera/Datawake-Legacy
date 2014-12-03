@@ -1,4 +1,4 @@
-(ns test1
+(ns datawake-mockcrawler
 (:use     [streamparse.specs])
 (:gen-class))
 

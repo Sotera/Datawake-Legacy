@@ -17,7 +17,7 @@ limitations under the License.
 """
 import igraph
 import tangelo
-
+import time
 import datawake.util.dataconnector.factory as factory
 from datawake.util.db import datawake_mysql
 
@@ -340,14 +340,20 @@ def processEdges(rawEdges,nodeDict={}):
 
 def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domain=''):
     entityDataConnector.close()
+    #t1 = time.time()
     browsePathGraph = getBrowsePathEdges(org,startdate,enddate,userlist,trail,domain)
+    #t2 = time.time()
+    #tangelo.log("GOT BROWSE PATH IN "+str(t2-t1))
     nodes = browsePathGraph['nodes']
     edges = browsePathGraph['edges']
     urls = browsePathGraph['nodes'].keys()
 
-
     # for every url in the browse path get all extracted entities and collect all adjacent urls in a set + url-> link map
+    #t1 = time.time()
     visitedEntities = entityDataConnector.get_extracted_entities_from_urls(urls)
+    #t2 = time.time()
+    #tangelo.log("GOT ALL VISITED ENTITIES IN "+str(t2-t1))
+
     entity_set = set([])
     adj_urls = set([])
     link_map = {}
@@ -365,16 +371,22 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
 
     del visitedEntities
 
+    #t1 = time.time()
     lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
+    #t2 = time.time()
+    #tangelo.log("GOT ALL LOOKAHEAD ENTITIES IN "+str(t2-t1))
 
-    # add place holders for urls with no extracted data
+# add place holders for urls with no extracted data
     for adj_url in adj_urls:
         if adj_url not in lookaheadFeatures:
             lookaheadFeatures[adj_url] = {}
 
+    #t1 = time.time()
     domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
+    #t2 = time.time()
+    #tangelo.log("GOT DOMAIN LOOKAHEAD ENTITIES IN "+str(t2-t1))
 
-
+    #t1 = time.time()
 
     for link,resultObj in lookaheadFeatures.iteritems():
         webdomain = 'n/a'
@@ -409,7 +421,8 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
             else:
                 tangelo.log("KeyError. ignoring link: "+link)
 
-
+    #t2 = time.time()
+    #tangelo.log("PROCESSED GRAPH IN "+str(t2-t1))
     entityDataConnector.close()
     return {'nodes':nodes,'edges':edges}
 

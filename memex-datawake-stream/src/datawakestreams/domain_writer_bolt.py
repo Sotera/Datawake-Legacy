@@ -50,7 +50,7 @@ class DomainWriterBolt(Bolt):
         domainValues = self.connector.get_domain_entity_matches( context['domain'], attribute, [value])
         if len(domainValues) > 0:
             self.connector.insert_domain_entities( context['domain'],context['url'],attribute,domainValues)
-            self.log("WROTE to DOMAIN attribute: "+attribute+" value: "+value)
+            #self.log("WROTE to DOMAIN attribute: "+attribute+" value: "+value)
 
 
 
