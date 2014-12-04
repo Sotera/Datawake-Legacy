@@ -35,68 +35,52 @@ def get_domains(*args):
     return json.dumps(map(lambda x: dict(name=x[0], description=x[1]), domains))
 
 
-def get_preview(*args, **kwargs):
+def get_preview(domain):
     domain_content_connector = factory.get_entity_data_connector()
     try:
-        name = kwargs.get("domain")
-        data = domain_content_connector.get_domain_items(name, 10)
+        data = domain_content_connector.get_domain_items(domain, 10)
         return json.dumps(data)
     finally:
         domain_content_connector.close()
 
 
 def valid_domain_line(line):
-    if '\0' not in line:
-        return True
-    else:
-        return False
+    return '\0' not in line
 
 
 def finished_database_upload(*args):
     if not completed_threads.empty():
         return json.dumps(completed_threads.get())
-    else:
-        return json.dumps(dict(complete=False))
+    return json.dumps(dict(complete=False))
 
 
-def upload_file(*args, **kwargs):
+def upload_file(file_upload, name, description):
     domain_content_connector = factory.get_entity_data_connector()
     try:
-        domain_file = kwargs.get("file_upload")
-        domain_name = kwargs.get("name")
-        domain_description = kwargs.get("description")
-        if not db.domain_exists(domain_name):
-            if domain_file is not None:
+        if not db.domain_exists(name):
+            if file_upload is not None:
                 tangelo.log("read domain file")
-                domain_file_lines = domain_file.file.readlines()
-                domain_file_lines = map(lambda x: x.strip().replace('\0',''), domain_file_lines)
-                db.add_new_domain(domain_name, domain_description)
+                domain_file_lines = file_upload.file.readlines()
+                domain_file_lines = map(lambda x: x.strip().replace('\0', ''), domain_file_lines)
+                db.add_new_domain(name, description)
                 rowkeys = []
                 for line in domain_file_lines:
-                    i = line.index(',')   # split on the first comma
+                    i = line.index(',')  # split on the first comma
                     type = line[:i]
-                    value = line[i+1:]
-                    if type[0] == '"' and type[len(type)-1] == '"': type = type[1:-1]
-                    if value[0] == '"' and value[len(value)-1] == '"': value = value[1:-1]
-                    rowkeys.append( domain_name+'\0'+type+'\0'+value )
+                    value = line[i + 1:]
+                    if type[0] == '"' and type[len(type) - 1] == '"': type = type[1:-1]
+                    if value[0] == '"' and value[len(value) - 1] == '"': value = value[1:-1]
+                    rowkeys.append("%s\0%s\0%s" % (name, type, value))
                 result = domain_content_connector.add_new_domain_items(rowkeys)
                 return json.dumps(dict(success=result))
-            else:
-                return json.dumps(dict(success=False))
-        else:
             return json.dumps(dict(success=False))
+        return json.dumps(dict(success=False))
     finally:
         domain_content_connector.close()
 
 
-def upload_database_threaded(**kwargs):
+def upload_database_threaded(domain_name, connection_string, domain_description, table_name, attribute_column, value_column):
     domain_content_connector = factory.get_entity_data_connector()
-    domain_name = kwargs.get("domain_name")
-    connection_string = kwargs.get("connection_string")
-    domain_description = kwargs.get("domain_description")
-    table_name = kwargs.get("table_name")
-    attribute_column = kwargs.get("attribute_column")
-    value_column = kwargs.get("value_column")
     connector = ConnectorUtil.get_database_connector(connection_string, table_name, attribute_column, value_column)
     rows = connector.get_domain_items()
     success = domain_content_connector.add_new_domain_items(map(lambda items: "%s\0%s\0%s" % (domain_name, items[0], items[1]), rows))
@@ -104,30 +88,24 @@ def upload_database_threaded(**kwargs):
     completed_threads.put(complete_dict)
 
 
-def upload_database(*args, **kwargs):
-    domain_name = kwargs.get("domain_name")
-    domain_description = kwargs.get("domain_description")
+def upload_database(domain_name, domain_description):
     if not db.domain_exists(domain_name):
         db.add_new_domain(domain_name, domain_description)
+        kwargs = dict(domain_name=domain_name, domain_description=domain_description)
         database_upload_thread = threading.Thread(target=upload_database_threaded, kwargs=kwargs)
         database_upload_thread.daemon = True
         database_upload_thread.start()
-        return {'success': True}
-    else:
-        return {'success': False}
+        return json.dumps(dict(success=True))
+    return json.dumps(dict(success=False))
 
 
-def delete_domain(*args, **kwargs):
-    domain_name = kwargs.get("domain_name")
-    for key in kwargs.keys():
-        tangelo.log(key)
+def delete_domain(domain_name):
     if db.domain_exists(domain_name):
         domain_content_connector = factory.get_entity_data_connector()
         db.remove_domain(domain_name)
         domain_content_connector.delete_domain_items(domain_name)
         return json.dumps(dict(success=True))
-    else:
-        return json.dumps(dict(success=False))
+    return json.dumps(dict(success=False))
 
 
 get_actions = {
@@ -148,7 +126,7 @@ def post(action, *args, **kwargs):
     def unknown(*args):
         return tangelo.HTTPStatusCode(400, "invalid service call")
 
-    return post_actions.get(action, unknown)(*args, **kwargs)
+    return post_actions.get(action, unknown)(**kwargs)
 
 
 @tangelo.restful

@@ -50,7 +50,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 function highlightText(request, sender, sendResponse) {
     var entities_in_domain = request.entities_in_domain;
     if (entities_in_domain.length > 0) {
-        chrome.runtime.sendMessage({operation: "get-external-links"}, function (links) {
+        chrome.runtime.sendMessage({operation: "get-external-links"}, function (data) {
+            var links = data.links
             $.each(entities_in_domain, function (index, e) {
                 var i = index;
                 var entity = {};
@@ -58,6 +59,7 @@ function highlightText(request, sender, sendResponse) {
                 entity.type = e.type.trim();
                 $('body').highlight(entity.name, 'datawake-highlight-' + i);
 
+                console.log(links)
                 if (links.length > 0) {
                     var content = '<div> <h4>' + entity.type + ":" + entity.name + '</h4>';
                     $.each(links, function (index, linkObj) {

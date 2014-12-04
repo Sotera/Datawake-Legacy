@@ -17,21 +17,22 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
     });
 
     addon.port.on("sendUserInfo", function (user) {
-        if (!user.hasOwnProperty("session")) {
-            $scope.user = user;
-            $scope.hideSignInButton = true;
-            $scope.$apply();
-        }
+        $scope.user = user;
+        $scope.hideSignInButton = true;
+        $scope.$apply();
+
     });
 
     addon.port.on("authType", function (auth) {
         $scope.auth = auth;
         if (auth.type == 2) {
             $scope.signIn();
+        } else {
+            $scope.$apply();
         }
     });
 
-    addon.port.on("versionNumber", function(version){
+    addon.port.on("versionNumber", function (version) {
         $scope.versionNumber = version;
         $scope.$apply();
     });
@@ -78,10 +79,10 @@ newTabApp.controller("NewTabCtrl", function ($scope) {
         sendDatawakeInformation();
     };
 
-    $scope.enterKeyEvent = function(keyObject){
-      if(keyObject.keyCode == 13){
-          $scope.createNewTrail();
-      }
+    $scope.enterKeyEvent = function (keyObject) {
+        if (keyObject.keyCode == 13) {
+            $scope.createNewTrail();
+        }
     };
 
     $scope.domainChanged = function (domain) {

@@ -6,10 +6,10 @@
     "author": "",
     "license": "MPL 2.0",
     "lib": "base",
-    "version": "0.1",
+    "version": "0.5",
     "permissions": {
         "private-browsing": true,
-        "cross-domain-content": ["http://localhost:8088"]
+        "cross-domain-content": ["http://192.168.59.103"]
     },
     "preferences": [
         {

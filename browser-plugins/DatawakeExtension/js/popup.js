@@ -72,7 +72,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function getDomainAndTrail() {
-        chrome.tabs.query({active: true}, function (tabs) {
+        chrome.tabs.query({active: true,currentWindow: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (response) {
                 $scope.trail = response.trail;
                 $scope.domain = response.domain;
@@ -83,7 +83,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function fetchEntities(delay) {
-        chrome.tabs.query({active: true}, function (tabs) {
+        chrome.tabs.query({active: true ,currentWindow: true}, function (tabs) {
             var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/visited/entities";
             var domain = chrome.extension.getBackgroundPage().dwState.tabToDomain[tabs[0].id];
             var tabUrl = tabs[0].url;
@@ -122,7 +122,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function setUrlRank(rank) {
-        chrome.tabs.query({active: true}, function (tabs) {
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (response) {
                 var data = JSON.stringify({
                     trailname: response.trail,
@@ -142,7 +142,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function getUrlRank() {
-        chrome.tabs.query({active: true}, function (tabs) {
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (domainSpecificInformation) {
                 var rank_url = domainSpecificInformation.rankUrl + "/get";
                 $scope.current_url = tabs[0].url;

@@ -33,7 +33,7 @@ function interactiveSignIn(callback) {
 
     var handler = OAuthConsumer.getAuthorizer(p, tokenCallback);
     try {
-        handler.startAuthentication();
+        handler.getUserAuthorization();
     } catch (e) {
         console.error("The Google parameters are incorrect.");
         console.error(e);

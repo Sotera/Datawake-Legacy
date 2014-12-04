@@ -46,7 +46,10 @@ body {
 
 
 
-
+.highlighed_verts_dialog {
+    max-height: 300px;
+    overflow-y: scroll;
+}
 
 
 

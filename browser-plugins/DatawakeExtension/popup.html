@@ -25,12 +25,18 @@
 <body ng-controller="PopUpCtrl">
 <div class="container" style="margin-top: 10px">
     <div ng-hide="invalidTab">
+
+
         <table class="table table-bordered">
             <tbody>
             <tr>
                 <td>
-                    <b>User:</b> {{user.displayName}}
+                    <div id="user_info">{{user.displayName}}</div>
+                    <button id="signin">Sign in</button>
+                    <button id="revoke">Sign out</button>
                 </td>
+
+
                 <td>
                     <b>Org:</b> {{org}}
                 </td>
@@ -114,7 +120,7 @@
                                 <th>
                                     <span>{{type}}</span>
                                 </th>
-                                <th>
+                                <th colspan=42>
                                     External Tools
                                 </th>
                                 <th>

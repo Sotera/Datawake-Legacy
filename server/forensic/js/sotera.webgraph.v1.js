@@ -324,10 +324,13 @@ var SWG = (function() {
     }
     
     $("#dialog").dialog().dialog("close")
-    d3.select("#dialog").selectAll("table").remove()
+    d3.select("#dialog").selectAll("div").remove()
     $("#dialog").dialog().dialog('option','position',[100,100])
-	var rows = d3.select("#dialog")
-	  .append("table").attr("border","1")
+    var rows = d3.select("#dialog")
+        .append("div")
+        .attr("class","highlighed_verts_dialog")
+	  .append("table")
+        .attr("border","1")
 	  .selectAll("tr")
 	  .data(data).enter()
 	    .append("tr")

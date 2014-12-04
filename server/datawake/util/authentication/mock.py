@@ -11,7 +11,7 @@ class MockAuthentication(Authentication):
         return dict(displayName='John Doe', emails=[dict(value='john.doe@nomail.none')])
 
     def get_user_from_token(self):
-        return self.get_user(None)
+        return self.get_user('123456')
 
     def validate_token(self):
         return '0', '0', int(time.time()) + 300
