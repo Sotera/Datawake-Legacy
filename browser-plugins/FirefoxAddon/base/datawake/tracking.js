@@ -11,7 +11,10 @@ var selectionHelper = require("./selections");
 
 exports.trackTab = trackTab;
 exports.emitHighlightTextToTabWorker = emitHighlightTextToTabWorker;
+exports.highlightTrailEntities = highlightTrailEntities;
+exports.hideSelections = hideSelections;
 exports.highlightTextWithToolTips = highlightTextWithToolTips;
+exports.promptForExtractedFeedback = promptForExtractedFeedback;
 exports.isTabWorkerAttached = isTabWorkerAttached;
 
 /**
@@ -42,6 +45,26 @@ function trackTab(tab, datawakeInfo) {
         tab.removeListener('close', close);
         widgetHelper.resetIcon();
     }
+}
+
+function promptForExtractedFeedback(highlightedText, callback){
+    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+    var obj = {};
+    obj.raw_text = highlightedText;
+    currentTrackingTabWorker.port.emit("promptForFeedback", obj);
+    currentTrackingTabWorker.port.on("feedback", function(response){
+       callback(response.type, response.value);
+    });
+}
+
+function hideSelections(className){
+    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+    currentTrackingTabWorker.port.emit("removeSelections", className);
+}
+
+function highlightTrailEntities(entities){
+    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+    currentTrackingTabWorker.port.emit("highlightTrailEntities", entities);
 }
 
 /**

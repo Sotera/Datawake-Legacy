@@ -35,11 +35,30 @@ addon.port.on("loadToolTips", function (urls) {
     }
 });
 
+addon.port.on("removeSelections", function(className){
+    $("body").removeHighlight(className);
+});
+
 
 addon.port.on("highlight", function (selectionObject) {
-    for (var index in selectionObject.selections) {
-        $('body').highlight(selectionObject.selections[index]);
-    }
+    $.each(selectionObject.selections, function(index, item){
+        $('body').highlight(item, "selections");
+    });
+});
+
+addon.port.on("highlightTrailEntities", function(trailEntities){
+    $.each(trailEntities, function(index, entity){
+        $("body").highlight(entity, "trailentities");
+    });
+});
+
+addon.port.on("promptForFeedback", function(obj){
+    var extractedValue = prompt("What should have been extracted?", obj.raw_text);
+    var type = prompt("What type of entity is this? (phone, email, etc)");
+    var response = {};
+    response.type = type;
+    response.value = extractedValue;
+    addon.port.emit("feedback", response);
 });
 
 addon.port.on("highlightWithToolTips", function (helperObject) {
