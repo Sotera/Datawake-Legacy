@@ -28,6 +28,7 @@
 		"activityLogger":true,
 		"console":true,
 		"path":true,
-		"alert":true
+		"alert":true,
+		"GraphJS":true
 	}
 }
