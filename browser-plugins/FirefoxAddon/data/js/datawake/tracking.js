@@ -35,11 +35,21 @@ addon.port.on("loadToolTips", function (urls) {
     }
 });
 
+addon.port.on("removeSelections", function(className){
+    $("body").removeHighlight(className);
+});
+
 
 addon.port.on("highlight", function (selectionObject) {
-    for (var index in selectionObject.selections) {
-        $('body').highlight(selectionObject.selections[index]);
-    }
+    $.each(selectionObject.selections, function(index, item){
+        $('body').highlight(item, "selections");
+    });
+});
+
+addon.port.on("highlightTrailEntities", function(trailEntities){
+    $.each(trailEntities, function(index, entity){
+        $("body").highlight(entity, "trailentities");
+    });
 });
 
 addon.port.on("promptForFeedback", function(obj){

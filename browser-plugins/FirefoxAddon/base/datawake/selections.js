@@ -27,10 +27,12 @@ function useContextMenu(tab) {
             contentScriptFile: data.url("js/datawake/selections.js"),
             context: contextMenu.URLContext(url),
             items: [
-                contextMenu.Item({ label: "Selection", data: "selection", context: contextMenu.SelectionContext()}),
-                contextMenu.Item({ label: "Highlight All Selections", data: "highlight"}),
+                contextMenu.Item({ label: "Capture Selection", data: "selection", context: contextMenu.SelectionContext()}),
+                contextMenu.Item({ label: "Report Extraction Error", data: "feedback", context: contextMenu.SelectionContext()}),
                 contextMenu.Separator(),
-                contextMenu.Item({ label: "Report Extraction Error", data: "feedback", context: contextMenu.SelectionContext()})
+                contextMenu.Item({ label: "Hide Selections", data: "hide"}),
+                contextMenu.Item({ label: "Show Selections", data: "highlight"}),
+
             ],
             onMessage: function (message) {
                 var tabId = tabs.activeTab.id;
@@ -45,10 +47,17 @@ function useContextMenu(tab) {
                     case "feedback":
                         saveFeedback(message.text, tabs.activeTab.url, datawakeInfo.domain.name);
                         break;
+                    case "hide":
+                        hideSelections("selections");
+                        break;
                 }
             }
         });
     }
+}
+
+function hideSelections(className) {
+    tracking.hideSelections(className);
 }
 
 /**

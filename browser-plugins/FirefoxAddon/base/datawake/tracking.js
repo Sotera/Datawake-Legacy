@@ -11,6 +11,8 @@ var selectionHelper = require("./selections");
 
 exports.trackTab = trackTab;
 exports.emitHighlightTextToTabWorker = emitHighlightTextToTabWorker;
+exports.highlightTrailEntities = highlightTrailEntities;
+exports.hideSelections = hideSelections;
 exports.highlightTextWithToolTips = highlightTextWithToolTips;
 exports.promptForExtractedFeedback = promptForExtractedFeedback;
 exports.isTabWorkerAttached = isTabWorkerAttached;
@@ -51,6 +53,16 @@ function promptForExtractedFeedback(highlightedText, callback){
     currentTrackingTabWorker.port.on("feedback", function(response){
        callback(response.type, response.value);
     });
+}
+
+function hideSelections(className){
+    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+    currentTrackingTabWorker.port.emit("removeSelections", className);
+}
+
+function highlightTrailEntities(entities){
+    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+    currentTrackingTabWorker.port.emit("highlightTrailEntities", entities);
 }
 
 /**
