@@ -4,10 +4,12 @@ import tangelo
 
 import datawake.util.db.datawake_mysql as db
 import datawake.util.session.helper as session_helper
+from datawake.util.validate.parameters import required_parameters
 
 
 @session_helper.is_in_session
-def bad_extraction(entity_type, entity_value, domain):
+@required_parameters(['entity_type', 'entity_value', 'domain'])
+def invalid_extraction(entity_type, entity_value, domain):
     user = session_helper.get_user()
     user_name = user.get_user_name()
     org = session_helper.get_org()
@@ -16,6 +18,7 @@ def bad_extraction(entity_type, entity_value, domain):
 
 
 @session_helper.is_in_session
+@required_parameters(['raw_text', 'entity_type', 'entity_value', 'url', 'domain'])
 def good_extraction(raw_text, entity_type, entity_value, url, domain):
     org = session_helper.get_org()
     success = db.add_extractor_feedback(org, domain, raw_text, entity_type, entity_value, url) == 0
@@ -23,6 +26,7 @@ def good_extraction(raw_text, entity_type, entity_value, url, domain):
 
 
 @session_helper.is_in_session
+@required_parameters(['url', 'domain'])
 def fetch_entities(domain, url):
     org = session_helper.get_org()
     entities = db.get_feedback_entities(org, domain, url)
@@ -30,6 +34,7 @@ def fetch_entities(domain, url):
 
 
 @session_helper.is_in_session
+@required_parameters(['domain'])
 def marked_entities(domain):
     user = session_helper.get_user()
     user_name = user.get_user_name()
@@ -40,7 +45,7 @@ def marked_entities(domain):
 
 post_actions = {
     "marked": marked_entities,
-    "bad": bad_extraction,
+    "bad": invalid_extraction,
     "good": good_extraction,
     "entities": fetch_entities
 }
