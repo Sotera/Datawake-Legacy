@@ -1,4 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/graph', '../graph/linkType','../layout/layout','../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager'], function(graphTemplate,events,TrailGraphService,Graph,LINK_TYPE,Layout,testData,ForensicColumnLayout,ForensicGroupingManager) {
+define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager'], function(graphTemplate,events,TrailGraphService,testData,ForensicColumnLayout,ForensicGroupingManager) {
 
 
 	var DEFAULT_NODE_RADIUS = 20;
@@ -28,7 +28,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 	 */
 	GraphView.prototype._initialize = function(element,context) {
 		this._jqCanvas = $(graphTemplate(context));
-		this._graph = new Graph()
+		this._graph = new GraphJS.Graph()
 			.canvas(this._jqCanvas[0])
 			.groupingManager(new ForensicGroupingManager())
 			.pannable()
@@ -186,7 +186,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 				source : nodes[i],
 				target : nodes[i+1],
 				strokeStyle : '#343434',
-				type: LINK_TYPE.ARROW
+				type: GraphJS.LINK_TYPE.ARROW
 			};
 			links.push(link);
 		}
@@ -233,7 +233,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../graph/
 					source : browsePathNode,
 					target : node,
 					strokeStyle : '#343434',
-					type: LINK_TYPE.LINE
+					type: GraphJS.LINK_TYPE.LINE
 				};
 				links.push(link);
 				nodeIndex++;
