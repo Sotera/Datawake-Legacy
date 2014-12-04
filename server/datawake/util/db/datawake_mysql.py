@@ -101,7 +101,6 @@ TABLES['starred_features'] = """
     )
 """
 
-
 TABLES['datawake_url_rank'] = """
    CREATE TABLE datawake_url_rank (
     id INT NOT NULL AUTO_INCREMENT,
@@ -116,7 +115,6 @@ TABLES['datawake_url_rank'] = """
 )
 """
 
-
 TABLES['datawake_domain_entities'] = """
     CREATE TABLE datawake_domain_entities (
       rowkey varchar(1024),
@@ -124,7 +122,6 @@ TABLES['datawake_domain_entities'] = """
     )
 
 """
-
 
 TABLES['general_extractor_web_index'] = """
     CREATE TABLE general_extractor_web_index (
@@ -171,7 +168,7 @@ def get_cnx():
     pw = dbconfig.DATAWAKE_CORE_DB['password']
     host = dbconfig.DATAWAKE_CORE_DB['host']
     port = dbconfig.DATAWAKE_CORE_DB['port']
-    return mysql.connector.connect(user=user, password=pw, host=host, database=db,port=port)
+    return mysql.connector.connect(user=user, password=pw, host=host, database=db, port=port)
 
 
 #
@@ -204,7 +201,7 @@ def dbGetRows(sql, params):
         cursor.close()
 
 
-####   BROWSE PATH SCRAPE  ###
+# ###   BROWSE PATH SCRAPE  ###
 
 
 #
@@ -226,6 +223,7 @@ def get_post_id(url):
         return -1
     return rows[0][0]
 
+
 #
 # Get a post from the posts table (datwake_data)
 #
@@ -245,7 +243,7 @@ def getBrowsePathData(org, id, domain='default'):
 
 
 #
-#  Get all time stamps from the selected trail,users,org
+# Get all time stamps from the selected trail,users,org
 #  returns a dictionary of the form  {'min':0,'max':0,'data':[]}
 #
 def getTimeWindow(org, users, trail='*', domain='default'):
@@ -422,7 +420,6 @@ def get_active_trail_names(org, domain='default'):
     sql = "Select distinct(trail) from datawake_data where org = %s AND domain = %s "
     params = [org.upper(), domain]
     trails = dbGetRows(sql, params)
-    trails = cursor.fetchall()
     trails = map(lambda x: x[0], trails)
     trails = filter(lambda x: x is not None and x != '', trails)
     return trails
@@ -458,43 +455,37 @@ def getTrailsWithUserCounts(org):
     return map(lambda x: {'domain': x[0], 'trail': x[1], 'userCount': x[2], 'records': x[3]}, rows)
 
 
-
-
 #
 # Star a feature for a given trail
 #
-def starFeatureForTrail(org,trail,type,value):
+def starFeatureForTrail(org, trail, type, value):
     sql = "INSERT INTO starred_features (org,trail,type,value) VALUES(%s,%s,%s,%s)"
-    params = [org,trail,type,value]
-    dbCommitSQL(sql,params)
+    params = [org, trail, type, value]
+    dbCommitSQL(sql, params)
 
 
 #
 # un star a feature for a given trail
 #
-def unStarFeatureForTrail(org,trail,type,value):
+def unStarFeatureForTrail(org, trail, type, value):
     sql = "DELETE FROM starred_features WHERE org = %s and trail = %s and type = %s and value = %s"
-    params = [org,trail,type,value]
-    dbCommitSQL(sql,params)
+    params = [org, trail, type, value]
+    dbCommitSQL(sql, params)
 
 
 #
 # Return list of starred features for a trail
 #
-def getStarredFeaturesForTrail(org,trail):
+def getStarredFeaturesForTrail(org, trail):
     sql = "SELECT type,value FROM starred_features WHERE trail = %s and org = %s"
-    params = [trail,org]
-    rows = dbGetRows(sql,params)
+    params = [trail, org]
+    rows = dbGetRows(sql, params)
     tangelo.log(sql)
     tangelo.log(str(params))
     if len(rows) == 0:
         return []
     else:
-        return map(lambda x: {'type':x[0],'value':x[1]}, rows)
-
-
-
-
+        return map(lambda x: {'type': x[0], 'value': x[1]}, rows)
 
 
 ####   URL RANKS   ####
@@ -613,6 +604,33 @@ def domain_exists(name):
     result = dbGetRows(sql, [name])
     rows = map(lambda x: x[0], result)
     return rows[0] == 1
+
+def add_extractor_feedback(domain, raw_text, entity_type, entity_value, url):
+    sql = "insert into scraping_feedback(domain, raw_text, entity_type, entity_value, url) value (%s,%s,%s,%s,%s)"
+    return dbCommitSQL(sql, [domain, raw_text, entity_type, entity_value, url])
+
+
+def get_feedback_entities(domain, url):
+    sql = "select entity_type, entity_value from scraping_feedback where url=%s and domain=%s"
+    params = [url, domain]
+    rows = dbGetRows(sql, params)
+    return map(lambda x: dict(type=x[0], value=x[1]), rows)
+
+
+def get_invalid_extracted_entity_count(user_name, entity_type, entity_value, domain):
+    sql = "select count(*) from invalid_extracted_entity where userName=%s and entity_type=%s and entity_value=%s and domain=%s"
+    params = [user_name, entity_type, entity_value, domain]
+    return dbGetRows(sql, params)[0][0]
+
+
+def mark_invalid_extracted_entity(user_name, entity_type, entity_value, domain):
+    count = get_invalid_extracted_entity_count(user_name, entity_type, entity_value, domain)
+    if count == 0:
+        params = [user_name, entity_type, entity_value, domain]
+        sql = "insert into invalid_extracted_entity(userName, entity_type, entity_value, domain) value (%s,%s,%s,%s)"
+        return dbCommitSQL(sql, params)
+    else:
+        return -1
 
 
 #### OLD STUFF, needs cleaned and updated ####

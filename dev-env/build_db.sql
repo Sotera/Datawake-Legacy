@@ -118,7 +118,7 @@ CREATE TABLE domain_extractor_runtimes (
 DROP TABLE IF EXISTS scraping_feedback;
 CREATE TABLE scraping_feedback (
   entity_type varchar(100),
-  entity_value varchar(100),
+  entity_value varchar(1024),
   raw_text varchar (100),
   url TEXT,
   domain varchar (300),
@@ -127,7 +127,7 @@ CREATE TABLE scraping_feedback (
 
 DROP TABLE IF EXISTS invalid_extracted_entity;
 CREATE TABLE invalid_extracted_entity (
-  entity_value varchar (100),
+  entity_value varchar (1024),
   entity_type varchar (100),
   domain varchar (300),
   userName TEXT,

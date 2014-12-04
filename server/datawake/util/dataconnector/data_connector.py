@@ -65,12 +65,3 @@ class DataConnector:
 
     def add_new_domain_items(self, domain_items):
         raise NotImplementedError("Implement add_new_domain_items()")
-
-    def add_extractor_feedback(self, domain, raw_text, entity_type, entity_value, url):
-        raise NotImplementedError("Implement add_extractor_feedback()")
-
-    def get_feedback_entities(self, domain, url):
-        raise NotImplementedError("Implement get_feedback_entities()")
-
-    def mark_invalid_extracted_entity(self, user_name, entity_type, entity_value, domain):
-        raise NotImplementedError("Implement mark_invalid_extracted_entity()")
