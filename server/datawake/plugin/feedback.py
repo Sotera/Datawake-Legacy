@@ -29,7 +29,17 @@ def fetch_entities(domain, url):
     return json.dumps(dict(entities=entities))
 
 
+@session_helper.is_in_session
+def marked_entities(domain):
+    user = session_helper.get_user()
+    user_name = user.get_user_name()
+    org = session_helper.get_org()
+    marked_entities_list = db.get_marked_entities(org, domain, user_name)
+    return json.dumps(dict(marked_entities=marked_entities_list))
+
+
 post_actions = {
+    "marked": marked_entities,
     "bad": bad_extraction,
     "good": good_extraction,
     "entities": fetch_entities

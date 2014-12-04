@@ -633,6 +633,12 @@ def mark_invalid_extracted_entity(user_name, entity_type, entity_value, domain, 
     else:
         return -1
 
+def get_marked_entities(org, domain, user_name):
+    sql = "select entity_value from invalid_extracted_entity where org=%s and domain=%s and userName=%s"
+    params = [org, domain, user_name]
+    rows = dbGetRows(sql, params)
+    return map(lambda x: dict(value=x[0]), rows)
+
 
 #### OLD STUFF, needs cleaned and updated ####
 

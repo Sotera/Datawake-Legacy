@@ -180,8 +180,10 @@ function onToggle(state) {
         //Get the rank info and listen for someone ranking the page.
         emitFeedbackEntities(datawakeInfo.domain.name);
         emitRanks(datawakeInfo);
+        emitMarkedEntities(datawakeInfo.domain.name);
         mainPanel.port.on("setUrlRank", setUrlRank);
         mainPanel.port.on("openExternalLink", openExternalTool);
+        mainPanel.show({position: datawakeButton});
         mainPanel.port.on("markInvalid", markInvalid);
     }
     else {
@@ -196,11 +198,19 @@ function onToggle(state) {
  * Marks an entity as in valid
  * @param entity Object(entity_value, entity_type, domain)
  */
-function markInvalid(entity){
+function markInvalid(entity) {
     var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/bad";
     requestHelper.post(post_url, JSON.stringify(entity), function (response) {
-        if(response.json.success)
-            mainPanel.port.emit("marked", entity.entity_value);
+        mainPanel.port.emit("marked", entity.value);
+    });
+}
+
+function emitMarkedEntities(domain) {
+    var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/marked";
+    requestHelper.post(post_url, JSON.stringify({domain: domain}), function (response) {
+        var marked_entities = response.json.marked_entities;
+        for (var index in marked_entities)
+            mainPanel.port.emit("marked", marked_entities[index].value);
     });
 }
 
@@ -208,7 +218,7 @@ function markInvalid(entity){
  * Emits feedback entities
  * @param domain domainName
  */
-function emitFeedbackEntities(domain){
+function emitFeedbackEntities(domain) {
     var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/entities";
     var post_data = JSON.stringify({
         domain: domain,
@@ -349,11 +359,11 @@ function switchToTab(tabId, datawakeInfo, badgeCount) {
         getAllEntities(1000);
     }
 }
-function activeIcon(){
+function activeIcon() {
     datawakeButton.icon = data.url("img/waveicon38.png");
 }
 
-function resetIcon(){
+function resetIcon() {
     datawakeButton.icon = data.url("img/waveicon38_bw.png");
 }
 
@@ -366,9 +376,9 @@ function cleanUpTab(tabId) {
     deleteBadgeForTab(tabId);
 }
 
-tabs.on("activate", function(tab){
+tabs.on("activate", function (tab) {
     var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
-    if(datawakeInfoForTab != null && datawakeInfoForTab.isDatawakeOn){
+    if (datawakeInfoForTab != null && datawakeInfoForTab.isDatawakeOn) {
         activeIcon();
     } else {
         resetIcon();
