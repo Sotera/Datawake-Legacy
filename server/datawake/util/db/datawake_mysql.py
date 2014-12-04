@@ -244,7 +244,7 @@ def getBrowsePathData(org, id, domain='default'):
 
 #
 # Get all time stamps from the selected trail,users,org
-#  returns a dictionary of the form  {'min':0,'max':0,'data':[]}
+# returns a dictionary of the form  {'min':0,'max':0,'data':[]}
 #
 def getTimeWindow(org, users, trail='*', domain='default'):
     sql = 'SELECT unix_timestamp(ts) as ts from datawake_data WHERE org = %s AND domain = %s '
@@ -605,29 +605,30 @@ def domain_exists(name):
     rows = map(lambda x: x[0], result)
     return rows[0] == 1
 
-def add_extractor_feedback(domain, raw_text, entity_type, entity_value, url):
-    sql = "insert into scraping_feedback(domain, raw_text, entity_type, entity_value, url) value (%s,%s,%s,%s,%s)"
-    return dbCommitSQL(sql, [domain, raw_text, entity_type, entity_value, url])
+
+def add_extractor_feedback(org, domain, raw_text, entity_type, entity_value, url):
+    sql = "insert into scraping_feedback(org, domain, raw_text, entity_type, entity_value, url) value (%s,%s,%s,%s,%s,%s)"
+    return dbCommitSQL(sql, [org, domain, raw_text, entity_type, entity_value, url])
 
 
-def get_feedback_entities(domain, url):
-    sql = "select entity_type, entity_value from scraping_feedback where url=%s and domain=%s"
-    params = [url, domain]
+def get_feedback_entities(org, domain, url):
+    sql = "select entity_type, entity_value from scraping_feedback where url=%s and domain=%s and org=%s"
+    params = [url, domain, org]
     rows = dbGetRows(sql, params)
     return map(lambda x: dict(type=x[0], value=x[1]), rows)
 
 
-def get_invalid_extracted_entity_count(user_name, entity_type, entity_value, domain):
-    sql = "select count(*) from invalid_extracted_entity where userName=%s and entity_type=%s and entity_value=%s and domain=%s"
-    params = [user_name, entity_type, entity_value, domain]
+def get_invalid_extracted_entity_count(user_name, entity_type, entity_value, domain, org):
+    sql = "select count(*) from invalid_extracted_entity where userName=%s and entity_type=%s and entity_value=%s and domain=%s and org=%s"
+    params = [user_name, entity_type, entity_value, domain, org]
     return dbGetRows(sql, params)[0][0]
 
 
-def mark_invalid_extracted_entity(user_name, entity_type, entity_value, domain):
-    count = get_invalid_extracted_entity_count(user_name, entity_type, entity_value, domain)
+def mark_invalid_extracted_entity(user_name, entity_type, entity_value, domain, org):
+    count = get_invalid_extracted_entity_count(user_name, entity_type, entity_value, domain, org)
     if count == 0:
-        params = [user_name, entity_type, entity_value, domain]
-        sql = "insert into invalid_extracted_entity(userName, entity_type, entity_value, domain) value (%s,%s,%s,%s)"
+        params = [user_name, entity_type, entity_value, domain, org]
+        sql = "insert into invalid_extracted_entity(userName, entity_type, entity_value, domain, org) value (%s,%s,%s,%s,%s)"
         return dbCommitSQL(sql, params)
     else:
         return -1
