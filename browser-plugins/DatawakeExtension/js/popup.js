@@ -14,7 +14,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.versionNumber = chrome.runtime.getManifest().version;
     $scope.invalid = {};
 
-    $scope.addLookaheadLink = function (link) {
+    function addLookaheadLink(link) {
         var inLookahead = false;
         for (var index in $scope.lookaheadLinks) {
             if ($scope.lookaheadLinks.hasOwnProperty(index) && $scope.lookaheadLinks[index].url == link.url) {
@@ -24,7 +24,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         }
         if (!inLookahead)
             $scope.lookaheadLinks.push(link);
-    };
+    }
 
 
     function linkLookahead(tabUrl, extractedLinks, index, domain, delay) {
@@ -33,7 +33,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         popUpService.post(post_url, jsonData).then(function (response) {
             var objectReturned;
             if (objectReturned = response.matches.length > 0 || response.domain_search_matches.length > 0) {
-                $scope.addLookaheadLink(response);
+                addLookaheadLink(response);
                 extractedLinks.splice(index, 1);
                 if (index >= extractedLinks.length) {
                     index = 0;
@@ -244,7 +244,7 @@ popUpControllers.controller("FeedbackCtrl", function ($scope, popUpService) {
 
 });
 
-popUpControllers.controller('LookaheadCtrl', function ($scope, $timeout, popUpService) {
+popUpControllers.controller('LookaheadCtrl', function ($scope) {
     $scope.lookaheadLinks = $scope.$parent.lookaheadLinks;
     $scope.lookaheadStarted = false;
     $scope.lookaheadEnabled = chrome.extension.getBackgroundPage().onOff.lookahead;
