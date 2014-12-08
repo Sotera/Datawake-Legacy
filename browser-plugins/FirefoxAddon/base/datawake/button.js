@@ -135,7 +135,7 @@ function useButton() {
         onClick: onToggle
     });
 
-    setupTimerListeners();
+    setupListeners();
 }
 
 /**
@@ -155,13 +155,17 @@ function overrideActiveTab() {
 /**
  * Sets up the timer for the lookahead.
  */
-function setupTimerListeners() {
+function setupListeners() {
     try {
 
         mainPanel.port.on("startLookaheadTimer", function (lookaheadTimerObject) {
             var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
             startLookaheadTimer(datawakeInfo, lookaheadTimerObject.links, 0, 1000);
         });
+
+        mainPanel.port.on("setUrlRank", setUrlRank);
+        mainPanel.port.on("openExternalLink", openExternalTool);
+        mainPanel.port.on("markInvalid", markInvalid);
     } catch (e) {
         console.error(e.name + " : " + e.message);
     }
@@ -181,10 +185,8 @@ function onToggle(state) {
         emitFeedbackEntities(datawakeInfo.domain.name);
         emitRanks(datawakeInfo);
         emitMarkedEntities(datawakeInfo.domain.name);
-        mainPanel.port.on("setUrlRank", setUrlRank);
-        mainPanel.port.on("openExternalLink", openExternalTool);
+
         mainPanel.show({position: datawakeButton});
-        mainPanel.port.on("markInvalid", markInvalid);
     }
     else {
         //Emit that it is not a valid tab.
