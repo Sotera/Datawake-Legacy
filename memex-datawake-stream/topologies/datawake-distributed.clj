@@ -2,7 +2,7 @@
 (:use     [streamparse.specs])
 (:gen-class))
 
-(defn test1 [options]
+(defn datawake-distributed [options]
 
 [
     ;; spout configuration
