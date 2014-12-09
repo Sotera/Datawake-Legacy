@@ -9,7 +9,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.lookaheadEnabled = chrome.extension.getBackgroundPage().onOff.lookahead;
     $scope.showRanking = chrome.extension.getBackgroundPage().onOff.ranking;
     $scope.showDomainFeatures = chrome.extension.getBackgroundPage().onOff.domain_features;
-
+    $scope.popupHeader = "partials/popup-header-partial.html";
     $scope.current_url = "";
     $scope.versionNumber = chrome.runtime.getManifest().version;
     $scope.invalid = {};
