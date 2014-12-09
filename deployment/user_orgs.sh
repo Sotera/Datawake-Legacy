@@ -1,17 +1,6 @@
 #!/bin/bash
 
-
-# image name
-IMAGE=datawake-appserver
-
-# set you connection info here
-
-DW_DB=memex_sotera
-DW_DB_USER=dw
-DW_DB_PASSWORD=memex
-DW_DB_HOST=172.21.10.117
-DW_DB_PORT=3306
-
+source config.sh
 
 echo "$#"
 if [ $# -lt 2 ]

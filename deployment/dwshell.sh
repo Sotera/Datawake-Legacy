@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# image name
-IMAGE=datawake-appserver
-CONTAINER=datawake-appserver-1
 
 source config.sh
 

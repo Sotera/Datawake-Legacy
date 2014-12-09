@@ -1,5 +1,7 @@
 #! /bin/bash
 
+IMAGE=datawake-appserver
+CONTAINER=datawake-appserver-1
 EXPOSED_PORT=
 DW_DB=
 DW_DB_USER=
