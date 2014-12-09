@@ -42,28 +42,28 @@
                      options
                      {"datawake-visited-spout" :shuffle }
                      "datawakestreams.extractors.email_bolt.EmailBolt"
-                     ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+                     ["attribute", "value", "extracted_raw", "extracted_metadata","url","context"]
                      )
 
         "phone-bolt" (python-bolt-spec
                      options
                      {"datawake-visited-spout" :shuffle }
                      "datawakestreams.extractors.phone_bolt.PhoneBolt"
-                     ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+                     ["attribute", "value", "extracted_raw", "extracted_metadata","url","context"]
                      )
 
         "website-bolt" (python-bolt-spec
                        options
                        {"datawake-visited-spout" :shuffle }
                        "datawakestreams.extractors.website_bolt.WebsiteBolt"
-                       ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+                       ["attribute", "value", "extracted_raw", "extracted_metadata","url","context"]
                        )
 
         "mitie-bolt" (python-bolt-spec
                      options
                      {"datawake-visited-spout" :shuffle }
                      "datawakestreams.extractors.mitie_bolt.MitieBolt"
-                     ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+                     ["attribute", "value", "extracted_raw", "extracted_metadata","url","context"]
                      )
 
         ;; write extracted links to the crawler-in
@@ -97,7 +97,7 @@
                                 options
                                 {"datawake-lookahead-spout"  :shuffle }
                                 "datawakestreams.extractors.email_bolt.EmailBolt"
-                                ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+                                ["attribute", "value", "extracted_raw", "extracted_metadata","url","context"]
                                 )
 
 
@@ -105,7 +105,7 @@
                                options
                                {"datawake-lookahead-spout"  :shuffle }
                                "datawakestreams.extractors.phone_bolt.PhoneBolt"
-                               ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+                               ["attribute", "value", "extracted_raw", "extracted_metadata","url","context"]
                                )
 
 
@@ -113,14 +113,14 @@
                                  options
                                  {"datawake-lookahead-spout" :shuffle }
                                  "datawakestreams.extractors.website_bolt.WebsiteBolt"
-                                 ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+                                 ["attribute", "value", "extracted_raw", "extracted_metadata","url","context"]
                                  )
 
         "lookahead-mitie-bolt" (python-bolt-spec
                                options
                                {"datawake-lookahead-spout" :shuffle }
                                "datawakestreams.extractors.mitie_bolt.MitieBolt"
-                               ["attribute", "value", "extracted_raw", "extracted_metadata","context"]
+                               ["attribute", "value", "extracted_raw", "extracted_metadata","url","context"]
                                )
 
 

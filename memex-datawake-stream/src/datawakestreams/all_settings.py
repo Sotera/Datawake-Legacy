@@ -22,6 +22,7 @@ ALL_SETTINGS['cluster'] = {
     'crawler-out-topic' : 'crawler-out',
     'visited-topic': 'datawake-visited',
     'conn_pool' : "",
+    'crawler_conn_pool' : "",
 
     'hbase_host':'',
     'hbase_port':'9090',

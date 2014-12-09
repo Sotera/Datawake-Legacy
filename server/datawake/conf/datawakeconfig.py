@@ -28,7 +28,7 @@ DW_HBASE_HOST: hbase host name (cluster only)
 DW_HBASE_NAMESPACE: hbase namespace (cluster only, default: default)
 DW_HBASE_DOMAIN_ENTITIES_TABLE (cluster only, default: datawake_domain_entities_hbase)
 DW_HBASE_EXTRACTED_ALL_TABLE (cluster only, default: general_extractor_web_index_hbase)
-DW_HBASE_EXTRACTED_DOMAIN_TALBE (cluster only, default: domain_extractor_web_index_hbase)
+DW_HBASE_EXTRACTED_DOMAIN_TABLE (cluster only, default: domain_extractor_web_index_hbase)
 DW_EXTERNAL_LINK_NAMES: Comma separated list of links names to provide for extracted features found in the domain index.
 DW_EXTERNAL_LINK_VALUES: Comma separated list of links to provide for extracted features found in the domain index.
     The link text may contain "$ATTR" and/or "$VALUE", which will be replaced with an extracted type and value such as "phone" and "5555555555"
@@ -98,7 +98,7 @@ IMPALA_PORT = os.environ['DW_IMPALA_PORT'] if 'DW_IMPALA_PORT' in os.environ els
 IMPALA_DB = os.environ['DW_IMPALA_DB'] if 'DW_IMPALA_DB' in os.environ else 'default'
 IMPALA_DOMAIN_ENTITIES_TABLE = os.environ['DW_IMPALA_DOMAIN_ENTITIES_TABLE'] if 'DW_IMPALA_DOMAIN_ENTITIES_TABLE' in os.environ else 'datawake_domain_entities'
 IMPALA_EXTRACTED_ALL_TABLE = os.environ['DW_IMPALA_EXTRACTED_ALL_TABLE'] if 'DW_IMPALA_EXTRACTED_ALL_TABLE' in os.environ else 'general_extractor_web_index'
-IMPALA_EXTRACTED_DOMAIN_TABLE = os.environ['DW_IMPALA_EXTRACTED_DOMAIN_TALBE'] if 'DW_IMPALA_EXTRACTED_DOMAIN_TABLE' in os.environ else 'domain_extractor_web_index'
+IMPALA_EXTRACTED_DOMAIN_TABLE = os.environ['DW_IMPALA_EXTRACTED_DOMAIN_TABLE'] if 'DW_IMPALA_EXTRACTED_DOMAIN_TABLE' in os.environ else 'domain_extractor_web_index'
 
 
 HBASE_HOST = os.environ['DW_HBASE_HOST'] if 'DW_HBASE_HOST' in os.environ else 'NO HBASE HOST SET'
@@ -106,7 +106,7 @@ HBASE_PORT = os.environ['DW_HBASE_PORT'] if 'DW_HBASE_PORT' in os.environ else '
 HBASE_NAMESPACE = os.environ['DW_HBASE_NAMESPACE'] if 'DW_HBASE_NAMESPACE' in os.environ else 'default'
 HBASE_DOMAIN_ENTITIES_TABLE = os.environ['DW_HBASE_DOMAIN_ENTITIES_TABLE'] if 'DW_HBASE_DOMAIN_ENTITIES_TABLE' in os.environ else 'datawake_domain_entities_hbase'
 HBASE_EXTRACTED_ALL_TABLE = os.environ['DW_HBASE_EXTRACTED_ALL_TABLE'] if 'DW_HBASE_EXTRACTED_ALL_TABLE' in os.environ else 'general_extractor_web_index_hbase'
-HBASE_EXTRACTED_DOMAIN_TABLE = os.environ['DW_HBASE_EXTRACTED_DOMAIN_TALBE'] if 'DW_HBASE_EXTRACTED_DOMAIN_TABLE' in os.environ else 'domain_extractor_web_index_hbase'
+HBASE_EXTRACTED_DOMAIN_TABLE = os.environ['DW_HBASE_EXTRACTED_DOMAIN_TABLE'] if 'DW_HBASE_EXTRACTED_DOMAIN_TABLE' in os.environ else 'domain_extractor_web_index_hbase'
 
 
 

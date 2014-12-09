@@ -48,6 +48,7 @@ class ExtractorBolt(Bolt):
             return
         tuples = map(lambda x: x.to_list(),tuples)
         for t in tuples:
+            t.append(url)
             t.append(context)
         if len(tuples) > 0:
             self.emit_many(tuples)
@@ -55,7 +56,7 @@ class ExtractorBolt(Bolt):
 
             values = map(lambda x: x[1],tuples)
             type = tuples[0][0]
-            self.connector.insert_entities(context['url'], type, values)
+            self.connector.insert_entities(url, type, values)
             #self.log("WROTE attribute: "+type+" values: "+str(values))
 
 
