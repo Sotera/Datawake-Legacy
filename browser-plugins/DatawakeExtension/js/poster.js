@@ -36,7 +36,8 @@ window.setTimeout(function () {
 
 var messageListenerMethods = {
     "highlighttext": highlightText,
-    "selections": highlightSelections
+    "selections": highlightSelections,
+    "removeHighlight": removeHighlight
 };
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -104,12 +105,23 @@ function highlightText(request, sender, sendResponse) {
 function highlightSelections(request, sender, sendResponse) {
     try {
         var selections = request.selections;
+        var className = request.highlight_class;
         $.each(selections, function (index, selection) {
-            $('body').highlight(selection);
+            $('body').highlight(selection, className);
         });
         sendResponse({success: true});
     } catch (e) {
         sendResponse({success: false, error: e.message})
     }
 
+}
+
+function removeHighlight(request, sender, sendResponse) {
+    try {
+        var highlight_class = request.highlight_class;
+        $("body").removeHighlight(highlight_class);
+        sendResponse({success: true});
+    } catch (e) {
+        sendResponse({success: false, error: e.message})
+    }
 }

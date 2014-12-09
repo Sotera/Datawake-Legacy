@@ -27,8 +27,12 @@ function useContextMenu(tab) {
             contentScriptFile: data.url("js/datawake/selections.js"),
             context: contextMenu.URLContext(url),
             items: [
-                contextMenu.Item({ label: "Selection", data: "selection"}),
-                contextMenu.Item({label: "Highlight All Selections", data: "highlight"})
+                contextMenu.Item({ label: "Capture Selection", data: "selection", context: contextMenu.SelectionContext()}),
+                contextMenu.Item({ label: "Report Extraction Error", data: "feedback", context: contextMenu.SelectionContext()}),
+                contextMenu.Separator(),
+                contextMenu.Item({ label: "Hide Selections", data: "hide"}),
+                contextMenu.Item({ label: "Show Selections", data: "highlight"}),
+
             ],
             onMessage: function (message) {
                 var tabId = tabs.activeTab.id;
@@ -40,10 +44,44 @@ function useContextMenu(tab) {
                     case "selection":
                         saveWindowSelection(datawakeInfo, tabs.activeTab.url, message.text);
                         break;
+                    case "feedback":
+                        saveFeedback(message.text, tabs.activeTab.url, datawakeInfo.domain.name);
+                        break;
+                    case "hide":
+                        hideSelections("selections");
+                        break;
                 }
             }
         });
     }
+}
+
+function hideSelections(className) {
+    tracking.hideSelections(className);
+}
+
+/**
+ * Saves extractor feedback
+ * @param raw_text raw_text that was highlighted
+ * @param url the url it occurred on
+ * @param domain domain it was apart of.
+ */
+function saveFeedback(raw_text, url, domain) {
+
+    tracking.promptForExtractedFeedback(raw_text, function (type, extractedValue) {
+        var post_obj = {};
+        post_obj.raw_text = raw_text;
+        post_obj.entity_value = extractedValue;
+        post_obj.entity_type = type;
+        post_obj.url = url;
+        post_obj.domain = domain;
+        function logSuccess(response) {
+            console.log(raw_text + " was successfully saved as feedback.");
+        }
+
+        requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/feedback/good", JSON.stringify(post_obj), logSuccess);
+    });
+
 }
 
 /**

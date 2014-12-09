@@ -49,13 +49,13 @@ domainLoaderApp.controller("DomainLoaderCtrl", function ($scope, $timeout, domai
 
     $scope.addDomainViaFile = function () {
         domainService.addDomainViaFile($scope.domain.name, $scope.domain.description, $scope.domain.file)
-            .then(loadDomains, function (errorMessage) {
+            .then(function(){
+                window.location.reload();
+            }, function (errorMessage) {
                 console.warn(errorMessage);
             });
         $scope.domain.name = "";
         $scope.domain.description = "";
-        $scope.domain.file = undefined;
-        $scope.fileName = "";
     };
 
     $scope.getPreview = function (domain) {

@@ -13,7 +13,7 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     $scope.entities_in_domain = [];
     $scope.current_url = "";
     $scope.versionNumber = chrome.runtime.getManifest().version;
-
+    $scope.invalid = {};
 
 
     function linkLookahead(tabUrl, extractedLinks, index, domain, delay) {
@@ -71,17 +71,28 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
     }
 
     function getDomainAndTrail() {
-        chrome.tabs.query({active: true,currentWindow: true}, function (tabs) {
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             chrome.runtime.sendMessage({operation: "get-popup-data", tab: tabs[0]}, function (response) {
                 $scope.trail = response.trail;
                 $scope.domain = response.domain;
                 $scope.org = response.org;
+                fetchExtractorFeedbackEntities(response.domain, tabs[0].url);
+                fetchMarkedInvalidEntities(response.domain);
+            });
+        });
+    }
+
+    function fetchMarkedInvalidEntities(domain) {
+        var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/feedback/marked";
+        popUpService.post(post_url, JSON.stringify({domain: domain})).then(function (response) {
+            $.each(response.marked_entities, function (index, item) {
+                $scope.invalid[item.value] = true;
             });
         });
     }
 
     function fetchEntities(delay) {
-        chrome.tabs.query({active: true ,currentWindow: true}, function (tabs) {
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             var post_url = chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/visited/entities";
             var domain = chrome.extension.getBackgroundPage().dwState.tabToDomain[tabs[0].id];
             var tabUrl = tabs[0].url;
@@ -171,6 +182,30 @@ datawakePopUpApp.controller("PopUpCtrl", function ($scope, $timeout, popUpServic
         lookaheadObj.matchesShow = !lookaheadObj.matchesShow;
     };
 
+    $scope.markInvalid = function (type, entity) {
+        var postObj = {};
+        postObj.entity_type = type;
+        postObj.entity_value = entity;
+        postObj.domain = $scope.domain;
+        popUpService.post(chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/feedback/bad", JSON.stringify(postObj))
+            .then(function (response) {
+                if (response.success) {
+                    console.log("Successfully marked %s as invalid", entity);
+                    $scope.invalid[entity] = true;
+                }
+            })
+    };
+
+    function fetchExtractorFeedbackEntities(domain, url) {
+        var postObj = {};
+        postObj.domain = domain;
+        postObj.url = url;
+        popUpService.post(chrome.extension.getBackgroundPage().config.datawake_serviceUrl + "/feedback/entities", JSON.stringify(postObj))
+            .then(function (response) {
+                $scope.feedbackEntities = response.entities;
+            });
+    }
+
     googlePlusUserLoader.onload(setUser);
     getDomainAndTrail();
     fetchEntities(500);
@@ -232,6 +267,11 @@ $(document).ready(function () {
     });
 
     $('#all_extracted_entities').find('a').first().click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
+    $('#feedback').find('a').first().click(function (e) {
         e.preventDefault();
         $(this).tab('show');
     });
