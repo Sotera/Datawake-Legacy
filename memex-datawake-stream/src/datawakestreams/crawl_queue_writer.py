@@ -65,7 +65,7 @@ class CrawlerQueueWriter(Bolt):
 
 
         output = json.dumps(dict(
-            id = str(uuid.uuid4()),
+            crawlid = str(uuid.uuid4()),
             appid = self.appid,
             url = url,
             priority = 50,
