@@ -75,3 +75,6 @@ datawake/conf/datawakeconfig.py
 
 #Firefox
 *.xpi
+
+#deployment
+deployment/config.sh
