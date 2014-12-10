@@ -19,46 +19,10 @@ define(['../util/util'],function(_) {
 		this._easing = 'bounce-out';
 		this._renderHeight = 0;
 		this._positionedObjects = 0;
-		this._firstLayout = true;
 		this._columnWidth = columnWidth;
 	};
 
 	ForensicColumnLayout.prototype = GraphJS.Extend(ForensicColumnLayout, GraphJS.Layout.prototype, {
-		/**
-		 * Draw boxes behind the nodes that represent the columns
-		 * @param w
-		 * @param h
-		 * @returns {Array}
-		 */
-		prerender : function(w,h) {
-			var rects = [];
-			if (this._positionedObjects > 0) {
-				rects.push(path.rect($.extend(COLUMN_STYLE,{
-					x: 0,
-					y: 0,
-					width: this._columnWidth,
-					height: this._renderHeight
-				})));
-
-				rects.push(path.rect($.extend(COLUMN_STYLE,{
-					x: rects[0].x + this._columnWidth,
-					y: 0,
-					width: this._columnWidth,
-					height: this._renderHeight
-				})));
-
-				rects.push(path.rect($.extend(COLUMN_STYLE,{
-					x: rects[1].x + this._columnWidth,
-					y: 0,
-					width: this._columnWidth,
-					height: this._renderHeight
-				})));
-			}
-
-			return rects;
-		},
-
-
 		/**
 		 * Calculates the height of a laid-out array of nodes
 		 * @param nodeList - an array of node objects
@@ -132,27 +96,14 @@ define(['../util/util'],function(_) {
 						var node = columns[j][k];
 						x = getXPosition(j);
 						y = cellTop + node.radius;
-						if (this._firstLayout) {
-							this._setNodePositionImmediate(node, x, 0);
-						}
-
-						if (this._firstLayout || this._isUpdate) {
-							this._setNodePosition(node, x, y);
-						} else {
-							this._setNodePositionImmediate(node,x,y);
-						}
+						this._setNodePosition(node, x, y);
 						this._positionedObjects++;
 						cellTop += (2*node.radius) + NODE_PADDING;
 					}
 				}
 				top += rowHeight;
 			}
-			if (this._positionedObjects>0) {
-				this._firstLayout = false;
-			}
-
 			this._renderHeight = top;
-			this._isUpdate = false;
 			return this;
 		}
 	});

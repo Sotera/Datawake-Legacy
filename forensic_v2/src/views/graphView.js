@@ -1,4 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager'], function(graphTemplate,events,TrailGraphService,testData,ForensicColumnLayout,ForensicGroupingManager) {
+define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager', '../config/forensic_config'], function(graphTemplate,events,TrailGraphService,testData,ForensicColumnLayout,ForensicGroupingManager,ForensicConfig) {
 
 
 	var DEFAULT_NODE_RADIUS = 20;
@@ -35,6 +35,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			.zoomable()
 			.nodeHover(this._onNodeOver,this._onNodeOut)
 			.nodeClick(this._onNodeClick,this)
+			.fontColour(ForensicConfig.LABEL.FILL_STYLE)
+			.fontFamily(ForensicConfig.LABEL.FONT_FAMILY)
+			.fontSize(ForensicConfig.LABEL.FONT_HEIGHT)
 			.draw();
 
 		this._bindEventHandlers();
@@ -49,14 +52,6 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 
 	GraphView.prototype._onNodeClick = function(node) {
 		this._graph.ungroup(node);
-
-		var currentDur = this._graph.layouter().duration();
-		this._graph.layouter().duration(250);
-
-		this._graph.draw()
-			.layout();
-
-		this._graph.layouter().duration(currentDur);
 	};
 
 	/**
@@ -169,9 +164,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				var node = {
 					x : 0,
 					y : 0,
-					fillStyle: '#ff0000',
-					strokeStyle:'#232323',
-					strokeSize:2,
+					fillStyle: ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE,
+					strokeStyle: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_STYLE,
+					lineWidth: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_WIDTH,
 					radius : DEFAULT_NODE_RADIUS,					// TODO:   radius == number of times visited?
 					index : i,
 					url : browsePath[id].url,
@@ -195,8 +190,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			var link = {
 				source : nodes[i],
 				target : nodes[i+1],
-				strokeStyle : '#343434',
-				type: GraphJS.LINK_TYPE.ARROW
+				strokeStyle : ForensicConfig.BROWSE_PATH_LINK.STROKE_STYLE,
+				type: ForensicConfig.BROWSE_PATH_LINK.LINE_TYPE
 			};
 			links.push(link);
 		}
@@ -228,9 +223,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				var node = {
 					x : 0,
 					y : 0,
-					fillStyle: entity.type === 'email' ? '#00ff00' : '#0000ff',
-					strokeStyle:'#232323',
-					strokeSize:2,
+					fillStyle: entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.FILL_STYLE : ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+					strokeStyle:entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.STROKE_STYLE : ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
+					lineWidth:entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH : ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
 					radius : DEFAULT_NODE_RADIUS,
 					index : nodeIndex,
 					type: entity.type,
@@ -242,8 +237,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				var link = {
 					source : browsePathNode,
 					target : node,
-					strokeStyle : '#343434',
-					type: GraphJS.LINK_TYPE.LINE
+					strokeStyle : ForensicConfig.ENTITY_LINK.STROKE_STYLE,
+					lineWidth : ForensicConfig.ENTITY_LINK.LINE_WIDTH,
+					type: ForensicConfig.ENTITY_LINK.LINE_TYPE
 				};
 				links.push(link);
 				nodeIndex++;
@@ -278,9 +274,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				var node = {
 					x: 0,
 					y: 0,
-					fillStyle: '#ff0000',
-					strokeStyle: '#232323',
-					strokeSize: 2,
+					fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
+					strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
+					strokeSize: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
 					radius: DEFAULT_NODE_RADIUS,
 					index: nodeIndex,
 					type: entity.type,

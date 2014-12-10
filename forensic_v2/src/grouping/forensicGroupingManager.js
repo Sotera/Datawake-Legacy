@@ -1,4 +1,4 @@
-define(['../util/guid','../util/util'], function(guid,_) {
+define(['../util/guid','../util/util','../config/forensic_config'], function(guid,_, ForensicConfig) {
 
 	/**
 	 *
@@ -68,9 +68,10 @@ define(['../util/guid','../util/util'], function(guid,_) {
 					x: 0,
 					y: 0,
 					index: guid.generate(),
-					fillStyle: '#ff0000',
+					fillStyle: ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE,
 					type: 'browse_path',
-					strokeStyle: '#232323',
+					strokeStyle: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_STYLE,
+					lineWidth : ForensicConfig.BROWSE_PATH_ENTITY.STROKE_WIDTH,
 					radius: 20,
 					label: browsePathAggregates[0].domain,
 					children: browsePathAggregates[row],
@@ -84,10 +85,10 @@ define(['../util/guid','../util/util'], function(guid,_) {
 						x: 0,
 						y: 0,
 						index: guid.generate(),
-						fillStyle: '#00ff00',
-						strokeSize: 2,
+						fillStyle: ForensicConfig.EMAIL_ENTITY.FILL_STYLE,
+						lineWidth: ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH,
 						type: 'email',
-						strokeStyle: '#232323',
+						strokeStyle: ForensicConfig.EMAIL_ENTITY.STROKE_STYLE,
 						radius: 20,
 						children: aggregatedEmails[row],
 						innerLabel: aggregatedEmails[row].length,
@@ -101,10 +102,10 @@ define(['../util/guid','../util/util'], function(guid,_) {
 						x: 0,
 						y: 0,
 						index: guid.generate(),
-						fillStyle: '#0000ff',
-						strokeSize: 2,
+						fillStyle: ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+						lineWidth: ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
 						type: 'phone',
-						strokeStyle: '#232323',
+						strokeStyle: ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
 						radius: 20,
 						children: aggregatedPhoneNumbers[row],
 						innerLabel: aggregatedPhoneNumbers[row].length,
@@ -118,10 +119,10 @@ define(['../util/guid','../util/util'], function(guid,_) {
 						x: 0,
 						y: 0,
 						index: guid.generate(),
-						fillStyle: '#ff0000',
-						strokeSize: 2,
+						fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
+						lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
 						type: 'website',
-						strokeStyle: '#232323',
+						strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
 						radius: 20,
 						children: aggregatedRelatedLinks[row],
 						innerLabel: aggregatedRelatedLinks[row].length,
@@ -149,7 +150,11 @@ define(['../util/guid','../util/util'], function(guid,_) {
 				target: targetAggregate
 			};
 			if (sourceAggregate.type === 'browse_path' && targetAggregate.type === 'browse_path') {
-				link.type = GraphJS.LINK_TYPE.ARROW;
+				link.type = ForensicConfig.BROWSE_PATH_LINK.LINE_TYPE;
+				link.lineWidth = ForensicConfig.BROWSE_PATH_LINK.LINE_WIDTH;
+			} else {
+				link.type = ForensicConfig.ENTITY_LINK.LINE_TYPE;
+				link.lineWidth = ForensicConfig.ENTITY_LINK.LINE_WIDTH;
 			}
 			return link;
 		},
