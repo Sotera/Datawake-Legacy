@@ -54,8 +54,9 @@ define([], function() {
 		 * An enum of topics that can be pub/subbed
 		 */
 		topics: {
-			'TRAIL_CHANGE' : 'trail_change',
-			'REFRESH' : 'refresh'
+			'TRAIL_CHANGE' 	: 'trail_change',
+			'REFRESH' 		: 'refresh',
+			'FIT'			: 'fit'
 		}
 	};
 });

@@ -32,6 +32,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			.canvas(this._jqCanvas[0])
 			.groupingManager(new ForensicGroupingManager())
 			.pannable()
+			.zoomable()
 			.nodeHover(this._onNodeOver,this._onNodeOut)
 			.nodeClick(this._onNodeClick,this)
 			.draw();
@@ -102,7 +103,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * Handles resizing
 	 * @private
 	 */
-	GraphView.prototype._onResize = function() {
+	GraphView.prototype._onResize = function(event) {
 		var width = window.innerWidth;
 		var height = window.innerHeight - this._jqCanvas.offset().top;
 		this._graph.resize(width,height);
@@ -125,11 +126,20 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	};
 
 	/**
+	 * Fits the graph to the screen
+	 * @private
+	 */
+	GraphView.prototype._onFit = function() {
+		this._graph.fit();
+	};
+
+	/**
 	 * Adds any event handlers for custom message passing
 	 * @private
 	 */
 	GraphView.prototype._bindEventHandlers = function() {
 		events.subscribe(events.topics.TRAIL_CHANGE,this._onTrailChange,this);
+		events.subscribe(events.topics.FIT,this._onFit,this);
 	};
 
 	/**
@@ -321,10 +331,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * @param graphInstance - the graph object being drawn
 	 */
 	GraphView.prototype._renderForensicGraph = function(forensicGraph) {
-
-		this._layouter = new ForensicColumnLayout()
-			.duration(750);
-
+		var that = this;
+		this._layouter = new ForensicColumnLayout(250);
 		this._graph
 			.clear()
 			.nodes(forensicGraph.nodes)
@@ -332,7 +340,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			.initializeGrouping()
 			.layouter(this._layouter)
 			.draw()
-			.layout();
+			.layout()
+			.fit();
 	};
 
 	return GraphView;

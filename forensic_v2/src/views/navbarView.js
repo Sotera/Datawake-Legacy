@@ -62,7 +62,11 @@ define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events
 			});
 		});
 
-		this._canvas.find('.refreshAll').click(function() {
+		this._canvas.find('.fitBtn').click(function() {
+			events.publish(events.topics.FIT);
+		});
+
+		this._canvas.find('.refreshAllBtn').click(function() {
 			events.publish(events.topics.REFRESH);
 		});
 

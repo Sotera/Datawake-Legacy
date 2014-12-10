@@ -8,7 +8,7 @@ define(['../util/guid','../util/util'], function(guid,_) {
 		GraphJS.GroupingManager.apply(this);
 	};
 	
-	ForensicGroupingManager.prototype = _.extend(ForensicGroupingManager.prototype, GraphJS.GroupingManager.prototype, {
+	ForensicGroupingManager.prototype = GraphJS.Extend(ForensicGroupingManager.prototype, GraphJS.GroupingManager.prototype, {
 		/**
 		 * Perform node aggregation for Datawake Forensic.   Group browse path by domain and entities by type
 		 * @private
@@ -140,7 +140,10 @@ define(['../util/guid','../util/util'], function(guid,_) {
 		 * @returns {{source: *, target: *}}
 		 * @private
 		 */
-		_createAggregateLink : function (sourceAggregate, targetAggregate) {
+		_createAggregateLink : function (sourceAggregate, targetAggregate, originalLinks) {
+			if (sourceAggregate.index === targetAggregate.index) {
+				return;
+			}
 			var link = {
 				source: sourceAggregate,
 				target: targetAggregate

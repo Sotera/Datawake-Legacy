@@ -4,8 +4,7 @@ define(['../util/util'],function(_) {
 		fillStyle: '#efefef',
 		strokeStyle : '#121212',
 		lineWidth : 1,
-		lineDash : [5,5],
-		margin : 100
+		lineDash : [5,5]
 	});
 
 	var NODE_PADDING = 5;
@@ -14,14 +13,17 @@ define(['../util/util'],function(_) {
 	 *
 	 * @constructor
 	 */
-	var ForensicColumnLayout = function(columnOffsets,nodeVerticalPadding) {
+	var ForensicColumnLayout = function(columnWidth) {
 		GraphJS.Layout.apply(this);
+		this._duration = 750;
+		this._easing = 'bounce-out';
 		this._renderHeight = 0;
 		this._positionedObjects = 0;
 		this._firstLayout = true;
+		this._columnWidth = columnWidth;
 	};
 
-	ForensicColumnLayout.prototype = _.extend(ForensicColumnLayout, GraphJS.Layout.prototype, {
+	ForensicColumnLayout.prototype = GraphJS.Extend(ForensicColumnLayout, GraphJS.Layout.prototype, {
 		/**
 		 * Draw boxes behind the nodes that represent the columns
 		 * @param w
@@ -32,23 +34,23 @@ define(['../util/util'],function(_) {
 			var rects = [];
 			if (this._positionedObjects > 0) {
 				rects.push(path.rect($.extend(COLUMN_STYLE,{
-					x: COLUMN_STYLE.lineWidth + COLUMN_STYLE.margin/4.0,
+					x: 0,
 					y: 0,
-					width: w * 1/3.0 - COLUMN_STYLE.lineWidth - COLUMN_STYLE.margin/2.0,
+					width: this._columnWidth,
 					height: this._renderHeight
 				})));
 
 				rects.push(path.rect($.extend(COLUMN_STYLE,{
-					x: w * 1/3.0 + COLUMN_STYLE.lineWidth + COLUMN_STYLE.margin/4.0,
+					x: rects[0].x + this._columnWidth,
 					y: 0,
-					width: w * 1/3.0 - COLUMN_STYLE.lineWidth - COLUMN_STYLE.margin/2.0,
+					width: this._columnWidth,
 					height: this._renderHeight
 				})));
 
 				rects.push(path.rect($.extend(COLUMN_STYLE,{
-					x: w * 2/3.0 + COLUMN_STYLE.lineWidth + COLUMN_STYLE.margin/4.0,
+					x: rects[1].x + this._columnWidth,
 					y: 0,
-					width: w * 1/3.0 - COLUMN_STYLE.lineWidth - COLUMN_STYLE.margin/2.0,
+					width: this._columnWidth,
 					height: this._renderHeight
 				})));
 			}
@@ -81,19 +83,20 @@ define(['../util/util'],function(_) {
 		 * @param h - height of the canvas
 		 * @returns {ForensicColumnLayout}
 		 */
-		layout : function (w, h) {
+		_performLayout : function (w, h) {
 			var x = 0;
 			var y = 0;
 			var nodeGridMap = {};
 			this._positionedObjects = 0;
+			var that = this;
 
 			function getXPosition(col) {
 				if (col === 0) {
-					return 1/6.0 * w;
+					return that._columnWidth * 0.5;
 				} else if (col === 1) {
-					return 3/6.0 * w;
+					return that._columnWidth * 1.5;
 				} else if (col === 2) {
-					return 5/6.0 * w;
+					return that._columnWidth * 2.5;
 				}
 			}
 
