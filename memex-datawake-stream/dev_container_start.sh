@@ -11,4 +11,4 @@ $KAFKA_HOME/bin/kafka-topics.sh --create --zookeeper $ZK_PORT_2888_TCP_ADDR --re
 $KAFKA_HOME/bin/kafka-topics.sh --create --zookeeper $ZK_PORT_2888_TCP_ADDR --replication-factor 1 --partitions 1 --topic crawler-in
 $KAFKA_HOME/bin/kafka-topics.sh --create --zookeeper $ZK_PORT_2888_TCP_ADDR --replication-factor 1 --partitions 1 --topic crawler-out
 
-sparse run -n local -t 9999999 -o "'topology.deployment=\"local-docker\"'"
+sparse run -n datawake-mockcrawler -t 9999999 -o "'topology.deployment=\"local-docker\"'"

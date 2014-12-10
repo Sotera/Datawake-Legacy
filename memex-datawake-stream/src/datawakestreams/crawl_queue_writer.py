@@ -39,7 +39,7 @@ class CrawlerQueueWriter(Bolt):
             settings = all_settings.get_settings(storm_conf['topology.deployment'])
             self.appid = settings['appid']
             self.topic = settings['crawler-in-topic'].encode()
-            self.conn_pool = settings['conn_pool'].encode()
+            self.conn_pool = settings['crawler_conn_pool'].encode()
             self.log('CrawlerQueueWriter initialized with topic ='+self.topic+' conn_pool='+self.conn_pool)
             self.kafka = KafkaClient(self.conn_pool)
             self.producer = SimpleProducer(self.kafka, async=False)
@@ -52,31 +52,25 @@ class CrawlerQueueWriter(Bolt):
 
     def process(self, tup):
         """
-        Writes the input out to a local file
         :param tup:   (attribute,value,extracted_raw,extracted_metadata,context)
         :return:    None
 
         context = {
             'source':'datawake-visited',
-            'userId':user_id,
-            'org':org,
             'domain':domain,
-            'url':url
         }
 
         """
-        (attribute,url,extracted_raw,extracted_metadata,context) = tup.values
+        (attribute,url,extracted_raw,extracted_metadata,srcurl,context) = tup.values
 
 
         output = json.dumps(dict(
-            id = str(uuid.uuid4()),
+            crawlid = str(uuid.uuid4()),
             appid = self.appid,
             url = url,
             priority = 50,
             depth = 0,
             attrs  = dict(
-                userId = context['userId'],
-                org =  context['org'],
                 domain = context['domain']
             )
         ))

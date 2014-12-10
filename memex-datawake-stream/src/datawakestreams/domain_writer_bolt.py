@@ -39,18 +39,15 @@ class DomainWriterBolt(Bolt):
 
         context = {
             'source':'datawake-visited',
-            'userId':user_id,
-            'org':org,
             'domain':domain,
-            'url':url
         }
 
         """
-        (attribute,value,extracted_raw,extracted_metadata,context) = tup.values
+        (attribute,value,extracted_raw,extracted_metadata,url,context) = tup.values
         domainValues = self.connector.get_domain_entity_matches( context['domain'], attribute, [value])
         if len(domainValues) > 0:
-            self.connector.insert_domain_entities( context['domain'],context['url'],attribute,domainValues)
-            self.log("WROTE to DOMAIN attribute: "+attribute+" value: "+value)
+            self.connector.insert_domain_entities( context['domain'],url,attribute,domainValues)
+            #self.log("WROTE to DOMAIN attribute: "+attribute+" value: "+value)
 
 
 

@@ -32,14 +32,30 @@ def loadOrgs(add, file):
     fobj.close()
 
 
+def loadUser(user,org,add):
+    if add:
+        datawake_mysql.addOrgLink(user, org)
+    else:
+        datawake_mysql.deleteOrgLink(user, org)
+
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Add or remove email org links')
-    parser.add_argument('orgFile', help='csv file of email address, org name')
+    parser.add_argument('--file', help='csv file of email address, org name')
     parser.add_argument('--delete', action='store_false', help='delete relationships. default=add')
     parser.add_argument('--demo', action='store_true', help="Set up demo org")
+    parser.add_argument('--user',help='user email address to add')
+    parser.add_argument('--org',help='users org')
     args = parser.parse_args()
     if args.demo:
         datawake_mysql.addOrgLink("john.doe@nomail.none", "MEMEXDEMO")
-    else:
+    elif args.file:
         loadOrgs(args.delete, args.orgFile)
+    elif args.user and args.org:
+        loadUser(args.user,args.org,args.delete)
+    else:
+        print 'invalid args: try --help'
+        sys.exit(1)
+
 
