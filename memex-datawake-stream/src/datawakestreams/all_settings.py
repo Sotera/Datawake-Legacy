@@ -41,6 +41,7 @@ ALL_SETTINGS['local-docker'] = {
     'crawler-out-topic' : 'crawler-out',
     'visited-topic': 'memex-datawake-visited',
     'conn_pool' : os.environ['KAFKA_PORT_9092_TCP_ADDR']+":9092" if 'KAFKA_PORT_9092_TCP_ADDR' in os.environ else '',
+    'crawler_conn_pool' : os.environ['KAFKA_PORT_9092_TCP_ADDR']+":9092" if 'KAFKA_PORT_9092_TCP_ADDR' in os.environ else '',
     'user':'root',
     'database':'memex_sotera',
     'password':os.environ['MYSQL_ENV_MYSQL_ROOT_PASSWORD'] if 'MYSQL_ENV_MYSQL_ROOT_PASSWORD' in os.environ else '',
