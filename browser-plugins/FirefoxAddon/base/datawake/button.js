@@ -77,6 +77,8 @@ function setupListeners() {
 function onToggle(state) {
     var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
     if (datawakeInfo != null && datawakeInfo.isDatawakeOn && constants.isValidUrl(tabs.activeTab.url)) {
+        if(mainPanel != null || mainPanel != undefined)
+            mainPanel.destroy();
         mainPanel = panel.Panel({
             width: 800,
             height: 1000,
