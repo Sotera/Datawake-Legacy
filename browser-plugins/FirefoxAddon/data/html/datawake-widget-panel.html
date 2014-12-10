@@ -17,7 +17,7 @@
 </head>
 <body ng-controller="PanelCtrl">
 <div class="container">
-    <div ng-hide="invalidTab">
+    <div>
         <table class="table table-bordered">
             <tbody>
             <tr>
@@ -113,7 +113,7 @@
                                 <th>
                                     <span>{{type}}</span>
                                 </th>
-                                <th>
+                                <th colspan="{{(extracted_tools.length > 0) ? extracted_tools.length : 1}}">
                                     External Tools
                                 </th>
                                 <th>
@@ -207,13 +207,6 @@
 
             </div>
 
-        </div>
-    </div>
-    <div class="jumbotron alert alert-danger vertical-center" ng-hide="!invalidTab">
-        <div class="container">
-            <h3>The Datawake is not enabled with this tab.</h3>
-
-            <p>To use the Datawake, go to about:newtab or open up a new tab to get started.</p>
         </div>
     </div>
 </div>

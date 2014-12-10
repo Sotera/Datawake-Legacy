@@ -3,73 +3,26 @@ var panelApp = angular.module('panelApp', []);
 
 panelApp.controller("PanelCtrl", function ($scope, $document) {
 
-    $scope.invalidTab = true;
     $scope.lookaheadLinks = [];
     $scope.extracted_tools = [];
-    $scope.datawake = null;
-    $scope.current_url = "";
+    $scope.datawake = addon.options.datawakeInfo;
+    $scope.current_url = addon.options.current_url;
+    $scope.lookaheadEnabled = addon.options.useLookahead;
+    $scope.domainFeaturesEnabled = addon.options.useDomainFeatures;
+    $scope.rankingEnabled = addon.options.useRanking;
+    $scope.versionNumber = addon.options.versionNumber;
     $scope.invalid = {};
+    $scope.lookaheadTimerStarted = false;
+    $scope.pageVisits = addon.options.pageVisits;
 
-    addon.port.on("datawakeInfo", function (datawakeInfo) {
-        $scope.datawake = datawakeInfo;
-        $scope.hideSignInButton = datawakeInfo.user != null;
-        $scope.lookaheadLinks = [];
-        $scope.extracted_tools = [];
-        $scope.entities_in_domain = [];
-        $scope.feedbackEntities = [];
-        $scope.extracted_entities_dict = {};
-        $scope.lookaheadTimerStarted = false;
-        $scope.lookaheadEnabled = true;
-        $scope.domainFeaturesEnabled = true;
-        $scope.rankingEnabled = true;
-        $scope.invalid = {};
-        //Trigger the starting tab.
-        var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
-        domainExtractedEntities.trigger('click');
-        $scope.$apply();
-    });
 
     addon.port.on("feedbackEntities", function (entities) {
         $scope.feedbackEntities = entities;
         $scope.$apply();
     });
 
-    addon.port.on("versionNumber", function (version) {
-        $scope.versionNumber = version;
-        $scope.$apply();
-    });
-
-    addon.port.on("useDomainFeatures", function (domainFeatures) {
-        $scope.domainFeaturesEnabled = domainFeatures;
-        $scope.$apply();
-    });
-    addon.port.on("useLookahead", function (lookahead) {
-        $scope.lookaheadEnabled = lookahead;
-        $scope.$apply();
-    });
-    addon.port.on("useRanking", function (ranking) {
-        $scope.rankingEnabled = ranking;
-        $scope.$apply();
-    });
-
     addon.port.on("signOutComplete", function () {
         $scope.hideSignInButton = false;
-        $scope.$apply();
-    });
-
-    addon.port.on("sendUserInfo", function (user) {
-        $scope.datawake.user = user;
-        $scope.$apply();
-    });
-
-    addon.port.on("validTab", function (url) {
-        $scope.current_url = url;
-        $scope.invalidTab = false;
-        $scope.$apply();
-    });
-
-    addon.port.on("invalidTab", function () {
-        $scope.invalidTab = true;
         $scope.$apply();
     });
 
@@ -99,11 +52,6 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
 
     addon.port.on("lookaheadTimerResults", function (lookahead) {
         $scope.lookaheadLinks.push(lookahead);
-        $scope.$apply();
-    });
-
-    addon.port.on("badgeCount", function (badgeCount) {
-        $scope.pageVisits = badgeCount;
         $scope.$apply();
     });
 
@@ -198,5 +146,7 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
             $(this).tab('show');
         });
     });
+
+    addon.port.emit("init");
 
 });
