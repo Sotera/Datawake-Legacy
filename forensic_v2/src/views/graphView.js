@@ -16,6 +16,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this._browsePathComponents = null;
 		this._entitiesComponents = null;
 		this._relatedLinksComponents = null;
+		this._isLegendVisible = false;
 		this._groupingManager = new ForensicGroupingManager();
 		this._initialize(element,context);
 	}

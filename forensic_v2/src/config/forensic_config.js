@@ -42,6 +42,7 @@ define([], function() {
 			FONT_FAMILY : '"Helvetica Neue"',
 			FONT_HEIGHT : 14,
 			FILL_STYLE : '#333'
-		}
+		},
+		showLegendOnStart : true
 	};
 });

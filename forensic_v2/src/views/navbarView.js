@@ -70,6 +70,14 @@ define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events
 			events.publish(events.topics.REFRESH);
 		});
 
+		this._canvas.find('.toggleLegendLink').click(function() {
+			events.publish(events.topics.TOGGLE_LEGEND);
+		});
+
+		this._canvas.find('.aboutLink').click(function() {
+			$('.modal').show();
+		});
+
 		this._bindEventHandlers();
 
 		this._canvas.appendTo(element);

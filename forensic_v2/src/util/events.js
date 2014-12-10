@@ -56,7 +56,9 @@ define([], function() {
 		topics: {
 			'TRAIL_CHANGE' 	: 'trail_change',
 			'REFRESH' 		: 'refresh',
-			'FIT'			: 'fit'
+			'FIT'			: 'fit',
+			'TOGGLE_LEGEND' : 'toggle_legend',
+			'SHOW_ABOUT'	: 'show_about'
 		}
 	};
 });

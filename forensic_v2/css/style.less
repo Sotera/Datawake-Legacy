@@ -1,3 +1,7 @@
+@import "bootstrap.css";
+
+@background-color : #fbfbfb;
+
 .domainLabel {
   font-weight: 400;
   color: #787878;
@@ -8,6 +12,24 @@
 }
 
 canvas {
-  background-color: #fbfbfb
+  background-color: @background-color
 
+}
+
+#legendContainer {
+  position:absolute;
+  margin : 10px;
+  right : 0px;
+  background-color: @background-color;
+}
+
+@legend-item-icon-size : 20px;
+.legend-item-icon {
+  display: inline-block;
+  margin-right: 10px;
+  width : @legend-item-icon-size;
+  height : @legend-item-icon-size;
+}
+.legend-item-text {
+  top: -@legend-item-icon-size/2
 }
