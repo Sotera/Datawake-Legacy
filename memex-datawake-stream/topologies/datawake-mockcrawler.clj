@@ -1,8 +1,8 @@
-(ns test1
+(ns datawake-mockcrawler
 (:use     [streamparse.specs])
 (:gen-class))
 
-(defn test1 [options]
+(defn datawake-mockcrawler [options]
 
 [
     ;; spout configuration

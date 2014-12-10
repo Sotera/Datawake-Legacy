@@ -1,0 +1,4 @@
+streamparse
+happybase
+kafka-python
+beautifulsoup4

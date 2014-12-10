@@ -43,10 +43,7 @@ class KafkaDatawakeVisitedSpout(Spout):
         (timestamp, org, domain, userId, url, html) = message
         context = {
             'source': 'datawake-visited',
-            'userId': userId,
-            'org': org,
-            'domain': domain,
-            'url': url
+            'domain': domain
         }
         self.emit([url, '', '', '', html, timestamp, context['source'], context])
 
@@ -62,7 +59,7 @@ class KafkaDatawakeLookaheadSpout(Spout):
         try:
             self.settings = all_settings.get_settings(stormconf['topology.deployment'])
             self.topic = self.settings['crawler-out-topic'].encode()
-            self.conn_pool = self.settings['conn_pool'].encode()
+            self.conn_pool = self.settings['crawler_conn_pool'].encode()
             self.log('KafkaDatawakeLookaheadSpout initialized with topic =' + self.topic + ' conn_pool=' + self.conn_pool)
             self.kafka = KafkaClient(self.conn_pool)
             self.consumer = SimpleConsumer(self.kafka, self.group, self.topic, max_buffer_size=None)
@@ -77,14 +74,14 @@ class KafkaDatawakeLookaheadSpout(Spout):
         """
         input message:
             dict(
-                 id = input['id'],
+                 crawlid = input['id'],
                  appid = input['appid'],
                  url = url,
                  status_code = response.getcode(),
                  status_msg = 'Success',
                  timestamp = response.info()['date'],
                  links_found = links,
-                 raw_html =  html,
+                 body =  html,
                  attrs = input['attrs']
             )
         :return:  (url, status, headers, flags, body, timestamp, source,context)
@@ -96,15 +93,12 @@ class KafkaDatawakeLookaheadSpout(Spout):
         crawled = json.loads(message)
         if crawled['appid'] == self.settings["appid"]:
             safeurl = crawled['url'].encode('utf-8', 'ignore')
-            self.log("Lookahead spout received id: " + crawled['id'] + " url: " + safeurl)
+            self.log("Lookahead spout received id: " + crawled['crawlid'] + " url: " + safeurl)
             context = {
                 'source': 'datawake-lookahead',
-                'userId': crawled['attrs']['userId'],
-                'org': crawled['attrs']['org'],
-                'domain': crawled['attrs']['domain'],
-                'url': crawled['url']
+                'domain': crawled['attrs']['domain']
             }
-            self.emit([crawled['url'], crawled['status_code'], '', '', crawled['raw_html'], crawled['timestamp'], context['source'], context])
+            self.emit([crawled['url'], crawled['status_code'], '', '', crawled['body'], crawled['timestamp'], context['source'], context])
 
 
 
