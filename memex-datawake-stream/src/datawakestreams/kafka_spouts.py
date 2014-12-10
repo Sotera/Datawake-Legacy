@@ -74,14 +74,14 @@ class KafkaDatawakeLookaheadSpout(Spout):
         """
         input message:
             dict(
-                 id = input['id'],
+                 crawlid = input['id'],
                  appid = input['appid'],
                  url = url,
                  status_code = response.getcode(),
                  status_msg = 'Success',
                  timestamp = response.info()['date'],
                  links_found = links,
-                 raw_html =  html,
+                 body =  html,
                  attrs = input['attrs']
             )
         :return:  (url, status, headers, flags, body, timestamp, source,context)
@@ -93,12 +93,12 @@ class KafkaDatawakeLookaheadSpout(Spout):
         crawled = json.loads(message)
         if crawled['appid'] == self.settings["appid"]:
             safeurl = crawled['url'].encode('utf-8', 'ignore')
-            self.log("Lookahead spout received id: " + crawled['id'] + " url: " + safeurl)
+            self.log("Lookahead spout received id: " + crawled['crawlid'] + " url: " + safeurl)
             context = {
                 'source': 'datawake-lookahead',
                 'domain': crawled['attrs']['domain']
             }
-            self.emit([crawled['url'], crawled['status_code'], '', '', crawled['raw_html'], crawled['timestamp'], context['source'], context])
+            self.emit([crawled['url'], crawled['status_code'], '', '', crawled['body'], crawled['timestamp'], context['source'], context])
 
 
 
