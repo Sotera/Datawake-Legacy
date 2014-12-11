@@ -1,4 +1,4 @@
-define(['../util/util'],function(_) {
+define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) {
 
 	var COLUMN_STYLE = new Object({
 		fillStyle: '#efefef',
@@ -15,10 +15,8 @@ define(['../util/util'],function(_) {
 	 */
 	var ForensicColumnLayout = function(columnWidth) {
 		GraphJS.Layout.apply(this);
-		this._duration = 750;
-		this._easing = 'bounce-out';
-		this._renderHeight = 0;
-		this._positionedObjects = 0;
+		this._duration = ForensicConfig.layoutDuration;
+		this._easing = ForensicConfig.layoutEasing;
 		this._columnWidth = columnWidth;
 	};
 
@@ -51,18 +49,7 @@ define(['../util/util'],function(_) {
 			var x = 0;
 			var y = 0;
 			var nodeGridMap = {};
-			this._positionedObjects = 0;
 			var that = this;
-
-			function getXPosition(col) {
-				if (col === 0) {
-					return that._columnWidth * 0.5;
-				} else if (col === 1) {
-					return that._columnWidth * 1.5;
-				} else if (col === 2) {
-					return that._columnWidth * 2.5;
-				}
-			}
 
 			// Make a lookup of rows and columns for each grid cell
 			var maxRow = -1;
@@ -82,7 +69,6 @@ define(['../util/util'],function(_) {
 
 			// Layout each row one by one
 			var top = NODE_PADDING;
-			this._positionedObjects = 0;
 			for (var i = 0; i <= maxRow; i++) {
 				var columns = [nodeGridMap[i+',0']||[],nodeGridMap[i+',1']||[],nodeGridMap[i+',2']||[]];
 				var cellHeights = [this.getGridCellHeight(columns[0]),this.getGridCellHeight(columns[1]),this.getGridCellHeight(columns[2])];
@@ -94,7 +80,7 @@ define(['../util/util'],function(_) {
 					var cellTop = top + ((rowHeight - cellHeight) / 2.0);
 					for (var k = 0; k < columns[j].length; k++) {
 						var node = columns[j][k];
-						x = getXPosition(j);
+						x = that._columnWidth * (j+0.5);
 						y = cellTop + node.radius + (node.lineWidth || 0);
 						this._setNodePosition(node, x, y);
 						this._positionedObjects++;
@@ -104,7 +90,7 @@ define(['../util/util'],function(_) {
 				top += rowHeight;
 			}
 			this._renderHeight = top;
-			return this;
+			return false;
 		},
 
 		layoutLabel : function(node) {

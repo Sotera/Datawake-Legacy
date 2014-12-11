@@ -44,6 +44,8 @@ define([], function() {
 			FILL_STYLE : '#333'
 		},
 		showLegendOnStart : true,
-		fitPadding : 100				// padding around fit graph
+		fitPadding : 100, 				// padding around fit graph
+		layoutDuration : 750,			// in ms
+		layoutEasing : 'exponential-out'
 	};
 });
