@@ -20,12 +20,13 @@ define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events
 	 */
 	NavbarView.prototype._initialize = function(element,context) {
 		this._canvas = $(navbarTemplate(context));
+		var inputsInDropdowns = this._canvas.find('.dropdown-menu > li > input');
 		var trailSearchElement = this._canvas.find('.trailSearchInput');
 		var trailSelectLinks = this._canvas.find('.trailSelectLink');
 		var trailSearchDropdownToggle = this._canvas.find('.trailSearchDropdown');
 
-		// Prevent dropdown from closing on search input click
-		trailSearchElement.click(function(e) {
+		// Prevent dropdown from closing on input click
+		inputsInDropdowns.click(function(e) {
 			e.stopPropagation();
 		});
 
