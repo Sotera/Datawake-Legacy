@@ -6,14 +6,76 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 	 */
 	var ForensicGroupingManager = function() {
 		GraphJS.GroupingManager.apply(this);
+		this._nodeIndexToLinks = {};
 	};
 	
 	ForensicGroupingManager.prototype = GraphJS.Extend(ForensicGroupingManager.prototype, GraphJS.GroupingManager.prototype, {
+		_removeDuplicatesFromList : function(aggregateLists) {
+			var condensedList = [];
+			for (var i = 0; i < aggregateLists.length; i++) {
+				condensedList.push(this._removeDuplicates(aggregateLists[i]));
+			}
+			return condensedList;
+		},
+
+		_removeDuplicates : function(aggregate) {
+			var valueMap = {};
+			var that = this;
+			aggregate.forEach(function(entity) {
+				if (!valueMap[entity.value]) {
+					valueMap[entity.value] = entity;
+				} else {
+					// update links to singleton
+					var assocatedLinks = that._nodeIndexToLinks[entity.index];
+					if (assocatedLinks) {
+						assocatedLinks.forEach(function(link) {
+							if (entity.index === link.source.index) {
+								link.source = valueMap[entity.value];
+							} else {
+								link.target = valueMap[entity.value];
+							}
+						});
+					}
+
+				}
+			});
+			var condensed = [];
+			for (var entityKey in valueMap) {
+				if (valueMap.hasOwnProperty(entityKey)) {
+					condensed.push(valueMap[entityKey]);
+				}
+			}
+			return condensed;
+		},
+
+
 		/**
 		 * Perform node aggregation for Datawake Forensic.   Group browse path by domain and entities by type
 		 * @private
 		 */
 		_aggregateNodes: function () {
+			var nodeIndexToLinks = [];
+			this._links.forEach(function(link) {
+				var srcIdx = link.source.index;
+				var links = nodeIndexToLinks[srcIdx];
+				if (!links) {
+					links = [];
+				}
+				links.push(link);
+				nodeIndexToLinks[srcIdx] = links;
+
+				var dstIdx = link.target.index;
+				links = nodeIndexToLinks[dstIdx];
+				if (!links) {
+					links = [];
+				}
+				links.push(link);
+				nodeIndexToLinks[dstIdx] = links;
+			});
+			this._nodeIndexToLinks = nodeIndexToLinks;
+
+
+
 			// aggregate the browse path
 			var lastAggregatedDomain = '';
 			var browsePathAggregates = [];
@@ -61,6 +123,10 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 				aggregatedPhoneNumbers.push(nodeGroupPhoneNumbers);
 				aggregatedRelatedLinks.push(nodeGroupRelatedLinks);
 			});
+
+			aggregatedEmails = this._removeDuplicatesFromList(aggregatedEmails);
+			aggregatedPhoneNumbers = this._removeDuplicatesFromList(aggregatedPhoneNumbers);
+			aggregatedRelatedLinks = this._removeDuplicatesFromList(aggregatedRelatedLinks);
 
 			var aggregatedNodes = [];
 			for (var row = 0; row < browsePathAggregates.length; row++) {
