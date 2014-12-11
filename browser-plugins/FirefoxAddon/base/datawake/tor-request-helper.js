@@ -130,6 +130,8 @@ DatawakeHTTPHelper.HttpStreamListener.prototype = {
             this.callback(resp);
 
         } catch(e){
+            console.log(e.message);
+            console.log(e.stack);
             console.error("Context Closed");
         }
     },
