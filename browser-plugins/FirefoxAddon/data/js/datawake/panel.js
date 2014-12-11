@@ -1,5 +1,10 @@
 var addon = self;
-var panelApp = angular.module('panelApp', []);
+var panelApp = angular.module('panelApp', ["ngRoute"]).config( ['$provide', function ($provide){
+    $provide.decorator('$sniffer', ['$delegate', function ($delegate) {
+        $delegate.history = false;
+        return $delegate;
+    }]);
+}]);
 
 panelApp.controller("PanelCtrl", function ($scope, $document) {
 
@@ -14,51 +19,60 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
     $scope.invalid = {};
     $scope.lookaheadTimerStarted = false;
     $scope.pageVisits = addon.options.pageVisits;
+    $scope.headerPartial = "partials/header-partial.html";
+    $scope.extractedEntitiesPartial = "partials/extracted-entities-partial.html";
+    $scope.domainExtractedEntitiesPartial = "partials/domain-extracted-partial.html";
 
 
     addon.port.on("feedbackEntities", function (entities) {
-        $scope.feedbackEntities = entities;
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.feedbackEntities = entities;
+        });
     });
 
     addon.port.on("signOutComplete", function () {
-        $scope.hideSignInButton = false;
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.hideSignInButton = false;
+        });
     });
 
     addon.port.on("ranking", function (rankingInfo) {
-        $scope.ranking = rankingInfo.ranking;
-        var starRating = $("#star_rating");
-        starRating.attr("data-average", rankingInfo.ranking);
-        //Create this only once.
-        createStarRating(addon.options.starUrl);
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.ranking = rankingInfo.ranking;
+            var starRating = $("#star_rating");
+            starRating.attr("data-average", rankingInfo.ranking);
+            //Create this only once.
+            createStarRating(addon.options.starUrl);
+        });
     });
 
     addon.port.on("entities", function (extractedEntities) {
-        if (!$scope.lookaheadTimerStarted) {
-            if (extractedEntities.allEntities.hasOwnProperty("website")) {
-                var lookaheadTimerObject = {};
-                lookaheadTimerObject.links = extractedEntities.allEntities["website"];
-                addon.port.emit("startLookaheadTimer", lookaheadTimerObject);
-                $scope.lookaheadTimerStarted = true;
+        $scope.$apply(function () {
+            if (!$scope.lookaheadTimerStarted) {
+                if (extractedEntities.allEntities.hasOwnProperty("website")) {
+                    var lookaheadTimerObject = {};
+                    lookaheadTimerObject.links = extractedEntities.allEntities["website"];
+                    addon.port.emit("startLookaheadTimer", lookaheadTimerObject);
+                    $scope.lookaheadTimerStarted = true;
+                }
             }
-        }
-        console.debug("Parsing Extracted Entities...");
-        $scope.extracted_entities_dict = extractedEntities.allEntities;
-        $scope.entities_in_domain = extractedEntities.domainExtracted;
-        $scope.$apply();
+            console.debug("Parsing Extracted Entities...");
+            $scope.extracted_entities_dict = extractedEntities.allEntities;
+            $scope.entities_in_domain = extractedEntities.domainExtracted;
+        });
     });
 
     addon.port.on("lookaheadTimerResults", function (lookahead) {
-        $scope.lookaheadLinks.push(lookahead);
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.lookaheadLinks.push(lookahead);
+        });
     });
 
     addon.port.on("externalLinks", function (links) {
         console.debug("Loading External Entities..");
-        $scope.extracted_tools = links;
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.extracted_tools = links;
+        });
     });
 
 
@@ -74,7 +88,7 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         addon.port.emit("openExternalLink", {externalUrl: externalUrl});
     };
 
-    $scope.markInvalid = function(type, entity){
+    $scope.markInvalid = function (type, entity) {
         var postObj = {};
         postObj.entity_type = type;
         postObj.entity_value = entity;
@@ -83,9 +97,10 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
 
     };
 
-    addon.port.on("marked", function(entity){
-        $scope.invalid[entity] = true;
-        $scope.$apply();
+    addon.port.on("marked", function (entity) {
+        $scope.$apply(function () {
+            $scope.invalid[entity] = true;
+        });
     });
 
     $scope.isExtracted = function (type, name) {
@@ -109,8 +124,9 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
             nbRates: 9999999,
             onClick: function (element, rate) {
                 setUrlRank(rate);
-                $scope.ranking = rate;
-                $scope.$apply();
+                $scope.$apply(function () {
+                    $scope.ranking = rate;
+                });
             }
         });
 
@@ -125,28 +141,26 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         addon.port.emit("setUrlRank", rank_data);
     }
 
-    $document.ready(function () {
-        var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
-        domainExtractedEntities.click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-        });
-
-        $('#lookahead').find('a').first().click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-        });
-
-        $('#all_extracted_entities').find('a').first().click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-        });
-        $('#feedback').find('a').first().click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-        });
-    });
-
     addon.port.emit("init");
 
 });
+
+panelApp.config(['$routeProvider',
+    function ($routeProvider) {
+        $routeProvider.
+            when('/features/all', {
+                templateUrl: 'partials/extracted-entities-partial.html'
+            }).
+            when('/features/domain', {
+                templateUrl: 'partials/domain-extracted-partial.html'
+            }).
+            when('/lookahead', {
+                templateUrl: 'partials/lookahead-partial.html'
+            }).
+            when('/feedback', {
+                templateUrl: 'partials/feedback-partial.html'
+            }).
+            otherwise({
+                redirectTo: '/features/domain'
+            });
+    }]);
