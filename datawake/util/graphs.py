@@ -238,9 +238,8 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
         if trail is None or trail.strip() == '': trail = "default"
 
         if id not in browsePath:
-
             ext = tldextract.extract(url)
-
+            tangelo.log("TLDExtract: " + str(url) + '    domain:' + ext.domain);
             browsePath[id] = {'id':id,
                               'url':url,
                               'timestamp':ts,
@@ -250,7 +249,6 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
 
             }
 
-
         entity = {
             'id':id,
             'type':entity_type,
@@ -258,11 +256,13 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
         }
         bAdd = True;
         if (entity_type=='email'):
-            emailPieces = entity_value.split('@');
-            entity['user_name'] = emailPieces[0];
-            emailExt = tldextract.extract('mailto://'+emailPieces[1]);
-            entity['domain'] = emailExt.domain;
-            entity['subdomain'] = emailExt.subdomain;
+            emailPieces = entity_value.split('@')
+            entity['user_name'] = emailPieces[0]
+            emailURL = 'mailto://'+emailPieces[1]
+            emailExt = tldextract.extract(emailURL)
+            tangelo.log("TLDExtract: " + emailURL + '    domain:' + emailExt.domain)
+            entity['domain'] = emailExt.domain
+            entity['subdomain'] = emailExt.subdomain
         elif (entity_type=='phone'):
             if (len(entity_value) < 3):
                 bAdd = False
@@ -270,6 +270,7 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
                 entity['area_code'] = entity_value[:3]
         else:
             webExt = tldextract.extract(entity_value)
+            tangelo.log("TLDExtract: " + entity_value + '    domain:' + webExt.domain)
             entity['subdomain']=webExt.subdomain
             entity['domain']=webExt.domain
             entity['suffix']=webExt.suffix

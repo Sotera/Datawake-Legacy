@@ -60,29 +60,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * @private
 	 */
 	GraphView.prototype._onNodeOver = function(node) {
-		if (node.type === 'browse_path') {
-			if (node.children) {
-				this.addLabel(node, node.children[0].domain);
-			} else {
-				this.addLabel(node, node.url);
-			}
-		} else {
-			if (node.children) {
-				switch(node.type) {
-					case 'email':
-						this.addLabel(node,'Emails');
-						break;
-					case 'website':
-						this.addLabel(node,'Website');
-						break;
-					case 'phone':
-						this.addLabel(node,'Phone Numbers');
-						break;
-				}
-			} else {
-				this.addLabel(node, node.value);
-			}
-		}
+		this.addLabel(node,node.labelText);
 	};
 
 	/**
@@ -170,6 +148,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 					radius : DEFAULT_NODE_RADIUS,					// TODO:   radius == number of times visited?
 					index : i,
 					url : browsePath[id].url,
+					labelText : browsePath[id].url,
 					type : 'browse_path',
 					ts : browsePath[id].ts,
 					col : 0,
@@ -220,19 +199,21 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			var entity = response.entities[i];
 			var browsePathNode = this._browsePathComponents.browsePathNodeMap[entity.id];
 			if (entity.type === 'email' || entity.type === 'phone') {
-				var node = {
+
+				var node = $.extend(entity,{
 					x : 0,
 					y : 0,
 					fillStyle: entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.FILL_STYLE : ForensicConfig.PHONE_ENTITY.FILL_STYLE,
 					strokeStyle:entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.STROKE_STYLE : ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
 					lineWidth:entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH : ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
+					labelText : entity.value,
 					radius : DEFAULT_NODE_RADIUS,
 					index : nodeIndex,
 					type: entity.type,
 					value : entity.value,
 					col : 1,
 					row : browsePathNode.row
-				};
+				});
 				nodes.push(node);
 				var link = {
 					source : browsePathNode,
@@ -271,19 +252,18 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			var entity = response.entities[i];
 			var browsePathNode = this._browsePathComponents.browsePathNodeMap[entity.id];
 			if (entity.type === 'website') {
-				var node = {
+				var node =  $.extend(entity,{
 					x: 0,
 					y: 0,
 					fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
 					strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
-					strokeSize: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
+					lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
 					radius: DEFAULT_NODE_RADIUS,
 					index: nodeIndex,
-					type: entity.type,
-					value: entity.value,
+					labelText : entity.value,
 					col: 2,
 					row: browsePathNode.row
-				};
+				});
 				nodes.push(node);
 				nodeIndex++;
 			}

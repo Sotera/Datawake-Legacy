@@ -48,6 +48,32 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 			return condensed;
 		},
 
+		_clusterByDomain : function(entityList) {
+			var domainMap = {};
+			entityList.forEach(function(entity) {
+				var entities = domainMap[entity.domain];
+				if (!entities) {
+					entities = [];
+				}
+				entities.push(entity);
+				domainMap[entity.domain] = entities;
+			});
+			return domainMap;
+		},
+
+		_clusterByAreaCode : function(entityList) {
+			var areacodeMap = {};
+			entityList.forEach(function(entity) {
+				var areaCode = entity.value.substring(0,3);
+				var entities = areacodeMap[areaCode];
+				if (!entities) {
+					entities = [];
+				}
+				entities.push(entity);
+				areacodeMap[areaCode] = entities;
+			});
+			return areacodeMap;
+		},
 
 		/**
 		 * Perform node aggregation for Datawake Forensic.   Group browse path by domain and entities by type
@@ -93,43 +119,46 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 				}
 			});
 
-			var aggregatedEmails = [];
-			var aggregatedPhoneNumbers = [];
-			var aggregatedRelatedLinks = [];
+			var groupEmails = [];
+			var groupPhoneNumbers = [];
+			var groupRelatedLinks = [];
 			var that = this;
 			browsePathAggregates.forEach(function (nodeGroup) {
-				var nodeGroupPhoneNumbers = [];
-				var nodeGroupEmails = [];
-				var nodeGroupRelatedLinks = [];
+				var phoneClusters = [];
+				var emailClusters = [];
+				var relatedLinkClusters = [];
 				nodeGroup.forEach(function (groupedNode) {
 					that._nodes.filter(function (node) {
+
 						if (node.row === groupedNode.row) {
 							switch (node.type) {
 								case 'email':
-									nodeGroupEmails.push(node);
+									emailClusters.push(node);
 									break;
 								case 'website':
-									nodeGroupRelatedLinks.push(node);
+									relatedLinkClusters.push(node);
 									break;
 								case 'phone':
-									nodeGroupPhoneNumbers.push(node);
+									phoneClusters.push(node);
 									break;
 							}
 
 						}
 					});
 				});
-				aggregatedEmails.push(nodeGroupEmails);
-				aggregatedPhoneNumbers.push(nodeGroupPhoneNumbers);
-				aggregatedRelatedLinks.push(nodeGroupRelatedLinks);
+				groupEmails.push(emailClusters);
+				groupPhoneNumbers.push(phoneClusters);
+				groupRelatedLinks.push(relatedLinkClusters);
 			});
 
-			aggregatedEmails = this._removeDuplicatesFromList(aggregatedEmails);
-			aggregatedPhoneNumbers = this._removeDuplicatesFromList(aggregatedPhoneNumbers);
-			aggregatedRelatedLinks = this._removeDuplicatesFromList(aggregatedRelatedLinks);
+			groupEmails = this._removeDuplicatesFromList(groupEmails);
+			groupPhoneNumbers = this._removeDuplicatesFromList(groupPhoneNumbers);
+			groupRelatedLinks = this._removeDuplicatesFromList(groupRelatedLinks);
+
 
 			var aggregatedNodes = [];
 			for (var row = 0; row < browsePathAggregates.length; row++) {
+
 				aggregatedNodes.push({
 					x: 0,
 					y: 0,
@@ -139,62 +168,74 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 					strokeStyle: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_STYLE,
 					lineWidth : ForensicConfig.BROWSE_PATH_ENTITY.STROKE_WIDTH,
 					radius: 20,
-					label: browsePathAggregates[0].domain,
+					labelText: browsePathAggregates[row][0].domain,
 					children: browsePathAggregates[row],
 					innerLabel: browsePathAggregates[row].length,
 					row: row,
 					col: 0
 				});
 
-				if (aggregatedEmails[row].length > 0) {
-					aggregatedNodes.push({
-						x: 0,
-						y: 0,
-						index: guid.generate(),
-						fillStyle: ForensicConfig.EMAIL_ENTITY.FILL_STYLE,
-						lineWidth: ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH,
-						type: 'email',
-						strokeStyle: ForensicConfig.EMAIL_ENTITY.STROKE_STYLE,
-						radius: 20,
-						children: aggregatedEmails[row],
-						innerLabel: aggregatedEmails[row].length,
-						row: row,
-						col: 1
-					});
+				var clusteredEmails = this._clusterByDomain(groupEmails[row]);
+				for (var domainKey in clusteredEmails) {
+					if (clusteredEmails.hasOwnProperty(domainKey)) {
+						aggregatedNodes.push({
+							x: 0,
+							y: 0,
+							index: guid.generate(),
+							fillStyle: ForensicConfig.EMAIL_ENTITY.FILL_STYLE,
+							lineWidth: ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH,
+							type: 'email',
+							strokeStyle: ForensicConfig.EMAIL_ENTITY.STROKE_STYLE,
+							radius: 20,
+							labelText: domainKey,
+							children: clusteredEmails[domainKey],
+							innerLabel: clusteredEmails[domainKey].length,
+							row: row,
+							col: 1
+						});
+					}
 				}
 
-				if (aggregatedPhoneNumbers[row].length > 0) {
-					aggregatedNodes.push({
-						x: 0,
-						y: 0,
-						index: guid.generate(),
-						fillStyle: ForensicConfig.PHONE_ENTITY.FILL_STYLE,
-						lineWidth: ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
-						type: 'phone',
-						strokeStyle: ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
-						radius: 20,
-						children: aggregatedPhoneNumbers[row],
-						innerLabel: aggregatedPhoneNumbers[row].length,
-						row: row,
-						col: 1
-					});
+				var clusteredPhoneNumbers = this._clusterByAreaCode(groupPhoneNumbers[row]);
+				for (var areaCodeKey in clusteredPhoneNumbers) {
+					if (clusteredPhoneNumbers.hasOwnProperty(areaCodeKey)) {
+						aggregatedNodes.push({
+							x: 0,
+							y: 0,
+							index: guid.generate(),
+							fillStyle: ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+							lineWidth: ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
+							type: 'phone',
+							strokeStyle: ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
+							radius: 20,
+							labelText : areaCodeKey,
+							children: clusteredPhoneNumbers[areaCodeKey],
+							innerLabel: clusteredPhoneNumbers[areaCodeKey].length,
+							row: row,
+							col: 1
+						});
+					}
 				}
 
-				if (aggregatedRelatedLinks[row].length > 0) {
-					aggregatedNodes.push({
-						x: 0,
-						y: 0,
-						index: guid.generate(),
-						fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
-						lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
-						type: 'website',
-						strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
-						radius: 20,
-						children: aggregatedRelatedLinks[row],
-						innerLabel: aggregatedRelatedLinks[row].length,
-						row: row,
-						col: 2
-					});
+				var clusteredRelatedLinks = this._clusterByDomain(groupRelatedLinks[row]);
+				for (domainKey in clusteredRelatedLinks) {
+					if (clusteredRelatedLinks.hasOwnProperty(domainKey)) {
+						aggregatedNodes.push({
+							x: 0,
+							y: 0,
+							index: guid.generate(),
+							fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
+							lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
+							type: 'website',
+							strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
+							radius: 20,
+							labelText : domainKey,
+							children: clusteredRelatedLinks[domainKey],
+							innerLabel: clusteredRelatedLinks[domainKey].length,
+							row: row,
+							col: 2
+						});
+					}
 				}
 			}
 			this._aggregatedNodes = aggregatedNodes;
