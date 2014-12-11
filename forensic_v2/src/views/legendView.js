@@ -13,15 +13,15 @@ define(['hbs!templates/legend','../util/events','../config/forensic_config'], fu
 		this._initialize(element,{
 			items : [
 				{
-					text : 'Website',
+					text : 'Websites',
 					color : ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE
 				},
 				{
-					text : 'Email Entity',
+					text : 'Email Addresses',
 					color : ForensicConfig.EMAIL_ENTITY.FILL_STYLE
 				},
 				{
-					text : 'Phone Entity',
+					text : 'Phone Numbers',
 					color : ForensicConfig.PHONE_ENTITY.FILL_STYLE
 
 				}
