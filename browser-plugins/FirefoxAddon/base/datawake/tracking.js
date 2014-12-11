@@ -2,14 +2,13 @@ var self = require("sdk/self");
 var data = self.data;
 var addOnPrefs = require("sdk/simple-prefs").prefs;
 var tabs = require("sdk/tabs");
-var externalLinkHelper = require("./external-links");
 
 var requestHelper = require("./request-helper");
 var constants = require("./constants");
 var storage = require("./storage");
 var widgetHelper = require("./button");
 var timer = require("sdk/timers");
-
+var service = require("./service");
 var selectionHelper = require("./selections");
 
 exports.trackTab = trackTab;
@@ -115,7 +114,7 @@ function setupTabWorkerAndServices(tab) {
                     var scrapeObject = response.json;
                     //Sets up the context menu objects for this tab.
                     if (currentTrackingTabWorker.tab != null) {
-                        getAllEntities(1000);
+                        getDomainExtractedEntities(1000);
                         widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, scrapeObject.count);
                     }
                 });
@@ -136,39 +135,31 @@ function setupTabWorkerAndServices(tab) {
  * Gets all entities associated for this url
  * @param delay Timeout delay between each call.
  */
-function getAllEntities(delay) {
-    if (isTabWorkerAttached(tabs.activeTab.id)) {
+function getDomainExtractedEntities(delay) {
+    if (isTabWorkerAttached(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
         var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
         var tabUrl = tabs.activeTab.url;
-        if (constants.isValidUrl(tabUrl)) {
-            var entitiesUrl = addOnPrefs.datawakeDeploymentUrl + "/visited/entities";
-            var post_data = JSON.stringify({
-                url: tabUrl,
-                domain: datawakeInfo.domain.name
-            });
-            requestHelper.post(entitiesUrl, post_data, function (response) {
-                var entities = response.json;
-                if (Object.keys(entities.domainExtracted).length > 0) {
-                    var entitiesInDomain = getEntitiesInDomain(entities.domainExtracted);
-                    highlightExtractedLinks(entitiesInDomain);
-                    if (entitiesInDomain.length > 0) {
-                        console.debug("Domain matches found on url: " + tabUrl + " setting badge RED");
-                        //TODO: When badges get added, change the color here.
-                    } else {
-                        console.debug("no domain matches found on url: " + tabUrl);
-                    }
+        service.getDomainExtractedEntities(datawakeInfo.domain.name, tabUrl, function (entities) {
+            if (entities.domainExtracted != null && Object.keys(entities.domainExtracted).length > 0) {
+                var entitiesInDomain = getEntitiesInDomain(entities.domainExtracted);
+                highlightExtractedLinks(entitiesInDomain);
+                if (entitiesInDomain.length > 0) {
+                    console.debug("Domain matches found on url: " + tabUrl + " setting badge RED");
+                    //TODO: When badges get added, change the color here.
                 } else {
-                    console.debug("advanceSearch, no response for url, setting time to try again.");
+                    console.debug("no domain matches found on url: " + tabUrl);
                 }
-                //Keep Polling
-                if (delay <= 5 * 60 * 1000) { // eventually stop polling
-                    advanceSearchTimerId = timer.setTimeout(function (newDelay) {
-                        getAllEntities(newDelay);
-                    }, delay * 2);
-                }
+            } else {
+                console.debug("advanceSearch, no response for url, setting time to try again.");
+            }
+            //Keep Polling
+            if (delay <= 5 * 60 * 1000) { // eventually stop polling
+                advanceSearchTimerId = timer.setTimeout(function (newDelay) {
+                    getDomainExtractedEntities(newDelay);
+                }, delay * 2);
+            }
 
-            });
-        }
+        });
     } else {
         console.debug("The Datawake is not on for this tab.");
     }
@@ -198,10 +189,10 @@ function getEntitiesInDomain(domainExtracted) {
  * @param entitiesInDomain Entities to highlight.
  */
 function highlightExtractedLinks(entitiesInDomain) {
-    externalLinkHelper.getExternalLinks(function (response) {
+    service.getExternalLinks(function (externalLinks) {
         var highlightObject = {};
         highlightObject.entities = entitiesInDomain;
-        highlightObject.links = response.json;
+        highlightObject.links = externalLinks;
         console.debug("Emitting data to highlight");
         highlightTextWithToolTips(tabs.activeTab.id, highlightObject);
     });

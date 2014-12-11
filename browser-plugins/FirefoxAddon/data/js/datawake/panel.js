@@ -1,5 +1,5 @@
 var addon = self;
-var panelApp = angular.module('panelApp', ["ngRoute"]).config( ['$provide', function ($provide){
+var panelApp = angular.module('panelApp', ["ngRoute"]).config(['$provide', function ($provide) {
     $provide.decorator('$sniffer', ['$delegate', function ($delegate) {
         $delegate.history = false;
         return $delegate;
@@ -20,8 +20,6 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
     $scope.lookaheadTimerStarted = false;
     $scope.pageVisits = addon.options.pageVisits;
     $scope.headerPartial = "partials/header-partial.html";
-    $scope.extractedEntitiesPartial = "partials/extracted-entities-partial.html";
-    $scope.domainExtractedEntitiesPartial = "partials/domain-extracted-partial.html";
 
 
     addon.port.on("feedbackEntities", function (entities) {
@@ -41,20 +39,16 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
             $scope.ranking = rankingInfo.ranking;
             var starRating = $("#star_rating");
             starRating.attr("data-average", rankingInfo.ranking);
-            //Create this only once.
             createStarRating(addon.options.starUrl);
         });
     });
 
     addon.port.on("entities", function (extractedEntities) {
         $scope.$apply(function () {
-            if (!$scope.lookaheadTimerStarted) {
-                if (extractedEntities.allEntities.hasOwnProperty("website")) {
-                    var lookaheadTimerObject = {};
-                    lookaheadTimerObject.links = extractedEntities.allEntities["website"];
-                    addon.port.emit("startLookaheadTimer", lookaheadTimerObject);
-                    $scope.lookaheadTimerStarted = true;
-                }
+            if (extractedEntities.allEntities.hasOwnProperty("website")) {
+                var lookaheadTimerObject = {};
+                lookaheadTimerObject.links = extractedEntities.allEntities["website"];
+                addon.port.emit("startLookaheadTimer", lookaheadTimerObject);
             }
             console.debug("Parsing Extracted Entities...");
             $scope.extracted_entities_dict = extractedEntities.allEntities;
@@ -94,7 +88,6 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         postObj.entity_value = entity;
         postObj.domain = $scope.datawake.domain.name;
         addon.port.emit("markInvalid", postObj);
-
     };
 
     addon.port.on("marked", function (entity) {
@@ -105,14 +98,12 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
 
     $scope.isExtracted = function (type, name) {
         if ($scope.entities_in_domain.hasOwnProperty(type)) {
-
             return $scope.entities_in_domain[type].indexOf(name) >= 0;
         }
     };
 
     function createStarRating(starUrl) {
         var starRating = $("#star_rating");
-        starRating.html("");
         starRating.jRating({
             type: 'big', // type of the rate.. can be set to 'small' or 'big'
             length: 10, // nb of stars

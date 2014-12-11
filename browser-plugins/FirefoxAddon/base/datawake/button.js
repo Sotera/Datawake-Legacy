@@ -5,11 +5,11 @@ var ui = require('sdk/ui');
 var tabs = require("sdk/tabs");
 var timer = require("sdk/timers");
 
-var externalLinkHelper = require("./external-links");
 var storage = require("./storage");
 var constants = require("./constants");
 var requestHelper = require("./request-helper");
 var tracking = require("./tracking");
+var service = require("./service");
 var panel = require("sdk/panel");
 
 exports.useButton = useButton;
@@ -77,8 +77,9 @@ function setupListeners() {
 function onToggle(state) {
     var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
     if (datawakeInfo != null && datawakeInfo.isDatawakeOn && constants.isValidUrl(tabs.activeTab.url)) {
-        if(mainPanel != null || mainPanel != undefined)
+        if (mainPanel != null || mainPanel != undefined)
             mainPanel.destroy();
+        clearTimers();
         mainPanel = panel.Panel({
             width: 800,
             height: 1000,
@@ -96,6 +97,7 @@ function onToggle(state) {
 
             }
         });
+
         setupListeners();
         mainPanel.port.on("init", function () {
             console.debug("Valid Tab");
@@ -103,11 +105,11 @@ function onToggle(state) {
             emitFeedbackEntities(datawakeInfo.domain.name);
             emitRanks(datawakeInfo);
             emitMarkedEntities(datawakeInfo.domain.name);
-            getEntities(function (entities) {
+            getEntities(datawakeInfo.domain.name, function (entities) {
                 mainPanel.port.emit("entities", entities);
             });
-            externalLinkHelper.getExternalLinks(function (response) {
-                mainPanel.port.emit("externalLinks", response.json);
+            service.getExternalLinks(function (externalLinks) {
+                mainPanel.port.emit("externalLinks", externalLinks);
             });
         });
 
@@ -121,21 +123,9 @@ function onToggle(state) {
 
 }
 
-function getEntities(callback) {
-    if (tracking.isTabWorkerAttached(tabs.activeTab.id)) {
-        var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
-        var tabUrl = tabs.activeTab.url;
-        if (constants.isValidUrl(tabUrl)) {
-            var entitiesUrl = addOnPrefs.datawakeDeploymentUrl + "/visited/entities";
-            var post_data = JSON.stringify({
-                url: tabUrl,
-                domain: datawakeInfo.domain.name
-            });
-            requestHelper.post(entitiesUrl, post_data, function (response) {
-                var entities = response.json;
-                callback(entities);
-            });
-        }
+function getEntities(domain, callback) {
+    if (tracking.isTabWorkerAttached(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
+        service.getEntities(domain, tabs.activeTab.url, callback);
     } else {
         console.debug("The Datawake is not on for this tab.");
     }
@@ -156,7 +146,8 @@ function emitMarkedEntities(domain) {
     requestHelper.post(post_url, JSON.stringify({domain: domain}), function (response) {
         var marked_entities = response.json.marked_entities;
         for (var index in marked_entities)
-            mainPanel.port.emit("marked", marked_entities[index].value);
+            if (marked_entities.hasOwnProperty(index))
+                mainPanel.port.emit("marked", marked_entities[index].value);
     });
 }
 
