@@ -43,6 +43,7 @@ define([], function() {
 			FONT_HEIGHT : 14,
 			FILL_STYLE : '#333'
 		},
-		showLegendOnStart : true
+		showLegendOnStart : true,
+		fitPadding : 100				// padding around fit graph
 	};
 });

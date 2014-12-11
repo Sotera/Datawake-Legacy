@@ -125,7 +125,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * @private
 	 */
 	GraphView.prototype._onFit = function() {
-		this._graph.fit();
+		this._graph.fit(ForensicConfig.fitPadding);
 	};
 
 	/**
