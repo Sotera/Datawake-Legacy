@@ -16,7 +16,6 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this._browsePathComponents = null;
 		this._entitiesComponents = null;
 		this._relatedLinksComponents = null;
-		this._isLegendVisible = false;
 		this._groupingManager = new ForensicGroupingManager();
 		this._initialize(element,context);
 	}
@@ -291,7 +290,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		}
 		return {
 			nodes : nodes,
-			links : []
+			links : []			// TODO:  how to get these?
 		};
 	};
 
@@ -328,7 +327,6 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * @param graphInstance - the graph object being drawn
 	 */
 	GraphView.prototype._renderForensicGraph = function(forensicGraph) {
-		var that = this;
 		this._layouter = new ForensicColumnLayout(250);
 		this._graph
 			.clear()

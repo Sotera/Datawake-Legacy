@@ -95,7 +95,7 @@ define(['../util/util'],function(_) {
 					for (var k = 0; k < columns[j].length; k++) {
 						var node = columns[j][k];
 						x = getXPosition(j);
-						y = cellTop + node.radius;
+						y = cellTop + node.radius + (node.lineWidth || 0);
 						this._setNodePosition(node, x, y);
 						this._positionedObjects++;
 						cellTop += (2*node.radius) + NODE_PADDING;
@@ -105,6 +105,20 @@ define(['../util/util'],function(_) {
 			}
 			this._renderHeight = top;
 			return this;
+		},
+
+		layoutLabel : function(node) {
+			var xOffset =  node.radius + (node.lineWidth || 0) + 5;
+			var textAlign = 'start';
+			if (node.type === 'browse_path') {
+				xOffset*=-1;
+				textAlign = 'end';
+			}
+			return {
+				x : (node.finalX || node.x) + xOffset,
+				y : (node.finalY || node.y),
+				textAlign : textAlign
+			};
 		}
 	});
 	return ForensicColumnLayout;
