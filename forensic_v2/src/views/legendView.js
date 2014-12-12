@@ -48,6 +48,10 @@ define(['hbs!templates/legend','../util/events','../config/forensic_config'], fu
 		this._canvas.appendTo(element);
 	};
 
+	/**
+	 * Toggle visibility of the legend
+	 * @private
+	 */
 	LegendView.prototype._onToggle = function() {
 		if (this._isVisible) {
 			this._canvas.animate({opacity:0});

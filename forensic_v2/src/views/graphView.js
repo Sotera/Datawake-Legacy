@@ -51,6 +51,12 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		$(window).resize();
 	};
 
+	/**
+	 * Ungroups the node on click.
+	 * TODO: if this is not a cluster, do something intelligent like open the webpage?   display other info?
+	 * @param node
+	 * @private
+	 */
 	GraphView.prototype._onNodeClick = function(node) {
 		this._graph.ungroup(node);
 	};
@@ -100,6 +106,10 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			});
 	};
 
+	/**
+	 * Fetch the trail again from the server and display it
+	 * TODO:  Do something better than reset all node positions
+	 */
 	GraphView.prototype._onRefresh = function() {
 		if (!this._activeTrail) {
 			return;

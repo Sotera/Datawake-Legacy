@@ -1,5 +1,9 @@
 define([], function() {
 	return {
+		/**
+		 * Generates a random GUID
+		 * @returns {string}
+		 */
 		generate : function() {
 			var result = '';
 			for (var i = 0; i < 32; i++) {

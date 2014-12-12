@@ -10,6 +10,13 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 	};
 	
 	ForensicGroupingManager.prototype = GraphJS.Extend(ForensicGroupingManager.prototype, GraphJS.GroupingManager.prototype, {
+
+		/**
+		 * Remove duplicate entities from aggregate list.
+		 * @param aggregateLists - a list of row aggregates of a common type (email, website, phone)
+		 * @returns {Array} - each subarray will be a set of entities based on value
+		 * @private
+		 */
 		_removeDuplicatesFromList : function(aggregateLists) {
 			var condensedList = [];
 			for (var i = 0; i < aggregateLists.length; i++) {
@@ -18,6 +25,13 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 			return condensedList;
 		},
 
+		/**
+		 * Given a list of entity nodes, remove any duplicate values and update links from them to the first
+		 * node found with that value
+		 * @param aggregate
+		 * @returns {Array}
+		 * @private
+		 */
 		_removeDuplicates : function(aggregate) {
 			var valueMap = {};
 			var that = this;
@@ -48,6 +62,12 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 			return condensed;
 		},
 
+		/**
+		 * Groups entityList by website domain.
+		 * @param entityList
+		 * @returns {{}} - a map of domain to a list of entities
+		 * @private
+		 */
 		_clusterByDomain : function(entityList) {
 			var domainMap = {};
 			entityList.forEach(function(entity) {
@@ -61,6 +81,12 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 			return domainMap;
 		},
 
+		/**
+		 * Groups entityList by area code
+		 * @param entityList - a list of phone entities
+		 * @returns {{}} - a map from string to list of entities
+		 * @private
+		 */
 		_clusterByAreaCode : function(entityList) {
 			var areacodeMap = {};
 			entityList.forEach(function(entity) {
@@ -76,7 +102,9 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 		},
 
 		/**
-		 * Perform node aggregation for Datawake Forensic.   Group browse path by domain and entities by type
+		 * Perform node aggregation for Datawake Forensic.   Group browse path by domain and entities by type.
+		 * Phone entities are grouped by area code, email/websites by domain.  Removes any duplicate entities
+		 * from the same group if they are linked to multuple browse path nodes/entities
 		 * @private
 		 */
 		_aggregateNodes: function () {

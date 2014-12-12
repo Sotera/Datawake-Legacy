@@ -93,6 +93,11 @@ define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) 
 			return false;
 		},
 
+		/**
+		 * Browse path nodes should have the label to the left, entities to the right
+		 * @param node
+		 * @returns {{x: *, y: (finalY|*|node.y), textAlign: string}}
+		 */
 		layoutLabel : function(node) {
 			var xOffset =  node.radius + (node.lineWidth || 0) + 5;
 			var textAlign = 'start';
