@@ -37,7 +37,7 @@ define([], function() {
 			img.attr('height',imgDim);
 
 			$(window).resize(function() {
-				overlay.width(window.innerWidth).height(winder.innerHeight);
+				overlay.width(window.innerWidth).height(window.innerHeight).css('top','0px');
 			});
 		},
 
