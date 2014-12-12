@@ -79,6 +79,31 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this.removeLabel(node);
 	};
 
+	GraphView.prototype._showLoader = function() {
+		var overlay = $('<div/>')
+			.attr('id','ajax_loader_overlay')
+			.width(this._jqCanvas.width())
+			.height(this._jqCanvas.height())
+			.offset(this._jqCanvas.offset())
+			.addClass('ajax_loader_overlay')
+			.appendTo(this._jqCanvas.parent());
+
+		var img = $('<img/>')
+			.attr('src','./img/ajax_loader.gif')
+			.addClass('ajax_loader_image')
+			.appendTo(overlay);
+
+		var imgDim = parseInt(img.css('margin-left').replace('px',''))*-2;
+		img.attr('width',imgDim);
+		img.attr('height',imgDim);
+
+
+	};
+
+	GraphView.prototype._hideLoader = function() {
+		$('#ajax_loader_overlay').remove();
+	};
+
 	/**
 	 * Handles resizing
 	 * @private
@@ -86,6 +111,12 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	GraphView.prototype._onResize = function(event) {
 		var width = window.innerWidth;
 		var height = window.innerHeight - this._jqCanvas.offset().top;
+
+		var overlay = $('#ajax_loader_overlay');
+		if (overlay.length) {
+			overlay.width(width).height(height).offset(this._jqCanvas.offset());
+		}
+
 		this._graph.resize(width,height);
 	};
 
@@ -97,8 +128,10 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	GraphView.prototype._onTrailChange = function(trailInfo) {
 		var self = this;
 		this._activeTrail = trailInfo;
+		this._showLoader();
 		TrailGraphService.get(trailInfo)
 			.then(function(response) {
+				self._hideLoader();
 				return self._getForensicGraph(response);
 			})
 			.then(function(forensicGraph) {

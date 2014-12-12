@@ -1,6 +1,7 @@
 @import "bootstrap.css";
 
 @background-color : #fbfbfb;
+@ajax-loader-size : 100px;
 
 .domainLabel {
   font-weight: 400;
@@ -18,7 +19,21 @@
 
 canvas {
   background-color: @background-color
+}
 
+.ajax_loader_overlay {
+  position: absolute;
+  z-index: 10000;
+  background-color: #000000;
+  opacity: 0.35;
+}
+
+.ajax_loader_image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -@ajax-loader-size/2;
+  margin-top: -@ajax-loader-size/2;
 }
 
 #legendContainer {
