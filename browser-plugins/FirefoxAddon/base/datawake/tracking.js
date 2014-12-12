@@ -7,6 +7,8 @@ var requestHelper = require("./request-helper");
 var constants = require("./constants");
 var storage = require("./storage");
 var widgetHelper = require("./button");
+var timer = require("sdk/timers");
+var service = require("./service");
 var selectionHelper = require("./selections");
 
 exports.trackTab = trackTab;
@@ -22,6 +24,7 @@ exports.isTabWorkerAttached = isTabWorkerAttached;
  * @type {{Dictionary}}
  */
 var trackingTabWorkers = {};
+var advanceSearchTimerId;
 
 /**
  * Tracks the current tab.
@@ -47,22 +50,22 @@ function trackTab(tab, datawakeInfo) {
     }
 }
 
-function promptForExtractedFeedback(highlightedText, callback){
+function promptForExtractedFeedback(highlightedText, callback) {
     var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
     var obj = {};
     obj.raw_text = highlightedText;
     currentTrackingTabWorker.port.emit("promptForFeedback", obj);
-    currentTrackingTabWorker.port.on("feedback", function(response){
-       callback(response.type, response.value);
+    currentTrackingTabWorker.port.on("feedback", function (response) {
+        callback(response.type, response.value);
     });
 }
 
-function hideSelections(className){
+function hideSelections(className) {
     var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
     currentTrackingTabWorker.port.emit("removeSelections", className);
 }
 
-function highlightTrailEntities(entities){
+function highlightTrailEntities(entities) {
     var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
     currentTrackingTabWorker.port.emit("highlightTrailEntities", entities);
 }
@@ -111,11 +114,12 @@ function setupTabWorkerAndServices(tab) {
                     var scrapeObject = response.json;
                     //Sets up the context menu objects for this tab.
                     if (currentTrackingTabWorker.tab != null) {
-                        widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, datawakeInfoForTab, scrapeObject.count);
+                        getDomainExtractedEntities(1000);
+                        widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, scrapeObject.count);
                     }
                 });
             } else {
-                widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, datawakeInfoForTab, 0);
+                widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, 0);
             }
             selectionHelper.useContextMenu(currentTrackingTabWorker.tab);
         });
@@ -124,8 +128,74 @@ function setupTabWorkerAndServices(tab) {
     else {
         console.debug("Tracking is off for this page...");
         destoryTabWorker(tab.id);
-        widgetHelper.resetToggleButton();
     }
+}
+
+/**
+ * Gets all entities associated for this url
+ * @param delay Timeout delay between each call.
+ */
+function getDomainExtractedEntities(delay) {
+    if (isTabWorkerAttached(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
+        var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
+        var tabUrl = tabs.activeTab.url;
+        service.getDomainExtractedEntities(datawakeInfo.domain.name, tabUrl, function (entities) {
+            if (entities.domainExtracted != null && Object.keys(entities.domainExtracted).length > 0) {
+                var entitiesInDomain = getEntitiesInDomain(entities.domainExtracted);
+                highlightExtractedLinks(entitiesInDomain);
+                if (entitiesInDomain.length > 0) {
+                    console.debug("Domain matches found on url: " + tabUrl + " setting badge RED");
+                    //TODO: When badges get added, change the color here.
+                } else {
+                    console.debug("no domain matches found on url: " + tabUrl);
+                }
+            } else {
+                console.debug("advanceSearch, no response for url, setting time to try again.");
+            }
+            //Keep Polling
+            if (delay <= 5 * 60 * 1000) { // eventually stop polling
+                advanceSearchTimerId = timer.setTimeout(function (newDelay) {
+                    getDomainExtractedEntities(newDelay);
+                }, delay * 2);
+            }
+
+        });
+    } else {
+        console.debug("The Datawake is not on for this tab.");
+    }
+}
+
+/**
+ * Gets the entities in this domain.
+ * @returns {Array} The entities that are in this domain.
+ * @param domainExtracted
+ */
+function getEntitiesInDomain(domainExtracted) {
+    var entitiesInDomain = [];
+    for (var type in domainExtracted) {
+        for (var index in domainExtracted[type]) {
+            var typeObject = {};
+            typeObject.type = type;
+            typeObject.name = domainExtracted[type][index];
+            console.debug("Extracted value: " + typeObject.name);
+            entitiesInDomain.push(typeObject);
+        }
+    }
+    return entitiesInDomain;
+}
+
+/**
+ * Gets the external links for this instance and highlights the entities in the array.
+ * @param entitiesInDomain Entities to highlight.
+ */
+function highlightExtractedLinks(entitiesInDomain) {
+    service.getExternalLinks(function (externalLinks) {
+        var highlightObject = {};
+        highlightObject.entities = entitiesInDomain;
+        highlightObject.links = externalLinks;
+        console.debug("Emitting data to highlight");
+        highlightTextWithToolTips(tabs.activeTab.id, highlightObject);
+    });
 }
 
 /**
@@ -184,8 +254,8 @@ function setTabWorker(tabId, worker) {
  * @param tab Tab to switch.
  */
 function switchTab(tab) {
-    var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
-    widgetHelper.switchToTab(tab.id, datawakeInfoForTab);
+    timer.clearInterval(advanceSearchTimerId);
+    widgetHelper.switchToTab(tab.id);
 }
 
 /**

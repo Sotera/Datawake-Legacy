@@ -1,0 +1,53 @@
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <td>
+            <div id="user_info">{{user.displayName}}</div>
+            <button id="signin">Sign in</button>
+            <button id="revoke">Sign out</button>
+        </td>
+
+
+        <td>
+            <b>Org:</b> {{org}}
+        </td>
+        <td>
+            <b>Version:</b> {{versionNumber}}
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <td>
+            <b>Domain:</b>
+        </td>
+        <td>
+            {{domain}}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Trail:</b>
+        </td>
+        <td>
+            {{trail}}
+        </td>
+    </tr>
+    <tr>
+        <td><b>URL: </b></td>
+        <td>{{current_url}}</td>
+    </tr>
+    <tr ng-if="showRanking">
+        <td>
+            <b>URL Ranking:</b>
+        </td>
+        <td>
+            <div id="star_rating"></div>
+            <span id="url_rank_text">{{ranking}} / 10</span>
+        </td>
+    </tr>
+    </tbody>
+</table>

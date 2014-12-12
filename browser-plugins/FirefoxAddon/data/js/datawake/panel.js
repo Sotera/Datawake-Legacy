@@ -1,116 +1,72 @@
 var addon = self;
-var panelApp = angular.module('panelApp', []);
+var panelApp = angular.module('panelApp', ["ngRoute"]).config(['$provide', function ($provide) {
+    $provide.decorator('$sniffer', ['$delegate', function ($delegate) {
+        $delegate.history = false;
+        return $delegate;
+    }]);
+}]);
 
 panelApp.controller("PanelCtrl", function ($scope, $document) {
 
-    $scope.invalidTab = true;
     $scope.lookaheadLinks = [];
     $scope.extracted_tools = [];
-    $scope.datawake = null;
-    $scope.current_url = "";
+    $scope.datawake = addon.options.datawakeInfo;
+    $scope.current_url = addon.options.current_url;
+    $scope.lookaheadEnabled = addon.options.useLookahead;
+    $scope.domainFeaturesEnabled = addon.options.useDomainFeatures;
+    $scope.rankingEnabled = addon.options.useRanking;
+    $scope.versionNumber = addon.options.versionNumber;
     $scope.invalid = {};
+    $scope.lookaheadTimerStarted = false;
+    $scope.pageVisits = addon.options.pageVisits;
+    $scope.headerPartial = "partials/header-partial.html";
 
-    addon.port.on("datawakeInfo", function (datawakeInfo) {
-        $scope.datawake = datawakeInfo;
-        $scope.hideSignInButton = datawakeInfo.user != null;
-        $scope.lookaheadLinks = [];
-        $scope.extracted_tools = [];
-        $scope.entities_in_domain = [];
-        $scope.feedbackEntities = [];
-        $scope.extracted_entities_dict = {};
-        $scope.lookaheadTimerStarted = false;
-        $scope.lookaheadEnabled = true;
-        $scope.domainFeaturesEnabled = true;
-        $scope.rankingEnabled = true;
-        $scope.invalid = {};
-        //Trigger the starting tab.
-        var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
-        domainExtractedEntities.trigger('click');
-        $scope.$apply();
-    });
 
     addon.port.on("feedbackEntities", function (entities) {
-        $scope.feedbackEntities = entities;
-        $scope.$apply();
-    });
-
-    addon.port.on("versionNumber", function (version) {
-        $scope.versionNumber = version;
-        $scope.$apply();
-    });
-
-    addon.port.on("useDomainFeatures", function (domainFeatures) {
-        $scope.domainFeaturesEnabled = domainFeatures;
-        $scope.$apply();
-    });
-    addon.port.on("useLookahead", function (lookahead) {
-        $scope.lookaheadEnabled = lookahead;
-        $scope.$apply();
-    });
-    addon.port.on("useRanking", function (ranking) {
-        $scope.rankingEnabled = ranking;
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.feedbackEntities = entities;
+        });
     });
 
     addon.port.on("signOutComplete", function () {
-        $scope.hideSignInButton = false;
-        $scope.$apply();
-    });
-
-    addon.port.on("sendUserInfo", function (user) {
-        $scope.datawake.user = user;
-        $scope.$apply();
-    });
-
-    addon.port.on("validTab", function (url) {
-        $scope.current_url = url;
-        $scope.invalidTab = false;
-        $scope.$apply();
-    });
-
-    addon.port.on("invalidTab", function () {
-        $scope.invalidTab = true;
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.hideSignInButton = false;
+        });
     });
 
     addon.port.on("ranking", function (rankingInfo) {
-        $scope.ranking = rankingInfo.ranking;
-        var starRating = $("#star_rating");
-        starRating.attr("data-average", rankingInfo.ranking);
-        //Create this only once.
-        createStarRating(addon.options.starUrl);
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.ranking = rankingInfo.ranking;
+            var starRating = $("#star_rating");
+            starRating.attr("data-average", rankingInfo.ranking);
+            createStarRating(addon.options.starUrl);
+        });
     });
 
     addon.port.on("entities", function (extractedEntities) {
-        if (!$scope.lookaheadTimerStarted) {
+        $scope.$apply(function () {
             if (extractedEntities.allEntities.hasOwnProperty("website")) {
                 var lookaheadTimerObject = {};
                 lookaheadTimerObject.links = extractedEntities.allEntities["website"];
                 addon.port.emit("startLookaheadTimer", lookaheadTimerObject);
-                $scope.lookaheadTimerStarted = true;
             }
-        }
-        console.debug("Parsing Extracted Entities...");
-        $scope.extracted_entities_dict = extractedEntities.allEntities;
-        $scope.entities_in_domain = extractedEntities.domainExtracted;
-        $scope.$apply();
+            console.debug("Parsing Extracted Entities...");
+            $scope.extracted_entities_dict = extractedEntities.allEntities;
+            $scope.entities_in_domain = extractedEntities.domainExtracted;
+        });
     });
 
     addon.port.on("lookaheadTimerResults", function (lookahead) {
-        $scope.lookaheadLinks.push(lookahead);
-        $scope.$apply();
-    });
-
-    addon.port.on("badgeCount", function (badgeCount) {
-        $scope.pageVisits = badgeCount;
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.lookaheadLinks.push(lookahead);
+        });
     });
 
     addon.port.on("externalLinks", function (links) {
         console.debug("Loading External Entities..");
-        $scope.extracted_tools = links;
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.extracted_tools = links;
+        });
     });
 
 
@@ -126,30 +82,28 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         addon.port.emit("openExternalLink", {externalUrl: externalUrl});
     };
 
-    $scope.markInvalid = function(type, entity){
+    $scope.markInvalid = function (type, entity) {
         var postObj = {};
         postObj.entity_type = type;
         postObj.entity_value = entity;
         postObj.domain = $scope.datawake.domain.name;
         addon.port.emit("markInvalid", postObj);
-
     };
 
-    addon.port.on("marked", function(entity){
-        $scope.invalid[entity] = true;
-        $scope.$apply();
+    addon.port.on("marked", function (entity) {
+        $scope.$apply(function () {
+            $scope.invalid[entity] = true;
+        });
     });
 
     $scope.isExtracted = function (type, name) {
         if ($scope.entities_in_domain.hasOwnProperty(type)) {
-
             return $scope.entities_in_domain[type].indexOf(name) >= 0;
         }
     };
 
     function createStarRating(starUrl) {
         var starRating = $("#star_rating");
-        starRating.html("");
         starRating.jRating({
             type: 'big', // type of the rate.. can be set to 'small' or 'big'
             length: 10, // nb of stars
@@ -161,8 +115,9 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
             nbRates: 9999999,
             onClick: function (element, rate) {
                 setUrlRank(rate);
-                $scope.ranking = rate;
-                $scope.$apply();
+                $scope.$apply(function () {
+                    $scope.ranking = rate;
+                });
             }
         });
 
@@ -177,26 +132,26 @@ panelApp.controller("PanelCtrl", function ($scope, $document) {
         addon.port.emit("setUrlRank", rank_data);
     }
 
-    $document.ready(function () {
-        var domainExtractedEntities = $('#domain_extracted_entities').find('a').first();
-        domainExtractedEntities.click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-        });
-
-        $('#lookahead').find('a').first().click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-        });
-
-        $('#all_extracted_entities').find('a').first().click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-        });
-        $('#feedback').find('a').first().click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-        });
-    });
+    addon.port.emit("init");
 
 });
+
+panelApp.config(['$routeProvider',
+    function ($routeProvider) {
+        $routeProvider.
+            when('/features/all', {
+                templateUrl: 'partials/extracted-entities-partial.html'
+            }).
+            when('/features/domain', {
+                templateUrl: 'partials/domain-extracted-partial.html'
+            }).
+            when('/lookahead', {
+                templateUrl: 'partials/lookahead-partial.html'
+            }).
+            when('/feedback', {
+                templateUrl: 'partials/feedback-partial.html'
+            }).
+            otherwise({
+                redirectTo: '/features/domain'
+            });
+    }]);
