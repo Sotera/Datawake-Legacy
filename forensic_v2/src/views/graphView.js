@@ -59,7 +59,12 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * @private
 	 */
 	GraphView.prototype._onNodeClick = function(node) {
-		this._graph.ungroup(node);
+		if (node.children) {
+			this._graph.ungroup(node);
+		} else if (node.type === 'website' || node.type === 'browse_path') {
+			var win = window.open(node.value, '_blank');
+			win.focus();
+		}
 	};
 
 	/**
