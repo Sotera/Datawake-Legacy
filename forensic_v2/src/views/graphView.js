@@ -79,6 +79,11 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this.removeLabel(node);
 	};
 
+
+	/**
+	 * Display a modal overlay with a loader
+	 * @private
+	 */
 	GraphView.prototype._showLoader = function() {
 		var overlay = $('<div/>')
 			.attr('id','ajax_loader_overlay')
@@ -100,6 +105,10 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 
 	};
 
+	/**
+	 * Hide modal loader overlay
+	 * @private
+	 */
 	GraphView.prototype._hideLoader = function() {
 		$('#ajax_loader_overlay').remove();
 	};
