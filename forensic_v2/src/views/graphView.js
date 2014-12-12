@@ -342,6 +342,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			var browsePathNode = this._browsePathComponents.browsePathNodeMap[entity.id];
 			if (entity.type === 'website') {
 
+				// Create a list of all phone/email entities that are lookaheads
 				var lookaheadFeatures = response.lookaheadFeatures[entity.value];
 				var phoneAndEmailLookaheadEntities = [];
 				if (lookaheadFeatures) {
@@ -353,6 +354,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 					}
 				}
 
+				// Get a list of all entities we've already come across that have the same value as the ones in the lookahead
 				var that = this;
 				var sourceEntityNodes = [];
 				phoneAndEmailLookaheadEntities.forEach(function(lookaheadFeature) {
@@ -363,8 +365,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				});
 
 
+				// If this website has links to email/phone entities, add it and create links to those entities
 				if (sourceEntityNodes.length > 0) {
-
 					var node = $.extend(entity, {
 						x: 0,
 						y: 0,
