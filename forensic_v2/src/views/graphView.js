@@ -79,6 +79,46 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this.removeLabel(node);
 	};
 
+	GraphView.prototype._showLoader = function(duration) {
+		if (this._loaderAnimationId) {
+			return;
+		}
+
+		_.showLoader();
+
+		var startBlur = 0, endBlur = 5;
+		var startGrayscale = 0, endGrayscale = 1;
+		var startTime = (new Date()).getTime();
+		var elements = $(document.body).children('div').not('#ajax_loader_overlay');
+
+		var that = this;
+		function stepAnimation() {
+			var currentTime = (new Date()).getTime();
+			var t = _.clamp((currentTime-startTime)/duration,0,1);
+			var grayscale = _.lerp(startGrayscale,endGrayscale,t);
+			var blur = _.lerp(startBlur,endBlur,t);
+			var filterStr = 'blur(' + blur + 'px) grayscale(' + grayscale + ')';
+			elements.css({
+				'-webkit-filter' : filterStr		// TODO:  other browsers?
+			});
+			if (t < 1) {
+				that._loaderAnimationId = window.requestAnimationFrame(stepAnimation);
+			}
+		}
+		this._loaderAnimationId = window.requestAnimationFrame(stepAnimation);
+	};
+
+	GraphView.prototype._hideLoader = function(intervalId) {
+		if (this._loaderAnimationId) {
+			window.cancelAnimationFrame(this._loaderAnimationId);
+		}
+		$(document.body).children('div').css({
+			'-webkit-filter':''
+		});
+		_.hideLoader();
+		delete this._loaderAnimationId;
+	};
+
 
 	/**
 	 * Handles resizing
@@ -104,10 +144,10 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	GraphView.prototype._onTrailChange = function(trailInfo) {
 		var self = this;
 		this._activeTrail = trailInfo;
-		_.showLoader();
+		this._showLoader(1000);
 		TrailGraphService.get(trailInfo)
 			.then(function(response) {
-				_.hideLoader();
+				self._hideLoader();
 				return self._getForensicGraph(response);
 			})
 			.then(function(forensicGraph) {

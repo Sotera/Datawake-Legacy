@@ -47,6 +47,20 @@ define([], function() {
 		 */
 		hideLoader : function() {
 			$('#ajax_loader_overlay').remove();
+		},
+
+		lerp : function(a,b,t) {
+			return a + (t * (b-a));
+		},
+
+		clamp : function(val,min,max) {
+			if (val < min) {
+				return min;
+			} else if (val > max) {
+				return max;
+			} else {
+				return val;
+			}
 		}
 	};
 });
