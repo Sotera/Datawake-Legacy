@@ -175,6 +175,13 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	},
 
 	/**
+	 * Trims the graph to show only connected components
+	 */
+	GraphView.prototype._onTrim = function() {
+
+	},
+
+	/**
 	 * Fits the graph to the screen
 	 * @private
 	 */

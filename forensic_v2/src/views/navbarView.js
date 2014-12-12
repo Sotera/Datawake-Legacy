@@ -75,6 +75,10 @@ define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events
 			events.publish(events.topics.TOGGLE_LEGEND);
 		});
 
+		this._canvas.find('.trimBtn').click(function() {
+			events.publish(events.topics.TRIM);
+		});
+
 		this._canvas.find('.aboutLink').click(function() {
 			$('.modal').show();
 		});

@@ -58,7 +58,8 @@ define([], function() {
 			'REFRESH' 		: 'refresh',
 			'FIT'			: 'fit',
 			'TOGGLE_LEGEND' : 'toggle_legend',
-			'SHOW_ABOUT'	: 'show_about'
+			'SHOW_ABOUT'	: 'show_about',
+			'TRIM'			: 'trim'
 		}
 	};
 });
