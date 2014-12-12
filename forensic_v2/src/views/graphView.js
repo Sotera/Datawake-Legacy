@@ -16,6 +16,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this._activeTrail = null;
 		this._browsePathComponents = null;
 		this._entitiesComponents = null;
+		this._entityValuesMap = null;
 		this._relatedLinksComponents = null;
 		this._groupingManager = new ForensicGroupingManager();
 		this._initialize(element,context);
@@ -264,6 +265,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	GraphView.prototype._getEntitiesGraph = function(response) {
 		var nodeIndex = this._browsePathComponents.nodes.length;
 
+		this._entityValuesMap = {};
+
 		var nodes = [];
 		var links = [];
 		for (var i = 0; i < response.entities.length; i++) {
@@ -285,6 +288,15 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 					col : 1,
 					row : browsePathNode.row
 				});
+
+				var nodesWithValue = this._entityValuesMap[entity.value];
+				if (!nodesWithValue) {
+					nodesWithValue = [];
+				}
+				nodesWithValue.push(node);
+				this._entityValuesMap[entity.value] = nodesWithValue;
+
+
 				nodes.push(node);
 				var link = {
 					source : browsePathNode,
@@ -319,29 +331,62 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		var nodeIndex = this._browsePathComponents.nodes.length + this._entitiesComponents.nodes.length;
 
 		var nodes = [];
+		var links = [];
 		for (var i = 0; i < response.entities.length; i++) {
 			var entity = response.entities[i];
 			var browsePathNode = this._browsePathComponents.browsePathNodeMap[entity.id];
 			if (entity.type === 'website') {
-				var node =  $.extend(entity,{
-					x: 0,
-					y: 0,
-					fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
-					strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
-					lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
-					radius: DEFAULT_NODE_RADIUS,
-					index: nodeIndex,
-					labelText : entity.value,
-					col: 2,
-					row: browsePathNode.row
+
+				var lookaheadFeatures = response.lookaheadFeatures[entity.value];
+				var phoneAndEmailLookaheadEntities = [];
+				if (lookaheadFeatures) {
+					if (lookaheadFeatures.phone) {
+						phoneAndEmailLookaheadEntities = phoneAndEmailLookaheadEntities.concat(lookaheadFeatures.phone);
+					}
+					if (lookaheadFeatures.email) {
+						phoneAndEmailLookaheadEntities = phoneAndEmailLookaheadEntities.concat(lookaheadFeatures.email);
+					}
+				}
+
+				var that = this;
+				var sourceEntityNodes = [];
+				phoneAndEmailLookaheadEntities.forEach(function(lookaheadFeature) {
+					var nodesWithEntityValue = that._entityValuesMap[lookaheadFeature];
+					if (nodesWithEntityValue) {
+						sourceEntityNodes = sourceEntityNodes.concat(nodesWithEntityValue);
+					}
 				});
-				nodes.push(node);
-				nodeIndex++;
+
+
+				if (sourceEntityNodes.length > 0) {
+
+					var node = $.extend(entity, {
+						x: 0,
+						y: 0,
+						fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
+						strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
+						lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
+						radius: DEFAULT_NODE_RADIUS,
+						index: nodeIndex,
+						labelText: entity.value,
+						col: 2,
+						row: browsePathNode.row
+					});
+					nodes.push(node);
+					nodeIndex++;
+
+					sourceEntityNodes.forEach(function(sourceNode) {
+						links.push({
+							source : sourceNode,
+							target : node
+						});
+					});
+				}
 			}
 		}
 		return {
 			nodes : nodes,
-			links : []			// TODO:  how to get these?
+			links : links
 		};
 	};
 
