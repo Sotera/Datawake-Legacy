@@ -13,6 +13,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this._graph = null;
 		this._jqCanvas = null;
 		this._layouter = null;
+		this._activeTrail = null;
 		this._browsePathComponents = null;
 		this._entitiesComponents = null;
 		this._relatedLinksComponents = null;
@@ -89,6 +90,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 */
 	GraphView.prototype._onTrailChange = function(trailInfo) {
 		var self = this;
+		this._activeTrail = trailInfo;
 		TrailGraphService.get(trailInfo)
 			.then(function(response) {
 				return self._getForensicGraph(response);
@@ -97,6 +99,15 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				self._renderForensicGraph(forensicGraph);
 			});
 	};
+
+	GraphView.prototype._onRefresh = function() {
+		if (!this._activeTrail) {
+			return;
+		}
+		//TODO:  save position of graph
+		this._onTrailChange(this._activeTrail);
+		// TODO:  restore position of graph
+	},
 
 	/**
 	 * Fits the graph to the screen
@@ -112,6 +123,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 */
 	GraphView.prototype._bindEventHandlers = function() {
 		events.subscribe(events.topics.TRAIL_CHANGE,this._onTrailChange,this);
+		events.subscribe(events.topics.REFRESH, this._onRefresh, this);
 		events.subscribe(events.topics.FIT,this._onFit,this);
 	};
 
