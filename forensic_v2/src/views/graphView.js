@@ -1,4 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager', '../config/forensic_config'], function(graphTemplate,events,TrailGraphService,testData,ForensicColumnLayout,ForensicGroupingManager,ForensicConfig) {
+define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager', '../config/forensic_config', '../util/util'], function(graphTemplate,events,TrailGraphService,testData,ForensicColumnLayout,ForensicGroupingManager,ForensicConfig,_) {
 
 
 	var DEFAULT_NODE_RADIUS = 20;
@@ -81,39 +81,6 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 
 
 	/**
-	 * Display a modal overlay with a loader
-	 * @private
-	 */
-	GraphView.prototype._showLoader = function() {
-		var overlay = $('<div/>')
-			.attr('id','ajax_loader_overlay')
-			.width(this._jqCanvas.width())
-			.height(this._jqCanvas.height())
-			.offset(this._jqCanvas.offset())
-			.addClass('ajax_loader_overlay')
-			.appendTo(this._jqCanvas.parent());
-
-		var img = $('<img/>')
-			.attr('src','./img/ajax_loader.gif')
-			.addClass('ajax_loader_image')
-			.appendTo(overlay);
-
-		var imgDim = parseInt(img.css('margin-left').replace('px',''))*-2;
-		img.attr('width',imgDim);
-		img.attr('height',imgDim);
-
-
-	};
-
-	/**
-	 * Hide modal loader overlay
-	 * @private
-	 */
-	GraphView.prototype._hideLoader = function() {
-		$('#ajax_loader_overlay').remove();
-	};
-
-	/**
 	 * Handles resizing
 	 * @private
 	 */
@@ -137,10 +104,10 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	GraphView.prototype._onTrailChange = function(trailInfo) {
 		var self = this;
 		this._activeTrail = trailInfo;
-		this._showLoader();
+		_.showLoader();
 		TrailGraphService.get(trailInfo)
 			.then(function(response) {
-				self._hideLoader();
+				_.hideLoader();
 				return self._getForensicGraph(response);
 			})
 			.then(function(forensicGraph) {
