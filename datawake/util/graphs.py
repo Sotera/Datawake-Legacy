@@ -225,13 +225,10 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
 
     command = command + " ORDER BY datawake_data.ts asc"
 
-    tangelo.log("SQL COMMAND: " + command)
-    tangelo.log("SQL PARAMS : " + str(commandArgs))
-
     db_rows = datawake_db.dbGetRows(command,commandArgs)
 
-    tangelo.log("SQL RETURNED " + str(len(db_rows)) + " rows")
     browsePath = {}
+    adj_urls = set([])
     entities = []
     for row in db_rows:
         (id,ts,url,entity_type,entity_value) = row
@@ -239,7 +236,6 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
 
         if id not in browsePath:
             ext = tldextract.extract(url)
-            tangelo.log("TLDExtract: " + str(url) + '    domain:' + ext.domain);
             browsePath[id] = {'id':id,
                               'url':url,
                               'timestamp':ts,
@@ -260,7 +256,6 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
             entity['user_name'] = emailPieces[0]
             emailURL = 'mailto://'+emailPieces[1]
             emailExt = tldextract.extract(emailURL)
-            tangelo.log("TLDExtract: " + emailURL + '    domain:' + emailExt.domain)
             entity['domain'] = emailExt.domain
             entity['subdomain'] = emailExt.subdomain
         elif (entity_type=='phone'):
@@ -269,8 +264,8 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
             else:
                 entity['area_code'] = entity_value[:3]
         else:
+            adj_urls.add(entity_value)
             webExt = tldextract.extract(entity_value)
-            tangelo.log("TLDExtract: " + entity_value + '    domain:' + webExt.domain)
             entity['subdomain']=webExt.subdomain
             entity['domain']=webExt.domain
             entity['suffix']=webExt.suffix
@@ -279,10 +274,24 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
             entities.append(entity)
 
 
+
+    # Get all the lookahead features
+    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls(adj_urls)
+
+    # add place holders for urls with no extracted data
+    for adj_url in adj_urls:
+        if adj_url not in lookaheadFeatures:
+            lookaheadFeatures[adj_url] = {}
+
+    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,adj_urls)
+
+
     entityDataConnector.close()
     return {
         'browsePath':browsePath,
-        'entities':entities
+        'entities':entities,
+        'lookaheadFeatures':lookaheadFeatures,
+        'domainLookaheadFeatures':domainLookaheadFeatures
     }
 
 def getBrowsePathWithTextSelections(org,startdate,enddate,userlist=[],trail='*',domain=''):
