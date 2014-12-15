@@ -62,7 +62,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		if (node.children) {
 			this._graph.ungroup(node);
 		} else if (node.type === 'website' || node.type === 'browse_path') {
-			var win = window.open(node.value, '_blank');
+			var url = node.type === 'website' ? node.value : node.url;
+			var win = window.open(url, '_blank');
 			win.focus();
 		}
 	};
