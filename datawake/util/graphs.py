@@ -19,6 +19,7 @@ import igraph
 import datawake.util.entity_data_connector_factory as factory
 from datawake.util import datawake_db
 import tangelo
+import time
 import tldextract
 
 """
@@ -187,6 +188,7 @@ def getBrowsePathAndAdjacentEmailEdgesWithLimit(org,startdate,enddate,limit,user
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['email'],limit,userlist,trail,domain)
 
 def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
+    startMillis = int(round(time.time() * 1000))
     entityDataConnector.close()
     org = org.upper()
     command = """SELECT datawake_data.id,unix_timestamp(datawake_data.ts) as ts,datawake_data.url,entity_type,entity_value
@@ -299,6 +301,8 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
 
 
     entityDataConnector.close()
+    endMillis = int(round(time.time() * 1000))
+    tangelo.log('Processing time = ' + str((endMillis-startMillis)/1000) + 's');
     return {
         'browsePath':browsePath,
         'entities':entities,
