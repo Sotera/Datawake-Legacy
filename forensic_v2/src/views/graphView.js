@@ -40,6 +40,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			.fontColour(ForensicConfig.LABEL.FILL_STYLE)
 			.fontFamily(ForensicConfig.LABEL.FONT_FAMILY)
 			.fontSize(ForensicConfig.LABEL.FONT_HEIGHT)
+			.fontShadow(ForensicConfig.LABEL.SHADOW_COLOR,0,0,ForensicConfig.LABEL.SHADOW_BLUR)
 			.draw();
 
 		this._bindEventHandlers();
@@ -53,8 +54,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	};
 
 	/**
-	 * Ungroups the node on click.
-	 * TODO: if this is not a cluster, do something intelligent like open the webpage?   display other info?
+	 * Ungroups the node on click.  If this is not a cluster, open the webpage
 	 * @param node
 	 * @private
 	 */

@@ -287,9 +287,11 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 			if (sourceAggregate.type === 'browse_path' && targetAggregate.type === 'browse_path') {
 				link.type = ForensicConfig.BROWSE_PATH_LINK.LINE_TYPE;
 				link.lineWidth = ForensicConfig.BROWSE_PATH_LINK.LINE_WIDTH;
+				link.strokeStyle = ForensicConfig.BROWSE_PATH_LINK.STROKE_STYLE;
 			} else {
 				link.type = ForensicConfig.ENTITY_LINK.LINE_TYPE;
 				link.lineWidth = ForensicConfig.ENTITY_LINK.LINE_WIDTH;
+				link.strokeStyle = ForensicConfig.ENTITY_LINK.STROKE_STYLE;
 			}
 			return link;
 		},

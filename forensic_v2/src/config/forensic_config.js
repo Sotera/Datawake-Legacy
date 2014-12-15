@@ -14,7 +14,7 @@ define([], function() {
 			LINE_TYPE : GraphJS.LINK_TYPE.ARROW
 		},
 		ENTITY_LINK : {
-			STROKE_STYLE : '#232323',
+			STROKE_STYLE : '#787878',
 			LINE_WIDTH : 1,
 			LINE_TYPE : GraphJS.LINK_TYPE.LINE
 		},
@@ -39,13 +39,15 @@ define([], function() {
 			STROKE_WIDTH : NODE_STROKE_WIDTH
 		},
 		LABEL : {
-			FONT_FAMILY : '"Helvetica Neue"',
-			FONT_HEIGHT : 14,
-			FILL_STYLE : '#333'
+			FONT_FAMILY : '"Open Sans"',
+			FONT_HEIGHT : 20,
+			FILL_STYLE : '#333',
+			SHADOW_COLOR : '#fff',
+			SHADOW_BLUR : 5
 		},
 		showLegendOnStart : true,
 		fitPadding : 100, 				// padding around fit graph
 		layoutDuration : 750,			// in ms
-		layoutEasing : 'exponential-out'
+		layoutEasing : 'elastic-out'
 	};
 });
