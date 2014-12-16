@@ -55,8 +55,10 @@ define(['hbs!templates/legend','../util/events','../config/forensic_config'], fu
 	LegendView.prototype._onToggle = function() {
 		if (this._isVisible) {
 			this._canvas.animate({opacity:0});
+			this._canvas.parent().animate({opacity:0});
 		} else {
 			this._canvas.animate({opacity:1});
+			this._canvas.parent().animate({opacity:1});
 		}
 		this._isVisible = !this._isVisible;
 	};
