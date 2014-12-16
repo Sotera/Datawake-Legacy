@@ -15,6 +15,8 @@ define([], function() {
 		},
 		ENTITY_LINK : {
 			STROKE_STYLE : '#787878',
+			MIN_LINE_WIDTH : 1,
+			MAX_LINE_WIDTH : 4,
 			LINE_WIDTH : 1,
 			LINE_TYPE : GraphJS.LINK_TYPE.LINE
 		},
@@ -37,6 +39,11 @@ define([], function() {
 			FILL_STYLE : palette.primary[0],
 			STROKE_STYLE : palette.primary[palette.primary.length-1],
 			STROKE_WIDTH : NODE_STROKE_WIDTH
+		},
+		NODE_RADIUS : {
+			UNGROUPED : 12,
+			AGGREGATE_MIN : 20,
+			AGGREGATE_MAX : 35
 		},
 		LABEL : {
 			FONT_FAMILY : '"Open Sans"',

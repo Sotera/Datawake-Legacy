@@ -1,8 +1,6 @@
 define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager', '../config/forensic_config', '../util/util'], function(graphTemplate,events,TrailGraphService,testData,ForensicColumnLayout,ForensicGroupingManager,ForensicConfig,_) {
 
 
-	var DEFAULT_NODE_RADIUS = 20;
-
 	/**
 	 *
 	 * @param element - the parent DOM element
@@ -230,7 +228,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 					fillStyle: ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE,
 					strokeStyle: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_STYLE,
 					lineWidth: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_WIDTH,
-					radius : DEFAULT_NODE_RADIUS,					// TODO:   radius == number of times visited?
+					radius : ForensicConfig.NODE_RADIUS.UNGROUPED,					// TODO:   radius == number of times visited?
 					index : i,
 					url : browsePath[id].url,
 					labelText : browsePath[id].url,
@@ -294,7 +292,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 					strokeStyle:entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.STROKE_STYLE : ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
 					lineWidth:entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH : ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
 					labelText : entity.value,
-					radius : DEFAULT_NODE_RADIUS,
+					radius : ForensicConfig.NODE_RADIUS.UNGROUPED,
 					index : nodeIndex,
 					type: entity.type,
 					value : entity.value,
@@ -381,7 +379,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 						fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
 						strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
 						lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
-						radius: DEFAULT_NODE_RADIUS,
+						radius: ForensicConfig.NODE_RADIUS.UNGROUPED,
 						index: nodeIndex,
 						labelText: entity.value,
 						col: 2,

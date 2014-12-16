@@ -195,7 +195,6 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 					type: 'browse_path',
 					strokeStyle: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_STYLE,
 					lineWidth : ForensicConfig.BROWSE_PATH_ENTITY.STROKE_WIDTH,
-					radius: 20,
 					labelText: browsePathAggregates[row][0].domain,
 					children: browsePathAggregates[row],
 					innerLabel: browsePathAggregates[row].length,
@@ -214,7 +213,6 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 							lineWidth: ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH,
 							type: 'email',
 							strokeStyle: ForensicConfig.EMAIL_ENTITY.STROKE_STYLE,
-							radius: 20,
 							labelText: domainKey,
 							children: clusteredEmails[domainKey],
 							innerLabel: clusteredEmails[domainKey].length,
@@ -235,7 +233,6 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 							lineWidth: ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
 							type: 'phone',
 							strokeStyle: ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
-							radius: 20,
 							labelText : areaCodeKey,
 							children: clusteredPhoneNumbers[areaCodeKey],
 							innerLabel: clusteredPhoneNumbers[areaCodeKey].length,
@@ -256,7 +253,6 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 							lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
 							type: 'website',
 							strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
-							radius: 20,
 							labelText : domainKey,
 							children: clusteredRelatedLinks[domainKey],
 							innerLabel: clusteredRelatedLinks[domainKey].length,
@@ -266,6 +262,23 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 					}
 				}
 			}
+
+			// Get min/max group size to compute the radii
+			var minAggregateSize = Number.MAX_VALUE;
+			var maxAggregateSize = 0;
+			aggregatedNodes.forEach(function(aggregate) {
+				if (aggregate.children && aggregate.children.length > 0) {
+					minAggregateSize = Math.min(minAggregateSize, aggregate.children.length)
+					maxAggregateSize = Math.max(maxAggregateSize, aggregate.children.length);
+				}
+			});
+
+			// Set the radius for each node
+			aggregatedNodes.forEach(function(aggregate) {
+				aggregate.radius = _.lerp(ForensicConfig.NODE_RADIUS.AGGREGATE_MIN, ForensicConfig.NODE_RADIUS.AGGREGATE_MAX, aggregate.children.length/maxAggregateSize);
+			});
+
+
 			this._aggregatedNodes = aggregatedNodes;
 		},
 
@@ -276,7 +289,7 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 		 * @returns {{source: *, target: *}}
 		 * @private
 		 */
-		_createAggregateLink : function (sourceAggregate, targetAggregate, originalLinks) {
+		_createAggregateLink : function (sourceAggregate, targetAggregate, originalLinks, minLinkCount, maxLinkCount) {
 			if (sourceAggregate.index === targetAggregate.index) {
 				return;
 			}
@@ -290,7 +303,7 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 				link.strokeStyle = ForensicConfig.BROWSE_PATH_LINK.STROKE_STYLE;
 			} else {
 				link.type = ForensicConfig.ENTITY_LINK.LINE_TYPE;
-				link.lineWidth = ForensicConfig.ENTITY_LINK.LINE_WIDTH;
+				link.lineWidth = _.lerp(ForensicConfig.ENTITY_LINK.MIN_LINE_WIDTH, ForensicConfig.ENTITY_LINK.MAX_LINE_WIDTH, Math.floor(originalLinks.length / maxLinkCount));
 				link.strokeStyle = ForensicConfig.ENTITY_LINK.STROKE_STYLE;
 			}
 			return link;
