@@ -79,6 +79,17 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		if (!this._graph.showAllLabels()) {
 			this._graph.addLabel(node, node.labelText);
 		}
+		this._graph.updateNode(node.index,{
+			fillStyle : node.highlightFill
+		});
+		// Update outgoing links
+		this._graph.updateLinks(node.index,null,{
+			strokeStyle : node.highlightStroke
+		});
+		// Update incoming links
+		this._graph.updateLinks(null,node.index,{
+			strokeStyle : node.highlightStroke
+		});
 	};
 
 	/**
@@ -90,6 +101,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		if (!this._graph.showAllLabels()) {
 			this._graph.removeLabel(node);
 		}
+		this._graph.updateNode(node.index,{
+			fillStyle : node.standardFill
+		});
 	};
 
 	GraphView.prototype._showLoader = function(duration) {
@@ -244,6 +258,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 					x : 0,
 					y : 0,
 					fillStyle: ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE,
+					standardFill : ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE,
+					highlightFill : ForensicConfig.HIGHLIGHT.FILL_STYLE,
 					strokeStyle: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_STYLE,
 					lineWidth: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_WIDTH,
 					radius : ForensicConfig.NODE_RADIUS.UNGROUPED,					// TODO:   radius == number of times visited?
@@ -307,6 +323,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 					x : 0,
 					y : 0,
 					fillStyle: entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.FILL_STYLE : ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+					standardFill : entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.FILL_STYLE : ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+					highlightFill : ForensicConfig.HIGHLIGHT.FILL_STYLE,
 					strokeStyle:entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.STROKE_STYLE : ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
 					lineWidth:entity.type === 'email' ? ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH : ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
 					labelText : entity.value,
@@ -331,6 +349,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 					source : browsePathNode,
 					target : node,
 					strokeStyle : ForensicConfig.ENTITY_LINK.STROKE_STYLE,
+					standardStroke : ForensicConfig.ENTITY_LINK.STROKE_STYLE,
+					highlightStroke : ForensicConfig.HIGHLIGHT.STROKE_STYLE,
 					lineWidth : ForensicConfig.ENTITY_LINK.LINE_WIDTH,
 					type: ForensicConfig.ENTITY_LINK.LINE_TYPE
 				};
@@ -395,6 +415,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 						x: 0,
 						y: 0,
 						fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
+						standardFill : ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
+						highlightFill : ForensicConfig.HIGHLIGHT.FILL_STYLE,
 						strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
 						lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
 						radius: ForensicConfig.NODE_RADIUS.UNGROUPED,

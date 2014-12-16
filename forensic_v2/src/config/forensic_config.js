@@ -40,6 +40,10 @@ define([], function() {
 			STROKE_STYLE : palette.primary[palette.primary.length-1],
 			STROKE_WIDTH : NODE_STROKE_WIDTH
 		},
+		HIGHLIGHT : {
+			FILL_STYLE : '#ff0000',
+			STROKE_STYLE : '#ff0000'
+		},
 		NODE_RADIUS : {
 			UNGROUPED : 12,
 			AGGREGATE_MIN : 20,
