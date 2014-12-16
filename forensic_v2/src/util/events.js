@@ -58,6 +58,7 @@ define([], function() {
 			'REFRESH' 		: 'refresh',
 			'FIT'			: 'fit',
 			'TOGGLE_LEGEND' : 'toggle_legend',
+			'TOGGLE_LABELS' : 'toggle_labels',
 			'SHOW_ABOUT'	: 'show_about',
 			'TRIM'			: 'trim'
 		}

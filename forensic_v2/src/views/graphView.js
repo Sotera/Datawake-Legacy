@@ -33,13 +33,17 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			.groupingManager(new ForensicGroupingManager())
 			.pannable()
 			.zoomable()
-			.nodeHover(this._onNodeOver,this._onNodeOut)
+			.nodeHover(this._onNodeOver,this._onNodeOut,this)
 			.nodeClick(this._onNodeClick,this)
 			.fontColour(ForensicConfig.LABEL.FILL_STYLE)
 			.fontFamily(ForensicConfig.LABEL.FONT_FAMILY)
 			.fontSize(ForensicConfig.LABEL.FONT_HEIGHT)
 			.fontShadow(ForensicConfig.LABEL.SHADOW_COLOR,0,0,ForensicConfig.LABEL.SHADOW_BLUR)
 			.draw();
+
+		if (ForensicConfig.showLabelsOnStart) {
+			this._graph.showAllLabels(true);
+		}
 
 		this._bindEventHandlers();
 
@@ -72,7 +76,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * @private
 	 */
 	GraphView.prototype._onNodeOver = function(node) {
-		this.addLabel(node,node.labelText);
+		if (!this._graph.showAllLabels()) {
+			this._graph.addLabel(node, node.labelText);
+		}
 	};
 
 	/**
@@ -81,7 +87,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * @private
 	 */
 	GraphView.prototype._onNodeOut = function(node) {
-		this.removeLabel(node);
+		if (!this._graph.showAllLabels()) {
+			this._graph.removeLabel(node);
+		}
 	};
 
 	GraphView.prototype._showLoader = function(duration) {
@@ -189,6 +197,15 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	};
 
 	/**
+	 * Event handler for toggle labels from settings menu
+	 * @private
+	 */
+	GraphView.prototype._onToggleLabels = function() {
+		this._graph.showAllLabels(!this._graph.showAllLabels());
+		this._graph.update();
+	};
+
+	/**
 	 * Adds any event handlers for custom message passing
 	 * @private
 	 */
@@ -196,6 +213,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		events.subscribe(events.topics.TRAIL_CHANGE,this._onTrailChange,this);
 		events.subscribe(events.topics.REFRESH, this._onRefresh, this);
 		events.subscribe(events.topics.FIT,this._onFit,this);
+		events.subscribe(events.topics.TOGGLE_LABELS,this._onToggleLabels,this);
 	};
 
 	/**

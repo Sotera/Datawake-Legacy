@@ -53,6 +53,7 @@ define([], function() {
 			SHADOW_BLUR : 5
 		},
 		showLegendOnStart : true,
+		showLabelsOnStart : true,
 		fitPadding : 100, 				// padding around fit graph
 		layoutDuration : 750,			// in ms
 		layoutEasing : 'elastic-out'
