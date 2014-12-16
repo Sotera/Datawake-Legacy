@@ -295,7 +295,8 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 			}
 			var link = {
 				source: sourceAggregate,
-				target: targetAggregate
+				target: targetAggregate,
+				originalLinks : originalLinks
 			};
 			if (sourceAggregate.type === 'browse_path' && targetAggregate.type === 'browse_path') {
 				link.type = ForensicConfig.BROWSE_PATH_LINK.LINE_TYPE;
@@ -307,6 +308,38 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 				link.strokeStyle = ForensicConfig.ENTITY_LINK.STROKE_STYLE;
 			}
 			return link;
+		},
+
+		onAggregationComplete : function() {
+			var degreeMap = {};
+			var minDegree = Math.MAX_VALUE;
+			var maxDegree = 0;
+			this._aggregatedLinks.forEach(function(link) {
+				var sourceDegree = degreeMap[link.source.index];
+				if (!sourceDegree) {
+					sourceDegree = 0;
+				}
+				sourceDegree += link.originalLinks.length;
+				degreeMap[link.source.index] = sourceDegree;
+
+				var targetDegree = degreeMap[link.target.index];
+				if (!targetDegree) {
+					targetDegree = 0;
+				}
+				targetDegree += link.originalLinks.length;
+				degreeMap[link.target.index] = targetDegree;
+
+				minDegree = Math.min(minDegree,targetDegree);
+				minDegree = Math.min(minDegree,sourceDegree);
+
+				maxDegree = Math.max(maxDegree,targetDegree);
+				maxDegree = Math.max(maxDegree,sourceDegree);
+			});
+
+
+			this._aggregatedNodes.forEach(function(aggregate) {
+				aggregate.radius = _.lerp(ForensicConfig.NODE_RADIUS.AGGREGATE_MIN, ForensicConfig.NODE_RADIUS.AGGREGATE_MAX, degreeMap[aggregate.index]/maxDegree);
+			});
 		},
 
 
