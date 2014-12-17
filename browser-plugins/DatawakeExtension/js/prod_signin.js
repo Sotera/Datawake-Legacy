@@ -17,11 +17,13 @@ var googlePlusUserLoader = (function () {
     var signin_button, revoke_button;
 
     function disableButton(button) {
-        button.setAttribute('disabled', 'disabled');
+        if (button)
+            button.setAttribute('disabled', 'disabled');
     }
 
     function enableButton(button) {
-        button.removeAttribute('disabled');
+        if (button)
+            button.removeAttribute('disabled');
     }
 
     function changeState(newState) {
@@ -84,7 +86,7 @@ var googlePlusUserLoader = (function () {
 
     function getUserInfo(interactive, callback) {
         // bind the user callback function into the onUserINfoFetched function
-        var onUserInfoFetched = getOnUserInfoFetchedFucntion(callback)
+        var onUserInfoFetched = getOnUserInfoFetchedFucntion(callback);
         xhrWithAuth('GET',
             'https://www.googleapis.com/plus/v1/people/me',
             interactive,
@@ -114,7 +116,8 @@ var googlePlusUserLoader = (function () {
 
     function populateUserInfo(user_info) {
         userInfo.user = user_info;
-        user_info_div.innerHTML = user_info.displayName;
+        if (user_info_div)
+            user_info_div.innerHTML = user_info.displayName;
         fetchImageBytes(user_info);
     }
 
@@ -135,7 +138,8 @@ var googlePlusUserLoader = (function () {
         imgElem.onload = function () {
             window.webkitURL.revokeObjectURL(objUrl);
         };
-        user_info_div.insertAdjacentElement("afterbegin", imgElem);
+        if (user_info_div)
+            user_info_div.insertAdjacentElement("afterbegin", imgElem);
     }
 
     // OnClick event handlers for the buttons.
@@ -162,7 +166,7 @@ var googlePlusUserLoader = (function () {
         // will be opened when the user is not yet authenticated or not.
         // @see http://developer.chrome.com/apps/app_identity.html
         // @see http://developer.chrome.com/apps/identity.html#method-getAuthToken
-        chrome.identity.getAuthToken({ 'interactive': true }, function (token) {
+        chrome.identity.getAuthToken({'interactive': true}, function (token) {
             if (chrome.runtime.lastError) {
                 console.log(chrome.runtime.lastError);
                 changeState(STATE_START);
@@ -232,12 +236,16 @@ var googlePlusUserLoader = (function () {
         // takes a callback of type function(user_info)
         onload: function (callback) {
             signin_button = document.querySelector('#signin');
-            signin_button.addEventListener('click', function () {
-                interactiveSignIn(callback)
-            });
+            if (signin_button != null) {
+                signin_button.addEventListener('click', function () {
+                    interactiveSignIn(callback)
+                });
+            }
 
             revoke_button = document.querySelector('#revoke');
-            revoke_button.addEventListener('click', revokeToken);
+            if (revoke_button != null) {
+                revoke_button.addEventListener('click', revokeToken);
+            }
 
             user_info_div = document.querySelector('#user_info');
 
@@ -249,8 +257,8 @@ var googlePlusUserLoader = (function () {
 
 })();
 
-$(document).ready(function(){
-    if (!chrome.runtime.getManifest().hasOwnProperty("oauth2")){
+$(document).ready(function () {
+    if (!chrome.runtime.getManifest().hasOwnProperty("oauth2")) {
         alert("You enabled google auth, but forgot to add your client ids to the manifest file.");
     }
 });
