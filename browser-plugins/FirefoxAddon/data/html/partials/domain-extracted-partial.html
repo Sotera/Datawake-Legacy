@@ -17,12 +17,12 @@
         <tbody>
         <tr ng-repeat="entity in entities">
             <td>
-                                    <span>
-                                        {{entity}}
-                                    </span>
+                <span>
+                    {{entity}}
+                </span>
             </td>
             <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
-                <a ng-href="{{tools.link.replace('$ATTR',entities.type).replace('$VALUE',entity)}}">{{tools.display}}</a>
+                <a ng-click="openExternalLink(tools.link.replace('$ATTR',entities.type).replace('$VALUE',entity));">{{tools.display}}</a>
             </td>
             <td ng-show="extracted_tools.length == 0">
                 <span>No External Tools Available</span>
