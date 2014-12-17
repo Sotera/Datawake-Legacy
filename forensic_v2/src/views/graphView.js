@@ -62,6 +62,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 */
 	GraphView.prototype._onNodeClick = function(node) {
 		if (node.children) {
+			this._onNodeOut(node);
 			this._graph.ungroup(node);
 		} else if (node.type === 'website' || node.type === 'browse_path') {
 			var url = node.type === 'website' ? node.value : node.url;
@@ -83,13 +84,13 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			fillStyle : node.highlightFill
 		});
 		// Update outgoing links
-		this._graph.updateLinks(node.index,null,{
-			strokeStyle : node.highlightStroke
-		});
-		// Update incoming links
-		this._graph.updateLinks(null,node.index,{
-			strokeStyle : node.highlightStroke
-		});
+		//this._graph.updateLinks(node.index,null,{
+		//	strokeStyle : node.highlightStroke
+		//});
+		//// Update incoming links
+		//this._graph.updateLinks(null,node.index,{
+		//	strokeStyle : node.highlightStroke
+		//});
 	};
 
 	/**
