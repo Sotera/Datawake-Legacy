@@ -324,6 +324,6 @@ datawakePopUpApp.config(['$routeProvider',
                 controller: 'FeedbackCtrl'
             }).
             otherwise({
-                redirectTo: '/features/domain'
+                redirectTo: '/features/all'
             });
     }]);
