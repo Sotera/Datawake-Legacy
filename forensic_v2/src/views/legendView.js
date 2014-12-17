@@ -14,18 +14,25 @@ define(['hbs!templates/legend','../util/events','../config/forensic_config'], fu
 			items : [
 				{
 					text : 'Websites',
-					color : ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE
+					fillStyle : ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE,
+					strokeWidth : ForensicConfig.BROWSE_PATH_ENTITY.STROKE_WIDTH,
+					strokeStyle : ForensicConfig.BROWSE_PATH_ENTITY.STROKE_STYLE
 				},
 				{
 					text : 'Email Addresses',
-					color : ForensicConfig.EMAIL_ENTITY.FILL_STYLE
+					fillStyle : ForensicConfig.EMAIL_ENTITY.FILL_STYLE,
+					strokeWidth : ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH,
+					strokeStyle : ForensicConfig.EMAIL_ENTITY.STROKE_STYLE
 				},
 				{
 					text : 'Phone Numbers',
-					color : ForensicConfig.PHONE_ENTITY.FILL_STYLE
+					fillStyle : ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+					strokeWidth : ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
+					strokeStyle : ForensicConfig.PHONE_ENTITY.STROKE_STYLE
 
 				}
-			]
+			],
+			iconSize : 20
 		});
 	}
 
