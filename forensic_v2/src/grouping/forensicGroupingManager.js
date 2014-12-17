@@ -192,6 +192,8 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 					y: 0,
 					index: guid.generate(),
 					fillStyle: ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE,
+					standardFill : ForensicConfig.BROWSE_PATH_ENTITY.FILL_STYLE,
+					highlightFill : ForensicConfig.HIGHLIGHT.FILL_STYLE,
 					type: 'browse_path',
 					strokeStyle: ForensicConfig.BROWSE_PATH_ENTITY.STROKE_STYLE,
 					lineWidth : ForensicConfig.BROWSE_PATH_ENTITY.STROKE_WIDTH,
@@ -210,6 +212,8 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 							y: 0,
 							index: guid.generate(),
 							fillStyle: ForensicConfig.EMAIL_ENTITY.FILL_STYLE,
+							standardFill : ForensicConfig.EMAIL_ENTITY.FILL_STYLE,
+							highlightFill : ForensicConfig.HIGHLIGHT.FILL_STYLE,
 							lineWidth: ForensicConfig.EMAIL_ENTITY.STROKE_WIDTH,
 							type: 'email',
 							strokeStyle: ForensicConfig.EMAIL_ENTITY.STROKE_STYLE,
@@ -230,6 +234,8 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 							y: 0,
 							index: guid.generate(),
 							fillStyle: ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+							standardFill : ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+							highlightFill : ForensicConfig.HIGHLIGHT.FILL_STYLE,
 							lineWidth: ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
 							type: 'phone',
 							strokeStyle: ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
@@ -250,6 +256,8 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 							y: 0,
 							index: guid.generate(),
 							fillStyle: ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
+							standardFill : ForensicConfig.WEBSITE_ENTITY.FILL_STYLE,
+							highlightFill : ForensicConfig.HIGHLIGHT.FILL_STYLE,
 							lineWidth: ForensicConfig.WEBSITE_ENTITY.STROKE_WIDTH,
 							type: 'website',
 							strokeStyle: ForensicConfig.WEBSITE_ENTITY.STROKE_STYLE,
@@ -302,10 +310,14 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 				link.type = ForensicConfig.BROWSE_PATH_LINK.LINE_TYPE;
 				link.lineWidth = ForensicConfig.BROWSE_PATH_LINK.LINE_WIDTH;
 				link.strokeStyle = ForensicConfig.BROWSE_PATH_LINK.STROKE_STYLE;
+				link.standardStroke = link.strokeStyle;
+				link.highlightStroke = link.strokeStyle;
 			} else {
 				link.type = ForensicConfig.ENTITY_LINK.LINE_TYPE;
 				link.lineWidth = _.lerp(ForensicConfig.ENTITY_LINK.MIN_LINE_WIDTH, ForensicConfig.ENTITY_LINK.MAX_LINE_WIDTH, Math.floor(originalLinks.length / maxLinkCount));
 				link.strokeStyle = ForensicConfig.ENTITY_LINK.STROKE_STYLE;
+				link.standardStroke = link.strokeStyle;
+				link.highlightStroke = ForensicConfig.HIGHLIGHT.STROKE_STYLE;
 			}
 			return link;
 		},
