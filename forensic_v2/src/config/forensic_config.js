@@ -41,8 +41,8 @@ define([], function() {
 			STROKE_WIDTH : NODE_STROKE_WIDTH
 		},
 		HIGHLIGHT : {
-			FILL_STYLE : '#ff0000',
-			STROKE_STYLE : '#ff0000'
+			FILL_STYLE : '#cc2222',
+			STROKE_STYLE : '#cc2222'
 		},
 		NODE_RADIUS : {
 			UNGROUPED : 12,

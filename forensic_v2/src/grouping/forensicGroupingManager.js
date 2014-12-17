@@ -310,6 +310,8 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 				link.type = ForensicConfig.BROWSE_PATH_LINK.LINE_TYPE;
 				link.lineWidth = ForensicConfig.BROWSE_PATH_LINK.LINE_WIDTH;
 				link.strokeStyle = ForensicConfig.BROWSE_PATH_LINK.STROKE_STYLE;
+				link.standardStroke = link.strokeStyle;
+				link.highlightStroke = link.strokeStyle;
 			} else {
 				link.type = ForensicConfig.ENTITY_LINK.LINE_TYPE;
 				link.lineWidth = _.lerp(ForensicConfig.ENTITY_LINK.MIN_LINE_WIDTH, ForensicConfig.ENTITY_LINK.MAX_LINE_WIDTH, Math.floor(originalLinks.length / maxLinkCount));

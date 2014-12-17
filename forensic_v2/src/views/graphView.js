@@ -83,12 +83,35 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this._graph.updateNode(node.index,{
 			fillStyle : node.highlightFill
 		});
-		// Update outgoing links
-		//this._graph.updateLinks(node.index,null,{
-		//	strokeStyle : node.highlightStroke
+		//Update outgoing links
+		var outgoingLinks = this._graph.linkObjectsBetween(node.index,null);
+		var incomingLinks = this._graph.linkObjectsBetween(null,node.index);
+		var links = incomingLinks.concat(outgoingLinks);
+		var linkedNodes = {};
+		links.forEach(function(link) {
+			link.strokeStyle = link.highlightStroke;
+			if (link.target.type !== 'browse_path' || link.source.type !== 'browse_path') {
+				linkedNodes[link.target.index] = true;
+				linkedNodes[link.source.index] = true;
+			}
+			if (link.target.type !== 'browse_path') {
+				link.lineWidth *= 2;
+			}
+		});
+		for (var linkedNodeIndex in linkedNodes) {
+			if (linkedNodes.hasOwnProperty(linkedNodeIndex)) {
+				var circle = this._graph.nodeWithIndex(linkedNodeIndex);
+				this._graph.updateNode(linkedNodeIndex, {
+					fillStyle : circle.highlightFill
+				});
+			}
+		}
+		this._graph.update();
+		//this._graph.updateLink(node.index,null,{
+		//	strokeStyle :
 		//});
 		//// Update incoming links
-		//this._graph.updateLinks(null,node.index,{
+		//this._graph.updateLink(null,node.index,{
 		//	strokeStyle : node.highlightStroke
 		//});
 	};
@@ -105,6 +128,30 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this._graph.updateNode(node.index,{
 			fillStyle : node.standardFill
 		});
+		//Update outgoing links
+		var outgoingLinks = this._graph.linkObjectsBetween(node.index,null);
+		var incomingLinks = this._graph.linkObjectsBetween(null,node.index);
+		var links = incomingLinks.concat(outgoingLinks);
+		var linkedNodes = {};
+		links.forEach(function(link) {
+			link.strokeStyle = link.standardStroke;
+			if (link.target.type !== 'browse_path' || link.source.type !== 'browse_path') {
+				linkedNodes[link.target.index] = true;
+				linkedNodes[link.source.index] = true;
+			}
+			if (link.target.type !== 'browse_path') {
+				link.lineWidth *= 1 / 2;
+			}
+		});
+		for (var linkedNodeIndex in linkedNodes) {
+			if (linkedNodes.hasOwnProperty(linkedNodeIndex)) {
+				var circle = this._graph.nodeWithIndex(linkedNodeIndex);
+				this._graph.updateNode(linkedNodeIndex, {
+					fillStyle : circle.standardFill
+				});
+			}
+		}
+		this._graph.update();
 	};
 
 	GraphView.prototype._showLoader = function(duration) {
