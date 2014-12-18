@@ -169,7 +169,7 @@ function emitFeedbackEntities(domain) {
 
 function openExternalTool(externalUrlObject) {
     console.log("Opening External Tool");
-    tabs.activeTab.url = externalUrlObject.externalUrl;
+    tabs.open(externalUrlObject.externalUrl);
 }
 
 /**
