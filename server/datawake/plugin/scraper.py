@@ -23,6 +23,7 @@ from datawake.util.kafka import kafka_producer
 from datawake.util.session.helper import is_in_session
 from datawake.util.session import helper
 from datawake.util.validate.parameters import required_parameters
+import urllib
 
 
 """
@@ -90,7 +91,7 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    json_obj = tangelo.request_body().read()
+    json_obj = urllib.unquote(tangelo.request_body().read())
     post_data = json.loads(json_obj, strict=False)
 
     def unknown(*args):
