@@ -1,15 +1,18 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from streamparse.bolt import Bolt
-from extractors.extract_website import ExtractWebsite
-from kafka.client import KafkaClient
-from kafka.producer import SimpleProducer
 import datetime
 import operator
 import time
 import urllib2
 import traceback
 import json
+
+from streamparse.bolt import Bolt
+from kafka.client import KafkaClient
+from kafka.producer import SimpleProducer
+
+from extractors.extract_website import ExtractWebsite
 from datawakestreams import all_settings
+
 
 class CrawlerBolt(Bolt):
     """
@@ -28,18 +31,18 @@ class CrawlerBolt(Bolt):
         self.linkExtractor = ExtractWebsite()
 
 
-    def initialize(self,storm_conf, context):
+    def initialize(self, storm_conf, context):
         try:
             self.log("CrawlerBolt INIT")
             settings = all_settings.get_settings(storm_conf['topology.deployment'])
             self.topic = settings['crawler-out-topic'].encode()
             self.conn_pool = settings['conn_pool'].encode()
-            self.log('CrawlerQueueWriter initialized with topic ='+self.topic+' conn_pool='+self.conn_pool)
+            self.log('CrawlerQueueWriter initialized with topic =' + self.topic + ' conn_pool=' + self.conn_pool)
             self.kafka = KafkaClient(self.conn_pool)
             self.producer = SimpleProducer(self.kafka, async=False)
         except:
-            self.log("CrawlerBolt initialize error",level='error')
-            self.log(traceback.format_exc(),level='error')
+            self.log("CrawlerBolt initialize error", level='error')
+            self.log(traceback.format_exc(), level='error')
             raise
 
 
@@ -94,9 +97,8 @@ class CrawlerBolt(Bolt):
 
         delta = now - self.lastfetch
         if delta.total_seconds < 0.25:
-            #self.log("CrawlerBolt sleeping")
+            # self.log("CrawlerBolt sleeping")
             time.sleep(.25)
-
 
         opener = urllib2.build_opener()
         headers = [("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0")]
@@ -107,20 +109,20 @@ class CrawlerBolt(Bolt):
             html = response.read().decode('latin-1')
 
             links = self.linkExtractor.extract(url, response.getcode(), '', '', html, response.info()['date'], 'datawake-local-crawler')
-            links = map(lambda x: x.value,links)
-            links = filter(lambda x: x is not None and len(x) >0, links)
-            #self.log("CrawlerBolt extracted links: "+str(links))
+            links = map(lambda x: x.value, links)
+            links = filter(lambda x: x is not None and len(x) > 0, links)
+            # self.log("CrawlerBolt extracted links: "+str(links))
 
             output = dict(
-                crawlid = input['crawlid'],
-                appid = input['appid'],
-                url = url,
-                status_code = response.getcode(),
-                status_msg = 'Success',
-                timestamp = response.info()['date'],
-                links_found = links,
-                body =  html,
-                attrs = input['attrs']
+                crawlid=input['crawlid'],
+                appid=input['appid'],
+                url=url,
+                status_code=response.getcode(),
+                status_msg='Success',
+                timestamp=response.info()['date'],
+                links_found=links,
+                body=html,
+                attrs=input['attrs']
             )
 
 
@@ -129,15 +131,12 @@ class CrawlerBolt(Bolt):
 
             self.lastfetch = datetime.datetime.now()
         except:
-            self.log("CrawlerBolt "+traceback.format_exc())
+            self.log("CrawlerBolt " + traceback.format_exc())
             self.log("CrawlerBolt: URL: " + url)
-            if output is not None:
-                self.log("CrawlerBolt: Output Length: " + str(len(json.dumps(output))))
-            #self.fail(tup)
-
+            # self.fail(tup)
 
         if len(self.seen) > self.MAX_LRU_SIZE:
-            self.log("CrawlerBolt truncating LRU cache",level='trace')
+            self.log("CrawlerBolt truncating LRU cache", level='trace')
             sorted_x = sorted(self.seen.items(), key=operator.itemgetter(1))[0:self.TRUNCATE]
             self.seen = dict(sorted_x)
 

@@ -98,10 +98,8 @@ class KafkaDatawakeLookaheadSpout(Spout):
                 'source': 'datawake-lookahead',
                 'domain': crawled['attrs']['domain']
             }
-            try:
-                self.emit([crawled['url'], crawled['status_code'], '', '', crawled['raw_html'], crawled['timestamp'], context['source'], context])
-            except:
-                self.log(message)
+            self.emit([crawled['url'], crawled['status_code'], '', '', crawled['body'], crawled['timestamp'], context['source'], context])
+
 
 
 
