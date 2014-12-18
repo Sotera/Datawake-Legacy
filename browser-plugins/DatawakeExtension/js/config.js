@@ -24,7 +24,7 @@ dwConfig = function () {
     };
 
     var localHostDefaults = {
-        datawake_serviceUrl: "http://localhost:8088/datawake/plugin",
+        datawake_serviceUrl: "http://192.168.59.103/datawake/plugin",
         datawake_imageServiceUrl: ""
     };
     pubs.localHostDefaults = localHostDefaults;
