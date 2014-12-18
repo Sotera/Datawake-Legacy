@@ -27,7 +27,7 @@ import tangelo
 from entity import Entity
 from datawake.conf import datawakeconfig
 from datawake.util.dataconnector.data_connector import DataConnector
-
+import datetime
 
 THREADS_PER_HOST = 2
 
@@ -309,4 +309,25 @@ class ClusterEntityDataConnector(DataConnector):
 
         map(lambda x: new_entity(x), entities)
         vals = url_dict.values()
+
+
+
+    def add_new_domain_items(self, domain_items):
+        self._check_conn()
+        cursor = self.cnx.cursor()
+        values = []
+        params = {}
+        i = 0
+        dt = str(datetime.datetime.now())
+        for item in domain_items:
+            key = "value"+str(i)
+            values.append("(%("+key+")s,\""+dt+"\" )")
+            params[key] = item.encode('utf-8')
+            i = i + 1
+        sql = "INSERT INTO TABLE "+self.config['domain_table']+" (rowkey,dt) VALUES "+ ','.join(values)
+        try:
+            cursor.execute(sql, params)
+        except:
+            self.close()
+            raise
 
