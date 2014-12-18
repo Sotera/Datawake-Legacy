@@ -74,7 +74,7 @@ class KafkaDatawakeLookaheadSpout(Spout):
         """
         input message:
             dict(
-                 crawlid = input['id'],
+                 crawlid = input['crawlid'],
                  appid = input['appid'],
                  url = url,
                  status_code = response.getcode(),

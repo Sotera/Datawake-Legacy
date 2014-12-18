@@ -111,14 +111,14 @@ class CrawlerBolt(Bolt):
             #self.log("CrawlerBolt extracted links: "+str(links))
 
             output = dict(
-                id = input['id'],
+                crawlid = input['crawlid'],
                 appid = input['appid'],
                 url = url,
                 status_code = response.getcode(),
                 status_msg = 'Success',
                 timestamp = response.info()['date'],
                 links_found = links,
-                raw_html =  html,
+                body =  html,
                 attrs = input['attrs']
             )
 
