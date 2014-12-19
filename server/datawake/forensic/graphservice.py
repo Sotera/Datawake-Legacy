@@ -89,16 +89,6 @@ def listUsers():
     return json.dumps(datawake_mysql.getActiveUsers(org))
 
 
-#
-# Delete all user activity within a time frame
-#
-@is_in_session
-def deleteUser(users, startdate, enddate):
-    org = helper.get_org()
-    tangelo.log('deleteUser(' + users + ',' + startdate + ',' + enddate + ')')
-    datawake_mysql.deleteUserData(org, users, startdate, enddate)
-    return json.dumps(dict(success=True))
-
 
 @is_in_session
 def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''):
@@ -153,11 +143,7 @@ get_actions = {
 
 post_actions = {
     'timewindow': getTimeWindow,
-    'get': getGraph
-}
-
-delete_actions = {
-    'deleteUser': deleteUser
+    'get': getGraph,
 }
 
 
@@ -177,11 +163,3 @@ def get(action, *args, **kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call")
 
     return get_actions.get(action, unknown)(**kwargs)
-
-
-@tangelo.restful
-def delete(action, *args, **kwargs):
-    def unknown(**kwargs):
-        return tangelo.HTTPStatusCode(400, "invalid service call")
-
-    return delete_actions.get(action, unknown)(**kwargs)

@@ -119,45 +119,6 @@ $(function () {
 });
 
 
-/*
- Clear a users history from the database
- */
-$(function () {
-    $("#delete_btn").click(function () {
-
-        // check that exactly one user is selected
-        var users = $("#userselect").val();
-        if (!users || users.length != 1) {
-            alert("To delete history you must select exactly 1 user.");
-            return
-        }
-        var startdate = dateWidget.window_start;
-        var enddate = dateWidget.window_end;
-
-        // send the request to delete the user
-        var jsonData = JSON.stringify({
-            users: users[0],
-            startdate: startdate,
-            enddate: enddate
-        });
-        $.ajax({
-            type: 'DELETE',
-            url: '/datawake/forensic/graphservice/deleteUser',
-            data: jsonData,
-            dataType: 'json',
-            contentType: 'application/json',
-            success: function (response) {
-                // reset the users list
-                list_users()
-            },
-            error: function (jqxhr, textStatus, reason) {
-                console.log("error " + textStatus + " " + reason)
-            }
-        });
-
-    });
-});
-
 
 /*
  Calls the python service to list all
@@ -650,14 +611,6 @@ window.onload = function () {
         "3. A time range<br><br>"
     $("#filter_help").popover(popover_cfg);
 
-
-    popover_cfg.content = "<b>Clear Data</b><Br>" +
-        "Select a single user and a time range.<br>" +
-        "Hit Clear Data to delete all of the user data within the selected time range.<br>" +
-        "This operation can not be reversed."
-
-
-    $("#advacned_help").popover(popover_cfg);
 
 };
 
