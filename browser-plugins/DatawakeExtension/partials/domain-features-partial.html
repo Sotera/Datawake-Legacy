@@ -1,0 +1,37 @@
+<div class="tab-pane" id="domain_extracted_entities" ng-show="showDomainFeatures">
+    <div>
+        <h3>Features in Domain</h3>
+        <table class="table table-bordered" ng-repeat="(type, entities) in entities_in_domain">
+            <thead>
+            <tr>
+                <th>
+                    <span>{{type}}</span>
+                </th>
+                <th colspan={{extracted_tools.length}}>
+                    External Tools
+                </th>
+                <th>
+                    Remove
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="entity in entities">
+                <td>
+                    <span>{{entity}}</span>
+                </td>
+                <td ng-show="extracted_tools.length > 0" ng-repeat="tools in extracted_tools">
+                    <a ng-href="{{tools.link.replace('$ATTR',entities.type).replace('$VALUE',entity)}}" target="_blank">{{tools.display}}</a>
+                </td>
+                <td ng-show="extracted_tools.length == 0">
+                    <span>No External Tools Available</span>
+                </td>
+                <td>
+                    <button ng-hide="invalid[entity]" class="btn btn-danger" ng-click="markInvalid(type, entity);">Invalid Extraction?</button>
+                    <span ng-hide="!invalid[entity]">Marked</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

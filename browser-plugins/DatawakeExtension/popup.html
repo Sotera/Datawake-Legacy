@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html ng-app="datawakePopUpApp" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
+    <link href="css/chosen.min.css" rel="stylesheet">
+    <link href="css/chosen.min.css" rel="stylesheet">
+    <link href="css/jRating.jquery.css" rel="stylesheet">
+    <style type="text/css">
+        body {
+            min-width: 500px;
+            overflow-x: hidden;
+            height: 300px;
+        }
+
+        img {
+            margin: 5px;
+            border: 2px solid black;
+            vertical-align: middle;
+            width: 75px;
+            height: 75px;
+        }
+    </style>
+</head>
+<body ng-controller="PopUpCtrl">
+<div class="container" style="margin-top: 10px">
+    <div ng-hide="invalidTab">
+
+
+        <div ng-include="popupHeader"></div>
+
+        <div class="row">
+            <ul class="nav nav-tabs nav-pills" role="tablist">
+                <li><a href="#/features/all">Extracted Features</a></li>
+                <li><a href="#/features/domain" ng-show="showDomainFeatures">Features in Domain</a></li>
+                <li><a href="#/lookahead" ng-show="lookaheadEnabled">Lookahead</a></li>
+                <li><a href="#/feedback">Extractor Feedback</a></li>
+            </ul>
+            <div class="tab-content">
+
+                <div ng-view></div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="alert alert-danger" ng-hide="!invalidTab">
+        <h3>The Datawake is not enabled with this tab.</h3>
+    </div>
+</div>
+<script src="js/jquery-1.11.0.min.js"></script>
+<script src="js/jRating.jquery.js"></script>
+<script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+<script src="js/angular.min.js"></script>
+<script src="js/angular-route.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/signin.js"></script>
+<script src="js/popup.js"></script>
+</body>
+</html>

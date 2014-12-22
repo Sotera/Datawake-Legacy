@@ -1,0 +1,24 @@
+#! /bin/bash
+
+IMAGE=datawake-appserver
+CONTAINER=datawake-appserver-1
+EXPOSED_PORT=
+DW_DB=
+DW_DB_USER=
+DW_DB_PASSWORD=
+DW_DB_HOST=
+DW_DB_PORT=
+DW_KAFKA_CONN_POOL=
+DW_KAFKA_PUB_TOPIC=
+DW_CONN_TYPE=cluster-hbase
+DW_MOCK_AUTH=
+DW_GOOGLE_CLIENT_IDS=
+DW_IMPALA_HOSTS=
+DW_IMPALA_PORT=
+DW_IMPALA_DB=
+DW_HBASE_HOST=
+DW_HBASE_DOMAIN_ENTITIES_TABLE="datawake_domain_entities"
+DW_HBASE_EXTRACTED_ALL_TABLE="datawake_general_extractor_web_index_hbase"
+DW_HBASE_EXTRACTED_DOMAIN_TABLE="datawake_domain_extractor_web_index_hbase"
+DW_EXTERNAL_LINK_NAMES=''
+DW_EXTERNAL_LINK_VALUES=''

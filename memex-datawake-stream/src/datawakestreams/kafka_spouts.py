@@ -1,16 +1,15 @@
 from __future__ import absolute_import, print_function, unicode_literals
+import json
+import traceback
+
 from kafka.client import KafkaClient
 from kafka.consumer import SimpleConsumer
 from streamparse.spout import Spout
-import sys
-import json
-from datawakestreams import all_settings
-import traceback
 
+from datawakestreams import all_settings
 
 
 class KafkaDatawakeVisitedSpout(Spout):
-
     group = 'datawake-visited-consumer'.encode()
 
     def __init__(self):
@@ -22,13 +21,13 @@ class KafkaDatawakeVisitedSpout(Spout):
             settings = all_settings.get_settings(stormconf['topology.deployment'])
             self.topic = settings['visited-topic'].encode()
             self.conn_pool = settings['conn_pool'].encode()
-            self.log('KafkaDatawakeVisitedSpout initialized with topic ='+self.topic+' conn_pool='+self.conn_pool)
+            self.log('KafkaDatawakeVisitedSpout initialized with topic =' + self.topic + ' conn_pool=' + self.conn_pool)
             self.kafka = KafkaClient(self.conn_pool)
-            self.consumer = SimpleConsumer(self.kafka,self.group,self.topic,max_buffer_size=None)
-            self.consumer.seek(0,2) # move to the tail of the queue
+            self.consumer = SimpleConsumer(self.kafka, self.group, self.topic, max_buffer_size=None)
+            self.consumer.seek(0, 2)  # move to the tail of the queue
         except:
-            self.log("KafkaDatawakeVisitedSpout initialize error",level='error')
-            self.log(traceback.format_exc(),level='error')
+            self.log("KafkaDatawakeVisitedSpout initialize error", level='error')
+            self.log(traceback.format_exc(), level='error')
             raise
 
 
@@ -41,21 +40,15 @@ class KafkaDatawakeVisitedSpout(Spout):
         message = offsetAndMessage.message.value
         message = message.decode('utf-8')
         message = message.split('\0')
-        (timestamp,org,domain,userId,url,html) = message
+        (timestamp, org, domain, userId, url, html) = message
         context = {
-            'source':'datawake-visited',
-            'userId':userId,
-            'org':org,
-            'domain':domain,
-            'url':url
+            'source': 'datawake-visited',
+            'domain': domain
         }
-        self.emit([url,'','','',html,timestamp,context['source'],context])
-
-
+        self.emit([url, '', '', '', html, timestamp, context['source'], context])
 
 
 class KafkaDatawakeLookaheadSpout(Spout):
-
     group = 'datawake-crawler-out-consumer'.encode()
 
     def __init__(self):
@@ -64,16 +57,16 @@ class KafkaDatawakeLookaheadSpout(Spout):
 
     def initialize(self, stormconf, context):
         try:
-            settings = all_settings.get_settings(stormconf['topology.deployment'])
-            self.topic = settings['crawler-out-topic'].encode()
-            self.conn_pool = settings['conn_pool'].encode()
-            self.log('KafkaDatawakeLookaheadSpout initialized with topic ='+self.topic+' conn_pool='+self.conn_pool)
+            self.settings = all_settings.get_settings(stormconf['topology.deployment'])
+            self.topic = self.settings['crawler-out-topic'].encode()
+            self.conn_pool = self.settings['crawler_conn_pool'].encode()
+            self.log('KafkaDatawakeLookaheadSpout initialized with topic =' + self.topic + ' conn_pool=' + self.conn_pool)
             self.kafka = KafkaClient(self.conn_pool)
-            self.consumer = SimpleConsumer(self.kafka,self.group,self.topic,max_buffer_size=None)
-            self.consumer.seek(0,2) # move to the tail of the queue
+            self.consumer = SimpleConsumer(self.kafka, self.group, self.topic, max_buffer_size=None)
+            self.consumer.seek(0, 2)  # move to the tail of the queue
         except:
-            self.log("KafkaDatawakeLookaheadSpout initialize error",level='error')
-            self.log(traceback.format_exc(),level='error')
+            self.log("KafkaDatawakeLookaheadSpout initialize error", level='error')
+            self.log(traceback.format_exc(), level='error')
             raise
 
 
@@ -81,14 +74,14 @@ class KafkaDatawakeLookaheadSpout(Spout):
         """
         input message:
             dict(
-                 id = input['id'],
+                 crawlid = input['crawlid'],
                  appid = input['appid'],
                  url = url,
                  status_code = response.getcode(),
                  status_msg = 'Success',
                  timestamp = response.info()['date'],
                  links_found = links,
-                 raw_html =  html,
+                 body =  html,
                  attrs = input['attrs']
             )
         :return:  (url, status, headers, flags, body, timestamp, source,context)
@@ -98,16 +91,14 @@ class KafkaDatawakeLookaheadSpout(Spout):
         message = offsetAndMessage.message.value
 
         crawled = json.loads(message)
-        safeurl = crawled['url'].encode('utf-8','ignore')
-        self.log("Lookahead spout received id: "+crawled['id']+" url: "+safeurl)
-        context = {
-            'source':'datawake-lookahead',
-            'userId':crawled['attrs']['userId'],
-            'org':crawled['attrs']['org'],
-            'domain':crawled['attrs']['domain'],
-            'url':crawled['url']
-        }
-        self.emit([crawled['url'],crawled['status_code'],'','',crawled['raw_html'],crawled['timestamp'],context['source'],context])
+        if crawled['appid'] == self.settings["appid"]:
+            safeurl = crawled['url'].encode('utf-8', 'ignore')
+            self.log("Lookahead spout received id: " + crawled['crawlid'] + " url: " + safeurl)
+            context = {
+                'source': 'datawake-lookahead',
+                'domain': crawled['attrs']['domain']
+            }
+            self.emit([crawled['url'], crawled['status_code'], '', '', crawled['body'], crawled['timestamp'], context['source'], context])
 
 
 
