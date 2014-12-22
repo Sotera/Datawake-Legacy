@@ -8,34 +8,12 @@ RUN apt-get install -y python-software-properties \
     && apt-get -y install python-pip \
     && apt-get -y install python-dev
 
-RUN apt-get -y install git \
-    && apt-get -y install make \
-    && apt-get -y install cmake
-
+RUN apt-get -y install git
 RUN apt-get install -y wget
 
+# install tangelo
 
-# install dependencies for building tangelo
-
-RUN add-apt-repository -y ppa:chris-lea/node.js \
-    && apt-get install -y nodejs \
-    && apt-get install -y npm \
-    && ln -s /usr/bin/nodejs /usr/bin/node
-
-
-# install tangelo from master branch
-
-RUN git clone https://github.com/chris-dickson/tangelo.git \
-    && cd tangelo \
-    && git checkout v0.7 \
-    && cd .. \
-    && mkdir tangelo-build \
-    && cd tangelo-build \
-    && cmake -DNPM_EXECUTABLE=/usr/bin/npm  -DBUILD_DOCUMENTATION=OFF -DBUILD_TESTING=OFF ../tangelo \
-    && make \
-    && pip install sdist/tangelo-0.7.tar.gz
-
-
+RUN pip install tangelo
 
 
 # misc python libs
@@ -104,5 +82,4 @@ ENV PYTHONPATH /usr/local/share/tangelo/web:$PYTHONPATH
 
 # set the default container command to run tangelo
 
-#CMD ["tangelo","-nd","start"]
-CMD [
+CMD ["tangelo","-c","/etc/tangelo.conf"]
