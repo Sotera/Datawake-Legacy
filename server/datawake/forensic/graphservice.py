@@ -108,7 +108,7 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
         return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
     if name == 'browse path - with connected entities min degree 2':
-        rows = graphs.getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,2,userlist,trail,domain)
+        rows = graph_helper.getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,2,userlist,trail,domain)
         return json.dumps(rows)
 
     if name == 'browse path - with adjacent urls min degree 2':
