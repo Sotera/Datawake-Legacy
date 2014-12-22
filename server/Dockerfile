@@ -23,11 +23,11 @@ RUN add-apt-repository -y ppa:chris-lea/node.js \
     && ln -s /usr/bin/nodejs /usr/bin/node
 
 
-# install tangelo from sessions branch
+# install tangelo from master branch
 
-RUN git clone https://github.com/Kitware/tangelo.git \
+RUN git clone https://github.com/chris-dickson/tangelo.git \
     && cd tangelo \
-    && git checkout sessions \
+    && git checkout v0.7 \
     && cd .. \
     && mkdir tangelo-build \
     && cd tangelo-build \
@@ -42,6 +42,7 @@ RUN git clone https://github.com/Kitware/tangelo.git \
 
 RUN pip install happybase
 RUN pip install httplib2
+RUN pip install tldextract
 
 
 # install mysql client
@@ -96,10 +97,12 @@ EXPOSE 80
 COPY datawake /usr/local/share/tangelo/web/datawake
 COPY domain /usr/local/share/tangelo/web/domain
 COPY forensic /usr/local/share/tangelo/web/forensic
+COPY forensic_v2 /usr/local/share/tangelo/web/forensic_v2
 ENV PYTHONPATH /usr/local/share/tangelo/web:$PYTHONPATH
 
 
 
 # set the default container command to run tangelo
 
-CMD ["tangelo","-nd","start"]
+#CMD ["tangelo","-nd","start"]
+CMD [
