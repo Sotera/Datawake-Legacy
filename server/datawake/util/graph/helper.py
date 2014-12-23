@@ -314,7 +314,6 @@ def getBrowsePathAndAdjacentEmailEdgesWithLimit(org,startdate,enddate,limit,user
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['email'],limit,userlist,trail,domain)
 
 def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
-    startMillis = int(round(time.time() * 1000))
     entityDataConnector.close()
     org = org.upper()
     command = """SELECT datawake_data.id,unix_timestamp(datawake_data.ts) as ts,datawake_data.url,entity_type,entity_value

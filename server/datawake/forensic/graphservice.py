@@ -43,6 +43,7 @@ def listGraphs():
     return json.dumps(dict(graphs=['none',
                                    'browse path',
                                    'browse path - with adjacent urls',
+                                   'browse path - with connected entities min degree 2',
                                    'browse path - with adjacent urls min degree 2',
                                    'browse path - with adjacent phone #\'s',
                                    'browse path - with adjacent email #\'s',
