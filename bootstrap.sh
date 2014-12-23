@@ -48,18 +48,7 @@ pip install httplib2 &> /dev/null
 
 # install tangelo from sessions branch
 
-echo "installing tangelo from sessions branch"
-git clone https://github.com/chris-dickson/tangelo.git &> /dev/null
-cd tangelo
-git checkout v0.7
-cd ..
-mkdir tangelo-build
-cd tangelo-build
-cmake -DNPM_EXECUTABLE=/usr/bin/npm  -DBUILD_DOCUMENTATION=OFF -DBUILD_TESTING=OFF ../tangelo  &> /dev/null
-make &> /dev/null
-pip install sdist/tangelo-0.7.tar.gz
-cd ..
-
+pip install tangelo
 
 # install clojure and lein
 
@@ -84,7 +73,7 @@ pip install tldextract &> /dev/null
 # install kafka
 
 wget http://mirror.nexcess.net/apache/kafka/0.8.1.1/kafka_2.9.2-0.8.1.1.tgz &> /dev/null
-tar -xzf kafka_2.9.2-0.8.1.1.tgz
+tar -xzf kafka_2.9.2-0.8.1.1.tgz 
 mv kafka_2.9.2-0.8.1.1 /usr/local/kafka
 
 
@@ -158,7 +147,7 @@ cd /vagrant/datawake/conf/
 cp datawakeconfig.py.template datawakeconfig.py
 cd /vagrant/datawake/util/
 python datawake_db.py create-db
-python domainLoader.py memex_program "emails asscoiated with the memex program" ../../etc/default_domain.csv
+python domainLoader.py memex_program "emails asscoiated with the memex program" ../../etc/default_domain.csv 
 cd ~
 
 # start kafka and create topics
@@ -167,7 +156,7 @@ cd ~
 #/vagrant/etc/kafka_startup.sh start
 #sleep 5
 #/usr/local/kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic memex-datawake-lookahead
-#/usr/local/kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic memex-datawake-visited
+#/usr/local/kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic memex-datawake-visited 
 
 
 
