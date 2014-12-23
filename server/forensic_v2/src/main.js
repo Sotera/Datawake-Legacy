@@ -2,7 +2,7 @@
  * Created by cdickson on 10/17/2014.
  */
 
-require(['config','views/navbarView', 'views/graphView', 'views/legendView', 'views/aboutView', 'rest/trails'], function(config,NavbarView,GraphView,LegendView,AboutView,TrailsService) {
+require(['config','views/navbarView', 'views/graphView', 'views/legendView', 'views/aboutView', 'rest/trails', 'rest/authorization'], function(config,NavbarView,GraphView,LegendView,AboutView,TrailsService, AuthService) {
 	require([],
 		function() {
 			/*----------------------------------------------------------------------------------------------------------
@@ -12,13 +12,21 @@ require(['config','views/navbarView', 'views/graphView', 'views/legendView', 'vi
 			var _navbarView = null;
 			var _legendView = null;
 			var _aboutView = null;
-			TrailsService.get().then(function(trails) {
-				_navbarView = new NavbarView($('#navbarContainer'),{
-					trails:trails
+
+			alert('Fuck you docker');
+
+			// TODO:  replace this with google sign in token when we have that working
+			AuthService.post({
+				token : '123456'
+			}).then(function() {
+				TrailsService.get().then(function(trails) {
+					_navbarView = new NavbarView($('#navbarContainer'),{
+						trails:trails
+					});
+					_graphView = new GraphView($('#graphContainer'),{});
+					_legendView = new LegendView($('#legendContainer'));
+					_aboutView = new AboutView($('#aboutForensic'));
 				});
-				_graphView = new GraphView($('#graphContainer'),{});
-				_legendView = new LegendView($('#legendContainer'));
-				_aboutView = new AboutView($('#aboutForensic'));
 			});
 		});
 });

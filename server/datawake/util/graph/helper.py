@@ -314,6 +314,7 @@ def getBrowsePathAndAdjacentEmailEdgesWithLimit(org,startdate,enddate,limit,user
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['email'],limit,userlist,trail,domain)
 
 def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
+    startMillis = int(round(time.time() * 1000))
     entityDataConnector.close()
     org = org.upper()
     command = """SELECT datawake_data.id,unix_timestamp(datawake_data.ts) as ts,datawake_data.url,entity_type,entity_value
@@ -357,8 +358,12 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
     browsePath = {}
     adj_urls = set([])
     entities = []
+    tangelo.log('DB Returned ' + str(len(db_rows)) + ' rows ')
     for row in db_rows:
         (id,ts,url,entity_type,entity_value) = row
+
+        tangelo.log('\t'+str(row))
+
         if trail is None or trail.strip() == '': trail = "default"
 
         if id not in browsePath:
@@ -411,6 +416,27 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
 
         if (bAdd):
             entities.append(entity)
+
+            # Get all the lookahead features
+    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls(adj_urls)
+
+    # add place holders for urls with no extracted data
+    for adj_url in adj_urls:
+        if adj_url not in lookaheadFeatures:
+            lookaheadFeatures[adj_url] = {}
+
+    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,adj_urls)
+
+
+    entityDataConnector.close()
+    endMillis = int(round(time.time() * 1000))
+    tangelo.log('Processing time = ' + str((endMillis-startMillis)/1000) + 's');
+    return {
+        'browsePath':browsePath,
+        'entities':entities,
+        'lookaheadFeatures':lookaheadFeatures,
+        'domainLookaheadFeatures':domainLookaheadFeatures
+    }
 
 def getBrowsePathAndAdjacentInfoEdges(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['info'],limit,userlist,trail,domain)
