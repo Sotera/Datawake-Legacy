@@ -60,6 +60,7 @@ define([], function() {
 		showLabelsOnStart : true,
 		fitPadding : 100, 				// padding around fit graph
 		layoutDuration : 750,			// in ms
-		layoutEasing : 'elastic-out'
+		layoutEasing : 'elastic-out',
+		useTestData : true
 	};
 });

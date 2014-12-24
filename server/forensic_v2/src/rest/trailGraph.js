@@ -1,5 +1,5 @@
-define(['../util/util', '../util/guid', './testResponse'], function(util,guid,TEST_RESPONSE) {
-	var USE_TEST_RESPONSE = false;
+define(['../util/util', '../util/guid', './testGraphResponse', '../config/forensic_config'], function(util,guid,TEST_RESPONSE,ForensicConfig) {
+	var USE_TEST_RESPONSE = ForensicConfig.useTestData;
 	return {
 
 		/**
