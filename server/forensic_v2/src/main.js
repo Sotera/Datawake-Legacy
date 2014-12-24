@@ -13,7 +13,6 @@ require(['config','views/navbarView', 'views/graphView', 'views/legendView', 'vi
 			var _legendView = null;
 			var _aboutView = null;
 
-			alert('Fuck you docker');
 
 			// TODO:  replace this with google sign in token when we have that working
 			AuthService.post({

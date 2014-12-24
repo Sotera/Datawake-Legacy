@@ -225,14 +225,14 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
 
 
     # Get all the lookahead features
-    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls(adj_urls)
+    lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
 
     # add place holders for urls with no extracted data
     for adj_url in adj_urls:
         if adj_url not in lookaheadFeatures:
             lookaheadFeatures[adj_url] = {}
 
-    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,adj_urls)
+    domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
 
 
     entityDataConnector.close()
@@ -358,11 +358,11 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
     browsePath = {}
     adj_urls = set([])
     entities = []
-    tangelo.log('DB Returned ' + str(len(db_rows)) + ' rows ')
+    # tangelo.log('DB Returned ' + str(len(db_rows)) + ' rows ')
     for row in db_rows:
         (id,ts,url,entity_type,entity_value) = row
 
-        tangelo.log('\t'+str(row))
+        # tangelo.log('\t'+str(row))
 
         if trail is None or trail.strip() == '': trail = "default"
 
@@ -418,14 +418,14 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
             entities.append(entity)
 
             # Get all the lookahead features
-    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls(adj_urls)
+    lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
 
     # add place holders for urls with no extracted data
     for adj_url in adj_urls:
         if adj_url not in lookaheadFeatures:
             lookaheadFeatures[adj_url] = {}
 
-    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,adj_urls)
+    domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
 
 
     entityDataConnector.close()
@@ -442,14 +442,14 @@ def getBrowsePathAndAdjacentInfoEdges(org,startdate,enddate,limit,userlist=[],tr
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['info'],limit,userlist,trail,domain)
 
     # Get all the lookahead features
-    lookaheadFeatures = entityDataConnector.getExtractedEntitiesFromUrls(adj_urls)
+    lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
 
     # add place holders for urls with no extracted data
     for adj_url in adj_urls:
         if adj_url not in lookaheadFeatures:
             lookaheadFeatures[adj_url] = {}
 
-    domainLookaheadFeatures = entityDataConnector.getExtractedDomainEntitiesFromUrls(domain,adj_urls)
+    domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
 
 
     entityDataConnector.close()

@@ -60,6 +60,7 @@ datawake:
     - /Users/cdickson/Documents/workspace/Datawake/server/datawake:/usr/local/share/tangelo/web/datawake
     - /Users/cdickson/Documents/workspace/Datawake/server/domain:/usr/local/share/tangelo/web/domain
     - /Users/cdickson/Documents/workspace/Datawake/server/forensic:/usr/local/share/tangelo/web/forensic
+    - /Users/cdickson/Documents/workspace/Datawake/server/forensic_v2:/usr/local/share/tangelo/web/forensic_v2
     - /Users/cdickson/Documents/workspace/Datawake/memex-datawake-stream:/memex-datawake-stream
 
 

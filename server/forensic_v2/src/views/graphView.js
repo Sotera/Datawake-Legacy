@@ -221,13 +221,20 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this._activeTrail = trailInfo;
 		this._showLoader(1000);
 		TrailGraphService.get(trailInfo)
-			.then(function(response) {
-				self._hideLoader();
-				return self._getForensicGraph(response);
-			})
+			.then(
+				function(response) {
+					self._hideLoader();
+					return self._getForensicGraph(response);
+				},
+				function(error) {
+					self._hideLoader();
+					alert('An error occured on the server' + error.responseText);
+				}
+			)
 			.then(function(forensicGraph) {
 				self._renderForensicGraph(forensicGraph);
 			});
+
 	};
 
 	/**
