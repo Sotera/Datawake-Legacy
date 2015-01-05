@@ -49,7 +49,11 @@ object SearchTopology {
       .shuffleGrouping("internet-search", "new-term")
 
     //POSTS TO THE KAFKA QUEUE THAT SCRAPES THE HTML
-    topologyBuilder.setBolt("scrape-kafka", new CrawlerKafkaProducer("memex.incoming_urls", kafkaCrawlerBrokers.getOrElse(throw new DatawakeException("Your Kafka Brokers are not set!"))))
+    val incoming_urls_topic = sys.env.get("DW_INCOMING_URLS")
+    topologyBuilder.setBolt("scrape-kafka",
+      new CrawlerKafkaProducer(incoming_urls_topic.getOrElse(throw new DatawakeException("Your incoming url topic was not set!")), kafkaCrawlerBrokers.getOrElse(throw new DatawakeException("Your Kafka " +
+        "Brokers " +
+        "are not set!"))))
       .shuffleGrouping("internet-search", "new-url")
 
     val localCluster = new LocalCluster()

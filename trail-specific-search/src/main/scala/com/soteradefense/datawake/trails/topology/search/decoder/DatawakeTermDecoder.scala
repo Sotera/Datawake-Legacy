@@ -10,7 +10,7 @@ class DatawakeTermDecoder extends Decoder[DatawakeTerm] with Serializable {
   override def fromBytes(bytes: Array[Byte]): DatawakeTerm = {
     if (bytes == null || bytes.length == 0)
       return null
-    val str = new String(bytes)
+    val str = new String(bytes, "utf-8")
     val data = str.split("\u0000")
     logger.info("Parsed DatawakeTerm: {}", str)
     if (data == null || data.length != 5)

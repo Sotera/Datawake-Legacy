@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS trail_term_rank (
   rank DOUBLE,
   pageRank INT,
   removed INT DEFAULT 0,
-  index(org(300), domain(300), trail(100), url(1024))
+  index(org(300), domain(300), trail(100), url(255))
 );
 
 CREATE TABLE IF NOT EXISTS entities_on_url (
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS entities_on_url (
 CREATE TABLE IF NOT EXISTS trail_entities_contents(
   url varchar(1024),
   html MEDIUMBLOB,
-  index(url(1024))
+  index(url(255))
 );
 
 exit;

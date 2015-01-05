@@ -11,7 +11,7 @@ object DatawakeConstants {
   val BING_KEY_ID: String = "bing.search.key"
   val ZK_NODES_ID: String = "zk.nodes.key"
 
-  val APP_ID: String = "trail-search-new-rank"
+  val APP_ID: String = "trail-entities-search"
   val CRAWLER_TOPIC: String = "memex.crawled_" + APP_ID
   val TRAIL_SEARCH_TOPIC: String = "trail-search"
 }

@@ -53,11 +53,10 @@ def get_trails_for_domain_and_org(org, domain):
 @required_parameters(['domain', 'trail', 'entity'])
 def add_trail_based_entity(domain, trail, entity):
     org = helper.get_org()
-    # entity = entity.encode('ascii', 'ignore')
     if not db.does_trail_entity_exist(org, domain, trail, entity):
-        success = db.add_trail_based_entity(org, domain, trail, entity) == 0
+        success = db.add_trail_based_entity(org, domain, trail, entity.encode("utf-8")) == 0
         if success:
-            kafka_producer.send_trail_term_message(org.encode("utf-8"), domain.encode("utf-8"), trail.encode("utf-8"), entity.encode("utf-8"))
+            kafka_producer.send_trail_term_message(org, domain, trail, entity)
 
         return json.dumps(dict(success=success))
     return json.dumps(dict(success=True))
@@ -105,9 +104,9 @@ def delete_link_from_trail(domain, trail, url):
 def add_irrelevant_trail_entity(domain, trail, entity):
     org = helper.get_org()
     if not db.does_irrelevant_entity_exist(org, domain, trail, entity):
-        success = db.add_irrelevant_trail_entity(org, domain, trail, entity) == 0
+        success = db.add_irrelevant_trail_entity(org, domain, trail, entity.encode("utf-8")) == 0
         if success:
-            kafka_producer.send_trail_term_message(org.encode("utf-8"), domain.encode("utf-8"), trail.encode("utf-8"), entity.encode("utf-8"), False)
+            kafka_producer.send_trail_term_message(org, domain, trail, entity, False)
         return json.dumps(dict(success=success))
     return json.dumps(dict(success=True))
 

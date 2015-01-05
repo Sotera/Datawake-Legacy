@@ -15,11 +15,12 @@ object UrlContentsTopology {
   def main(args: Array[String]): Unit = {
     val topologyBuilder: TopologyBuilder = new TopologyBuilder()
 
-
+    val useDistributedCrawler: Boolean = sys.env.getOrElse("DW_USE_DISTRIBUTED", "false").toBoolean
+    val crawlerTopic: String = if(useDistributedCrawler) DatawakeConstants.CRAWLER_TOPIC else sys.env.getOrElse("DW_CRAWLER_OUT", throw new DatawakeException("You need to set the local crawler out topic"))
     val kafkaConsumer = new HighLevelKafkaConsumer[DatawakeCrawlerData](
       new Fields("kafkaOrg", "kafkaDomain", "kafkaTrail", "kafkaLink", "kafkaHtml", "kafkaTitle", "kafkaRank"),
       new DatawakeCrawlerDataDecoder,
-      DatawakeConstants.CRAWLER_TOPIC, "trail-save-html-contents-listener")
+      crawlerTopic, "trail-save-html-contents-listener")
 
 
 

@@ -45,17 +45,9 @@ def sendVisitingMessage(org, domain, userId, url, html):
     if VISITING_PRODUCER is None:
         VISITING_PRODUCER = KafkaProducer(datawakeconfig.KAFKA_CONN_POOL, datawakeconfig.KAFKA_PUBLISH_TOPIC)
     try:
-        message = []
-        message.append(datetime.utcnow().strftime("%s"))
-        message.append(org)
-        message.append(domain)
-        message.append(userId)
-        message.append(url)
-        message.append(html)
-
+        message = [datetime.utcnow().strftime("%s"), org, domain, userId, url, html]
         message = map(lambda x: x.replace('\0', ''), message)
         message = '\0'.join(message)
-
         VISITING_PRODUCER.send(message)
     except:
         try:
@@ -76,7 +68,8 @@ def send_trail_term_message(org, domain, trail, term, validEntity=True):
 
     try:
         message = "%s\0%s\0%s\0%s\0%s" % (org, domain, trail, term, str(validEntity))
-        TRAIL_PRODUCER.send(message)
+        utf8_encoded_message = message.encode("utf-8")
+        TRAIL_PRODUCER.send(utf8_encoded_message)
     except:
         try:
             TRAIL_PRODUCER.close()
