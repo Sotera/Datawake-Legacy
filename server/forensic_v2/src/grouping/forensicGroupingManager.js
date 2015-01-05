@@ -367,6 +367,21 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 				child.y = aggregate.y;
 				child.row = aggregate.row;
 			});
+		},
+
+		getMinimizeIconPosition : function(boundingBox,ungroupedNodes) {
+			var node = ungroupedNodes[0];
+			if (node.type === 'browse_path') {
+				return {
+					x : boundingBox.x + boundingBox.width + 10,
+					y : boundingBox.y - 20
+				};
+			} else {
+				return {
+					x: boundingBox.x - 30,
+					y: boundingBox.y - 20
+				};
+			}
 		}
 	});
 	return ForensicGroupingManager;
