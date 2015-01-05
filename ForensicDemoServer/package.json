@@ -5,7 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "express": "^4.10.6",
-    "passport": "^0.2.1"
+    "http-auth": "^2.2.5"
   },
   "devDependencies": {
     "express": "^4.10.7",
