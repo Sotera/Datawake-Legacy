@@ -20,6 +20,7 @@ object SearchTopology {
     val sqlUser = sys.env.getOrElse("DW_DB_USER", throw new DatawakeException("You need to set your database username."))
     val sqlPassword = sys.env.getOrElse("DW_DB_PASSWORD", throw new DatawakeException("You need to set your database password."))
     val sqlCredentials = new SqlCredentials(jdbc, sqlUser, sqlPassword)
+    val useDistributedCrawler: Boolean = sys.env.getOrElse("DW_USE_DISTRIBUTED", "false").toBoolean
 
 
     val kafkaConsumer = new HighLevelKafkaConsumer[DatawakeTerm](
@@ -43,7 +44,7 @@ object SearchTopology {
     topologyBuilder.setBolt("internet-search", searchBolt)
       .shuffleGrouping("search-term-spout")
     val kafkaBrokers = sys.env.get("DW_KAFKA_BROKERS")
-    val kafkaCrawlerBrokers = sys.env.get("DW_KAFKA_CRAWLER_BROKERS")
+    val kafkaCrawlerBrokers = if(useDistributedCrawler) sys.env.get("DW_KAFKA_CRAWLER_BROKERS") else kafkaBrokers
     //POSTS TO THE KAFKA QUEUE THAT UPDATES THE COUNT FOR A URL
     topologyBuilder.setBolt("url-filter", new UpdateRankKafkaProducer(sqlCredentials, selectTrailUrlsSql, "update-url", kafkaBrokers.getOrElse(throw new DatawakeException("Your Kafka Brokers are not set!"))))
       .shuffleGrouping("internet-search", "new-term")

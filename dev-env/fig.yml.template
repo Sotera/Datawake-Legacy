@@ -4,12 +4,14 @@ mysql:
     MYSQL_ROOT_PASSWORD: root
   ports:
     - "3336:3306"
+  volumes:
+    - /Users/jostinowsky/Projects/Datawake/dev-env:/dev-env
 
 
 zookeeper:
   image: jplock/zookeeper
   ports:
-    - "2181"
+    - "2181:2181"
 
 kafka:
   image: wurstmeister/kafka:0.8.1.1-1
@@ -19,6 +21,8 @@ kafka:
     - zookeeper:zk
   environment:
     KAFKA_ADVERTISED_HOST_NAME: 192.168.59.103
+    KAFKA_MESSAGE_MAX_BYTES: 2000000
+    KAFKA_REPLICA_FETCH_MAX_BYTES: 3000000
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 
@@ -29,8 +33,15 @@ dwstream:
     - mysql:mysql
     - kafka:kafka
     - zookeeper:zk
+  environment:
+      DW_DB: memex_sotera
+      DW_DB_USER: root
+      DW_DB_PASSWORD: root
+      DW_DB_HOST: 192.168.59.103
+      DW_DB_PORT: 3336
   volumes:
-    - /Users/.../code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
+    - /Users/jostinowsky/Projects/Datawake/memex-datawake-stream:/memex-datawake-stream
+    - /Users/jostinowsky/Projects/Datawake/dev-env:/dev-env
 
 dwsearch:
   build: ../trail-specific-search
@@ -43,10 +54,14 @@ dwsearch:
     DW_DB_USER: root
     DW_DB_PASSWORD: root
     DW_DB_JDBC: jdbc:mysql://192.168.59.103:3336/memex_sotera
+    DW_CRAWLER_TOPIC: trail-search-ec2
     DW_BING_KEY: YOUR_KEY_HERE
     DW_GOOGLE_PUBLIC_KEY: YOUR_KEY_HERE
     DW_GOOGLE_CUSTOM_SEARCH_CX: YOUR_CUSTOM_SEARCH_HERE
     DW_KAFKA_BROKERS: 192.168.59.103:9092
+    DW_USE_DISTRIBUTED: true
+    DW_INCOMING_URLS: memex.incoming_urls
+    DW_KAFKA_CRAWLER_BROKERS: 192.168.59.103:9092
     DW_ZK_QUORUM: 192.168.59.103:2181
     DW_SEARCH_API: localhost:8787/search?term=
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.search.SearchTopology
@@ -79,9 +94,13 @@ dwurlcontents:
   environment:
     DW_DB_USER: root
     DW_DB_PASSWORD: root
+    DW_CRAWLER_TOPIC: trail-search-ec2
     DW_DB_JDBC: jdbc:mysql://192.168.59.103:3336/memex_sotera
+    DW_CRAWLER_OUT: crawler-out
+    DW_USE_DISTRIBUTED: true
     DW_KAFKA_BROKERS: 192.168.59.103:9092
-    DW_ZK_QUORUM: 192.168.59.103:2181
+    DW_LOCAL_ZK_QUORUM: 192.168.59.103:2181
+    DW_ZK_QUORUM: 192.168.59.103:218
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.save.UrlContentsTopology
 
 datawake:
@@ -99,7 +118,8 @@ datawake:
     DW_DB_PORT: 3336
     DW_KAFKA_CONN_POOL: 192.168.59.103:9092
     DW_KAFKA_PUB_TOPIC: memex-datawake-visited
-    #DW_GOOGLE_CLIENT_IDS:
+    DW_KAFKA_TRAIL_TOPIC: trail-search
+    DW_GOOGLE_CLIENT_IDS: YOUR_CLIENT_IDS_HERE
     DW_MOCK_AUTH:  1
     DW_CONN_TYPE: mysql
     #DW_IMPALA_HOSTS:
@@ -107,10 +127,11 @@ datawake:
     #DW_EXTERNAL_LINK_NAMES:
     #DW_EXTERNAL_LINK_VALUES:
   volumes:
-    - /Users/.../code/sotera/Datawake/server/datawake:/usr/local/share/tangelo/web/datawake
-    - /Users/.../code/sotera/Datawake/server/domain:/usr/local/share/tangelo/web/domain
-    - /Users/.../code/sotera/Datawake/server/forensic:/usr/local/share/tangelo/web/forensic
-    - /Users/.../code/sotera/Datawake/memex-datawake-stream:/memex-datawake-stream
+    - /Users/jostinowsky/Projects/Datawake/server/datawake:/usr/local/share/tangelo/web/datawake
+    - /Users/jostinowsky/Projects/Datawake/server/domain:/usr/local/share/tangelo/web/domain
+    - /Users/jostinowsky/Projects/Datawake/server/forensic:/usr/local/share/tangelo/web/forensic
+    - /Users/jostinowsky/Projects/Datawake/memex-datawake-stream:/memex-datawake-stream
+    - /Users/jostinowsky/Projects/Datawake/server/js/:/usr/local/share/tangelo/web/js/datawake
 
 
 

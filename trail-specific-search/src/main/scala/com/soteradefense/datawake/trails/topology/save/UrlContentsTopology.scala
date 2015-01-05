@@ -47,7 +47,7 @@ object UrlContentsTopology {
 
     val localCluster = new LocalCluster()
     val config = new Config
-    val zkQuorum = sys.env.get("DW_ZK_QUORUM")
+    val zkQuorum = if(useDistributedCrawler) sys.env.get("DW_ZK_QUORUM") else sys.env.get("DW_LOCAL_ZK_QUORUM")
     config.put(DatawakeConstants.ZK_NODES_ID, zkQuorum.getOrElse(throw new DatawakeException("Your Zookeeper nodes were not set!")))
     localCluster.submitTopology("search-crawler", config, topologyBuilder.createTopology())
   }
