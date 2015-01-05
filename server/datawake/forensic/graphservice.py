@@ -137,7 +137,6 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
 get_actions = {
     'list': listGraphs,
     'getusers': listUsers,
-    'delete': deleteUser,
     'trails': getTrails
 }
 
