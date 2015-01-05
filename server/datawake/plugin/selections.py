@@ -35,7 +35,7 @@ from datawake.util.validate.parameters import required_parameters
 @is_in_session
 @required_parameters(['selection', 'domain', 'url'])
 def save_page_selection(selection, domain, url):
-    tangelo.log('savePageSelection url=' + str(url) + ' selection=' + selection + ' domain=' + domain)
+    #tangelo.log('savePageSelection url=' + str(url) + ' selection=' + selection + ' domain=' + domain)
     user = helper.get_user()
     org = user.get_org()
     postId = db.get_post_id(url)

@@ -304,8 +304,7 @@ class ClusterEntityDataConnector(DataConnector):
             values = x.split("\0")
             if len(values) == 3:
                 url_dict[values[0]].add(Entity(dict(type=values[1], name=values[2])))
-            else:
-                tangelo.log(",".join(values))
+
 
         map(lambda x: new_entity(x), entities)
         vals = url_dict.values()

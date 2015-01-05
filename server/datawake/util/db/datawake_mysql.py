@@ -283,8 +283,7 @@ def getHourlyBrowsePathCounts(org, users, trail, domain='default'):
         params.extend(users)
     sql = sql + " GROUP BY group_hour"
 
-    tangelo.log(sql)
-    tangelo.log(str(params))
+
     rows = dbGetRows(sql, params)
     result = []
     delta = 3600
@@ -480,8 +479,6 @@ def getStarredFeaturesForTrail(org, trail):
     sql = "SELECT type,value FROM starred_features WHERE trail = %s and org = %s"
     params = [trail, org]
     rows = dbGetRows(sql, params)
-    tangelo.log(sql)
-    tangelo.log(str(params))
     if len(rows) == 0:
         return []
     else:

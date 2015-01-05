@@ -39,7 +39,7 @@ def get_user(token):
     if helper.get_token() != token or user is None:
         user_auth = factory.get_authentication_object(token)
         user = user_auth.get_user_from_token()
-        tangelo.log('session.post verified user: ' + str(user))
+        #tangelo.log('session.post verified user: ' + str(user))
     return user
 
 
@@ -53,7 +53,7 @@ def get():
 def post():
     post_data = json.loads(tangelo.request_body().read(), strict=False)
     token = post_data.get("token")
-    tangelo.log("TOKEN: " + token)
+    #tangelo.log("TOKEN: " + token)
     user = get_user(token)
     org = get_org(user.get_email())
     user.set_org(org)
