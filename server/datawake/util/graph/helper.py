@@ -317,25 +317,25 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
     startMillis = int(round(time.time() * 1000))
     entityDataConnector.close()
     org = org.upper()
-    command = """SELECT datawake_data.id,unix_timestamp(datawake_data.ts) as ts,datawake_data.url,entity_type,entity_value
-                 FROM memex_sotera.datawake_data INNER JOIN general_extractor_web_index ON memex_sotera.datawake_data.url = memex_sotera.general_extractor_web_index.url
-                 WHERE datawake_data.org=%s AND domain=%s
+    command = """SELECT t1.id,unix_timestamp(t1.ts) as ts,t1.url,entity_type,entity_value
+                 FROM memex_sotera.datawake_data as t1 INNER JOIN general_extractor_web_index as t2 ON t1.url = t2.url
+                 WHERE t1.org=%s AND t1.domain=%s
                   """
     commandArgs = [org,domain]
 
     # add the time filter to the query
-    # if (startdate == '' and enddate == ''):
-    #     pass
-    # elif (startdate != '' and enddate == ''):
-    #     command = command +" AND unix_timestamp(datawake_data.ts) >= %s "
-    #     commandArgs.append(startdate)
-    # elif (startdate == '' and enddate != ''):
-    #     command = command + "  AND unix_timestamp(datawake_data.ts) <= %s "
-    #     commandArgs.append(enddate)
-    # else:
-    #     command = command + " AND unix_timestamp(datawake_data.ts) >= %s and unix_timestamp(datawake_data.ts) <= %s "
-    #     commandArgs.append(startdate)
-    #     commandArgs.append(enddate)
+    if (startdate == '' and enddate == ''):
+        pass
+    elif (startdate != '' and enddate == ''):
+        command = command +" AND t1.ts >= %s "
+        commandArgs.append(startdate)
+    elif (startdate == '' and enddate != ''):
+        command = command + "  AND t1.ts <= %s "
+        commandArgs.append(enddate)
+    else:
+        command = command + " AND t1.ts >= %s and t1.ts <= %s "
+        commandArgs.append(startdate)
+        commandArgs.append(enddate)
 
     # add the user filter
     if (len(userlist) > 0):
@@ -351,8 +351,10 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
         command = command + " trail = %s"
         commandArgs.append(trail)
 
-    command = command + " ORDER BY datawake_data.ts asc"
+    command = command + " ORDER BY t1.ts asc"
 
+    tangelo.log('Executing command : ' + command)
+    tangelo.log('Command args : ' + str(commandArgs))
     db_rows = datawake_mysql.dbGetRows(command,commandArgs)
 
     browsePath = {}
@@ -417,15 +419,19 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
         if (bAdd):
             entities.append(entity)
 
-            # Get all the lookahead features
-    lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
+    # Get all the lookahead features
+    if (len(adj_urls) > 0):
+        lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
 
-    # add place holders for urls with no extracted data
-    for adj_url in adj_urls:
-        if adj_url not in lookaheadFeatures:
-            lookaheadFeatures[adj_url] = {}
+        # add place holders for urls with no extracted data
+        for adj_url in adj_urls:
+            if adj_url not in lookaheadFeatures:
+                lookaheadFeatures[adj_url] = {}
 
-    domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
+        domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
+    else:
+        lookaheadFeatures = []
+        domainLookaheadFeatures = []
 
 
     entityDataConnector.close()
