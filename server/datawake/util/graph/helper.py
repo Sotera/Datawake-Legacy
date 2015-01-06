@@ -360,7 +360,7 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
     browsePath = {}
     adj_urls = set([])
     entities = []
-    # tangelo.log('DB Returned ' + str(len(db_rows)) + ' rows ')
+    tangelo.log('DB Returned : ' + str(len(db_rows)) + ' rows ')
     for row in db_rows:
         (id,ts,url,entity_type,entity_value) = row
 

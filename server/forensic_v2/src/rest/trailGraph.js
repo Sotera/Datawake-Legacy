@@ -10,8 +10,8 @@ define(['../util/util', '../util/guid', './testGraphResponse', '../config/forens
 		get : function(trail) {
 			var requestData = {
 				name : 'browse path - with connected entities min degree 2',
-				startdate : 1416459600,
-				enddate : 1416546000
+				startdate :  Math.floor(915148798 / 1000),
+				enddate :	Math.floor(new Date().getTime()/1000)
 			};
 			requestData.users = trail.users;
 			requestData.domain = trail.domain;
