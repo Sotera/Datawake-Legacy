@@ -6,14 +6,19 @@ import java.util.Properties
 import backtype.storm.task.TopologyContext
 import backtype.storm.topology.OutputFieldsDeclarer
 import backtype.storm.topology.base.BaseBasicBolt
-import com.soteradefense.datawake.trails.constants.DatawakeConstants
 import kafka.producer.{Producer, ProducerConfig}
-import org.slf4j.{LoggerFactory, Logger}
+import org.slf4j.{Logger, LoggerFactory}
 
-abstract class HighLevelKafkaProducer(brokers:String, topic: String) extends BaseBasicBolt {
+/**
+ * Abstract class that creates a kafka producer
+ * @param brokers Comma-separated list of kafka brokers
+ * @param topic The topic to write to.
+ */
+abstract class HighLevelKafkaProducer(brokers: String, topic: String) extends BaseBasicBolt {
   var kafkaProducer: Producer[String, String] = null
   var logger: Logger = null
   var kafkaBrokers: String = null
+
   override def prepare(stormConf: util.Map[_, _], context: TopologyContext): Unit = {
     super.prepare(stormConf, context)
     kafkaBrokers = brokers
@@ -25,6 +30,10 @@ abstract class HighLevelKafkaProducer(brokers:String, topic: String) extends Bas
     //Do Nothing
   }
 
+  /**
+   * Creates the producer configuration for connecting to kafka.
+   * @return ProducerConfig object
+   */
   def createProducerConfig: ProducerConfig = {
     val props = new Properties()
 

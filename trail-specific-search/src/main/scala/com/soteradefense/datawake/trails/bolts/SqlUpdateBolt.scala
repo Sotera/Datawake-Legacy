@@ -9,6 +9,10 @@ import backtype.storm.topology.base.BaseBasicBolt
 import com.soteradefense.datawake.trails.sql.SqlCredentials
 import org.slf4j.{Logger, LoggerFactory}
 
+/**
+ * Abstract class for defining a sql update bolt
+ * @param sqlCredentials SqlCredentials object that contains data to connect to mysql.
+ */
 abstract class SqlUpdateBolt(sqlCredentials: SqlCredentials) extends BaseBasicBolt {
   var connection: Connection = null
   var logger: Logger = null

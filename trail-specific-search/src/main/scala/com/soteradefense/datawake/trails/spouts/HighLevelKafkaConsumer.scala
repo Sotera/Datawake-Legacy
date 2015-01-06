@@ -13,6 +13,14 @@ import com.soteradefense.datawake.trails.data.StormData
 import kafka.consumer.{Consumer, ConsumerConfig, ConsumerConnector, KafkaStream}
 import kafka.serializer.{Decoder, StringDecoder}
 
+/**
+ * Class that defines a High-level kafka consumer
+ * @param outputFields Expected output fields
+ * @param decoder Class for decoding the kafka message.
+ * @param topic The topic to read from
+ * @param groupId The group id that reads from kafka
+ * @tparam T An instance of StormData
+ */
 class HighLevelKafkaConsumer[T <: StormData](outputFields: Fields, decoder: Decoder[T], topic: String, groupId: String = "trail-search-demo") extends BaseRichSpout {
   var collector: SpoutOutputCollector = null
   var stream: KafkaStream[String, T] = null
