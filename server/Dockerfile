@@ -8,28 +8,12 @@ RUN apt-get install -y python-software-properties \
     && apt-get -y install python-pip \
     && apt-get -y install python-dev
 
-RUN apt-get -y install git \
-    && apt-get -y install make \
-    && apt-get -y install cmake
-
+RUN apt-get -y install git
 RUN apt-get install -y wget
 
+# install tangelo
 
-# install dependencies for building tangelo
-
-RUN add-apt-repository -y ppa:chris-lea/node.js \
-    && apt-get install -y nodejs \
-    && apt-get install -y npm \
-    && ln -s /usr/bin/nodejs /usr/bin/node
-
-
-# install tangelo from sessions branch
-RUN apt-get install libffi-dev
-RUN pip install girder
-RUN pip install twisted
 RUN pip install tangelo
-
-
 
 
 # misc python libs
@@ -96,4 +80,4 @@ ENV PYTHONPATH /usr/local/share/tangelo/web:$PYTHONPATH
 
 # set the default container command to run tangelo
 
-CMD ["tangelo", "-c", "/etc/tangelo.conf"]
+CMD ["tangelo","-nd","start"]

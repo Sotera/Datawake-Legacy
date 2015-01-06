@@ -33,7 +33,7 @@ from datawake.util.session import helper
 @helper.is_in_session
 def get_chart(users=u'', trail=u'*', domain=u''):
     org = helper.get_org()
-    tangelo.log('dataservice-get org=' + org + ' users=' + users + ' trail= ' + trail + ' domain=' + domain)
+    #tangelo.log('dataservice-get org=' + org + ' users=' + users + ' trail= ' + trail + ' domain=' + domain)
     if trail == u'':
         trail = u'*'
     if len(users) > 0:
@@ -42,7 +42,6 @@ def get_chart(users=u'', trail=u'*', domain=u''):
         users = []
 
     result = datawake_mysql.getHourlyBrowsePathCounts(org, users, trail, domain=domain)
-    tangelo.log("dataservice result: " + str(result))
     return json.dumps(dict(data=result))
 
 

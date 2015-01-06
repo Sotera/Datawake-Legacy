@@ -56,12 +56,12 @@ import urllib
 
 
 def scrape_page(html, url, userId, userName, trail, domain, org):
-    tangelo.log('USER NAME: ' + userName)
+    #tangelo.log('USER NAME: ' + userName)
     domain = domain.encode('utf-8')
     org = org.encode('utf-8')
     html = html.encode('utf-8')
     url = url.encode('utf-8')
-    tangelo.log('posting url contents to kafka: ' + url)
+    #tangelo.log('posting url contents to kafka: ' + url)
     kafka_producer.sendVisitingMessage(org, domain, str(userId), url, html)
     # add the row to the database
 
@@ -70,7 +70,7 @@ def scrape_page(html, url, userId, userName, trail, domain, org):
     # get number of times this url appears in the database
     count = db.getUrlCount(org, url, domain=domain)
     result = dict(id=id, count=count)
-    tangelo.log("POSTED url:" + url + "  return: " + str(result))
+    #tangelo.log("POSTED url:" + url + "  return: " + str(result))
     return json.dumps(result)
 
 
