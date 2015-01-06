@@ -122,128 +122,6 @@ def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
 
     return {'nodes':nodes,'edges':edges}
 
-def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
-    startMillis = int(round(time.time() * 1000))
-    entityDataConnector.close()
-    org = org.upper()
-    command = """SELECT datawake_data.id,unix_timestamp(datawake_data.ts) as ts,datawake_data.url,entity_type,entity_value
-                 FROM memex_sotera.datawake_data INNER JOIN general_extractor_web_index ON memex_sotera.datawake_data.url = memex_sotera.general_extractor_web_index.url
-                 WHERE datawake_data.org=%s AND domain=%s
-                  """
-    commandArgs = [org,domain]
-
-    # add the time filter to the query
-    # if (startdate == '' and enddate == ''):
-    #     pass
-    # elif (startdate != '' and enddate == ''):
-    #     command = command +" AND unix_timestamp(datawake_data.ts) >= %s "
-    #     commandArgs.append(startdate)
-    # elif (startdate == '' and enddate != ''):
-    #     command = command + "  AND unix_timestamp(datawake_data.ts) <= %s "
-    #     commandArgs.append(enddate)
-    # else:
-    #     command = command + " AND unix_timestamp(datawake_data.ts) >= %s and unix_timestamp(datawake_data.ts) <= %s "
-    #     commandArgs.append(startdate)
-    #     commandArgs.append(enddate)
-
-    # add the user filter
-    if (len(userlist) > 0):
-        command = command +" AND "
-        params = ['%s' for i in range(len(userlist))]
-        params = ','.join(params)
-        command = command + "  userId in ("+params+") "
-        commandArgs.extend(userlist)
-
-    # add the trail filter
-    if trail != '*':
-        command = command +" AND "
-        command = command + " trail = %s"
-        commandArgs.append(trail)
-
-    command = command + " ORDER BY datawake_data.ts asc"
-
-    db_rows = datawake_mysql.dbGetRows(command,commandArgs)
-
-    browsePath = {}
-    adj_urls = set([])
-    entities = []
-    for row in db_rows:
-        (id,ts,url,entity_type,entity_value) = row
-        if trail is None or trail.strip() == '': trail = "default"
-
-        if id not in browsePath:
-            ext = tldextract.extract(url)
-            browsePath[id] = {'id':id,
-                              'url':url,
-                              'timestamp':ts,
-                              'subdomain':ext.subdomain,
-                              'domain':ext.domain,
-                              'suffix':ext.suffix
-
-            }
-
-        entity = {
-            'id':id,
-            'type':entity_type,
-            'value':entity_value
-        }
-        bAdd = True;
-        if (entity_type=='email'):
-            emailPieces = entity_value.split('@')
-            entity['user_name'] = emailPieces[0]
-            emailURL = 'mailto://'+emailPieces[1]
-            emailExt = tldextract.extract(emailURL)
-            entity['domain'] = emailExt.domain
-            entity['subdomain'] = emailExt.subdomain
-        elif (entity_type=='phone'):
-            areaCode = ''
-            if (len(entity_value) != 7 and len(entity_value) != 9 and len(entity_value) != 9):
-                bAdd = False
-
-            if (len(entity_value) == 7 or len(entity_value) == 10 or len(entity_value) == 9):
-                if (len(entity_value) == 10):
-                    areaCode = entity_value[1:4]
-                    if (entity_value[:1] != '1' or areaCode not in areaCodes):
-                        bAdd = False
-                if (len(entity_value) == 9):
-                    areaCode = entity_value[:3]
-                    if (areaCode not in areaCodes):
-                        bAdd = False
-
-            if (bAdd == True):
-                entity['area_code'] = areaCode
-        else:
-            adj_urls.add(entity_value)
-            webExt = tldextract.extract(entity_value)
-            entity['subdomain']=webExt.subdomain
-            entity['domain']=webExt.domain
-            entity['suffix']=webExt.suffix
-
-        if (bAdd):
-            entities.append(entity)
-
-
-
-    # Get all the lookahead features
-    lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
-
-    # add place holders for urls with no extracted data
-    for adj_url in adj_urls:
-        if adj_url not in lookaheadFeatures:
-            lookaheadFeatures[adj_url] = {}
-
-    domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
-
-
-    entityDataConnector.close()
-    endMillis = int(round(time.time() * 1000))
-    tangelo.log('Processing time = ' + str((endMillis-startMillis)/1000) + 's');
-    return {
-        'browsePath':browsePath,
-        'entities':entities,
-        'lookaheadFeatures':lookaheadFeatures,
-        'domainLookaheadFeatures':domainLookaheadFeatures
-    }
 
 def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,userlist=[],trail='*',domain=''):
     entityDataConnector.close()
@@ -327,13 +205,13 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
     if (startdate == '' and enddate == ''):
         pass
     elif (startdate != '' and enddate == ''):
-        command = command +" AND t1.ts >= %s "
+        command = command +" AND unix_timestamp(t1.ts) >= %s "
         commandArgs.append(startdate)
     elif (startdate == '' and enddate != ''):
-        command = command + "  AND t1.ts <= %s "
+        command = command + "  AND unix_timestamp(t1.ts) <= %s "
         commandArgs.append(enddate)
     else:
-        command = command + " AND t1.ts >= %s and t1.ts <= %s "
+        command = command + " AND unix_timestamp(t1.ts) >= %s and unix_timestamp(t1.ts) <= %s "
         commandArgs.append(startdate)
         commandArgs.append(enddate)
 
