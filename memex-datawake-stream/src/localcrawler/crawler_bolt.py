@@ -109,7 +109,7 @@ class CrawlerBolt(Bolt):
             self.log(response.info().getheader('Content-Type'))
             content_type = response.info().getheader('Content-Type')
             decode_type = "utf-8"
-            if "charset" in content_type:
+            if content_type is not None and "charset" in content_type:
                 decode_type = content_type.split("charset=")[-1]
             html = response.read().decode(decode_type)
 
