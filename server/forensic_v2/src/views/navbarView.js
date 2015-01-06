@@ -1,4 +1,4 @@
-define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events) {
+define(['hbs!templates/navbar','../util/events', '../config/forensic_config'], function(navbarTemplate,events,ForensicConfig) {
 
 	/**
 	 * Creates the navbar view
@@ -8,8 +8,17 @@ define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events
 	 */
 	function NavbarView(element,context) {
 		this._canvas = null;
+		this._daterange = null;
 		this._initialize(element,context);
 	}
+
+	NavbarView.prototype._onDateRangeChange = function(start, end, label) {
+		events.publish(events.topics.DATE_RANGE_CHANGE,{
+			start : start,
+			end : end
+		});
+		events.publish(events.topics.REFRESH);
+	};
 
 	/**
 	 * Initializes the navbar view.   Bind search functionality.   Context expects
@@ -62,6 +71,21 @@ define(['hbs!templates/navbar','../util/events'], function(navbarTemplate,events
 				}
 			});
 		});
+
+
+		this._daterange = this._canvas.find('input[name="daterange"]')
+		this._daterange.daterangepicker(
+			{
+				format: 'YYYY-MM-DD'
+			},this._onDateRangeChange
+		);
+		this._daterange.data('daterangepicker').setStartDate(ForensicConfig.defaultStartDate);
+		this._daterange.data('daterangepicker').setEndDate(ForensicConfig.defaultEndDate);
+		events.publish(events.topics.DATE_RANGE_CHANGE,{
+			start : this._daterange.data('daterangepicker').startDate,
+			end : this._daterange.data('daterangepicker').endDate
+		});
+
 
 		this._canvas.find('.fitBtn').click(function() {
 			events.publish(events.topics.FIT);

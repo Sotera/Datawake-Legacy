@@ -1,5 +1,13 @@
-define(['../util/util', '../util/guid', './testGraphResponse', '../config/forensic_config'], function(util,guid,TEST_RESPONSE,ForensicConfig) {
+define(['../util/util', '../util/guid', './testGraphResponse', '../config/forensic_config', '../util/events'], function(util,guid,TEST_RESPONSE,ForensicConfig,Events) {
 	var USE_TEST_RESPONSE = ForensicConfig.useTestData;
+
+	var startDate = null;
+	var endDate = null;
+	Events.subscribe(Events.topics.DATE_RANGE_CHANGE, function(data) {
+		startDate = data.start.unix();
+		endDate = data.end.unix();
+	});
+
 	return {
 
 		/**
@@ -10,8 +18,8 @@ define(['../util/util', '../util/guid', './testGraphResponse', '../config/forens
 		get : function(trail) {
 			var requestData = {
 				name : 'browse path - with connected entities min degree 2',
-				startdate :  Math.floor(915148798 / 1000),
-				enddate :	Math.floor(new Date().getTime()/1000)
+				startdate :  startDate,
+				enddate :	endDate
 			};
 			requestData.users = trail.users;
 			requestData.domain = trail.domain;

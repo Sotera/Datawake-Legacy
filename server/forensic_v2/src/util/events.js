@@ -45,7 +45,7 @@ define([], function() {
 				if (item.self) {
 					item.func.call(item.self, info || {});
 				} else {
-					item(info || {});
+					item.func(info || {});
 				}
 			});
 		},
@@ -55,6 +55,7 @@ define([], function() {
 		 */
 		topics: {
 			'TRAIL_CHANGE' 	: 'trail_change',
+			'DATE_RANGE_CHANGE' : 'date_range_change',
 			'REFRESH' 		: 'refresh',
 			'FIT'			: 'fit',
 			'TOGGLE_LEGEND' : 'toggle_legend',
