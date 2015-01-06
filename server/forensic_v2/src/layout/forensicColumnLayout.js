@@ -18,6 +18,7 @@ define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) 
 		this._duration = ForensicConfig.layoutDuration;
 		this._easing = ForensicConfig.layoutEasing;
 		this._columnWidth = columnWidth;
+		this._backgrounds = [];
 	};
 
 	ForensicColumnLayout.prototype = GraphJS.Extend(ForensicColumnLayout, GraphJS.Layout.prototype, {
@@ -35,6 +36,55 @@ define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) 
 				}
 			}
 			return height;
+		},
+
+		prerender : function() {
+			var nodes = this.nodes();
+			var renderObjects = [];
+			if (!nodes || nodes.length === 0) {
+				return renderObjects;
+			}
+
+			// Get the total number of rows
+			var maxRows = 0;
+			nodes.forEach(function(node) {
+				maxRows = Math.max(maxRows,node.row);
+			});
+			var rows = [];
+			for (var i = 0; i <= maxRows; i++) {
+				rows.push(i);
+				this._backgrounds.push({});
+			}
+
+			var that = this;
+			var totalBB = this.getBoundingBox(this._nodes);
+			var maxWidth = totalBB.width;
+			var minX = totalBB.x;
+			rows.forEach(function(row) {
+				var nodesInRow = nodes.filter(function(node) {
+					if (node.row === row) {
+						return true;
+					} else {
+						return false;
+					}
+				});
+				var bb = that.getBoundingBox(nodesInRow);
+				var backgroundObject = path.rect({
+					x : minX,
+					y : bb.y,
+					width : maxWidth,
+					height : bb.height,
+					fillStyle : COLUMN_STYLE.fillStyle,
+					strokeStyle : COLUMN_STYLE.strokeStyle,
+					lineDash : COLUMN_STYLE.lineDash,
+					lineWidth : COLUMN_STYLE.lineWidth,
+					opacity : 0.3
+				});
+				renderObjects.push(backgroundObject);
+				that._backgrounds[row] = backgroundObject;
+			});
+
+			return renderObjects;
 		},
 
 		/**
@@ -90,6 +140,43 @@ define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) 
 				top += rowHeight;
 			}
 			this._renderHeight = top;
+
+
+			// Animate backgrounds
+			var maxRows = 0;
+			this._nodes.forEach(function(node) {
+				maxRows = Math.max(maxRows,node.row);
+			});
+			var rows = [];
+			for (i = 0; i <= maxRows; i++) {
+				rows.push(i);
+			}
+
+			var totalBB = this.getBoundingBox(this._nodes);
+			var maxWidth = totalBB.width;
+			var minX = totalBB.x;
+			rows.forEach(function(row) {
+				var nodesInRow = that._nodes.filter(function(node) {
+					if (node.row === row) {
+						return true;
+					} else {
+						return false;
+					}
+				});
+				var bb = that.getBoundingBox(nodesInRow);
+				var backgroundObject = that._backgrounds[row];
+				backgroundObject.tweenAttr({
+					x : minX,
+					y : bb.y,
+					width : maxWidth,
+					height : bb.height
+				},{
+					duration : that._duration,
+					easing : that._easing
+				});
+
+			});
+
 			return false;
 		},
 
