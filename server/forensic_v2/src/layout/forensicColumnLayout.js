@@ -40,6 +40,9 @@ define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) 
 
 		prerender : function() {
 			var nodes = this.nodes();
+
+			this._backgrounds = [];
+
 			var renderObjects = [];
 			if (!nodes || nodes.length === 0) {
 				return renderObjects;
