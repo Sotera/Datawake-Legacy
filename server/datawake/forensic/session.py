@@ -43,7 +43,7 @@ def post(token=u''):
     user = session_helper.get_user()
     org = None
     if user is not None and session_helper.is_token_in_session() and session_helper.get_token() == token:
-        tangelo.log('plugin-sever.session tokens matched using existing session.')
+        #tangelo.log('plugin-sever.session tokens matched using existing session.')
         user = session_helper.get_user()
     else:
         auth_helper = factory.get_authentication_object(token)

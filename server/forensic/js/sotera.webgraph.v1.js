@@ -265,14 +265,14 @@ var SWG = (function() {
   function show_legend(keys,colorFunc){
     // Construct a color legend.
     $("#legend").svgColorLegend({
-      cmap_func: colorFunc,
+      cmapFunc: colorFunc,
       xoffset: 10,
       yoffset: 10,
       categories: keys,
-      height_padding: 5,
-      width_padding: 7,
-      text_spacing: 19,
-      legend_margins: {top: 5, left: 5, bottom: 5, right: 5},
+      heightPadding: 5,
+      widthPadding: 7,
+      textSpacing: 19,
+      legendMargins: {top: 5, left: 5, bottom: 5, right: 5},
       clear: true
     });
   }

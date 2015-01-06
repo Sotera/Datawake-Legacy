@@ -55,11 +55,11 @@ def finished_database_upload(*args):
 
 
 def upload_file(file_upload, name, description):
+    tangelo.log("Loading new domain: "+name)
     domain_content_connector = factory.get_entity_data_connector()
     try:
         if not db.domain_exists(name):
             if file_upload is not None:
-                tangelo.log("read domain file")
                 domain_file_lines = file_upload.file.readlines()
                 domain_file_lines = map(lambda x: x.strip().replace('\0', ''), domain_file_lines)
                 db.add_new_domain(name, description)

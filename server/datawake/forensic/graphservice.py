@@ -98,7 +98,7 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
         trail = u'*'
     userlist = map(lambda x: x.replace('\"', '').strip(), users.split(','))
     userlist = filter(lambda x: len(x) > 0, userlist)
-    tangelo.log('getGraph( ' + str(name) + ',' + str(startdate) + ',' + str(enddate) + ',' + str(userlist) + ',' + str(trail) + ',' + str(domain) + ')')
+    #tangelo.log('getGraph( ' + str(name) + ',' + str(startdate) + ',' + str(enddate) + ',' + str(userlist) + ',' + str(trail) + ',' + str(domain) + ')')
 
     if name == 'browse path':
         graph = graph_helper.getBrowsePathEdges(org, startdate, enddate, userlist, trail, domain)

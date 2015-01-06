@@ -686,7 +686,7 @@ def getBrowsePathWithLookAhead(org,startdate,enddate,userlist=[],trail='*',domai
                 for url in link_map[link]:
                     edges.append((url,link))
             else:
-                tangelo.log("KeyError. ignoring link: "+link)
+                tangelo.log("getBrowsePathWithLookAhead:: KeyError. ignoring link: "+link)
 
     #t2 = time.time()
     #tangelo.log("PROCESSED GRAPH IN "+str(t2-t1))

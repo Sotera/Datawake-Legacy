@@ -60,7 +60,7 @@ class ODBCConnector(BasicConnector):
             self.open()
             cursor = self.connection.cursor()
             sql_cmd = "select " + self.connection_information["attribute_column"] + "," + self.connection_information["value_column"] + " from " + self.connection_information["table_name"] + ";"
-            tangelo.log(sql_cmd)
+            #tangelo.log(sql_cmd)
             cursor.execute(sql_cmd)
             rows = cursor.fetchall()
             if rows:
