@@ -8,12 +8,13 @@ define(['hbs!templates/tooltip'], function(tooltipTemplate) {
     }
 
     TooltipView.prototype._initialize = function(element,spec) {
-        this._canvas = $(tooltipTemplate(spec));
-        this._canvas.appendTo(element);
+
     };
 
     TooltipView.prototype.show = function(spec) {
-        this._canvas.remove();
+        if (this._canvas) {
+            this._canvas.remove();
+        }
         this._canvas = $(tooltipTemplate({
             labels : spec.labels
         }));
