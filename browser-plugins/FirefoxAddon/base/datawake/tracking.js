@@ -109,7 +109,7 @@ function setupTabWorkerAndServices(tab) {
                 pageContents.domain = datawakeInfoForTab.domain.name;
                 pageContents.trail = datawakeInfoForTab.trail.name;
                 var url = addOnPrefs.datawakeDeploymentUrl + "/scraper/scrape";
-                requestHelper.post(url, encodeURIComponent(JSON.stringify(pageContents)), function (response) {
+                requestHelper.post(url, JSON.stringify(pageContents), function (response) {
                     console.debug("Setting up selections and advanced search");
                     var scrapeObject = response.json;
                     //Sets up the context menu objects for this tab.

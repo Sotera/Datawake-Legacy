@@ -51,6 +51,7 @@ datawake:
     DW_KAFKA_PUB_TOPIC: memex-datawake-visited
     #DW_GOOGLE_CLIENT_IDS:
     DW_MOCK_AUTH:  1
+    DW_MOCK_FORENSIC_AUTH: 1
     DW_CONN_TYPE: mysql
     #DW_IMPALA_HOSTS:
     #DW_HBASE_HOST:

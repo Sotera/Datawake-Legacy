@@ -24,12 +24,7 @@ import cherrypy
 from datawake.util.authentication import factory
 from datawake.util.db import datawake_mysql
 from datawake.util.session import helper as session_helper
-
-
-"""
-To use sessions you must set the cherrypy configuration.  Currently this is done manually / hard coded.
-working with kitware to improve for tangelo
-"""
+from datawake.conf.datawakeconfig import MOCK_FORENSIC_AUTH
 
 
 @tangelo.restful
@@ -46,7 +41,7 @@ def post(token=u''):
         #tangelo.log('plugin-sever.session tokens matched using existing session.')
         user = session_helper.get_user()
     else:
-        auth_helper = factory.get_authentication_object(token)
+        auth_helper = factory.get_authentication_object(token,MOCK_FORENSIC_AUTH)
         user = auth_helper.get_user_from_token()
         tangelo.log('session.post verified user: ' + str(user))
     orgs = datawake_mysql.getOrgLinks(user.get_email())

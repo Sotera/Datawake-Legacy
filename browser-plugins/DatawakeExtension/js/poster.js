@@ -10,7 +10,7 @@ var dwPoster = function () {
                 return;
             }
             var data = JSON.stringify({
-                html: $('body').html(),
+                html: encodeURIComponent($('body').html()),
                 url: response.url,
                 domain: response.domain,
                 trail: response.trail
