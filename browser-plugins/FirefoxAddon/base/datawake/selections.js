@@ -1,5 +1,6 @@
 var contextMenu = require("sdk/context-menu");
 var self = require("sdk/self");
+var notifications = require("sdk/notifications");
 var data = self.data;
 var addOnPrefs = require("sdk/simple-prefs").prefs;
 var tabs = require("sdk/tabs");
@@ -31,6 +32,8 @@ function useContextMenu(tab) {
                 contextMenu.Item({ label: "Report Extraction Error", data: "feedback", context: contextMenu.SelectionContext()}),
                 contextMenu.Item({ label: "Add Trail Based Entity", data: "add-trail-entity", context: contextMenu.SelectionContext()}),
                 contextMenu.Item({ label: "Add Irrelevant Trail Based Entity", data: "add-irrelevant-trail-entity", context: contextMenu.SelectionContext()}),
+                contextMenu.Item({ label: "Add Custom Trail Based Entity", data: "add-trail-entity-custom"}),
+                contextMenu.Item({ label: "Add Custom Irrelevant Trail Based Entity", data: "add-irrelevant-trail-entity-custom"}),
                 contextMenu.Separator(),
                 contextMenu.Item({ label: "Hide Selections", data: "hide"}),
                 contextMenu.Item({ label: "Show Selections", data: "highlight"}),
@@ -57,6 +60,12 @@ function useContextMenu(tab) {
                         break;
                     case "hide-trail":
                         hideSelections("trailentities");
+                        break;
+                    case "add-trail-entity-custom":
+                        addCustomTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+                        break;
+                    case "add-irrelevant-trail-entity-custom":
+                        addCustomIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
                         break;
                     case "add-trail-entity":
                         addTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
@@ -87,20 +96,35 @@ function showTrailEntities(domain, trail) {
     });
 }
 
-function addTrailEntity(domain, trail, entity) {
+function addCustomTrailEntity(domain, trail, entity) {
     tracking.promptTrailBasedEntity(entity, function (text) {
-        var post_obj = JSON.stringify({domain: domain, trail: trail, entity: text});
-        requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function (response) {
-            console.debug("Success");
+        addTrailEntity(domain, trail, text);
+    });
+}
+
+function addCustomIrrelevantTrailEntity(domain, trail, entity) {
+    tracking.promptIrrelevantTrailBasedEntity(entity, function (text) {
+        addIrrelevantTrailEntity(domain, trail, text);
+    });
+}
+function addTrailEntity(domain, trail, entity) {
+    var post_obj = JSON.stringify({domain: domain, trail: trail, entity: entity});
+    requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function (response) {
+        var myIconURL = data.url("img/waveicon38.png");
+        notifications.notify({
+            text: "Successfully added " + entity + " as an entity!",
+            iconURL: myIconURL
         });
     });
 }
 
 function addIrrelevantTrailEntity(domain, trail, entity) {
-    tracking.promptIrrelevantTrailBasedEntity(entity, function (text) {
-        var post_obj = JSON.stringify({domain: domain, trail: trail, entity: text});
-        requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/irrelevant", post_obj, function (response) {
-            console.debug("Success");
+    var post_obj = JSON.stringify({domain: domain, trail: trail, entity: entity});
+    requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/irrelevant", post_obj, function (response) {
+        var myIconURL = data.url("img/waveicon38.png");
+        notifications.notify({
+            text: "Successfully added " + entity + " as an irrelevant entity!",
+            iconURL: myIconURL
         });
     });
 }
