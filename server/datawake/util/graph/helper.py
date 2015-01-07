@@ -272,20 +272,10 @@ def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userli
             entity['subdomain'] = emailExt.subdomain
         elif (entity_type=='phone'):
             areaCode = ''
-            if (len(entity_value) != 7 and len(entity_value) != 9 and len(entity_value) != 9):
-                bAdd = False
+            if (len(entity_value) == 10):
+                areaCode = entity_value[1:4]
 
-            if (len(entity_value) == 7 or len(entity_value) == 10 or len(entity_value) == 9):
-                if (len(entity_value) == 10):
-                    areaCode = entity_value[1:4]
-                    if (entity_value[:1] != '1' or areaCode not in areaCodes):
-                        bAdd = False
-                if (len(entity_value) == 9):
-                    areaCode = entity_value[:3]
-                    if (areaCode not in areaCodes):
-                        bAdd = False
-
-            if (bAdd == True):
+            if (areaCode != ''):
                 entity['area_code'] = areaCode
         else:
             adj_urls.add(entity_value)

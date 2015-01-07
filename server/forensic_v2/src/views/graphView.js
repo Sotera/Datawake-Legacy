@@ -167,12 +167,12 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 		this._graph.update();
 	};
 
-	GraphView.prototype._showLoader = function(duration) {
+	GraphView.prototype._showLoader = function(duration,msg) {
 		if (this._loaderAnimationId) {
 			return;
 		}
 
-		_.showLoader();
+		_.showLoader(msg);
 
 		var startBlur = 0, endBlur = 5;
 		var startGrayscale = 0, endGrayscale = 1;
@@ -232,7 +232,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	GraphView.prototype._onTrailChange = function(trailInfo) {
 		var self = this;
 		this._activeTrail = trailInfo;
-		this._showLoader(1000);
+		this._showLoader(1000,'Requesting trail from server');
 		TrailGraphService.get(trailInfo)
 			.then(
 				function(response) {

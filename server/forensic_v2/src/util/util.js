@@ -19,7 +19,7 @@ define([], function() {
 		 * Display a modal overlay with a loader
 		 * @private
 		 */
-		showLoader : function() {
+		showLoader : function(message) {
 			var overlay = $('<div/>')
 				.attr('id','ajax_loader_overlay')
 				.width(window.innerWidth)
@@ -27,10 +27,19 @@ define([], function() {
 				.addClass('ajax_loader_overlay')
 				.appendTo($(document.body));
 
-			var img = $('<img/>')
-				.attr('src','./img/ajax_loader.gif')
+			var container = $('<div/>')
 				.addClass('ajax_loader_image')
 				.appendTo(overlay);
+
+			var img = $('<img/>')
+				.attr('src','./img/ajax_loader.gif')
+				.appendTo(container);
+
+			if (message) {
+				var msg = $('<div/>')
+					.html(message)
+					.appendTo(container);
+			}
 
 			var imgDim = parseInt(img.css('margin-left').replace('px',''))*-2;
 			img.attr('width',imgDim);
