@@ -93,7 +93,7 @@ define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) 
 		},
 
 		postrender : function() {
-			var columnCenters = [];
+			var columnCenters = [null,null,null];
 			var renderObjects = [];
 			if (!this._nodes || this._nodes.length === 0) {
 				return renderObjects;
@@ -150,8 +150,13 @@ define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) 
 			var bb = this.getBoundingBox(this._nodes);
 
 			this._columnHeaders.forEach(function(textObject,i) {
-				textObject.x = columnCenters[i];
-				textObject.y = bb.y - 40;
+				if (columnCenters[i]) {
+					textObject.x = columnCenters[i];
+					textObject.y = bb.y - 40;
+				} else {
+					textObject.x = -100000;
+					textObject.y = -100000;
+				}
 			});
 		},
 

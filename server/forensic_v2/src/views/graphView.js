@@ -545,6 +545,10 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 */
 	GraphView.prototype._renderForensicGraph = function(forensicGraph) {
 		this._layouter = new ForensicColumnLayout(250);
+		var that = this;
+		var onLayoutFinished = function() {
+			that._layouter.postrenderUpdate();	// @hack
+		};
 		this._graph
 			.clear()
 			.nodes(forensicGraph.nodes)
@@ -552,7 +556,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			.initializeGrouping()
 			.layouter(this._layouter)
 			.draw()
-			.layout()
+			.layout(onLayoutFinished)
 			.fit();
 	};
 
