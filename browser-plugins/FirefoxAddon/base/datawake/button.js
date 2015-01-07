@@ -60,10 +60,23 @@ function setupListeners() {
             var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
             startLookaheadTimer(datawakeInfo, lookaheadTimerObject.links, 0, 1000);
         });
-
+        mainPanel.port.on("getUrlEntities", getUrlEntities);
         mainPanel.port.on("setUrlRank", setUrlRank);
         mainPanel.port.on("openExternalLink", openExternalTool);
         mainPanel.port.on("markInvalid", markInvalid);
+        mainPanel.port.on("refreshEntities", function(domainAndTrail){
+           emitTrailEntities(domainAndTrail.domain, domainAndTrail.trail);
+        });
+        mainPanel.port.on("refreshDomainEntities", function(domain_obj){
+            getEntities(domain_obj.domain, sendDomainEntities);
+        });
+        mainPanel.port.on("refreshWebPages", function(domainAndTrail){
+           emitTrailBasedLinks(domainAndTrail.domain, domainAndTrail.trail);
+        });
+
+        mainPanel.port.on("refreshFeedbackEntities", function(domain_obj){
+            emitFeedbackEntities(domain_obj.domain);
+        });
     } catch (e) {
         console.error(e.name + " : " + e.message);
     }
@@ -105,9 +118,7 @@ function onToggle(state) {
             emitRanks(datawakeInfo);
             emitMarkedEntities(datawakeInfo.domain.name);
             emitTrailBasedSearching(datawakeInfo.domain.name, datawakeInfo.trail.name);
-            getEntities(datawakeInfo.domain.name, function (entities) {
-                mainPanel.port.emit("entities", entities);
-            });
+            getEntities(datawakeInfo.domain.name, sendDomainEntities);
             service.getExternalLinks(function (externalLinks) {
                 mainPanel.port.emit("externalLinks", externalLinks);
             });
@@ -121,6 +132,10 @@ function onToggle(state) {
         console.debug("Invalid Tab");
     }
 
+}
+
+function sendDomainEntities(entities){
+    mainPanel.port.emit("entities", entities);
 }
 
 function getUrlEntities(data) {
@@ -161,7 +176,7 @@ function removeTrailBasedLink(data) {
 function markInvalid(entity) {
     var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/bad";
     requestHelper.post(post_url, JSON.stringify(entity), function (response) {
-        mainPanel.port.emit("marked", entity.value);
+        mainPanel.port.emit("marked", entity.entity_value);
     });
 }
 
@@ -170,7 +185,7 @@ function emitMarkedEntities(domain) {
     requestHelper.post(post_url, JSON.stringify({domain: domain}), function (response) {
         var marked_entities = response.json.marked_entities;
         for (var index in marked_entities)
-            if(marked_entities.hasOwnProperty(index))
+            if (marked_entities.hasOwnProperty(index))
                 mainPanel.port.emit("marked", marked_entities[index].value);
     });
 }

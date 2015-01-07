@@ -25,6 +25,15 @@
                 <li><a href="#/features/domain" ng-show="domainFeaturesEnabled">Features in Domain</a></li>
                 <li><a href="#/lookahead" ng-show="lookaheadEnabled">Lookahead</a></li>
                 <li><a href="#/feedback">Extractor Feedback</a></li>
+                <li role="presentation" class="dropdown">
+                    <a id="trail-entities-menu" class="dropdown-toggle" data-toggle="dropdown" aria-controls="trail-entities-menu-dropdown">Trail Based <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="trail-entities-menu" id="trail-entities-menu-dropdown">
+                        <li><a href="#/trail/explored">Explored Pages</a></li>
+                        <li><a href="#/trail/unexplored">Unexplored Pages</a></li>
+                        <li><a href="#/trail/entities/relevant">Entities</a></li>
+                        <li><a href="#/trail/entities/irrelevant">Irrelevant Entities</a></li>
+                    </ul>
+                </li>
             </ul>
             <div class="tab-content">
                 <div ng-view></div>

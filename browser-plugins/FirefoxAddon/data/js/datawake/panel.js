@@ -1,5 +1,5 @@
 var addon = self;
-var panelApp = angular.module('panelApp', ["ngRoute"]).config(['$provide', function ($provide) {
+var panelApp = angular.module('panelApp', ["ngRoute", "ngSanitize"]).config(['$provide', function ($provide) {
     $provide.decorator('$sniffer', ['$delegate', function ($delegate) {
         $delegate.history = false;
         return $delegate;
@@ -21,6 +21,9 @@ panelApp.controller("PanelCtrl", function ($scope) {
     $scope.pageVisits = addon.options.pageVisits;
     $scope.headerPartial = "partials/header-partial.html";
 
+    $scope.refreshFeedbackEntities = function () {
+        addon.port.emit("refreshFeedbackEntities", {domain: $scope.datawake.domain.name})
+    };
 
     addon.port.on("feedbackEntities", function (entities) {
         $scope.$apply(function () {
@@ -72,20 +75,30 @@ panelApp.controller("PanelCtrl", function ($scope) {
     addon.port.on("trailEntities", function (entities_obj) {
         $scope.irrelevantEntities = entities_obj.irrelevantEntities;
         $scope.trailEntities = entities_obj.entities;
+        $scope.trailEntitiesIter = createIterableEntityListForSorting(entities_obj.entities);
+        $scope.irrelevantEntitiesIter = createIterableEntityListForSorting(entities_obj.irrelevantEntities);
         $scope.$apply();
     });
 
-    addon.port.on("trailLinks", function (links_obj) {
-        $scope.visitedLinks = links_obj.visited;
-        $scope.notVisitedLinks = links_obj.notVisited;
-        $scope.$apply();
-    });
+    function createIterableEntityListForSorting(entities) {
+        var arr = [];
+        $.map(entities, function (item, key) {
+            arr.push({entity: key, rank: item});
+        });
+        return arr;
+    }
 
-    addon.port.on("trailEntities", function (entities_obj) {
-        $scope.irrelevantEntities = entities_obj.irrelevantEntities;
-        $scope.trailEntities = entities_obj.entities;
-        $scope.$apply();
-    });
+    $scope.refreshWebPages = function () {
+        addon.port.emit("refreshWebPages", {domain: $scope.datawake.domain.name, trail: $scope.datawake.trail.name});
+    };
+
+    $scope.refreshEntities = function () {
+        addon.port.emit("refreshEntities", {domain: $scope.datawake.domain.name, trail: $scope.datawake.trail.name});
+    };
+
+    $scope.refreshDomainEntities = function () {
+        addon.port.emit("refreshDomainEntities", {domain: $scope.datawake.domain.name});
+    };
 
     addon.port.on("trailLinks", function (links_obj) {
         $scope.visitedLinks = links_obj.visited;
@@ -131,26 +144,6 @@ panelApp.controller("PanelCtrl", function ($scope) {
         }
     };
 
-    $scope.showEntities = function (link) {
-        if (!link.show) {
-            var data = {};
-            data.domain = $scope.datawake.domain.name;
-            data.trail = $scope.datawake.trail.name;
-            data.url = link.url;
-            addon.port.emit("getUrlEntities", data);
-            function updateLink(entities) {
-                link.entities = entities;
-                link.show = !link.show;
-                $scope.$apply();
-            }
-
-            addon.port.once("urlEntities", updateLink);
-        } else {
-            link.show = !link.show;
-        }
-    };
-
-
     $scope.removeLink = function (link) {
         var data = {};
         data.domain = $scope.datawake.domain.name;
@@ -171,6 +164,7 @@ panelApp.controller("PanelCtrl", function ($scope) {
             data.domain = $scope.datawake.domain.name;
             data.trail = $scope.datawake.trail.name;
             data.url = link.url;
+            //TODO: Make this listener
             addon.port.emit("getUrlEntities", data);
             function updateLink(entities) {
                 link.entities = entities;
@@ -247,6 +241,18 @@ panelApp.config(['$routeProvider',
             }).
             when('/feedback', {
                 templateUrl: 'partials/feedback-partial.html'
+            }).
+            when('/trail/explored', {
+                templateUrl: 'partials/trail-based-explored-partial.html'
+            }).
+            when('/trail/unexplored', {
+                templateUrl: 'partials/trail-based-unexplored-partial.html'
+            }).
+            when('/trail/entities/relevant', {
+                templateUrl: 'partials/trail-based-relevant-entities-partial.html'
+            }).
+            when('/trail/entities/irrelevant', {
+                templateUrl: 'partials/trail-based-irrelevant-entities-partial.html'
             }).
             otherwise({
                 redirectTo: '/features/domain'
