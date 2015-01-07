@@ -33,20 +33,23 @@ define([], function() {
 
 			var img = $('<img/>')
 				.attr('src','./img/ajax_loader.gif')
+				.addClass('ajax_loader_img')
 				.appendTo(container);
 
 			if (message) {
 				var msg = $('<div/>')
-					.html(message)
-					.appendTo(container);
+					.addClass('ajax_loader_text')
+					.html(message);
+					//.appendTo(container);  // todo: fix
 			}
 
-			var imgDim = parseInt(img.css('margin-left').replace('px',''))*-2;
+			var imgDim = parseInt(container.css('margin-left').replace('px',''))*-2;
 			img.attr('width',imgDim);
 			img.attr('height',imgDim);
 
 			$(window).resize(function() {
 				overlay.width(window.innerWidth).height(window.innerHeight).css('top','0px');
+
 			});
 		},
 
