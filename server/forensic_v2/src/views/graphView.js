@@ -163,7 +163,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				});
 			}
 		}
-		this._tooltipView.hide();
+		this._tooltipView.hide(250);
 		this._graph.update();
 	};
 

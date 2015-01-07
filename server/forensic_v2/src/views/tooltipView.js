@@ -33,13 +33,20 @@ define(['hbs!templates/tooltip'], function(tooltipTemplate) {
     };
 
 
-    TooltipView.prototype.hide = function() {
-        var c = this._canvas;
-        c.animate({
-            opacity : 0
-        }, function() {
-            c.remove();
-        });
+    TooltipView.prototype.hide = function(delay) {
+        var that = this;
+        var _doHide = function() {
+            var c = that._canvas;
+            c.animate({
+                opacity : 0
+            }, function() {
+                c.remove();
+            });
+        };
+
+        setTimeout(function() {
+            _doHide();
+        },delay||1);
     };
 
     return TooltipView;
