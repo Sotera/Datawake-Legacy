@@ -20,7 +20,8 @@ DW_KAFKA_PUB_TOPIC: kafka topic to publish visited urls for processing.
 OPTIONAL ENVIRONMENT VARIABLES
 
 DW_GOOGLE_CLIENT_IDS: list of client ids used for google user authentication
-DW_MOCK_AUTH:  If set actual user authentication is bypassed. (for dev / demos only)
+DW_MOCK_AUTH:  If set actual user authentication is bypassed for browser plugins. (for dev / demos only)
+DW_MOCK_FORENSIC_AUTH:  If set actual user authentication is bypassed for forensic views. (for dev / demos only)
 DW_CONN_TYPE:  Determines mysql or impala / hbase is used to store the generated web index data. default=mysql. can by mysql or cluster
 DW_IMPALA_HOSTS: Comma separated list of impala hosts (cluster only)
 DW_IMPALA_PORT: impala port
@@ -83,6 +84,7 @@ if 'DW_GOOGLE_CLIENT_IDS' in os.environ:
 
 
 MOCK_AUTH = 'DW_MOCK_AUTH' in os.environ
+MOCK_FORENSIC_AUTH = 'DW_MOCK_FORENSIC_AUTH' in os.environ
 
 
 # can be "cluster" or "mysql"
