@@ -113,6 +113,7 @@ function addTrailEntity(domain, trail, entity) {
         var myIconURL = data.url("img/waveicon38.png");
         notifications.notify({
             text: "Successfully added " + entity + " as an entity!",
+            title: "Datawake",
             iconURL: myIconURL
         });
     });
@@ -124,6 +125,7 @@ function addIrrelevantTrailEntity(domain, trail, entity) {
         var myIconURL = data.url("img/waveicon38.png");
         notifications.notify({
             text: "Successfully added " + entity + " as an irrelevant entity!",
+            title: "Datawake",
             iconURL: myIconURL
         });
     });
