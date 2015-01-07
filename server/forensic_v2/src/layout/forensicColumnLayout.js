@@ -6,7 +6,7 @@ define(['../util/util', '../config/forensic_config'],function(_,ForensicConfig) 
 		lineWidth : 1,
 		lineDash : [5,5]
 	});
-	var COLUMN_HEADER_TEXT = ['Browse Path','Extracted Entities','Unexplored Websites'];
+	var COLUMN_HEADER_TEXT = ['Browse Path','Extracted Content','Unexplored Pages'];
 
 	var NODE_PADDING = 5;
 
