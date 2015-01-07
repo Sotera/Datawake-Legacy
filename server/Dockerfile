@@ -80,4 +80,5 @@ ENV PYTHONPATH /usr/local/share/tangelo/web:$PYTHONPATH
 
 # set the default container command to run tangelo
 
-CMD ["tangelo","-nd","start"]
+CMD ["tangelo", "-c", "/etc/tangelo.conf"]
+

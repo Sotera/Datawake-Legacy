@@ -104,6 +104,7 @@ function onToggle(state) {
             emitFeedbackEntities(datawakeInfo.domain.name);
             emitRanks(datawakeInfo);
             emitMarkedEntities(datawakeInfo.domain.name);
+            emitTrailBasedSearching(datawakeInfo.domain.name, datawakeInfo.trail.name);
             getEntities(datawakeInfo.domain.name, function (entities) {
                 mainPanel.port.emit("entities", entities);
             });
@@ -127,6 +128,14 @@ function getUrlEntities(data) {
     requestHelper.post(url, JSON.stringify(data), function (response) {
         mainPanel.port.emit("urlEntities", response.json.entities);
     });
+}
+
+function getEntities(domain, callback) {
+    if (tracking.isTabWorkerAttached(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
+        service.getEntities(domain, tabs.activeTab.url, callback);
+    } else {
+        console.debug("The Datawake is not on for this tab.");
+    }
 }
 
 function emitTrailBasedSearching(domain, trail) {

@@ -86,30 +86,6 @@ function promptForInput(obj, callback){
     });
 }
 
-function promptTrailBasedEntity(entity, callback){
-    var obj = {};
-    obj.raw_text = entity.trim();
-    obj.prompt = "Add trail based entity?";
-    obj.callback = "trailEntity";
-    promptForInput(obj, callback);
-}
-
-function promptIrrelevantTrailBasedEntity(entity, callback){
-    var obj = {};
-    obj.raw_text = entity.trim();
-    obj.prompt = "Add irrelevant trail entity?";
-    obj.callback = "irrelevantEntity";
-    promptForInput(obj, callback);
-}
-
-function promptForInput(obj, callback){
-    var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
-    currentTrackingTabWorker.port.emit("promptTrailBasedEntity", obj);
-    currentTrackingTabWorker.port.on(obj.callback, function(text){
-        callback(text);
-    });
-}
-
 function hideSelections(className){
     var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
     currentTrackingTabWorker.port.emit("removeSelections", className);
@@ -159,11 +135,11 @@ function setupTabWorkerAndServices(tab) {
                 pageContents.domain = datawakeInfoForTab.domain.name;
                 pageContents.trail = datawakeInfoForTab.trail.name;
                 var url = addOnPrefs.datawakeDeploymentUrl + "/scraper/scrape";
-                requestHelper.post(url, encodeURIComponent(JSON.stringify(pageContents)), function (response) {
+                requestHelper.post(url, JSON.stringify(pageContents), function (response) {
                     console.debug("Setting up selections and advanced search");
                     var scrapeObject = response.json;
                     //Sets up the context menu objects for this tab.
-                    if (currentTrackingTabWorker.tab != null) {
+                    if (scrapeObject && currentTrackingTabWorker.tab != null) {
                         getDomainExtractedEntities(1000);
                         widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, scrapeObject.count);
                     }

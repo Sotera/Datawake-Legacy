@@ -6,7 +6,7 @@ var panelApp = angular.module('panelApp', ["ngRoute"]).config(['$provide', funct
     }]);
 }]);
 
-panelApp.controller("PanelCtrl", function ($scope, $document) {
+panelApp.controller("PanelCtrl", function ($scope) {
 
     $scope.lookaheadLinks = [];
     $scope.extracted_tools = [];

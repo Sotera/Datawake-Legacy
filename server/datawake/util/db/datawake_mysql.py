@@ -624,11 +624,6 @@ def add_irrelevant_trail_entity(org, domain, trail, entity):
     return dbCommitSQL(sql, [org, domain, trail, entity, "0"])
 
 
-def add_irrelevant_trail_entity(org, domain, trail, entity):
-    sql = "insert into irrelevant_trail_based_entities(org, domain, trail, entity, google_result_count) value (%s, %s,%s,%s, %s)"
-    return dbCommitSQL(sql, [org, domain, trail, entity, "0"])
-
-
 def get_trail_based_entities(org, domain, trail):
     sql = "select entity,google_result_count from trail_based_entities " \
           "where org=%s and " \
