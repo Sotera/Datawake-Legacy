@@ -55,7 +55,8 @@ define([], function() {
 			HEADER_HEIGHT : 23,
 			FILL_STYLE : '#333',
 			SHADOW_COLOR : '#fff',
-			SHADOW_BLUR : 5
+			SHADOW_BLUR : 5,
+			INNER_FILL_STYLE : '#fff'
 		},
 		showLegendOnStart : true,
 		showLabelsOnStart : true,

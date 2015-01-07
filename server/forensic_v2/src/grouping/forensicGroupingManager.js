@@ -205,6 +205,7 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 						labelText: browsePathAggregates[row][0].domain,
 						children: browsePathAggregates[row],
 						innerLabel: browsePathAggregates[row].length,
+						innerLabelFillStyle : ForensicConfig.LABEL.INNER_FILL_STYLE,
 						row: row,
 						col: 0
 					});
@@ -231,6 +232,7 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 								labelText: domainKey,
 								children: clusteredEmails[domainKey],
 								innerLabel: clusteredEmails[domainKey].length,
+								innerLabelFillStyle : ForensicConfig.LABEL.INNER_FILL_STYLE,
 								row: row,
 								col: 1
 							});
@@ -259,6 +261,7 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 								labelText: areaCodeKey,
 								children: clusteredPhoneNumbers[areaCodeKey],
 								innerLabel: clusteredPhoneNumbers[areaCodeKey].length,
+								innerLabelFillStyle : ForensicConfig.LABEL.INNER_FILL_STYLE,
 								row: row,
 								col: 1
 							});
@@ -287,6 +290,7 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 								labelText: domainKey,
 								children: clusteredRelatedLinks[domainKey],
 								innerLabel: clusteredRelatedLinks[domainKey].length,
+								innerLabelFillStyle : ForensicConfig.LABEL.INNER_FILL_STYLE,
 								row: row,
 								col: 2
 							});
