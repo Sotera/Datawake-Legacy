@@ -91,7 +91,6 @@ post_actions = {
 
 @tangelo.restful
 def post(action, *args, **kwargs):
-    # json_obj = urllib.unquote(tangelo.request_body().read())
     json_obj = tangelo.request_body().read()
     post_data = json.loads(json_obj, strict=False)
 
