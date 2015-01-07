@@ -3,7 +3,7 @@ var addon = self;
 function scrapePage() {
     try {
         var pageContents = {
-            html: $('body').html()
+            html: encodeURIComponent($('body').html())
         };
         console.debug("Emitting page contents....");
         addon.port.emit("contents", pageContents);
