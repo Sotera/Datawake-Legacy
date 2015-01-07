@@ -1,4 +1,4 @@
-define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager', '../config/forensic_config', '../util/util'], function(graphTemplate,events,TrailGraphService,testData,ForensicColumnLayout,ForensicGroupingManager,ForensicConfig,_) {
+define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/testData', '../layout/forensicColumnLayout', '../grouping/forensicGroupingManager', '../config/forensic_config', '../util/util', './tooltipView'], function(graphTemplate,events,TrailGraphService,testData,ForensicColumnLayout,ForensicGroupingManager,ForensicConfig,_,TooltipView) {
 
 
 	/**
@@ -9,6 +9,8 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 */
 	function GraphView(element,context) {
 		this._graph = null;
+		this._tooltipElement = element.find('#tooltip');
+		this._tooltipView = null;
 		this._jqCanvas = null;
 		this._layouter = null;
 		this._activeTrail = null;
@@ -52,6 +54,9 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 			self._onResize(e);
 		});
 		this._jqCanvas.appendTo(element);
+
+		this._tooltipView = new TooltipView(this._tooltipElement,{});
+
 		$(window).resize();
 	};
 
@@ -76,7 +81,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 	 * @param node
 	 * @private
 	 */
-	GraphView.prototype._onNodeOver = function(node) {
+	GraphView.prototype._onNodeOver = function(node,e) {
 		if (!this._graph.showAllLabels()) {
 			this._graph.addLabel(node, node.labelText);
 		}
@@ -106,14 +111,18 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				});
 			}
 		}
+
+		if (node.children) {
+			var labels = node.children.map(function(child) {
+				return child.labelText;
+			});
+
+			this._tooltipView.show(labels, e.clientY, e.clientX);
+
+		}
+
 		this._graph.update();
-		//this._graph.updateLink(node.index,null,{
-		//	strokeStyle :
-		//});
-		//// Update incoming links
-		//this._graph.updateLink(null,node.index,{
-		//	strokeStyle : node.highlightStroke
-		//});
+
 	};
 
 	/**
