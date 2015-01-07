@@ -52,6 +52,7 @@ define([], function() {
 		LABEL : {
 			FONT_FAMILY : '"Open Sans"',
 			FONT_HEIGHT : 20,
+			HEADER_HEIGHT : 23,
 			FILL_STYLE : '#333',
 			SHADOW_COLOR : '#fff',
 			SHADOW_BLUR : 5
