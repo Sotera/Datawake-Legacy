@@ -164,7 +164,6 @@ panelApp.controller("PanelCtrl", function ($scope) {
             data.domain = $scope.datawake.domain.name;
             data.trail = $scope.datawake.trail.name;
             data.url = link.url;
-            //TODO: Make this listener
             addon.port.emit("getUrlEntities", data);
             function updateLink(entities) {
                 link.entities = entities;
