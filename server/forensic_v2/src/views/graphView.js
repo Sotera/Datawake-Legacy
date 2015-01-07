@@ -117,12 +117,15 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				return child.labelText;
 			});
 
-			this._tooltipView.show(labels, e.clientY, e.clientX);
+			this._tooltipView.show({
+				labels: labels,
+				x: e.clientX,
+				y: e.clientY,
+				orientation: node.type === 'browse_path' ? 'NW' : 'NE'
+			});
 
 		}
-
 		this._graph.update();
-
 	};
 
 	/**
@@ -160,6 +163,7 @@ define(['hbs!templates/graph','../util/events', '../rest/trailGraph', '../util/t
 				});
 			}
 		}
+		this._tooltipView.hide();
 		this._graph.update();
 	};
 
