@@ -1,13 +1,19 @@
-define(['../rest/authorization'], function(authModule) {
+define(['../rest/authorization','./events'], function(authModule,events) {
 
     var authResult;
     var onLoggedIn = function () {
+    };
+    var onLoggedOut = function() {
     };
 
     return {
 
         setOnLoggedIn: function (f) {
             onLoggedIn = f;
+        },
+
+        setOnLoggedOut : function(f) {
+            onLoggedOut = f;
         },
 
         getToken: function () {
@@ -37,10 +43,8 @@ define(['../rest/authorization'], function(authModule) {
                 authModule.post(_authResult)
                 .then(
                     function(response) {
-                        // TODO:  pub singin success
-                    },
-                    function() {
-                        // TODO:  pub singin failure
+                        console.log("datawake server login: " + response);
+                        onLoggedIn();
                     }
                 );
 
@@ -52,10 +56,7 @@ define(['../rest/authorization'], function(authModule) {
                 authModule.del()
                 .then(
                     function() {
-                        // TODO:   on logout success
-                    },
-                    function() {
-                        // TODO:   on logout fail
+                        onLoggedOut();
                     }
                 );
 
