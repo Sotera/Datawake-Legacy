@@ -1,4 +1,4 @@
-define(['../rest/authorization'], function(authModule) {
+define(['../rest/authorization','./events'], function(authModule,events) {
 
     var authResult;
     var onLoggedIn = function () {
@@ -37,7 +37,8 @@ define(['../rest/authorization'], function(authModule) {
                 authModule.post(_authResult)
                 .then(
                     function(response) {
-                        // TODO:  pub singin success
+                        console.log("datawake server login: " + response);
+                        onLoggedIn();
                     },
                     function() {
                         // TODO:  pub singin failure
