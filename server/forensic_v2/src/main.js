@@ -33,6 +33,14 @@ require(['config','config/forensic_config','views/navbarView', 'views/graphView'
 				});
 			});
 
+			AuthHelper.setOnLoggedOut(function() {
+				var helpfulMessage = $('#notSignedInMessage');
+				if (helpfulMessage.length === 0) {
+					helpfulMessage = $('<div id="notSignedInMessage"/>').html('You have signed out of Datawake.   Please log-in using the extension to view your content');
+					$('body').append(helpfulMessage);
+				}
+			});
+
 			function checkClientId(){
 				var clientId = $("meta[name='google-signin-clientid']").attr('content');
 				if(clientId == ''){
