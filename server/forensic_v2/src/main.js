@@ -12,7 +12,7 @@ require(['config','config/forensic_config','views/navbarView', 'views/graphView'
 			var _navbarView = null;
 			var _legendView = null;
 			var _aboutView = null;
-			var useGoogleAuth = true;
+			var useGoogleAuth = $('meta[name="google-signin-clientid"]').attr('content') !== '';
 
 			gOnSignin = function(authResult) {
 				AuthHelper.onSignInCallback(authResult);
@@ -41,13 +41,6 @@ require(['config','config/forensic_config','views/navbarView', 'views/graphView'
 				}
 			});
 
-			function checkClientId(){
-				var clientId = $("meta[name='google-signin-clientid']").attr('content');
-				if(clientId == ''){
-					alert('You have Google Auth Enabled, but forgot to add a client Id!');
-				}
-			}
-
 
 			if (ForensicConfig.useTestData) {
 				TrailsService.get().then(function(trails) {
@@ -62,14 +55,15 @@ require(['config','config/forensic_config','views/navbarView', 'views/graphView'
 
 				if (!useGoogleAuth) {
 					AuthHelper.onSignInCallback({'access_token': '123456'});
-				}
+				} else {
 
-				var po = document.createElement('script');
-				po.type = 'text/javascript'; po.async = true;
-				po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
-				var s = document.getElementsByTagName('script')[0];
-				s.parentNode.insertBefore(po, s);
-				checkClientId();
+					var po = document.createElement('script');
+					po.type = 'text/javascript';
+					po.async = true;
+					po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
+					var s = document.getElementsByTagName('script')[0];
+					s.parentNode.insertBefore(po, s);
+				}
 			}
 		});
 });
