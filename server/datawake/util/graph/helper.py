@@ -319,26 +319,6 @@ def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''
 def getBrowsePathAndAdjacentInfoEdges(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['info'],limit,userlist,trail,domain)
 
-    # Get all the lookahead features
-    lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
-
-    # add place holders for urls with no extracted data
-    for adj_url in adj_urls:
-        if adj_url not in lookaheadFeatures:
-            lookaheadFeatures[adj_url] = {}
-
-    domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
-
-
-    entityDataConnector.close()
-    endMillis = int(round(time.time() * 1000))
-    tangelo.log('Processing time = ' + str((endMillis-startMillis)/1000) + 's');
-    return {
-        'browsePath':browsePath,
-        'entities':entities,
-        'lookaheadFeatures':lookaheadFeatures,
-        'domainLookaheadFeatures':domainLookaheadFeatures
-    }
 
 def getBrowsePathWithTextSelections(org,startdate,enddate,userlist=[],trail='*',domain=''):
     # first get the browse path
