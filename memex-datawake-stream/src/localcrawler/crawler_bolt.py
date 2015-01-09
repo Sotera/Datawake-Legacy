@@ -3,6 +3,7 @@ import datetime
 import operator
 import time
 import urllib2
+import cookielib
 import traceback
 import json
 
@@ -100,41 +101,42 @@ class CrawlerBolt(Bolt):
             # self.log("CrawlerBolt sleeping")
             time.sleep(.25)
 
-        opener = urllib2.build_opener()
+        cj = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
         headers = [("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0")]
         opener.addheaders = headers
         output = None
         try:
-            response = opener.open(url)
-            self.log(response.info().getheader('Content-Type'))
+            response = opener.open(url, timeout=10)
             content_type = response.info().getheader('Content-Type')
-            decode_type = "utf-8"
-            if content_type is not None and "charset" in content_type:
+            decode_type = "ISO-8859-1"
+            if content_type is not None and "charset" in content_type and "pdf" not in content_type:
                 decode_type = content_type.split("charset=")[-1]
-            html = response.read().decode(decode_type)
+                html = response.read().decode(decode_type)
+                links = []
+                if input['depth'] is not 0:
+                    links = self.linkExtractor.extract(url, response.getcode(), '', '', html, response.info()['date'], 'datawake-local-crawler')
+                    links = map(lambda x: x.value, links)
+                    links = filter(lambda x: x is not None and len(x) > 0, links)
+                # self.log("CrawlerBolt extracted links: "+str(links))
 
-            links = self.linkExtractor.extract(url, response.getcode(), '', '', html, response.info()['date'], 'datawake-local-crawler')
-            links = map(lambda x: x.value, links)
-            links = filter(lambda x: x is not None and len(x) > 0, links)
-            # self.log("CrawlerBolt extracted links: "+str(links))
-
-            output = dict(
-                crawlid=input['crawlid'],
-                appid=input['appid'],
-                url=url,
-                status_code=response.getcode(),
-                status_msg='Success',
-                timestamp=response.info()['date'],
-                links_found=links,
-                body=html,
-                attrs=input['attrs']
-            )
+                output = dict(
+                    crawlid=input['crawlid'],
+                    appid=input['appid'],
+                    url=url,
+                    status_code=response.getcode(),
+                    status_msg='Success',
+                    timestamp=response.info()['date'],
+                    links_found=links,
+                    body=html,
+                    attrs=input['attrs']
+                )
 
 
-            #self.emit([json.dumps(output)])
-            self.producer.send_messages(self.topic, json.dumps(output))
+                # self.emit([json.dumps(output)])
+                self.producer.send_messages(self.topic, json.dumps(output))
 
-            self.lastfetch = datetime.datetime.now()
+                self.lastfetch = datetime.datetime.now()
         except:
             self.log("CrawlerBolt " + traceback.format_exc())
             self.log("CrawlerBolt: URL: " + url)
