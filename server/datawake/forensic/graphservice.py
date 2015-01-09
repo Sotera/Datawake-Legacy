@@ -154,11 +154,6 @@ post_actions = {
 def post(action, *args, **kwargs):
     post_data = json.loads(tangelo.request_body().read())
 
-    tangelo.log('---------------------------------------------------')
-    tangelo.log('PostData:' + str(post_data))
-    tangelo.log('Action:' + action)
-    tangelo.log('---------------------------------------------------')
-
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call")
 
@@ -167,10 +162,6 @@ def post(action, *args, **kwargs):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    tangelo.log('---------------------------------------------------')
-    tangelo.log('GetAction:' + action)
-    tangelo.log('---------------------------------------------------')
-
     def unknown(**kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call")
 

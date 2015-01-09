@@ -30,8 +30,6 @@ forensic view.
 
 """
 
-
-areaCodes = {'201':True,'202':True,'203':True,'204':True,'205':True,'206':True,'207':True,'208':True,'209':True,'210':True,'212':True,'213':True,'214':True,'215':True,'216':True,'217':True,'218':True,'219':True,'224':True,'225':True,'226':True,'228':True,'229':True,'231':True,'234':True,'236':True,'239':True,'240':True,'242':True,'246':True,'248':True,'249':True,'250':True,'251':True,'252':True,'253':True,'254':True,'256':True,'260':True,'262':True,'264':True,'267':True,'268':True,'269':True,'270':True,'272':True,'276':True,'281':True,'284':True,'289':True,'301':True,'302':True,'303':True,'304':True,'305':True,'306':True,'307':True,'308':True,'309':True,'310':True,'312':True,'313':True,'314':True,'315':True,'316':True,'317':True,'318':True,'319':True,'320':True,'321':True,'323':True,'325':True,'330':True,'331':True,'334':True,'336':True,'337':True,'339':True,'340':True,'343':True,'345':True,'346':True,'347':True,'351':True,'352':True,'360':True,'361':True,'364':True,'365':True,'385':True,'386':True,'401':True,'402':True,'403':True,'404':True,'405':True,'406':True,'407':True,'408':True,'409':True,'410':True,'412':True,'413':True,'414':True,'415':True,'416':True,'417':True,'418':True,'419':True,'423':True,'424':True,'425':True,'430':True,'431':True,'432':True,'434':True,'435':True,'437':True,'438':True,'440':True,'441':True,'442':True,'443':True,'450':True,'458':True,'469':True,'470':True,'473':True,'475':True,'478':True,'479':True,'480':True,'484':True,'501':True,'502':True,'503':True,'504':True,'505':True,'506':True,'507':True,'508':True,'509':True,'510':True,'512':True,'513':True,'514':True,'515':True,'516':True,'517':True,'518':True,'519':True,'520':True,'530':True,'531':True,'534':True,'539':True,'540':True,'541':True,'551':True,'559':True,'561':True,'562':True,'563':True,'567':True,'570':True,'571':True,'573':True,'574':True,'575':True,'579':True,'580':True,'581':True,'585':True,'586':True,'587':True,'601':True,'602':True,'603':True,'604':True,'605':True,'606':True,'607':True,'608':True,'609':True,'610':True,'612':True,'613':True,'614':True,'615':True,'616':True,'617':True,'618':True,'619':True,'620':True,'623':True,'626':True,'630':True,'631':True,'636':True,'639':True,'641':True,'646':True,'647':True,'649':True,'650':True,'651':True,'657':True,'660':True,'661':True,'662':True,'664':True,'667':True,'669':True,'670':True,'671':True,'678':True,'681':True,'682':True,'684':True,'701':True,'702':True,'703':True,'704':True,'705':True,'706':True,'707':True,'708':True,'709':True,'712':True,'713':True,'714':True,'715':True,'716':True,'717':True,'718':True,'719':True,'720':True,'721':True,'724':True,'725':True,'727':True,'731':True,'732':True,'734':True,'740':True,'747':True,'754':True,'757':True,'758':True,'760':True,'762':True,'763':True,'765':True,'767':True,'769':True,'770':True,'772':True,'773':True,'774':True,'775':True,'778':True,'779':True,'780':True,'781':True,'784':True,'785':True,'786':True,'787':True,'800':True,'801':True,'802':True,'803':True,'804':True,'805':True,'806':True,'807':True,'808':True,'809':True,'810':True,'812':True,'813':True,'814':True,'815':True,'816':True,'817':True,'818':True,'819':True,'828':True,'829':True,'830':True,'831':True,'832':True,'843':True,'844':True,'845':True,'847':True,'848':True,'849':True,'850':True,'855':True,'856':True,'857':True,'858':True,'859':True,'860':True,'862':True,'863':True,'864':True,'865':True,'866':True,'867':True,'868':True,'869':True,'870':True,'872':True,'873':True,'876':True,'877':True,'878':True,'888':True,'901':True,'902':True,'903':True,'904':True,'905':True,'906':True,'907':True,'908':True,'909':True,'910':True,'912':True,'913':True,'914':True,'915':True,'916':True,'917':True,'918':True,'919':True,'920':True,'925':True,'928':True,'929':True,'931':True,'936':True,'937':True,'938':True,'939':True,'940':True,'941':True,'947':True,'949':True,'951':True,'952':True,'954':True,'956':True,'959':True,'970':True,'971':True,'972':True,'973':True,'978':True,'979':True,'980':True,'984':True,'985':True,'989':True}
 entityDataConnector = factory.get_entity_data_connector()
 
 def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
@@ -73,7 +71,6 @@ def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
 
     command = command + " ORDER BY userId,t1.ts asc"
     rows = datawake_mysql.dbGetRows(command,commandArgs)
-
 
     edges = []
     nodes = {}
@@ -241,14 +238,11 @@ def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''
 
     command = command + " ORDER BY t1.ts asc"
 
-    tangelo.log('Executing command : ' + command)
-    tangelo.log('Command args : ' + str(commandArgs))
     db_rows = datawake_mysql.dbGetRows(command,commandArgs)
 
     browsePath = {}
     adj_urls = set([])
     entities = []
-    tangelo.log('DB Returned : ' + str(len(db_rows)) + ' rows ')
     for row in db_rows:
         (id,ts,url,entity_type,entity_value) = row
 
@@ -308,14 +302,13 @@ def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''
 
         domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
     else:
-        tangelo.log('No adjacent urls extracted for trail');
         lookaheadFeatures = []
         domainLookaheadFeatures = []
 
 
     entityDataConnector.close()
     endMillis = int(round(time.time() * 1000))
-    tangelo.log('Processing time = ' + str((endMillis-startMillis)/1000) + 's');
+    # tangelo.log('Processing time = ' + str((endMillis-startMillis)/1000) + 's');
     return {
         'browsePath':browsePath,
         'entities':entities,
