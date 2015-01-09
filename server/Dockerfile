@@ -20,6 +20,7 @@ RUN pip install tangelo
 
 RUN pip install happybase
 RUN pip install httplib2
+RUN pip install tldextract
 
 
 # install mysql client
@@ -74,6 +75,7 @@ EXPOSE 80
 COPY datawake /usr/local/share/tangelo/web/datawake
 COPY domain /usr/local/share/tangelo/web/domain
 COPY forensic /usr/local/share/tangelo/web/forensic
+COPY forensic_v2 /usr/local/share/tangelo/web/forensic_v2
 ENV PYTHONPATH /usr/local/share/tangelo/web:$PYTHONPATH
 
 

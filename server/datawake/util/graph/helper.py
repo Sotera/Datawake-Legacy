@@ -20,6 +20,7 @@ import tangelo
 import time
 import datawake.util.dataconnector.factory as factory
 from datawake.util.db import datawake_mysql
+import tldextract
 
 
 """
@@ -30,7 +31,6 @@ forensic view.
 """
 
 entityDataConnector = factory.get_entity_data_connector()
-
 
 def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
     print 'getBrowsePathEdges(',startdate,',',enddate,',',userlist,')'
@@ -120,8 +120,6 @@ def getBrowsePathEdges(org,startdate,enddate,userlist=[],trail='*',domain=''):
     return {'nodes':nodes,'edges':edges}
 
 
-
-
 def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,userlist=[],trail='*',domain=''):
     entityDataConnector.close()
 
@@ -175,11 +173,6 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
     entityDataConnector.close()
     return {'nodes':nodes,'edges':edges}
 
-
-
-
-
-
 def getBrowsePathAndAdjacentWebsiteEdgesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['website'],limit,userlist,trail,domain)
 
@@ -190,10 +183,162 @@ def getBrowsePathAndAdjacentPhoneEdgesWithLimit(org,startdate,enddate,limit,user
 def getBrowsePathAndAdjacentEmailEdgesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['email'],limit,userlist,trail,domain)
 
+def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''):
+    startMillis = int(round(time.time() * 1000))
+    entityDataConnector.close()
+    org = org.upper()
+
+    subcommand = """SELECT min(id)
+                    FROM memex_sotera.datawake_data
+                    WHERE org=%s AND domain=%s
+    """
+    subcommandArgs=[org,domain]
+
+    # add the user list filter if given
+    if (len(userlist) > 0):
+        subcommand = subcommand +" AND "
+        params = ['%s' for i in range(len(userlist))]
+        params = ','.join(params)
+        subcommand = subcommand + "  userId in ("+params+") "
+        subcommandArgs.extend(userlist)
+
+    # add the trail filter
+    if trail != '*':
+        subcommand = subcommand +" AND "
+        subcommand = subcommand + " trail = %s"
+        subcommandArgs.append(trail)
+
+    subcommand = subcommand + ' GROUP BY url '
+
+
+    command = """SELECT t1.id,unix_timestamp(t1.ts) as ts,t1.url,entity_type,entity_value
+                 FROM memex_sotera.datawake_data as t1 INNER JOIN general_extractor_web_index as t2 ON t1.url = t2.url
+                 WHERE t1.id IN (
+                  """
+    command = command + subcommand + " ) AND entity_type!=%s"
+    commandArgs = subcommandArgs[:]
+    commandArgs.append("info")
+
+    # add the time filter to the query
+    if (startdate == '' and enddate == ''):
+        pass
+    elif (startdate != '' and enddate == ''):
+        command = command +" AND unix_timestamp(t1.ts) >= %s "
+        commandArgs.append(startdate)
+    elif (startdate == '' and enddate != ''):
+        command = command + "  AND unix_timestamp(t1.ts) <= %s "
+        commandArgs.append(enddate)
+    else:
+        command = command + " AND unix_timestamp(t1.ts) >= %s and unix_timestamp(t1.ts) <= %s "
+        commandArgs.append(startdate)
+        commandArgs.append(enddate)
+
+
+
+
+    command = command + " ORDER BY t1.ts asc"
+
+    db_rows = datawake_mysql.dbGetRows(command,commandArgs)
+
+    browsePath = {}
+    adj_urls = set([])
+    entities = []
+    for row in db_rows:
+        (id,ts,url,entity_type,entity_value) = row
+
+        # tangelo.log('\t'+str(row))
+
+        if trail is None or trail.strip() == '': trail = "default"
+
+        if id not in browsePath:
+            ext = tldextract.extract(url)
+            browsePath[id] = {'id':id,
+                              'url':url,
+                              'timestamp':ts,
+                              'subdomain':ext.subdomain,
+                              'domain':ext.domain,
+                              'suffix':ext.suffix
+
+            }
+
+        entity = {
+            'id':id,
+            'type':entity_type,
+            'value':entity_value
+        }
+        bAdd = True;
+        if (entity_type=='email'):
+            emailPieces = entity_value.split('@')
+            entity['user_name'] = emailPieces[0]
+            emailURL = 'mailto://'+emailPieces[1]
+            emailExt = tldextract.extract(emailURL)
+            entity['domain'] = emailExt.domain
+            entity['subdomain'] = emailExt.subdomain
+        elif (entity_type=='phone'):
+            areaCode = ''
+            if (len(entity_value) == 10):
+                areaCode = entity_value[1:4]
+
+            if (areaCode != ''):
+                entity['area_code'] = areaCode
+        else:
+            adj_urls.add(entity_value)
+            webExt = tldextract.extract(entity_value)
+            entity['subdomain']=webExt.subdomain
+            entity['domain']=webExt.domain
+            entity['suffix']=webExt.suffix
+
+        if (bAdd):
+            entities.append(entity)
+
+    # Get all the lookahead features
+    if (len(adj_urls) > 0):
+        lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
+
+        # add place holders for urls with no extracted data
+        for adj_url in adj_urls:
+            if adj_url not in lookaheadFeatures:
+                lookaheadFeatures[adj_url] = {}
+
+        domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
+    else:
+        lookaheadFeatures = []
+        domainLookaheadFeatures = []
+
+
+    entityDataConnector.close()
+    endMillis = int(round(time.time() * 1000))
+    # tangelo.log('Processing time = ' + str((endMillis-startMillis)/1000) + 's');
+    return {
+        'browsePath':browsePath,
+        'entities':entities,
+        'lookaheadFeatures':lookaheadFeatures,
+        'domainLookaheadFeatures':domainLookaheadFeatures
+    }
 
 def getBrowsePathAndAdjacentInfoEdges(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['info'],limit,userlist,trail,domain)
 
+    # Get all the lookahead features
+    lookaheadFeatures = entityDataConnector.get_extracted_entities_from_urls(adj_urls)
+
+    # add place holders for urls with no extracted data
+    for adj_url in adj_urls:
+        if adj_url not in lookaheadFeatures:
+            lookaheadFeatures[adj_url] = {}
+
+    domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
+
+
+    entityDataConnector.close()
+    endMillis = int(round(time.time() * 1000))
+    tangelo.log('Processing time = ' + str((endMillis-startMillis)/1000) + 's');
+    return {
+        'browsePath':browsePath,
+        'entities':entities,
+        'lookaheadFeatures':lookaheadFeatures,
+        'domainLookaheadFeatures':domainLookaheadFeatures
+    }
 
 def getBrowsePathWithTextSelections(org,startdate,enddate,userlist=[],trail='*',domain=''):
     # first get the browse path
