@@ -21,13 +21,13 @@ define(['hbs!templates/tooltip'], function(tooltipTemplate) {
         this._parent.append(this._canvas);
         if (spec.orientation === 'NW') {
             this._canvas.offset({
-                top : spec.y,
-                left : spec.x
+                top : spec.y -10,
+                left : spec.x + 10
             });
         } else {
             this._canvas.offset({
-                top : spec.y,
-                left : spec.x - this._canvas.width()
+                top : spec.y + 10,
+                left : spec.x - this._canvas.width() - 10
             });
         }
     };
