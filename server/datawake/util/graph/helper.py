@@ -190,11 +190,37 @@ def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''
     startMillis = int(round(time.time() * 1000))
     entityDataConnector.close()
     org = org.upper()
+
+    subcommand = """SELECT min(id)
+                    FROM memex_sotera.datawake_data
+                    WHERE org=%s AND domain=%s
+    """
+    subcommandArgs=[org,domain]
+
+    # add the user list filter if given
+    if (len(userlist) > 0):
+        subcommand = subcommand +" AND "
+        params = ['%s' for i in range(len(userlist))]
+        params = ','.join(params)
+        subcommand = subcommand + "  userId in ("+params+") "
+        subcommandArgs.extend(userlist)
+
+    # add the trail filter
+    if trail != '*':
+        subcommand = subcommand +" AND "
+        subcommand = subcommand + " trail = %s"
+        subcommandArgs.append(trail)
+
+    subcommand = subcommand + ' GROUP BY url '
+
+
     command = """SELECT t1.id,unix_timestamp(t1.ts) as ts,t1.url,entity_type,entity_value
                  FROM memex_sotera.datawake_data as t1 INNER JOIN general_extractor_web_index as t2 ON t1.url = t2.url
-                 WHERE t1.org=%s AND t1.domain=%s
+                 WHERE t1.id IN (
                   """
-    commandArgs = [org,domain]
+    command = command + subcommand + " ) AND entity_type!=%s"
+    commandArgs = subcommandArgs[:]
+    commandArgs.append("info")
 
     # add the time filter to the query
     if (startdate == '' and enddate == ''):
@@ -210,19 +236,8 @@ def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''
         commandArgs.append(startdate)
         commandArgs.append(enddate)
 
-    # add the user filter
-    if (len(userlist) > 0):
-        command = command +" AND "
-        params = ['%s' for i in range(len(userlist))]
-        params = ','.join(params)
-        command = command + "  userId in ("+params+") "
-        commandArgs.extend(userlist)
 
-    # add the trail filter
-    if trail != '*':
-        command = command +" AND "
-        command = command + " trail = %s"
-        commandArgs.append(trail)
+
 
     command = command + " ORDER BY t1.ts asc"
 
@@ -293,6 +308,7 @@ def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''
 
         domainLookaheadFeatures = entityDataConnector.get_extracted_domain_entities_from_urls(domain,adj_urls)
     else:
+        tangelo.log('No adjacent urls extracted for trail');
         lookaheadFeatures = []
         domainLookaheadFeatures = []
 
