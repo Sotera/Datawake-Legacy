@@ -1,0 +1,19 @@
+{
+  "name": "ForensicDemoServer",
+  "version": "1.0.0",
+  "description": "Demo server for Forensic 2.0",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.10.6",
+    "http-auth": "^2.2.5"
+  },
+  "devDependencies": {
+    "express": "^4.10.7",
+    "http-auth": "^2.2.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Chris Dickson"
+}
