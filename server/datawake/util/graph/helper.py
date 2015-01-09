@@ -188,108 +188,108 @@ def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''
     entityDataConnector.close()
     org = org.upper()
 
-    subcommand = """SELECT min(id)
-                    FROM memex_sotera.datawake_data
-                    WHERE org=%s AND domain=%s
-    """
-    subcommandArgs=[org,domain]
+    command = """
+      SELECT id,unix_timestamp(ts) as ts,url
+      FROM memex_sotera.datawake_data
+      WHERE org=%s AND domain=%s
+      """
+    params = [org,domain]
+
 
     # add the user list filter if given
     if (len(userlist) > 0):
-        subcommand = subcommand +" AND "
-        params = ['%s' for i in range(len(userlist))]
-        params = ','.join(params)
-        subcommand = subcommand + "  userId in ("+params+") "
-        subcommandArgs.extend(userlist)
+        command = command +" AND "
+        newparams = ['%s' for i in range(len(userlist))]
+        newparams = ','.join(newparams)
+        command = command + "  userId in ("+params+") "
+        params.extend(newparams)
 
     # add the trail filter
     if trail != '*':
-        subcommand = subcommand +" AND "
-        subcommand = subcommand + " trail = %s"
-        subcommandArgs.append(trail)
-
-    subcommand = subcommand + ' GROUP BY url '
+        command = command +" AND trail = %s"
+        params.append(trail)
 
 
-    command = """SELECT t1.id,unix_timestamp(t1.ts) as ts,t1.url,entity_type,entity_value
-                 FROM memex_sotera.datawake_data as t1 INNER JOIN general_extractor_web_index as t2 ON t1.url = t2.url
-                 WHERE t1.id IN (
-                  """
-    command = command + subcommand + " ) AND entity_type!=%s"
-    commandArgs = subcommandArgs[:]
-    commandArgs.append("info")
+
 
     # add the time filter to the query
     if (startdate == '' and enddate == ''):
         pass
     elif (startdate != '' and enddate == ''):
-        command = command +" AND unix_timestamp(t1.ts) >= %s "
-        commandArgs.append(startdate)
+        command = command +" AND unix_timestamp(ts) >= %s "
+        params.append(startdate)
     elif (startdate == '' and enddate != ''):
-        command = command + "  AND unix_timestamp(t1.ts) <= %s "
-        commandArgs.append(enddate)
+        command = command + "  AND unix_timestamp(ts) <= %s "
+        params.append(enddate)
     else:
-        command = command + " AND unix_timestamp(t1.ts) >= %s and unix_timestamp(t1.ts) <= %s "
-        commandArgs.append(startdate)
-        commandArgs.append(enddate)
+        command = command + " AND unix_timestamp(ts) >= %s and unix_timestamp(ts) <= %s "
+        params.append(startdate)
+        params.append(enddate)
 
 
+    command = command + " GROUP BY url ORDER BY ts asc "
 
-
-    command = command + " ORDER BY t1.ts asc"
-
-    db_rows = datawake_mysql.dbGetRows(command,commandArgs)
+    db_rows = datawake_mysql.dbGetRows(command,params)
+    urls = map(lambda x: x[2],db_rows)
+    extracted_features = entityDataConnector.get_extracted_entities_from_urls(urls)
 
     browsePath = {}
     adj_urls = set([])
     entities = []
     for row in db_rows:
-        (id,ts,url,entity_type,entity_value) = row
+        (id,ts,url) = row
+        #tangelo.log("URL: "+url)
+        if url not in extracted_features:
+            #tangelo.log("skipping url: "+url)
+            continue
+        extracted_features_for_url = extracted_features[url]
+        for entity_type,entity_values in extracted_features_for_url.iteritems():
+            if entity_type == "info":
+                continue
+            #tangelo.log("\tENTITY TYPE: "+entity_type)
+            for entity_value in entity_values:
+                #tangelo.log("\t\tENTITY VALUE: "+entity_value)
+                if trail is None or trail.strip() == '': trail = "default"
 
-        # tangelo.log('\t'+str(row))
-
-        if trail is None or trail.strip() == '': trail = "default"
-
-        if id not in browsePath:
-            ext = tldextract.extract(url)
-            browsePath[id] = {'id':id,
+                if id not in browsePath:
+                    ext = tldextract.extract(url)
+                    browsePath[id] = {'id':id,
                               'url':url,
                               'timestamp':ts,
                               'subdomain':ext.subdomain,
                               'domain':ext.domain,
                               'suffix':ext.suffix
+                    }
 
-            }
+                entity = {
+                    'id':id,
+                    'type':entity_type,
+                    'value':entity_value
+                }
+                bAdd = True;
+                if (entity_type=='email'):
+                    emailPieces = entity_value.split('@')
+                    entity['user_name'] = emailPieces[0]
+                    emailURL = 'mailto://'+emailPieces[1]
+                    emailExt = tldextract.extract(emailURL)
+                    entity['domain'] = emailExt.domain
+                    entity['subdomain'] = emailExt.subdomain
+                elif (entity_type=='phone'):
+                    areaCode = ''
+                    if (len(entity_value) == 10):
+                        areaCode = entity_value[1:4]
 
-        entity = {
-            'id':id,
-            'type':entity_type,
-            'value':entity_value
-        }
-        bAdd = True;
-        if (entity_type=='email'):
-            emailPieces = entity_value.split('@')
-            entity['user_name'] = emailPieces[0]
-            emailURL = 'mailto://'+emailPieces[1]
-            emailExt = tldextract.extract(emailURL)
-            entity['domain'] = emailExt.domain
-            entity['subdomain'] = emailExt.subdomain
-        elif (entity_type=='phone'):
-            areaCode = ''
-            if (len(entity_value) == 10):
-                areaCode = entity_value[1:4]
+                    if (areaCode != ''):
+                        entity['area_code'] = areaCode
+                else:
+                    adj_urls.add(entity_value)
+                    webExt = tldextract.extract(entity_value)
+                    entity['subdomain']=webExt.subdomain
+                    entity['domain']=webExt.domain
+                    entity['suffix']=webExt.suffix
 
-            if (areaCode != ''):
-                entity['area_code'] = areaCode
-        else:
-            adj_urls.add(entity_value)
-            webExt = tldextract.extract(entity_value)
-            entity['subdomain']=webExt.subdomain
-            entity['domain']=webExt.domain
-            entity['suffix']=webExt.suffix
-
-        if (bAdd):
-            entities.append(entity)
+                if (bAdd):
+                    entities.append(entity)
 
     # Get all the lookahead features
     if (len(adj_urls) > 0):
