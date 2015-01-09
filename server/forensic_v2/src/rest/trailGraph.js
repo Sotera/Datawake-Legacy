@@ -17,7 +17,7 @@ define(['../util/util', '../util/guid', './testGraphResponse', '../config/forens
 		 */
 		get : function(trail) {
 			var requestData = {
-				name : 'browse path - with connected entities min degree 2',
+				name : 'OculusForensicRequest',
 				startdate :  startDate,
 				enddate :	endDate
 			};

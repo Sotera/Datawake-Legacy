@@ -43,7 +43,6 @@ def listGraphs():
     return json.dumps(dict(graphs=['none',
                                    'browse path',
                                    'browse path - with adjacent urls',
-                                   'browse path - with connected entities min degree 2',
                                    'browse path - with adjacent urls min degree 2',
                                    'browse path - with adjacent phone #\'s',
                                    'browse path - with adjacent email #\'s',
@@ -108,10 +107,6 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
         graph = graph_helper.getBrowsePathAndAdjacentWebsiteEdgesWithLimit(org, startdate, enddate, 1, userlist, trail, domain)
         return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
-    if name == 'browse path - with connected entities min degree 2':
-        rows = graph_helper.getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,2,userlist,trail,domain)
-        return json.dumps(rows)
-
     if name == 'browse path - with adjacent urls min degree 2':
         graph = graph_helper.getBrowsePathAndAdjacentWebsiteEdgesWithLimit(org, startdate, enddate, 2, userlist, trail, domain)
         return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
@@ -135,6 +130,10 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
     if name == 'browse path - with adjacent info':
         graph = graph_helper.getBrowsePathAndAdjacentInfoEdges(org, startdate, enddate,1,userlist, trail, domain)
         return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
+
+    if name == 'OculusForensicRequest':
+        rows = graph_helper.getOculusForensicGraph(org,startdate,enddate,userlist,trail,domain)
+        return json.dumps(rows)
 
     return json.dumps(dict(nodes=[], links=[]))
 

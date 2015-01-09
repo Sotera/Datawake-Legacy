@@ -176,11 +176,6 @@ def getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,adjTypes,limit,
     entityDataConnector.close()
     return {'nodes':nodes,'edges':edges}
 
-
-
-
-
-
 def getBrowsePathAndAdjacentWebsiteEdgesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['website'],limit,userlist,trail,domain)
 
@@ -191,7 +186,7 @@ def getBrowsePathAndAdjacentPhoneEdgesWithLimit(org,startdate,enddate,limit,user
 def getBrowsePathAndAdjacentEmailEdgesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
     return getBrowsePathAndAdjacentEdgesWithLimit(org,startdate,enddate,['email'],limit,userlist,trail,domain)
 
-def getBrowsePathAndAdjacentEntitiesWithLimit(org,startdate,enddate,limit,userlist=[],trail='*',domain=''):
+def getOculusForensicGraph(org,startdate,enddate,userlist=[],trail='*',domain=''):
     startMillis = int(round(time.time() * 1000))
     entityDataConnector.close()
     org = org.upper()
