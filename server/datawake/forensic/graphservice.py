@@ -131,6 +131,10 @@ def getGraph(name, startdate=u'', enddate=u'', users=u'', trail=u'*', domain=u''
         graph = graph_helper.getBrowsePathAndAdjacentInfoEdges(org, startdate, enddate,1,userlist, trail, domain)
         return json.dumps(graph_helper.processEdges(graph['edges'], graph['nodes']))
 
+    if name == 'OculusForensicRequest':
+        rows = graph_helper.getOculusForensicGraph(org,startdate,enddate,userlist,trail,domain)
+        return json.dumps(rows)
+
     return json.dumps(dict(nodes=[], links=[]))
 
 
