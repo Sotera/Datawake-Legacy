@@ -109,6 +109,7 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 		 */
 		_aggregateNodes: function () {
 			var nodeIndexToLinks = [];
+			var nodeIndexToOutgoingLinks = [];
 			this._links.forEach(function(link) {
 				var srcIdx = link.source.index;
 				var links = nodeIndexToLinks[srcIdx];
@@ -117,6 +118,13 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 				}
 				links.push(link);
 				nodeIndexToLinks[srcIdx] = links;
+
+				var outgoingLinks = nodeIndexToOutgoingLinks[srcIdx];
+				if (!outgoingLinks) {
+					outgoingLinks = [];
+				}
+				outgoingLinks.push(link);
+				nodeIndexToOutgoingLinks[srcIdx] = links;
 
 				var dstIdx = link.target.index;
 				links = nodeIndexToLinks[dstIdx];
@@ -240,7 +248,18 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 					}
 				}
 
-				var clusteredPhoneNumbers = this._clusterByAreaCode(groupPhoneNumbers[row]);
+				// Split phone numbers into two groups.   One with outgoing links, and one without any
+				var unlinkedPhoneNumbers = [];
+				var linkedPhoneNumbers = [];
+				groupPhoneNumbers[row].forEach(function(node) {
+					if (!nodeIndexToOutgoingLinks[node.index] || nodeIndexToOutgoingLinks[node.index].length === 0) {
+						unlinkedPhoneNumbers.push(node);
+					} else {
+						linkedPhoneNumbers.push(node);
+					}
+				});
+
+				var clusteredPhoneNumbers = this._clusterByAreaCode(linkedPhoneNumbers);
 				for (var areaCodeKey in clusteredPhoneNumbers) {
 					if (clusteredPhoneNumbers.hasOwnProperty(areaCodeKey)) {
 						if (clusteredPhoneNumbers[areaCodeKey].length === 1) {
@@ -267,6 +286,31 @@ define(['../util/guid','../util/util','../config/forensic_config'], function(gui
 							});
 						}
 					}
+				}
+
+				// Add the unlinked phonenumbers group
+				if (unlinkedPhoneNumbers.length === 1) {
+					unlinkedPhoneNumbers[0].row = row;
+					unlinkedPhoneNumbers[0].col = 1;
+					aggregatedNodes.push(unlinkedPhoneNumbers[0]);
+				} else if (unlinkedPhoneNumbers.length != 0) {
+					aggregatedNodes.push({
+						x : 0,
+						y : 0,
+						index: guid.generate(),
+						fillStyle: ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+						standardFill: ForensicConfig.PHONE_ENTITY.FILL_STYLE,
+						highlightFill: ForensicConfig.HIGHLIGHT.FILL_STYLE,
+						lineWidth: ForensicConfig.PHONE_ENTITY.STROKE_WIDTH,
+						type: 'phone',
+						strokeStyle: ForensicConfig.PHONE_ENTITY.STROKE_STYLE,
+						labelText: 'Others',
+						children: unlinkedPhoneNumbers,
+						innerLabel: unlinkedPhoneNumbers.length,
+						innerLabelFillStyle : ForensicConfig.LABEL.INNER_FILL_STYLE,
+						row: row,
+						col: 1
+					});
 				}
 
 				var clusteredRelatedLinks = this._clusterByDomain(groupRelatedLinks[row]);
