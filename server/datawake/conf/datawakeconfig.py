@@ -37,7 +37,7 @@ DW_EXTERNAL_LINK_VALUES: Comma separated list of links to provide for extracted 
 
 """
 
-VERSION_NUMBER="0.5_testing"
+VERSION_NUMBER="0.5.2-SNAPSHOT"
 
 # enforce requirement for all required paramaters to be set
 
