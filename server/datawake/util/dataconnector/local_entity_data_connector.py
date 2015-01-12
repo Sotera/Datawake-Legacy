@@ -101,7 +101,7 @@ class MySqlEntityDataConnector(DataConnector):
         :param
             urls:  list of urls to extract entities from
             type = None for all types,  specify a type for that type only.
-        :return: {attrType: [value1,value2,..], ... }
+        :return: {url: {attrType: [value1,value2,..], ... }}
         """
         self._check_conn()
         urls_in = "(" + ( ','.join(['%s' for i in range(len(urls))]) ) + ")"
