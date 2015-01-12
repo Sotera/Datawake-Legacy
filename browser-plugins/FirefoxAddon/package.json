@@ -6,7 +6,7 @@
     "author": "",
     "license": "MPL 2.0",
     "lib": "base",
-    "version": "0.5",
+    "version": "0.5.1",
     "permissions": {
         "private-browsing": true,
         "cross-domain-content": ["http://192.168.59.103"]
