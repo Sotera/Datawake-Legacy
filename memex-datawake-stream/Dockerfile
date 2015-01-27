@@ -15,6 +15,7 @@ RUN apt-get -y install git \
 RUN apt-get install -y wget
 
 # install the MITIE library
+RUN apt-get install -y libjpeg-dev
 RUN sudo apt-get install -y libopenblas-dev liblapack-dev
 RUN mkdir /usr/lib/mitie \
     && cd /usr/lib/mitie \
