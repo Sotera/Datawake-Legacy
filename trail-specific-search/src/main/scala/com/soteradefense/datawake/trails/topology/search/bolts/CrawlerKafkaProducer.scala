@@ -32,7 +32,9 @@ class CrawlerKafkaProducer(topic: String, brokers: String) extends HighLevelKafk
           ("rank" -> rank.toString)
         )
     val attrJson: String = compact(render(json))
-    logger.info("New Url Posted: {}", url)
+    logger.info("Json: {}", attrJson)
+    logger.info("New Url Posted: {} ", url)
+    logger.info("URL posted to topic: {}", topic)
     val message = new KeyedMessage[String, String](topic, attrJson)
     kafkaProducer.send(message)
   }
