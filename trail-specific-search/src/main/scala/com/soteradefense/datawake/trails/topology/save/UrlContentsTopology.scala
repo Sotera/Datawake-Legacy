@@ -10,13 +10,17 @@ import com.soteradefense.datawake.trails.sql.SqlCredentials
 import com.soteradefense.datawake.trails.topology.save.bolt.{SaveRawHtmlBolt, SaveUrlBolt, UpdateUrlKafkaProducer}
 import com.soteradefense.datawake.trails.topology.save.data.DatawakeCrawlerData
 import com.soteradefense.datawake.trails.topology.save.decoder.DatawakeCrawlerDataDecoder
+import org.slf4j.{Logger, LoggerFactory}
+
 
 object UrlContentsTopology {
   def main(args: Array[String]): Unit = {
+    var logger = LoggerFactory.getLogger(this.getClass)
     val topologyBuilder: TopologyBuilder = new TopologyBuilder()
 
     val useDistributedCrawler: Boolean = sys.env.getOrElse("DW_USE_DISTRIBUTED", "false").toBoolean
     val crawlerTopic: String = if(useDistributedCrawler) DatawakeConstants.CRAWLER_TOPIC else sys.env.getOrElse("DW_CRAWLER_OUT", throw new DatawakeException("You need to set the local crawler out topic"))
+    logger.info("Creating logger for: {}", crawlerTopic)
     val kafkaConsumer = new HighLevelKafkaConsumer[DatawakeCrawlerData](
       new Fields("kafkaOrg", "kafkaDomain", "kafkaTrail", "kafkaLink", "kafkaHtml", "kafkaTitle", "kafkaRank"),
       new DatawakeCrawlerDataDecoder,
