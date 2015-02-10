@@ -4,8 +4,8 @@ object DatawakeConstants {
   /**
    * Keys for the parameters in the StormConf
    */
-  var KAFKA_CRAWLER_BROKERS: String = "kafka.crawler.brokers"
-  var SEARCH_ENDPOINT_ID: String = "search.api.key"
+  val KAFKA_CRAWLER_BROKERS: String = "kafka.crawler.brokers"
+  val SEARCH_ENDPOINT_ID: String = "search.api.key"
   val GOOGLE_KEY_ID: String = "google.search.key"
   val GOOGLE_CX_ID: String = "google.search.cx"
   val KAFKA_BROKERS_ID: String = "kafka.brokers.key"
