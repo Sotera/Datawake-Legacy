@@ -1,6 +1,11 @@
 #!/usr/bin/perl
 
-print "\nHello, Installing Datawave!\n\n";
+print "\nHello! This PERL script will install everything needed to run Datawake";
+print "\non an Ubuntu 14.04 machine instance. It does no checking of OS type or";
+print "\nversion (that's up to you) and requires that the account running it be";
+print "\nin the 'sudo-ers' list.\n\n";
+
+prompt_yn('Continue?') || die;
 
 #Get use to enter 'sudo' password
 `sudo ls`;
@@ -21,9 +26,14 @@ print `sudo start ssh`;
 
 
 #Shutdown MEAN stack and set to no auto-restart (This should only apply to Bitnami stacks)
-print "Shutting down MEAN stack and disabling MEAN stack on startup";
-print `sudo /opt/bitnami/ctlscript.sh stop`;
-print `sudo update-rc.d bitnami disable`;
+if(-e '/opt/bitnami/ctlscript.sh'){
+    #if(prompt_yn('shutdown MEAN stack?'))
+    #{
+    print "Shutting down MEAN stack and disabling MEAN stack on startup";
+    print `sudo /opt/bitnami/ctlscript.sh stop`;
+    print `sudo update-rc.d bitnami disable`;
+    #}
+}
 
 print "Updating aptitude caches ...\n";
 print `sudo apt-get update`;
@@ -43,15 +53,14 @@ print `sudo apt-get -y install apparmor apparmor-utils`;
 
 print "Installing PIP ...\n";
 print `sudo apt-get -y install python-pip`;
-print `mkdir ~/src`;
-print `cd ~/src`;
 
-print "Cloning Datawake.git ...\n";
-print `git clone https://github.com/Sotera/Datawake.git`;
+print "Installing FIG ...\n";
+print `sudo pip install fig`;
+
+print "Creating 'src' directory & Cloning Datawake.git ...\n";
+print `mkdir src; cd src; git clone https://github.com/Sotera/Datawake.git;`;
 
 print "Writing fig.yml to Datawake/dev-env ...\n";
-print `cd ~`;
-
 @lines = <DATA>;
 open(FILE, '> src/Datawake/dev-env/fig.yml');
 foreach(@lines){
@@ -62,6 +71,27 @@ close(FILE);
 print "Starting Docker ...\n";
 print `sudo service docker start`;
 
+print "Getting and turning up 'mysql' docker container ...\n";
+print `cd src/Datawake/dev-env; sudo fig up -d mysql;`;
+
+print "Setting up MySQL database and creating test user ...\n";
+print `cd src/Datawake/dev-env; ./init_db.sh;`;
+
+print "Turning up remaining docker containers ...\n";
+print `cd src/Datawake/dev-env; sudo fig up -d;`;
+
+sub prompt {
+    my ($query) = @_; # take a prompt string as argument
+    local $| = 1; # activate autoflush to immediately show the prompt
+    print $query;
+    chomp(my $answer = <STDIN>);
+    return $answer;
+}
+sub prompt_yn {
+    my ($query) = @_;
+    my $answer = prompt("$query (Y/N): ");
+    return lc($answer) eq 'y';
+}
 __END__
 mysql:
   image: mysql
@@ -69,6 +99,8 @@ mysql:
     MYSQL_ROOT_PASSWORD: root
   ports:
     - "3336:3306"
+  volumes:
+    - ~/src/Datawake/server/mysql:/var/lib/mysql
 
 zookeeper:
   image: jplock/zookeeper:3.4.6
