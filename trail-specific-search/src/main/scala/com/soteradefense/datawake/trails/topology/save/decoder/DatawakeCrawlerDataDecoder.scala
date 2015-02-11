@@ -31,7 +31,7 @@ class DatawakeCrawlerDataDecoder extends Decoder[DatawakeCrawlerData] with Seria
         null
       }
     } catch{
-      case e: Throwable => {}
+      case e: Throwable => {
         logger.error(e)
         null
       }
