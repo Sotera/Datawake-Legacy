@@ -87,6 +87,21 @@ dwurlcontents:
     DW_CRAWLER_TOPIC: memex.crawled_trail-entities-search
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.save.UrlContentsTopology
 
+dwurlrank:
+  build: ../trail-specific-search
+  working_dir: /trail-specific-search
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+  environment:
+      DW_DB_USER: root
+      DW_DB_PASSWORD: root
+      DW_DB_JDBC: jdbc:mysql://172.31.31.203:3336/memex_sotera
+      DW_KAFKA_BROKERS: 172.31.31.203:9092
+      DW_ZK_QUORUM: 54.165.33.98:2181
+  command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.rank.UrlRankTopology
+
 datawake:
   build: ../server
   links:
