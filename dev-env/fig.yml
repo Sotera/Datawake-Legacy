@@ -105,6 +105,9 @@ dwstream:
     - mysql:mysql
     - kafka:kafka
     - zookeeper:zk
+    - dwsearch
+    - dwurlcontents
+    - datawake
   environment:
       DW_DB: memex_sotera
       DW_DB_USER: root
