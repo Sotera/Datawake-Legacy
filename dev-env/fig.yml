@@ -25,6 +25,23 @@ kafka:
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 
+dwstream:
+  build: ../memex-datawake-stream
+  links:
+    - mysql:mysql
+    - kafka:kafka
+    - zookeeper:zk
+  environment:
+      DW_DB: memex_sotera
+      DW_DB_USER: root
+      DW_DB_PASSWORD: root
+      DW_DB_HOST: 172.31.31.203
+      DW_DB_PORT: 3336
+  volumes:
+    - /home/ubuntu/trail-selections/memex-datawake-stream:/memex-datawake-stream
+    - /home/ubuntu/trail-selections/dev-env:/dev-env
+
+
 dwsearch:
   build: ../trail-specific-search
   working_dir: /trail-specific-search
@@ -63,7 +80,7 @@ dwurlcontents:
     DW_USE_DISTRIBUTED: true
     DW_KAFKA_BROKERS: 172.31.31.203:9092
     DW_LOCAL_ZK_QUORUM: 172.31.31.203:2181
-    DW_ZK_QUORUM: z01.istresearch.com:2181,z02.istresearch.com:2181,z03.istresearch.com:2181
+    DW_ZK_QUORUM: 172.31.31.203:2181
     DW_DB_USER: root
     DW_DB_PASSWORD: root
     DW_CRAWLER_TOPIC: memex.crawled_trail-entities-search
@@ -74,6 +91,9 @@ datawake:
   links:
     - mysql:mysql
     - kafka:kafka
+    - dwsearch
+    - dwurlcontents
+    - dwstream
   ports:
     - "80:80"
   environment:
@@ -98,22 +118,3 @@ datawake:
     - /home/ubuntu/trail-selections/server/forensic:/usr/local/share/tangelo/web/forensic
     - /home/ubuntu/trail-selections/memex-datawake-stream:/memex-datawake-stream
     - /home/ubuntu/trail-selections/server/js/:/usr/local/share/tangelo/web/js/datawake
-
-dwstream:
-  build: ../memex-datawake-stream
-  links:
-    - mysql:mysql
-    - kafka:kafka
-    - zookeeper:zk
-    - dwsearch
-    - dwurlcontents
-    - datawake
-  environment:
-      DW_DB: memex_sotera
-      DW_DB_USER: root
-      DW_DB_PASSWORD: root
-      DW_DB_HOST: 172.31.31.203
-      DW_DB_PORT: 3336
-  volumes:
-    - /home/ubuntu/trail-selections/memex-datawake-stream:/memex-datawake-stream
-    - /home/ubuntu/trail-selections/dev-env:/dev-env
