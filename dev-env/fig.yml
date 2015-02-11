@@ -80,7 +80,8 @@ dwurlcontents:
     DW_USE_DISTRIBUTED: true
     DW_KAFKA_BROKERS: 172.31.31.203:9092
     DW_LOCAL_ZK_QUORUM: 172.31.31.203:2181
-    DW_ZK_QUORUM: 172.31.31.203:2181
+    # DW_ZK_QUORUM: 172.31.31.203:2181
+    DW_ZK_QUORUM: 54.165.33.98
     DW_DB_USER: root
     DW_DB_PASSWORD: root
     DW_CRAWLER_TOPIC: memex.crawled_trail-entities-search
