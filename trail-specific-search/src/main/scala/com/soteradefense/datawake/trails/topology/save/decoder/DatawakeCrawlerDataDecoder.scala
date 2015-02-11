@@ -14,20 +14,27 @@ class DatawakeCrawlerDataDecoder extends Decoder[DatawakeCrawlerData] with Seria
       return null
     val str = new String(bytes)
     implicit val formats = DefaultFormats
-    val jValue = JsonParser.parse(str)
-    val appid = jValue.extract[AppIdHelper]
-    if (appid.appid.equals(DatawakeConstants.APP_ID)) {
-      try {
-        val results = jValue.extract[DatawakeCrawlerDataHelper]
-        logger.info("Crawled: {}", results.url)
-        logger.info("Title: {}", results.attrs.title)
-        new DatawakeCrawlerData(results.attrs.org, results.attrs.domain, results.attrs.trail, results.url, results.body, results.attrs.title, results.attrs.rank)
-      } catch{
-        case _: Throwable =>
-          null
+    try {
+      val jValue = JsonParser.parse(str)
+      val appid = jValue.extract[AppIdHelper]
+      if (appid.appid.equals(DatawakeConstants.APP_ID)) {
+        try {
+          val results = jValue.extract[DatawakeCrawlerDataHelper]
+          logger.info("Crawled: {}", results.url)
+          logger.info("Title: {}", results.attrs.title)
+          new DatawakeCrawlerData(results.attrs.org, results.attrs.domain, results.attrs.trail, results.url, results.body, results.attrs.title, results.attrs.rank)
+        } catch{
+          case _: Throwable =>
+            null
+        }
+      } else {
+        null
       }
-    } else {
-      null
+    } catch{
+      case e: Throwable => {}
+        logger.error(e)
+        null
+      }
     }
   }
 }
