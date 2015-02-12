@@ -111,6 +111,7 @@ datawake:
     - dwsearch
     - dwurlcontents
     - dwstream
+    - dwurlrank
   ports:
     - "80:80"
   environment:
