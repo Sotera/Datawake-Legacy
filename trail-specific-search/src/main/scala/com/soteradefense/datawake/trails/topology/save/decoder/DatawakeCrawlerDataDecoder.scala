@@ -15,7 +15,6 @@ class DatawakeCrawlerDataDecoder extends Decoder[DatawakeCrawlerData] with Seria
     val str = new String(bytes)
     implicit val formats = DefaultFormats
     try {
-      logger.info("Parsing JSON: {}", str)
       val jValue = JsonParser.parse(str)
       val appid = jValue.extract[AppIdHelper]
       if (appid.appid.equals(DatawakeConstants.APP_ID)) {
@@ -31,7 +30,7 @@ class DatawakeCrawlerDataDecoder extends Decoder[DatawakeCrawlerData] with Seria
       } else {
         null
       }
-    } catch { 
+    } catch {
       case e: Throwable => {
         logger.error("Error decoding message.",e)
         null
