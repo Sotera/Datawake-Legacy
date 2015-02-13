@@ -1,0 +1,24 @@
+<div class="tab-pane" id="irrelevant-trail-entities">
+    <h3>Irrelevant Trail Based Entities <button class="btn btn-default btn-small" ng-click="refreshEntities();"><span class="glyphicon glyphicon-refresh"></span></button></h3>
+
+    <div>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <td><b>Entities</b></td>
+                <td><b>Rank</b></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="entity in irrelevantEntitiesIter | orderBy:['rank']:true">
+                <td>
+                    {{entity.entity}}
+                </td>
+                <td>
+                    {{entity.rank}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
