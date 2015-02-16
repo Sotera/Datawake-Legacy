@@ -1,3 +1,0 @@
-AuthType digest
-AuthRealm MemexDatawake
-AuthPasswordFile /usr/local/share/tangelo/domain/loader/memdwpw.txt
