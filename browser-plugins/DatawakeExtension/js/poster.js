@@ -57,7 +57,14 @@ function highlightText(request, sender, sendResponse) {
                 var entity = {};
                 entity.name = e.name.trim();
                 entity.type = e.type.trim();
-                $('body').highlight(entity.name, 'datawake-highlight-' + i);
+                if (entity.type == "info" && entity.name.indexOf(" -> ") > -1 ){
+                    var mitie_value = entity.name.split(' -> ')[1].trim()
+                    $('body').highlight(mitie_value, 'datawake-highlight-' + i);
+                }
+                else{
+                    $('body').highlight(entity.name.trim(), 'datawake-highlight-' + i);
+                }
+
 
                 console.log(links)
                 if (links.length > 0) {
