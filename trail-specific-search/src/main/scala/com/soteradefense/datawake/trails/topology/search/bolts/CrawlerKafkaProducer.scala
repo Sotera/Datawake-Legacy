@@ -23,13 +23,13 @@ class CrawlerKafkaProducer(topic: String, brokers: String) extends HighLevelKafk
     val json = ("crawlid" -> UUID.randomUUID().toString) ~
       ("appid" -> DatawakeConstants.APP_ID) ~
       ("url" -> url) ~
-      ("depth" -> 0) ~
+      ("maxdepth" -> 0) ~
       ("attrs" ->
         ("org" -> org) ~
           ("domain" -> domain) ~
           ("trail" -> trail) ~
           ("title" -> title) ~
-          ("rank" -> rank.toString)
+          ("rank" -> rank.intValue)
         )
     val attrJson: String = compact(render(json))
     logger.info("Json: {}", attrJson)

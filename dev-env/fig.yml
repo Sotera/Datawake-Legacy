@@ -60,7 +60,7 @@ dwsearch:
     DW_KAFKA_BROKERS: 172.31.31.203:9092
     DW_USE_DISTRIBUTED: true
     DW_INCOMING_URLS: memex.incoming_urls
-    DW_KAFKA_CRAWLER_BROKERS: k01.istresearch.com:9092,k02.istresearch.com:9092,k03.istresearch.com:9092
+    DW_KAFKA_CRAWLER_BROKERS: k01.istresearch.com:9092
     DW_ZK_QUORUM: 172.31.31.203:2181
     DW_SEARCH_API: http://172.31.44.172:8787/search/
   volumes:
@@ -80,8 +80,8 @@ dwurlcontents:
     DW_USE_DISTRIBUTED: true
     DW_KAFKA_BROKERS: 172.31.31.203:9092
     DW_LOCAL_ZK_QUORUM: 172.31.31.203:2181
-    # DW_ZK_QUORUM: 172.31.31.203:2181
-    DW_ZK_QUORUM: 54.165.33.98:2181
+    #DW_ZK_QUORUM: 54.165.33.98:2181
+    DW_ZK_QUORUM: z03.istresearch.com:2181
     DW_DB_USER: root
     DW_DB_PASSWORD: root
     DW_CRAWLER_TOPIC: memex.crawled_trail-entities-search
