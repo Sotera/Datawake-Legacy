@@ -15,7 +15,7 @@ RUN apt-get -y install git \
 RUN apt-get install -y wget
 
 # install the MITIE library
-RUN sudo apt-get install -y libopenblas-dev liblapack-dev
+RUN sudo apt-get install -y libopenblas-dev liblapack-dev libjpeg-dev
 RUN mkdir /usr/lib/mitie \
     && cd /usr/lib/mitie \
     && git clone https://github.com/mitll/MITIE.git \
@@ -89,4 +89,3 @@ ADD dev_container_start.sh /usr/bin/dev_container_start.sh
 WORKDIR /memex-datawake-stream
 
 CMD dev_container_start.sh
-
