@@ -118,6 +118,64 @@ $(function () {
     })
 });
 
+$(function () {
+  $("#dd_btn").click(function () {
+    starSearch();
+  })
+});
+
+function starSearch(one) {
+  var url = d3.select("#url").property('value');
+  var index = d3.select("#index").property('value');
+  var mrpn = d3.select("#mrpn").property('value');
+  var jsonData = {data:{url:url,index:index,mrpn:mrpn,search_terms:[]}};
+
+  if (one === undefined)
+    {
+      SWG.graph.nodes.forEach(function(node){
+        jsonData.data.search_terms.push({type:node['type'],id:node['id'],data:node['data']});
+      }
+    );
+  }
+  else
+    {
+      var nodes = [one];
+      nodes.forEach(function(node){
+        jsonData.data.search_terms.push({type:node['type'],id:node['id'],data:node['data']});
+      }
+    );
+  }
+
+  $.ajax({
+    type: 'POST',
+    url: '/datawake/forensic/domaindive/query',
+    data: JSON.stringify(jsonData),
+    dataType: 'json',
+    contentType: 'application/json',
+    success: function (response) {
+    console.log(response);
+      var nodes = SWG.updateGraph(response);
+      nodes.on('click', function (d) {
+        selected_data = d;
+        showLinkDialog(d);
+        SWG.viz.selectAll(".node").style("stroke-width", function(d) {
+          return 0;});
+          d3.select(this).style("stroke", function(d) {
+            return 'yellow';
+          }).style("stroke-width", function(d) {
+            return 4;
+          });
+
+        });
+        change_highlight();
+      },
+      error: function (jqxhr, textStatus, reason) {
+        console.log("error " + textStatus + " " + reason)
+
+      }
+    });
+  }
+
 
 
 /*
@@ -274,6 +332,13 @@ function change_graph() {
 
             SWG.viz.selectAll(".node").on('click', function (d) {
                 showLinkDialog(d);
+                SWG.viz.selectAll(".node").style("stroke-width", function(d) {
+                  return 0;});
+                  d3.select(this).style("stroke", function(d) {
+                    return 'yellow';
+                  }).style("stroke-width", function(d) {
+                    return 4;
+                  });
             });
 
             SWG.viz.selectAll(".link")
@@ -679,6 +744,13 @@ function showLinkDialog(data) {
 
     var id = data.id;
     var type = data.type;
+    var search_term = data.search_term;
+    var nid = data.nid;
+    var st = data.id;
+    if (type == 'selection'){
+      st = data.data;
+    }
+    console.log(data);
 
     var mainDiv = d3.select("#link-dialog").append("div");
 
@@ -693,6 +765,22 @@ function showLinkDialog(data) {
             .attr("target", "blank")
             .text("open in new tab");
     }
+    else if ( nid != undefined ) {
+        mainDiv.append("a")
+            .style("font-color", "#428bca")
+            .style("text-decoration", "underline")
+            .attr("href", "http://analytics.soteradefense.com/newman/#!/email/" + id)
+            .attr("target", "blank")
+            .text("view match in new tab");
+      /*  mainDiv.append("br");
+        mainDiv.append("a")
+            .style("font-color", "#428bca")
+            .style("text-decoration", "underline")
+            .attr("href", "http://analytics.soteradefense.com/newman/#!/email/" + search_term)
+            .attr("target", "blank")
+            .text("view all matches in new tab");
+            */
+    }
     mainDiv.append("hr");
 
     // display the node type
@@ -701,6 +789,12 @@ function showLinkDialog(data) {
     p1.append("span").text(type);
     mainDiv.append("hr");
 
+    if( search_term != undefined ) {
+    var p1 = mainDiv.append("p");
+    p1.text("Searched ");
+    p1.append("span").text(data.search_url + data.jindex + ' for "' + search_term + '"');
+    mainDiv.append("hr");
+    }
 
     // display look ahead info
     if (type == "lookahead") {
@@ -758,8 +852,27 @@ function showLinkDialog(data) {
         mainDiv.append("span").text("Selection Text: ");
         mainDiv.append("br");
         mainDiv.append("br");
-        mainDiv.append("p").text(data.data);
+        mainDiv.append("p").text("\"" + data.data + "\"");
         mainDiv.append("hr");
+    }
+
+    if( type == 'selection' || type == 'email' || type == 'phone' || type == 'info' ){
+        mainDiv.append("a").attr('id','dd1_btn').attr('class',"btn btn-success").text('Domain Dive').attr('search_term',data.id);
+        mainDiv.append("hr");
+        var gst = st;
+        if (type == 'info'){
+          gst = st.split('->')[1].trim();
+        }
+        mainDiv.append("a")
+            .style("font-color", "#428bca")
+            .style("text-decoration", "underline")
+            .attr("href", "http://analytics.soteradefense.com/graphene-instagram-web/graphene/combinedentitysearchpage?match=COMPARE_CONTAINS&maxResults=200&schema=instagram&term=" + gst.replace(" ", "$0020") + "&type=media")
+            .attr("target", "blank")
+            .text("Search\"" + gst + "\" in Graphene (Instagram)");
+
+       $("#dd1_btn").click(function () {
+        starSearch(data);
+      });
     }
 
     $("#link-dialog").dialog({
