@@ -1,12 +1,16 @@
 # Firefox/Tor Add-on
 
-## How to make the xpi file
-1. First you need to get setup with the [Firefox SDK](https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation).
-2. Second you need to download [OAuthorizer](https://github.com/mozilla/oauthorizer) and put it in $SDK/packages/.
-3. After you have the SDK and OAuthorizer installed, navigate to the FirefoxAddon directory and run the command: `cfx xpi` .
-4. You can now open Firefox/Tor and [install the add-on manually](http://www.accessfirefox.org/Install_Addon_Manually.php).
-5. Before you use the datawake, go to the add-ons and set up the preferences specifically for your instance.
-6. (Optional) Set up Google Authentication.
+## How to make the xpi file (you will need to make sure Python 2.7.x is installed on your system)
+1. Pull down the latest Datawake source code from Github: https://github.com/Sotera/Datawake.git
+2. Navigate to Datawake\browser-plugins\FFirefoxAddon and edit the package.json file.  There will be three instances of the IP Address "192.168.59.103", change this IP Address to match the Datawake instance that your FFirefoxAddon will use. 
+3. Download the Firefox SDK and follow the instruction for your OS from:https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation
+4. After unzipping, create a new folder called "packages" in the addon-sdk-1.x folder.
+5. Download OAuthorizer from: https://github.com/mozilla/oauthorizer
+6. Copy the oauthorizer-develop folder from step 3 into addon-sdk-1.x\packages folder you created.
+7. In a command window execute "bin/activate", "source bin/activate", or "bash bin/activate" (based upon your operating system).  You should now have a prefix on your command prompt containing the name of the SDK's root directory. 
+8. In that same command window, navigate to the Datawake\browser-plugins\FFirefoxAddon directory and run the command: "cfx xpi" .
+9. Open Firefox/Tor, Add-Ons. Select "Install Add-on from File" and navigate to the .xpi file you created in step 8.
+10.(Optional) Set up Google Authentication.
 
 ## Google Authentication
 1. First you need to set up your native application keys on the [Google Developer Console](https://console.developers.google.com/).
