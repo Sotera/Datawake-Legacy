@@ -21,7 +21,7 @@ RUN pip install tangelo
 RUN pip install happybase
 RUN pip install httplib2
 RUN pip install tldextract
-
+RUN pip install elasticsearch
 
 # install mysql client
 
