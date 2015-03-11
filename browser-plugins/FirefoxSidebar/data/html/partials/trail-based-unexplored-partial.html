@@ -1,0 +1,48 @@
+<div class="tab-pane" id="not-visited-trail-links">
+  unexplored
+    <h3>Unexplored Pages ({{notVisitedLinks.length}}) <button class="btn btn-default btn-small" ng-click="refreshWebPages();"><span class="glyphicon glyphicon-refresh"></span></button></h3>
+    <div>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <td><b>Links</b></td>
+                <td><b>Domain</b></td>
+                <td><b>Rank</b></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="link in notVisitedLinks | orderBy:['rank']:true">
+                <td>
+                    <a target="_blank" ng-href="{{link.url}}"><span ng-bind-html="link.title"></span></a>
+                    <table class="table table-bordered" ng-show="link.show">
+                        <tbody>
+                        <tr ng-repeat="entity in link.entities">
+                            <td>
+                                {{entity.entity}}
+                            </td>
+                            <td ng-if="entity.relevant">
+                                {{trailEntities[entity.entity]}}
+                            </td>
+                            <td ng-if="!entity.relevant">
+                                -{{irrelevantEntities[entity.entity]}}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    <span ng-bind="getHostName(link.url);"></span>
+                </td>
+                <td>
+                    <button class="btn btn-info" ng-click="showEntities(link);">{{link.rank}}</button>
+                </td>
+
+                <td>
+                    <button class="btn btn-danger btn-sm" ng-click="removeLink(link);">X</button>
+                </td>
+
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
