@@ -1,5 +1,4 @@
 <div class="tab-pane" id="not-visited-trail-links">
-  unexplored
     <h3>Unexplored Pages ({{notVisitedLinks.length}}) <button class="btn btn-default btn-small" ng-click="refreshWebPages();"><span class="glyphicon glyphicon-refresh"></span></button></h3>
     <div>
         <table class="table table-bordered">
@@ -31,7 +30,7 @@
                     </table>
                 </td>
                 <td>
-                    <span ng-bind="getHostName(link.url);"></span>
+                    <span ng-bind-html="getHostName(link.url)"></span>
                 </td>
                 <td>
                     <button class="btn btn-info" ng-click="showEntities(link);">{{link.rank}}</button>

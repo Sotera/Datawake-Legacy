@@ -12,7 +12,7 @@
             <tbody>
             <tr ng-repeat="link in visitedLinks | orderBy:['rank']:true">
                 <td>
-                    <a target="_blank" ng-href="{{link.url}}"><span ng-bind-html="link.title"></span></a>
+                    <a target="_blank" ng-href="{{link.url}}"><span ng-bind-html="link.title">{{link.title}}</span></a>
                     <table class="table table-bordered" ng-show="link.show">
                         <tbody>
                         <tr ng-repeat="entity in link.entities">
