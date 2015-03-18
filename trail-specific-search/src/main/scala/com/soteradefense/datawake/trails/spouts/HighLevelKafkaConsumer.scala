@@ -43,7 +43,6 @@ class HighLevelKafkaConsumer[T <: StormData](outputFields: Fields, decoder: Deco
     stream.foreach { messageAndMetadata =>
       if (messageAndMetadata.message != null) {
         var value = messageAndMetadata.message().toValues
-        logger.info("Message: {}", value)
         collector.emit(value)
       }
     }
