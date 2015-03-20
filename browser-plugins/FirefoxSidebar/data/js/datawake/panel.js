@@ -137,7 +137,10 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
   $scope.getHostName = function(url) {
     //For some reason, sometimes errant spaces were apearing in the urls.
     url = url.replace(/\s+/g, '');
-    return new URL(url).hostname
+    url = new URL(url).hostname
+      //Remove http/www
+    url = url.replace(/^(https?:\/\/)?(www\.)?/, '')
+    return url
   };
 
   $scope.showEntities = function(link) {
@@ -163,19 +166,25 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
     }
   };
 
-  addon.port.on("infosaved", function(datawakeinfo) {
-    $scope.datawake = datawakeinfo;
-    $scope.$apply()
-    console.log("ON INFO SAVED")
-    console.log($scope.datawake)
-  })
+  // addon.port.on("infosaved", function(datawakeinfo) {
+  //   $scope.datawake = datawakeinfo;
+  //   $scope.$apply()
+  //   console.log("ON INFO SAVED")
+  //   console.log($scope.datawake)
+  // })
 
-  $scope.refreshWebPages = function () {
-      addon.port.emit("refreshWebPages", {domain: "memex", trail: "trail"});
+  $scope.refreshWebPages = function() {
+    addon.port.emit("refreshWebPages", {
+      domain: "memex",
+      trail: "trail"
+    });
   };
 
-  $scope.refreshEntities = function () {
-      addon.port.emit("refreshEntities", {domain: "memex", trail: "trail"});
+  $scope.refreshEntities = function() {
+    addon.port.emit("refreshEntities", {
+      domain: "memex",
+      trail: "trail"
+    });
   };
 
   function createIterableEntityListForSorting(entities) {
@@ -189,55 +198,12 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
     return arr;
   }
 
-
-  // function createStarRating(starUrl) {
-  //   var starRating = $("#star_rating");
-  //   starRating.jRating({
-  //     type: 'big', // type of the rate.. can be set to 'small' or 'big'
-  //     length: 10, // nb of stars
-  //     rateMax: 10,
-  //     bigStarsPath: starUrl + 'stars.png',
-  //     smallStarsPath: starUrl + 'small.png',
-  //     sendRequest: false,
-  //     canRateAgain: true,
-  //     nbRates: 9999999,
-  //     onClick: function(element, rate) {
-  //       setUrlRank(rate);
-  //       $scope.$apply(function() {
-  //         $scope.ranking = rate;
-  //       });
-  //     }
-  //   });
-  //
-  // }
-
-  function setUrlRank(rank) {
-    var rank_data = {
-      team_id: $scope.datawake.team.id,
-      domain_id: $scope.datawake.domain.id,
-      trail_id: $scope.datawake.trail.id,
-      url: $scope.current_url,
-      rank: rank
-    };
-    addon.port.emit("setUrlRank", rank_data);
-  }
-
   addon.port.emit("init");
-
 });
 
 panelApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
-    // when('/features/all', {
-    //   templateUrl: 'partials/extracted-entities-partial.html'
-    // }).
-    // when('/features/domain', {
-    //   templateUrl: 'partials/domain-extracted-partial.html'
-    // }).
-    // when('/features/manual', {
-    //   templateUrl: 'partials/manual-features-partial.html'
-    // }).
     when('/trail/explored', {
       templateUrl: 'partials/trail-based-explored-partial.html'
     }).
