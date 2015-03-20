@@ -29,16 +29,21 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
     console.log(prefs.datawakeInfo)
     $scope.datawake = prefs.datawakeInfo;
 
-    $scope.datawake.domain = 'memex'
-    $scope.datawake.trail = 'trail'
+    $scope.datawake.domain = 'memex';
+    $scope.datawake.trail = 'trail';
+    addon.port.emit("refreshEntities", {
+      domain: "memex",
+      trail: "trail"
+    });
+    addon.port.emit("refreshWebPages", {
+      domain: "memex",
+      trail: "trail"
+    });
 
     $scope.current_url = prefs.current_url;
     $scope.lookaheadEnabled = prefs.useLookahead;
     $scope.domainFeaturesEnabled = prefs.useDomainFeatures;
-    //$scope.rankingEnabled = prefs.useRanking;
     $scope.versionNumber = prefs.versionNumber;
-    //$scope.pageVisits = prefs.pageVisits;
-    //$scope.starUrl = prefs.starUrl
   });
 
   console.log($scope.datawake);
@@ -61,77 +66,15 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
     $scope.$apply();
   });
 
-  // addon.port.on("ranking", function(rankingInfo) {
-  //   $scope.$apply(function() {
-  //     $scope.ranking = rankingInfo.ranking;
-  //     var starRating = $("#star_rating");
-  //     starRating.attr("data-average", rankingInfo.ranking);
-  //     createStarRating(addon.options.starUrl);
-  //   });
-  // });
-
-  // addon.port.on("features", function(features) {
-  //   $scope.extracted_entities_dict = features;
-  //   $scope.$apply();
-  // });
-  //
-  // addon.port.on("domain_features", function(features) {
-  //   $scope.domain_extracted_entities_dict = features;
-  //   $scope.$apply();
-  // });
-
-  // addon.port.on("externalLinks", function(links) {
-  //   console.debug("Loading External Entities..");
-  //   $scope.$apply(function() {
-  //     $scope.extracted_tools = links;
-  //   });
-  // });
-
-
   $scope.signOut = function() {
     addon.port.emit("signOut");
   }
-
-  // $scope.openExternalLink = function(externalUrl) {
-  //   addon.port.emit("openExternalLink", {
-  //     externalUrl: externalUrl
-  //   });
-  // };
-
-  // $scope.markInvalid = function(type, entity) {
-  //   var postObj = {};
-  //   postObj.team_id = $scope.datawake.team.id;
-  //   postObj.domain_id = $scope.datawake.domain.id;
-  //   postObj.trail_id = $scope.datawake.trail.id;
-  //   postObj.feature_type = type;
-  //   postObj.feature_value = entity;
-  //   addon.port.emit("markInvalid", postObj);
-  //   $scope.invalid[entity] = true;
-  // };
-  //
-  // addon.port.on("markedFeatures", function(features) {
-  //   for (i in features) {
-  //     var feature = features[i];
-  //     $scope.invalid[feature.value] = true;
-  //   }
-  //   $scope.$apply()
-  //
-  //
-  // });
 
   $scope.isExtracted = function(type, name) {
     if ($scope.entities_in_domain && $scope.entities_in_domain.hasOwnProperty(type)) {
       return $scope.entities_in_domain[type].indexOf(name) >= 0;
     }
   };
-
-  // $scope.editFeatures = function() {
-  //   if (!$scope.allowEditFeatures) {
-  //     $scope.allowEditFeatures = true;
-  //   } else {
-  //     $scope.allowEditFeatures = false;
-  //   }
-  // };
 
   $scope.getHostName = function(url) {
     //For some reason, sometimes errant spaces were apearing in the urls.
@@ -164,13 +107,6 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
       link.show = !link.show;
     }
   };
-
-  // addon.port.on("infosaved", function(datawakeinfo) {
-  //   $scope.datawake = datawakeinfo;
-  //   $scope.$apply()
-  //   console.log("ON INFO SAVED")
-  //   console.log($scope.datawake)
-  // })
 
   $scope.refreshWebPages = function() {
     addon.port.emit("refreshWebPages", {

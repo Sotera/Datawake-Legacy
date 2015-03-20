@@ -144,8 +144,8 @@ function launchDatawakePanel() {
     url: require("sdk/self").data.url("html/datawake-widget-panel.html"),
     onReady: function(worker) {
       attachWorker(worker);
-      emitTrailEntities(worker, "memex", "trail")
-      emitTrailBasedLinks(worker, "memex", "trail")
+      // emitTrailEntities(worker, "memex", "trail")
+      // emitTrailBasedLinks(worker, "memex", "trail")
       worker.port.emit("ready", {
         starUrl: data.url("css/icons/"),
         datawakeInfo: datawakeInfo,
@@ -158,10 +158,10 @@ function launchDatawakePanel() {
       });
 
       worker.port.on("refreshEntities", function(domainAndTrail) {
-        emitTrailEntities(worker, "memex", "trail")
+        emitTrailEntities(worker, domainAndTrail.domain, domainAndTrail.trail)
       });
       worker.port.on("refreshWebPages", function(domainAndTrail) {
-        emitTrailBasedLinks(worker, "memex", "trail")
+        emitTrailBasedLinks(worker, domainAndTrail.domain, domainAndTrail.trail)
       });
     },
     onDetach: detachWorker,
