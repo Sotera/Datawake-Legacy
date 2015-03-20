@@ -35,10 +35,10 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
     $scope.current_url = prefs.current_url;
     $scope.lookaheadEnabled = prefs.useLookahead;
     $scope.domainFeaturesEnabled = prefs.useDomainFeatures;
-    $scope.rankingEnabled = prefs.useRanking;
+    //$scope.rankingEnabled = prefs.useRanking;
     $scope.versionNumber = prefs.versionNumber;
-    $scope.pageVisits = prefs.pageVisits;
-    $scope.starUrl = prefs.starUrl
+    //$scope.pageVisits = prefs.pageVisits;
+    //$scope.starUrl = prefs.starUrl
   });
 
   console.log($scope.datawake);
@@ -61,64 +61,63 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
     $scope.$apply();
   });
 
-  addon.port.on("ranking", function(rankingInfo) {
-    $scope.$apply(function() {
-      $scope.ranking = rankingInfo.ranking;
-      var starRating = $("#star_rating");
-      starRating.attr("data-average", rankingInfo.ranking);
-      createStarRating(addon.options.starUrl);
-    });
-  });
+  // addon.port.on("ranking", function(rankingInfo) {
+  //   $scope.$apply(function() {
+  //     $scope.ranking = rankingInfo.ranking;
+  //     var starRating = $("#star_rating");
+  //     starRating.attr("data-average", rankingInfo.ranking);
+  //     createStarRating(addon.options.starUrl);
+  //   });
+  // });
 
-  addon.port.on("features", function(features) {
-    $scope.extracted_entities_dict = features;
-    $scope.$apply();
-  });
+  // addon.port.on("features", function(features) {
+  //   $scope.extracted_entities_dict = features;
+  //   $scope.$apply();
+  // });
+  //
+  // addon.port.on("domain_features", function(features) {
+  //   $scope.domain_extracted_entities_dict = features;
+  //   $scope.$apply();
+  // });
 
-  addon.port.on("domain_features", function(features) {
-    $scope.domain_extracted_entities_dict = features;
-    $scope.$apply();
-  });
-
-
-  addon.port.on("externalLinks", function(links) {
-    console.debug("Loading External Entities..");
-    $scope.$apply(function() {
-      $scope.extracted_tools = links;
-    });
-  });
+  // addon.port.on("externalLinks", function(links) {
+  //   console.debug("Loading External Entities..");
+  //   $scope.$apply(function() {
+  //     $scope.extracted_tools = links;
+  //   });
+  // });
 
 
   $scope.signOut = function() {
     addon.port.emit("signOut");
   }
 
-  $scope.openExternalLink = function(externalUrl) {
-    addon.port.emit("openExternalLink", {
-      externalUrl: externalUrl
-    });
-  };
+  // $scope.openExternalLink = function(externalUrl) {
+  //   addon.port.emit("openExternalLink", {
+  //     externalUrl: externalUrl
+  //   });
+  // };
 
-  $scope.markInvalid = function(type, entity) {
-    var postObj = {};
-    postObj.team_id = $scope.datawake.team.id;
-    postObj.domain_id = $scope.datawake.domain.id;
-    postObj.trail_id = $scope.datawake.trail.id;
-    postObj.feature_type = type;
-    postObj.feature_value = entity;
-    addon.port.emit("markInvalid", postObj);
-    $scope.invalid[entity] = true;
-  };
-
-  addon.port.on("markedFeatures", function(features) {
-    for (i in features) {
-      var feature = features[i];
-      $scope.invalid[feature.value] = true;
-    }
-    $scope.$apply()
-
-
-  });
+  // $scope.markInvalid = function(type, entity) {
+  //   var postObj = {};
+  //   postObj.team_id = $scope.datawake.team.id;
+  //   postObj.domain_id = $scope.datawake.domain.id;
+  //   postObj.trail_id = $scope.datawake.trail.id;
+  //   postObj.feature_type = type;
+  //   postObj.feature_value = entity;
+  //   addon.port.emit("markInvalid", postObj);
+  //   $scope.invalid[entity] = true;
+  // };
+  //
+  // addon.port.on("markedFeatures", function(features) {
+  //   for (i in features) {
+  //     var feature = features[i];
+  //     $scope.invalid[feature.value] = true;
+  //   }
+  //   $scope.$apply()
+  //
+  //
+  // });
 
   $scope.isExtracted = function(type, name) {
     if ($scope.entities_in_domain && $scope.entities_in_domain.hasOwnProperty(type)) {
@@ -126,13 +125,13 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
     }
   };
 
-  $scope.editFeatures = function() {
-    if (!$scope.allowEditFeatures) {
-      $scope.allowEditFeatures = true;
-    } else {
-      $scope.allowEditFeatures = false;
-    }
-  }
+  // $scope.editFeatures = function() {
+  //   if (!$scope.allowEditFeatures) {
+  //     $scope.allowEditFeatures = true;
+  //   } else {
+  //     $scope.allowEditFeatures = false;
+  //   }
+  // };
 
   $scope.getHostName = function(url) {
     //For some reason, sometimes errant spaces were apearing in the urls.
@@ -217,7 +216,7 @@ panelApp.config(['$routeProvider',
       templateUrl: 'partials/trail-based-irrelevant-entities-partial.html'
     }).
     otherwise({
-      redirectTo: 'partials/extracted-entities-partial.html'
+      redirectTo: '/trail/unexplored'
     });
   }
 ]);

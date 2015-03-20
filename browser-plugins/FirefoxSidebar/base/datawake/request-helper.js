@@ -72,6 +72,8 @@ function proxyPost(url, post_data, callback) {
     requestWrapper.postRequest(url, post_data, function (resp) {
         if (resp.status === 200) {
             var response = {};
+            console.log("JSON returned");
+            console.log(resp.body);
             response.json = JSON.parse(resp.body);
             response.status = resp.status;
             callback(response);
