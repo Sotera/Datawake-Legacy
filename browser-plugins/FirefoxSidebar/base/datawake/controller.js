@@ -39,14 +39,11 @@ function loadDatawake() {
   // attach panels (logon panel and main panel) to the datawake action button
   attachActionButton();
 
-  // set up the tracker on the current / initial tab
-  trackingHelper.setUpTab(tabs.activeTab);
-
   // set up a new tab listener to add the tracker to each new tab
   tabs.on("open", function(tab) {
     var datawakeInfo = storage.getRecentlyUsedDatawakeInfo();
     storage.setDatawakeInfo(tab.id, datawakeInfo);
-    trackingHelper.setUpTab(tab);
+    // trackingHelper.setUpTab(tab);
   });
 
   // touch the datawake info for this tab so that it is the most recently used
@@ -144,14 +141,12 @@ function launchDatawakePanel() {
     url: require("sdk/self").data.url("html/datawake-widget-panel.html"),
     onReady: function(worker) {
       attachWorker(worker);
-      // emitTrailEntities(worker, "memex", "trail")
-      // emitTrailBasedLinks(worker, "memex", "trail")
       worker.port.emit("ready", {
-        starUrl: data.url("css/icons/"),
+        // starUrl: data.url("css/icons/"),
         datawakeInfo: datawakeInfo,
         useDomainFeatures: addOnPrefs.useDomainFeatures,
         useLookahead: addOnPrefs.useLookahead,
-        useRanking: addOnPrefs.useRanking,
+        // useRanking: addOnPrefs.useRanking,
         versionNumber: self.version,
         current_url: tabs.activeTab.url,
         pageVisits: badgeForTab[tabs.activeTab.id]
@@ -189,8 +184,6 @@ function emitTrailEntities(worker, domain, trail) {
     trail: trail
   });
   requestHelper.post(post_url, post_data, function(response) {
-    console.log("Trail Based Entities Retrieved")
-    console.log(response.json)
     worker.port.emit("trailEntities", response.json);
   });
 }
@@ -202,12 +195,9 @@ function emitTrailBasedLinks(worker, domain, trail) {
     trail: trail
   });
   requestHelper.post(post_url, post_data, function(response) {
-    console.log("Trail Bases Links Retrieved");
-    console.log(response.json);
     worker.port.emit("trailLinks", response.json);
   });
 }
-
 
 /**
  *
@@ -234,149 +224,6 @@ function getFeaturesForPanel(datawakeinfo) {
 
     }
   }
-}
-
-/**
- * Changes the team and resets domain and trail for a tab,
- * and fetches valid domains for this team.
- * @param tabId
- * @param newteam
- * @param callback, function handles response for /domains call to the server.
- * @returns The altered datawakeinfo object
- */
-function changeTeam(tabId, newteam, callback) {
-  var info = storage.getDatawakeInfo(tabId)
-  if (!info.team || info.team.id != newteam.id) {
-    info.team = newteam
-    info.domain = null;
-    info.trail = null;
-    info.isDatawakeOn = false;
-    storage.setDatawakeInfo(tabId, info)
-
-    service.getDomains(info.team.id, function(response) {
-      if (response.status == 200) {
-        var domains = response.json;
-        callback(domains);
-      } else {
-        //TODO handle the error
-        console.error("ERROR GETTING DOMAINS ");
-        console.error(response);
-      }
-    })
-  }
-  return info;
-}
-
-
-function changeDomain(tabId, newdomain, callback) {
-  var info = storage.getDatawakeInfo(tabId)
-  if (!info.domain || info.domain.id != newdomain.id) {
-    info.domain = newdomain
-    info.trail = null;
-    info.isDatawakeOn = false;
-    storage.setDatawakeInfo(tabId, info)
-
-    service.getTrails(info.team.id, info.domain.id, function(response) {
-      if (response.status == 200) {
-        var trails = response.json;
-        callback(trails);
-      } else {
-        console.error("ERROR GETTING trails ");
-        console.error(response);
-      }
-    })
-  }
-  return info;
-}
-
-/**
- * Marks an entity as invalid
- * @param entity Object(entity_value, entity_type, domain)
- */
-function markInvalid(data) {
-  var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/invalid_feature";
-  requestHelper.post(post_url, JSON.stringify(data), function(response) {
-    sideBar.port.emit("marked", data.feature_value);
-  });
-}
-
-function emitMarkedEntities(datawakeinfo) {
-  var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/get_invalid_features";
-  var post_obj = {
-    team_id: datawakeinfo.team.id,
-    domain_id: datawakeinfo.domain.id,
-    trail_id: datawakeinfo.trail.id
-  }
-  requestHelper.post(post_url, JSON.stringify(post_obj), function(response) {
-    if (response.status != 200) {
-      notifyError("Error retrieving invalid features for this trail.")
-    } else {
-      sideBar.port.emit("markedFeatures", response.json);
-    }
-
-  });
-}
-
-/**
- * Emits feedback entities
- * @param domain domainName
- */
-function loadManualFeatures(info) {
-  var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/manual_features";
-  var post_data = JSON.stringify({
-    team_id: info.team.id,
-    domain_id: info.domain.id,
-    trail_id: info.trail.id,
-    url: tabs.activeTab.url
-  });
-  requestHelper.post(post_url, post_data, function(response) {
-    if (response.status != 200) {
-      notifyError("Error getting manual features for this url.")
-    } else {
-      sideBar.port.emit("manualFeatures", response.json);
-    }
-
-  });
-}
-
-function openExternalTool(externalUrlObject) {
-  console.log("Opening External Tool");
-  tabs.open(externalUrlObject.externalUrl);
-}
-
-/**
- * Emits Rank information to the panel attached to the widget.
- * @param datawakeInfo The datawake info associated with the current tab.
- */
-function emitRanks(datawakeInfo) {
-  var url = addOnPrefs.datawakeDeploymentUrl + "/ranks/get";
-  var post_data = JSON.stringify({
-    team_id: datawakeInfo.team.id,
-    domain_id: datawakeInfo.domain.id,
-    trail_id: datawakeInfo.trail.id,
-    url: tabs.activeTab.url
-  });
-  requestHelper.post(url, post_data, function(response) {
-    var rank = response.json.rank;
-    var rankingInfo = {};
-    rankingInfo.ranking = rank;
-    if (sideBar) sideBar.port.emit("ranking", rankingInfo);
-  });
-}
-
-/**
- * Sets the rank that the user rated the page.
- * @param rank_data
- */
-function setUrlRank(rank_data) {
-  rank_data.url = tabs.activeTab.url;
-  var url = addOnPrefs.datawakeDeploymentUrl + "/ranks/set";
-  console.debug("Posting Rank..");
-  requestHelper.post(url, JSON.stringify(rank_data), function(response) {
-    if (response.json.success) {
-      console.debug("Successfully set rank..");
-    }
-  });
 }
 
 function activeIcon() {
