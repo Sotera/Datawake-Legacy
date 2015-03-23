@@ -9,7 +9,7 @@ var sidebarApp = angular.module('sidebarApp', ["ngRoute", "ngSanitize"]).config(
 }]);
 
 
-sidebarApp.controller("PanelCtrl", function($scope, $document) {
+sidebarApp.controller("SidebarCtrl", function($scope, $document) {
   $scope.teamSpinner = true;
   $scope.domainSpinner = true;
   $scope.trailSpinner = true;
