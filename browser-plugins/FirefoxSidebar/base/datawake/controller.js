@@ -15,7 +15,6 @@ exports.loadDatawake = loadDatawake;
 exports.resetIcon = resetIcon;
 exports.activeIcon = activeIcon;
 exports.notifyError = notifyError;
-exports.getFeaturesForPanel = getFeaturesForPanel;
 
 var datawakeButton;
 var sideBar;
@@ -89,16 +88,6 @@ function attachActionButton() {
 }
 
 /**
- * Handles the button when the panel's hide even is triggered.
- */
-function handleHide() {
-  datawakeButton.state('window', {
-    checked: false
-  });
-}
-
-
-/**
  * Sets up the required information when the ToggleButton is clicked.
  * Opens the login or datawake panel as needed
  * @param state The state of the ToggleButton.
@@ -107,6 +96,7 @@ function onToggle(state) {
 
   // load the main datawake panel
   if (signedIn) {
+    activeIcon();
     launchDatawakePanel();
   }
   // load the login panel
@@ -140,16 +130,13 @@ function launchDatawakePanel() {
     onReady: function(worker) {
       attachWorker(worker);
       worker.port.emit("ready", {
-        // starUrl: data.url("css/icons/"),
         datawakeInfo: datawakeInfo,
         useDomainFeatures: addOnPrefs.useDomainFeatures,
         useLookahead: addOnPrefs.useLookahead,
-        // useRanking: addOnPrefs.useRanking,
         versionNumber: self.version,
         current_url: tabs.activeTab.url,
         pageVisits: badgeForTab[tabs.activeTab.id]
       });
-
       worker.port.on("refreshEntities", function(domainAndTrail) {
         emitTrailEntities(worker, domainAndTrail.domain, domainAndTrail.trail)
       });
@@ -197,33 +184,6 @@ function emitTrailBasedLinks(worker, domain, trail) {
   });
 }
 
-/**
- *
- */
-function getFeaturesForPanel(datawakeinfo) {
-  if (sideBar) {
-    if (constants.isValidUrl(tabs.activeTab.url)) {
-
-      service.getEntities(tabs.activeTab.url, function(response) {
-        if (response.status != 200) notifyError("Error getting features for this url.")
-        else sideBar.port.emit("features", response.json);
-      });
-
-      service.getDomainExtractedEntities(datawakeinfo.team.id, datawakeinfo.domain.id, tabs.activeTab.url, function(response) {
-        if (response.status != 200) notifyError("Error getting domain features for this url.")
-        else sideBar.port.emit("domain_features", response.json);
-      });
-
-      // get manually labeled features
-      loadManualFeatures(datawakeinfo);
-
-      // get list of features marked as invalid
-      emitMarkedEntities(datawakeinfo);
-
-    }
-  }
-}
-
 function activeIcon() {
   datawakeButton.icon = data.url("img/waveicon38.png");
 }
@@ -252,7 +212,6 @@ function launchLoginPanel() {
 
   loginPanel = panel.Panel({
     contentURL: data.url("html/login-panel.html"),
-    onHide: handleHide,
     contentScriptOptions: {
       authType: authHelper.authType()
     }
@@ -262,7 +221,6 @@ function launchLoginPanel() {
     authHelper.signIn(function(response) {
       signedIn = true;
       userInfo = response.json
-        //loginPanel.port.emit("sendUserInfo", response.json);
       loginPanel.destroy()
       loginPanel = null;
       notifications.notify({
