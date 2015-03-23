@@ -1,7 +1,7 @@
 var addon = self;
 
 
-var panelApp = angular.module('panelApp', ["ngRoute", "ngSanitize"]).config(['$provide', function($provide) {
+var sidebarApp = angular.module('sidebarApp', ["ngRoute", "ngSanitize"]).config(['$provide', function($provide) {
   $provide.decorator('$sniffer', ['$delegate', function($delegate) {
     $delegate.history = false;
     return $delegate;
@@ -9,7 +9,7 @@ var panelApp = angular.module('panelApp', ["ngRoute", "ngSanitize"]).config(['$p
 }]);
 
 
-panelApp.controller("PanelCtrl", function($scope, $document) {
+sidebarApp.controller("PanelCtrl", function($scope, $document) {
   $scope.teamSpinner = true;
   $scope.domainSpinner = true;
   $scope.trailSpinner = true;
@@ -132,7 +132,7 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
   addon.port.emit("init");
 });
 
-panelApp.config(['$routeProvider',
+sidebarApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
     when('/trail/explored', {

@@ -97,7 +97,7 @@ function onToggle(state) {
   // load the main datawake panel
   if (signedIn) {
     activeIcon();
-    launchDatawakePanel();
+    launchDatawakeSidebar();
   }
   // load the login panel
   else {
@@ -117,7 +117,7 @@ function detachWorker(worker) {
   }
 }
 
-function launchDatawakePanel() {
+function launchDatawakeSidebar() {
   var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
   if (sideBar != null || sideBar != undefined) {
     sideBar.destroy();
@@ -223,13 +223,14 @@ function launchLoginPanel() {
       userInfo = response.json
       loginPanel.destroy()
       loginPanel = null;
+      activeIcon();
       notifications.notify({
         title: "Datawake Sign On",
         text: "Sign On Successful.  Click the datawake button to begin.",
         iconURL: self.data.url("img/waveicon38.png"),
         onClick: function(data) {
           console.log("clicked it")
-          launchDatawakePanel()
+          launchDatawakeSidebar()
         }
       });
     });
