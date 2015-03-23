@@ -7,11 +7,9 @@ var tabs = require("sdk/tabs");
 var storage = require("./storage");
 var constants = require("./constants");
 var requestHelper = require("./request-helper");
-var tracking = require("./tracking");
 var service = require("./service");
 var panel = require("sdk/panel");
 var notifications = require("sdk/notifications");
-var trackingHelper = require("./tracking");
 
 exports.loadDatawake = loadDatawake;
 exports.resetIcon = resetIcon;
