@@ -25,8 +25,6 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
 
   addon.port.on("ready", function(prefs) {
     console.log("Got Ready")
-    console.log("Datawake Prefs")
-    console.log(prefs.datawakeInfo)
     $scope.datawake = prefs.datawakeInfo;
 
     $scope.datawake.domain = 'memex';
@@ -50,7 +48,6 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
 
   addon.port.on("trailEntities", function(entities_obj) {
     console.log("Got trail entities")
-    console.log(entities_obj)
     $scope.irrelevantEntities = entities_obj.irrelevantEntities;
     $scope.trailEntities = entities_obj.entities;
     $scope.trailEntitiesIter = createIterableEntityListForSorting(entities_obj.entities);
@@ -59,8 +56,7 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
   });
 
   addon.port.on("trailLinks", function(links_obj) {
-    console.log("got trail links")
-    console.log(links_obj)
+    console.log("Got trail links")
     $scope.visitedLinks = links_obj.visited;
     $scope.notVisitedLinks = links_obj.notVisited;
     $scope.$apply();
