@@ -10,6 +10,7 @@ var requestHelper = require("./request-helper");
 var service = require("./service");
 var panel = require("sdk/panel");
 var notifications = require("sdk/notifications");
+var selections = require("./selections");
 
 exports.loadDatawake = loadDatawake;
 exports.resetIcon = resetIcon;
@@ -98,6 +99,7 @@ function onToggle(state) {
   if (signedIn) {
     activeIcon();
     launchDatawakeSidebar();
+    selections.useContextMenu(tab);
   }
   // load the login panel
   else {
@@ -224,13 +226,14 @@ function launchLoginPanel() {
       loginPanel.destroy()
       loginPanel = null;
       activeIcon();
+      launchDatawakeSidebar();
+      selections.useContextMenu();
       notifications.notify({
         title: "Datawake Sign On",
         text: "Sign On Successful.  Click the datawake button to begin.",
         iconURL: self.data.url("img/waveicon38.png"),
         onClick: function(data) {
           console.log("clicked it")
-          launchDatawakeSidebar()
         }
       });
     });
