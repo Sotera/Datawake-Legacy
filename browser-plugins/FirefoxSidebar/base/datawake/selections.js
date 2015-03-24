@@ -19,7 +19,8 @@ exports.cleanUpTab = cleanUpTab;
 function useContextMenu() {
   contextMenu.Menu({
     label: 'Datawake Prefetch',
-    //  context: contextMenu.URLContext(url),
+    contentScriptFile: data.url("js/datawake/selections.js"),
+    // context: contextMenu.URLContext(url),
     items: [
       contextMenu.Item({
         label: 'Add Entity'
