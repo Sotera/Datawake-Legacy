@@ -61,6 +61,7 @@ function loadDatawake() {
     var datawakeInfo = storage.getDatawakeInfo(tab.id);
 
     trackingHelper.trackTab(tab, datawakeInfo);
+    trackingHelper.setupTabWorkerAndServices(tab);
     // trackingHelper.setUpTab(tab);
   });
 

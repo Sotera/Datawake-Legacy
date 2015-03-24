@@ -1,6 +1,5 @@
 var addon = self;
 
-
 var sidebarApp = angular.module('sidebarApp', ["ngRoute", "ngSanitize"]).config(['$provide', function($provide) {
   $provide.decorator('$sniffer', ['$delegate', function($delegate) {
     $delegate.history = false;

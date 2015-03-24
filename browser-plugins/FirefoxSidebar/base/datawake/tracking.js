@@ -28,30 +28,6 @@ exports.isTabWorkerAttached = isTabWorkerAttached;
 var trackingTabWorkers = {};
 var advanceSearchTimerId;
 
-/**
- * Tracks the current tab.
- * @param tab The tab to track.
- * @param datawakeInfo The datawake info associated with the tab.
- */
-// function trackTab(tab, datawakeInfo) {
-//   var tabId = tab.id;
-//   destoryTabWorker(tabId);
-//   storage.setDatawakeInfo(tabId, datawakeInfo);
-//   if (datawakeInfo.isDatawakeOn) {
-//     tab.on('ready', setupTabWorkerAndServices);
-//     tab.on('activate', switchTab);
-//     tab.on('close', function(other) {
-//       close(tabId);
-//     });
-//     widgetHelper.activeIcon();
-//   } else {
-//     tab.removeListener('ready', setupTabWorkerAndServices);
-//     tab.removeListener('activate', switchTab);
-//     tab.removeListener('close', close);
-//     widgetHelper.resetIcon();
-//   }
-// }
-
 function trackTab(tab) {
   // in the event that there is already a worker for this tab destroy it.
   destoryTabWorker(tab.id);
