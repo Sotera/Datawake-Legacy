@@ -11,6 +11,7 @@ var service = require("./service");
 var panel = require("sdk/panel");
 var notifications = require("sdk/notifications");
 var selections = require("./selections");
+var trackingHelper = require("./tracking")
 
 exports.loadDatawake = loadDatawake;
 exports.resetIcon = resetIcon;
@@ -28,6 +29,21 @@ var signedIn = false;
 var userInfo = null;
 var workerArray = [];
 
+function hackDatawakeInfo() {
+  dom = {
+    name: "memex"
+  };
+  tr = {
+    name: "trail"
+  };
+  infoObj = {
+    domain: dom,
+    team: "",
+    trail: tr,
+    isDatawakeOn: "true"
+  };
+  return infoObj;
+}
 
 /**
  * Load and start datawake components
@@ -39,15 +55,23 @@ function loadDatawake() {
 
   // set up a new tab listener to add the tracker to each new tab
   tabs.on("open", function(tab) {
-    var datawakeInfo = storage.getRecentlyUsedDatawakeInfo();
-    storage.setDatawakeInfo(tab.id, datawakeInfo);
+    //Hack while i wait to set info.
+    ifoObj = hackDatawakeInfo();
+    storage.setDatawakeInfo(tab.id, infoObj);
+    var datawakeInfo = storage.getDatawakeInfo(tab.id);
+
+    trackingHelper.trackTab(tab, datawakeInfo);
     // trackingHelper.setUpTab(tab);
   });
 
   // touch the datawake info for this tab so that it is the most recently used
   // and get set the button icon for on / off
   tabs.on("activate", function(tab) {
+    //Hack while i wait to set info.
+    ifoObj = hackDatawakeInfo();
+    storage.setDatawakeInfo(tab.id, infoObj);
     var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
+
     if (datawakeInfoForTab != null && datawakeInfoForTab.isDatawakeOn) {
       activeIcon();
     } else {
@@ -99,7 +123,6 @@ function onToggle(state) {
   if (signedIn) {
     activeIcon();
     launchDatawakeSidebar();
-    selections.useContextMenu(tab);
   }
   // load the login panel
   else {
@@ -144,6 +167,25 @@ function launchDatawakeSidebar() {
       });
       worker.port.on("refreshWebPages", function(domainAndTrail) {
         emitTrailBasedLinks(worker, domainAndTrail.domain, domainAndTrail.trail)
+      });
+      worker.port.on("infochanged", function(infoObj) {
+
+        var old = storage.getDatawakeInfo(infoObj.tabId);
+        var wasOn = old && old.isDatawakeOn;
+        var isOn = infoObj.info && infoObj.info.isDatawakeOn;
+
+        storage.setDatawakeInfo(infoObj.tabId, infoObj.info);
+        worker.port.emit("infosaved", infoObj.info)
+
+
+        if (isOn != wasOn) {
+          if (isOn) {
+            activeIcon();
+            trackingHelper.trackTab(getAcitveTab());
+          } else {
+            resetIcon()
+          }
+        }
       });
     },
     onDetach: detachWorker,
@@ -245,4 +287,12 @@ function launchLoginPanel() {
     });
   });
   loginPanel.show();
+}
+
+function getEntities(domain, callback) {
+  if (tracking.isTabWorkerAttached(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
+    service.getEntities(domain, tabs.activeTab.url, callback);
+  } else {
+    console.debug("The Datawake is not on for this tab.");
+  }
 }
