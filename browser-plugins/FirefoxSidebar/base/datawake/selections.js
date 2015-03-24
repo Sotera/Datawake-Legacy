@@ -23,16 +23,31 @@ function useContextMenu() {
     // context: contextMenu.URLContext(url),
     items: [
       contextMenu.Item({
-        label: 'Add Entity'
+        label: "Add Entity",
+        data: "add-entity",
+        context: contextMenu.SelectionContext()
       }),
       contextMenu.Item({
-        label: 'Add Irrelevant Entity'
+        label: "Add Irrelevant Entity",
+        data: "add-irrelevant-entity",
+        context: contextMenu.SelectionContext()
       }),
       contextMenu.Item({
-        label: 'Add Custom Entity'
+        label: "Add Custom Entity",
+        data: "add-entity-custom"
       }),
       contextMenu.Item({
-        label: 'Add Custom Irrelevant Entity'
+        label: "Add Custom Irrelevant Entity",
+        data: "add-irrelevant-entity-custom"
+      }),
+      contextMenu.Separator(),
+      contextMenu.Item({
+        label: "Show Selections",
+        data: "show-trail"
+      }),
+      contextMenu.Item({
+        label: "Hide Selections",
+        data: "hide-trail"
       })
     ]
   });
