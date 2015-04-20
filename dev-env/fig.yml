@@ -7,36 +7,38 @@ mysql:
   volumes:
     - /home/ubuntu/trail-selections/dev-env:/dev-env
 
-zookeeper:
-  image: jplock/zookeeper
-  ports:
-    - "2181:2181"
+#zookeeper:
+#  image: jplock/zookeeper
+#  ports:
+#    - "2181:2181"
 
-kafka:
-  image: wurstmeister/kafka:0.8.1.1-1
-  ports:
-    - "9092:9092"
-  links:
-    - zookeeper:zk
-  environment:
-    KAFKA_ADVERTISED_HOST_NAME: 172.31.31.203
-    KAFKA_MESSAGE_MAX_BYTES: 2000000
-    KAFKA_REPLICA_FETCH_MAX_BYTES: 3000000
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
+#kafka:
+#  image: wurstmeister/kafka:0.8.1.1-1
+#  ports:
+#    - "9092:9092"
+#  links:
+#    - zookeeper:zk
+#  environment:
+#    KAFKA_ADVERTISED_HOST_NAME: 172.31.31.203
+#    KAFKA_MESSAGE_MAX_BYTES: 2000000
+#    KAFKA_REPLICA_FETCH_MAX_BYTES: 3000000
+#  volumes:
+#    - /var/run/docker.sock:/var/run/docker.sock
 
 dwstream:
   build: ../memex-datawake-stream
   links:
     - mysql:mysql
-    - kafka:kafka
-    - zookeeper:zk
+#    - kafka:kafka
+#    - zookeeper:zk
   environment:
       DW_DB: memex_sotera
       DW_DB_USER: root
       DW_DB_PASSWORD: root
       DW_DB_HOST: 172.31.31.203
       DW_DB_PORT: 3336
+      ZK_PORT_2888_TCP_ADDR: z01.istresearch.com:2181
+      KAFKA_PORT_9092_TCP_ADDR: 54.152.161.20
   volumes:
     - /home/ubuntu/trail-selections/memex-datawake-stream:/memex-datawake-stream
     - /home/ubuntu/trail-selections/dev-env:/dev-env
@@ -47,8 +49,8 @@ dwsearch:
   working_dir: /trail-specific-search
   links:
     - mysql:mysql
-    - kafka:kafka
-    - zookeeper:zk
+#    - kafka:kafka
+#    - zookeeper:zk
   environment:
     DW_DB_USER: root
     DW_DB_PASSWORD: root
@@ -57,12 +59,14 @@ dwsearch:
     DW_BING_KEY: AeLgwrJ49hIsdsivwmnGs6VOHq3cNs3vkKdnkYlwffQ
     DW_GOOGLE_PUBLIC_KEY: AIzaSyAdmOWQGKH38VkGRiprHtSIVP3NhbDj69A
     DW_GOOGLE_CUSTOM_SEARCH_CX: 017987995273492241149:qjaqo2emn3w
-    DW_KAFKA_BROKERS: 172.31.31.203:9092
+#    DW_KAFKA_BROKERS: 172.31.31.203:9092
+    DW_KAFKA_BROKERS: k01.istresearch.com:9092
     DW_USE_DISTRIBUTED: true
     DW_INCOMING_URLS: memex.incoming_urls
     DW_KAFKA_CRAWLER_BROKERS: k01.istresearch.com:9092
-    DW_ZK_QUORUM: 172.31.31.203:2181
-    DW_SEARCH_API: http://172.31.44.172:8787/search/
+    #DW_ZK_QUORUM: 172.31.31.203:2181
+    DW_ZK_QUORUM: z01.istresearch.com:2181
+    DW_SEARCH_API: http://172.31.41.61:8787/search/
   volumes:
     - /home/ubuntu/trail-selections/trail-specific-search:/tss
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.search.SearchTopology
@@ -72,16 +76,18 @@ dwurlcontents:
   working_dir: /trail-specific-search
   links:
     - mysql:mysql
-    - kafka:kafka
-    - zookeeper:zk
+    #- kafka:kafka
+    #- zookeeper:zk
   environment:
     DW_DB_JDBC: jdbc:mysql://172.31.31.203:3336/memex_sotera
     DW_CRAWLER_OUT: crawler-out
     DW_USE_DISTRIBUTED: true
-    DW_KAFKA_BROKERS: 172.31.31.203:9092
-    DW_LOCAL_ZK_QUORUM: 172.31.31.203:2181
+    #DW_KAFKA_BROKERS: 172.31.31.203:9092
+    DW_KAFKA_BROKERS: k01.istresearch.com:9092
+    #DW_LOCAL_ZK_QUORUM: 172.31.31.203:2181
+    DW_LOCAL_ZK_QUORUM: z01.istresearch.com:2181
     #DW_ZK_QUORUM: 54.165.33.98:2181
-    DW_ZK_QUORUM: z03.istresearch.com:2181
+    DW_ZK_QUORUM: z01.istresearch.com:2181
     DW_DB_USER: root
     DW_DB_PASSWORD: root
     DW_CRAWLER_TOPIC: memex.crawled_trail-entities-search
@@ -92,22 +98,24 @@ dwurlrank:
   working_dir: /trail-specific-search
   links:
     - mysql:mysql
-    - kafka:kafka
-    - zookeeper:zk
+    #- kafka:kafka
+    #- zookeeper:zk
   environment:
       DW_DB_USER: root
       DW_DB_PASSWORD: root
       DW_DB_JDBC: jdbc:mysql://172.31.31.203:3336/memex_sotera
-      DW_KAFKA_BROKERS: 172.31.31.203:9092
+      DW_KAFKA_BROKERS: k01.istresearch.com:9092
+      #DW_KAFKA_BROKERS: 172.31.31.203:9092
     #  DW_ZK_QUORUM: 54.165.33.98:2181
-      DW_ZK_QUORUM: 172.31.31.203:2181
+      #DW_ZK_QUORUM: 172.31.31.203:2181
+      DW_ZK_QUORUM: z01.istresearch.com:2181
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.rank.UrlRankTopology
 
 datawake:
   build: ../server
   links:
     - mysql:mysql
-    - kafka:kafka
+    #- kafka:kafka
     - dwsearch
     - dwurlcontents
     - dwstream
@@ -120,7 +128,8 @@ datawake:
     DW_DB_PASSWORD: root
     DW_DB_HOST: 172.31.31.203
     DW_DB_PORT: 3336
-    DW_KAFKA_CONN_POOL: 172.31.31.203:9092
+    #DW_KAFKA_CONN_POOL: 172.31.31.203:9092
+    DW_KAFKA_CONN_POOL: k01.istresearch.com:9092
     DW_KAFKA_PUB_TOPIC: memex-datawake-visited
     DW_KAFKA_TRAIL_TOPIC: trail-search
     DW_GOOGLE_CLIENT_IDS: 587886725690-bsns7flvb68l48q95f9l1su82q0p4k00.apps.googleusercontent.com,587886725690-njd26v0l3krmar5vtc8e06oprtqvkdvd.apps.googleusercontent.com
