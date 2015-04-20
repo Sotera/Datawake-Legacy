@@ -61,6 +61,13 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     $scope.$apply();
   });
 
+  addon.port.on("promptTrailBasedEntity", function(obj) {
+    var text = prompt(obj.prompt, obj.raw_text);
+    if (text) {
+      addon.port.emit(obj.callback, text);
+    }
+  });
+
   $scope.signOut = function() {
     addon.port.emit("signOut");
   }

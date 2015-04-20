@@ -10,9 +10,12 @@ var requestHelper = require("./request-helper");
 var service = require("./service");
 var panel = require("sdk/panel");
 var notifications = require("sdk/notifications");
-var selections = require("./selections");
-var trackingHelper = require("./tracking")
+//var selections = require("./selections");
+//var trackingHelper = require("./tracking")
+var contextMenu = require("sdk/context-menu");
 
+
+exports.useContextMenu = useContextMenu;
 exports.loadDatawake = loadDatawake;
 exports.resetIcon = resetIcon;
 exports.activeIcon = activeIcon;
@@ -183,6 +186,7 @@ function launchDatawakeSidebar() {
           if (isOn) {
             activeIcon();
             trackingHelper.trackTab(getAcitveTab());
+            useContextMenu();
           } else {
             resetIcon()
           }
@@ -270,7 +274,7 @@ function launchLoginPanel() {
       loginPanel = null;
       activeIcon();
       launchDatawakeSidebar();
-      selections.useContextMenu();
+      useContextMenu();
       notifications.notify({
         title: "Datawake Sign On",
         text: "Sign On Successful.  Click the datawake button to begin.",
@@ -296,4 +300,159 @@ function getEntities(domain, callback) {
   } else {
     console.debug("The Datawake is not on for this tab.");
   }
+}
+
+// Begin Copy and Paste
+/**
+ * Turns on the context menu with the datawake.
+ * @param tab The tab to add the context to.
+ */
+function useContextMenu() {
+  contextMenu.Menu({
+    label: 'Datawake Prefetch',
+    contentScriptFile: data.url("js/datawake/selections.js"),
+    // context: contextMenu.URLContext(url),
+    items: [
+      contextMenu.Item({
+        label: "Add Entity",
+        data: "add-entity",
+        context: contextMenu.SelectionContext()
+      }),
+      contextMenu.Item({
+        label: "Add Irrelevant Entity",
+        data: "add-irrelevant-entity",
+        context: contextMenu.SelectionContext()
+      }),
+      contextMenu.Item({
+        label: "Add Custom Entity",
+        data: "add-entity-custom"
+      }),
+      contextMenu.Item({
+        label: "Add Custom Irrelevant Entity",
+        data: "add-irrelevant-entity-custom"
+      }),
+      contextMenu.Separator(),
+      contextMenu.Item({
+        label: "Show Selections",
+        data: "show-trail"
+      }),
+      contextMenu.Item({
+        label: "Hide Selections",
+        data: "hide-trail"
+      })
+    ],
+    onMessage: function(message) {
+      var tabId = tabs.activeTab.id;
+      var datawakeInfo = storage.getDatawakeInfo(tabId);
+      switch (message.intent) {
+        case "add-entity-custom":
+          addCustomTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-irrelevant-entity-custom":
+          addCustomIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-entity":
+          addTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-irrelevant-entity":
+          addIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "show-trail":
+          showTrailEntities(datawakeInfo.domain.name, datawakeInfo.trail.name);
+          break;
+        case "hide-trail":
+          hideSelections("trailentities");
+          break;
+      }
+    }
+  });
+}
+
+function showTrailEntities(domain, trail) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entities", post_obj, function(response) {
+    var entities = [];
+    for (var entity in response.json.entities)
+      entities.push({
+        entity: entity
+      });
+    tracking.highlightTrailEntities(entities);
+  });
+}
+
+function addCustomTrailEntity(domain, trail, entity) {
+  promptTrailBasedEntity(entity, function(text) {
+    addTrailEntity(domain, trail, text);
+  });
+}
+
+function addCustomIrrelevantTrailEntity(domain, trail, entity) {
+  promptIrrelevantTrailBasedEntity(entity, function(text) {
+    addIrrelevantTrailEntity(domain, trail, text);
+  });
+}
+
+function addTrailEntity(domain, trail, entity) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail,
+    entity: entity
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function(response) {
+    var myIconURL = data.url("img/waveicon38.png");
+    notifications.notify({
+      text: "Successfully added " + entity + " as an entity!",
+      title: "Datawake",
+      iconURL: myIconURL
+    });
+  });
+}
+
+function addIrrelevantTrailEntity(domain, trail, entity) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail,
+    entity: entity
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/irrelevant", post_obj, function(response) {
+    var myIconURL = data.url("img/waveicon38.png");
+    notifications.notify({
+      text: "Successfully added " + entity + " as an irrelevant entity!",
+      title: "Datawake",
+      iconURL: myIconURL
+    });
+  });
+}
+
+function promptTrailBasedEntity(entity, callback) {
+  var obj = {};
+  obj.raw_text = entity.trim();
+  obj.prompt = "Add trail based entity?";
+  obj.callback = "trailEntity";
+  promptForInput(obj, callback);
+}
+
+function promptIrrelevantTrailBasedEntity(entity, callback) {
+  var obj = {};
+  obj.raw_text = entity.trim();
+  obj.prompt = "Add irrelevant trail entity?";
+  obj.callback = "irrelevantEntity";
+  promptForInput(obj, callback);
+}
+
+function highlightTrailEntities(entities) {
+  var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+  currentTrackingTabWorker.port.emit("highlightTrailEntities", entities);
+}
+
+function promptForInput(obj, callback) {
+  //var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+  var currentTrackingTabWorker = workerArray[0]
+  currentTrackingTabWorker.port.emit("promptTrailBasedEntity", obj);
+  currentTrackingTabWorker.port.on(obj.callback, function(text) {
+    callback(text);
+  });
 }
