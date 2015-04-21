@@ -134,20 +134,7 @@ function launchDatawakeSidebar() {
         worker.port.emit("infosaved", infoObj)
       });
     },
-    onDetach: detachWorker,
-    onAttach: function(worker) {
-      attachWorker(worker);
-      worker.port.emit("ready", {
-        starUrl: data.url("css/icons/"),
-        datawakeInfo: datawakeInfo,
-        useDomainFeatures: addOnPrefs.useDomainFeatures,
-        useLookahead: addOnPrefs.useLookahead,
-        useRanking: addOnPrefs.useRanking,
-        versionNumber: self.version,
-        current_url: tabs.activeTab.url,
-        pageVisits: badgeForTab[tabs.activeTab.id]
-      });
-    }
+    onDetach: detachWorker
   })
   sideBar.show();
 }
