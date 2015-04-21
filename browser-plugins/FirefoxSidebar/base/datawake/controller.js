@@ -10,8 +10,7 @@ var requestHelper = require("./request-helper");
 var service = require("./service");
 var panel = require("sdk/panel");
 var notifications = require("sdk/notifications");
-//var selections = require("./selections");
-//var trackingHelper = require("./tracking")
+
 var contextMenu = require("sdk/context-menu");
 
 
@@ -63,9 +62,6 @@ function loadDatawake() {
     storage.setDatawakeInfo(tab.id, infoObj);
     var datawakeInfo = storage.getDatawakeInfo(tab.id);
 
-    trackingHelper.trackTab(tab, datawakeInfo);
-    trackingHelper.setupTabWorkerAndServices(tab);
-    // trackingHelper.setUpTab(tab);
   });
 
   // touch the datawake info for this tab so that it is the most recently used
@@ -185,7 +181,7 @@ function launchDatawakeSidebar() {
         if (isOn != wasOn) {
           if (isOn) {
             activeIcon();
-            trackingHelper.trackTab(getAcitveTab());
+            //trackingHelper.trackTab(getAcitveTab());
             useContextMenu();
           } else {
             resetIcon()
@@ -295,11 +291,8 @@ function launchLoginPanel() {
 }
 
 function getEntities(domain, callback) {
-  if (tracking.isTabWorkerAttached(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
     service.getEntities(domain, tabs.activeTab.url, callback);
-  } else {
-    console.debug("The Datawake is not on for this tab.");
-  }
+
 }
 
 // Begin Copy and Paste
@@ -449,10 +442,9 @@ function highlightTrailEntities(entities) {
 }
 
 function promptForInput(obj, callback) {
-  //var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
-  var currentTrackingTabWorker = workerArray[0]
-  currentTrackingTabWorker.port.emit("promptTrailBasedEntity", obj);
-  currentTrackingTabWorker.port.on(obj.callback, function(text) {
+  var worker = workerArray[0]
+  worker.port.emit("promptTrailBasedEntity", obj);
+  worker.port.on(obj.callback, function(text) {
     callback(text);
   });
 }
