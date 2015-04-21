@@ -1,7 +1,7 @@
 FROM wurstmeister/kafka:0.8.1.1-1
 
-RUN apt-get -y update \
-    && apt-get -y upgrade
+RUN apt-get -y --fix-missing update \
+    && apt-get -y --fix-missing upgrade
 
 RUN apt-get install -y wget
 
@@ -13,8 +13,8 @@ RUN apt-get remove scala-library scala \
     && apt-get update \
     && apt-get install scala
 
-RUN apt-get install -y software-properties-common \
-    && apt-get install -y python-software-properties
+RUN apt-get install --fix-missing -y software-properties-common \
+    && apt-get install --fix-missing -y python-software-properties
 
 RUN add-apt-repository ppa:cwchien/gradle \
     && apt-get update \

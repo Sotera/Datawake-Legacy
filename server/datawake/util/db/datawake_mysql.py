@@ -654,7 +654,7 @@ def get_irrelevant_trail_based_entities(org, domain, trail):
 def get_trail_entity_links(org, domain, trail):
     sql = "select url, title, rank from trail_term_rank where org=%s and domain=%s and trail=%s order by rank desc"
     params = [org, domain, trail]
-    return map(lambda x: dict(url=x[0], title=x[1], rank=x[2]), dbGetRows(sql, params))
+    return map(lambda x: dict(url=x[0].replace(' ',''), title=x[1], rank=x[2]), dbGetRows(sql, params))
 
 
 def get_visited_trail_entity_links(org, domain, trail):

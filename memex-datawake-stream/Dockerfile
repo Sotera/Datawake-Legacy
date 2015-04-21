@@ -2,20 +2,21 @@ FROM wurstmeister/kafka:0.8.1.1-1
 
 RUN apt-get -y update \
     && apt-get -y upgrade
+RUN apt-get -y update &&  apt-get -y install unattended-upgrades
 
-RUN apt-get install -y python-software-properties \
-    && apt-get install -y software-properties-common \
-    && apt-get -y install python-pip \
-    && apt-get -y install python-dev
+RUN apt-get install -y --fix-missing python-software-properties \
+    && apt-get install -y --fix-missing software-properties-common \
+    && apt-get install -y --fix-missing python-pip \
+    && apt-get install -y --fix-missing python-dev
 
-RUN apt-get -y install git \
-    && apt-get -y install make \
-    && apt-get -y install cmake
+RUN apt-get install -y --fix-missing git \
+    && apt-get install -y --fix-missing make \
+    && apt-get install -y --fix-missing cmake
 
-RUN apt-get install -y wget
+RUN apt-get install -y --fix-missing wget
 
 # install the MITIE library
-RUN sudo apt-get install -y libopenblas-dev liblapack-dev libjpeg-dev
+RUN sudo apt-get install -y --fix-missing libopenblas-dev liblapack-dev libjpeg-dev
 RUN mkdir /usr/lib/mitie \
     && cd /usr/lib/mitie \
     && git clone https://github.com/mitll/MITIE.git \
@@ -31,10 +32,10 @@ RUN mkdir /usr/lib/mitie \
 ENV MITIE_HOME /usr/lib/mitie/MITIE
 
 # install beatiful soup
-RUN apt-get install -y python-bs4
+RUN apt-get install -y --fix-missing python-bs4
 
 # install java
-RUN apt-get -y install default-jdk
+RUN apt-get install -y --fix-missing default-jdk
 
 # install clojure and lein
 ENV LEIN_ROOT true
