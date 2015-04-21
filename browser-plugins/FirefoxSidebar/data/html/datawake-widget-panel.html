@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="panelApp" lang="en">
+<html ng-app="sidebarApp" lang="en">
 
 <head>
   <meta charset="utf-8" />
@@ -10,23 +10,23 @@
     .vertical-center {
       min-height: 100%;
       /* Fallback for browsers do NOT support vh unit */
-
+      
       min-height: 100vh;
       /* These two lines are counted as one :-)       */
-
+      
       display: flex;
       align-items: center;
     }
   </style>
 </head>
 
-<body ng-controller="PanelCtrl">
+<body ng-controller="SidebarCtrl">
   <div class="container-fluid" style="max-width: 400px;">
     <div>
       <div class="row">
         <ul class="nav nav-tabs nav-pills" role="tablist">
-          <li><a href="#/trail/explored">Explored Pages</a></li>
           <li><a href="#/trail/unexplored">Unexplored Pages</a></li>
+          <li><a href="#/trail/explored">Explored Pages</a></li>
           <li><a href="#/trail/entities/relevant">Entities</a></li>
           <li><a href="#/trail/entities/irrelevant">Irrelevant Entities</a></li>
         </ul>
@@ -45,7 +45,7 @@
   <script src="../js/min/sanitize.js"></script>
   <script src="../js/min/bootstrap.min.js"></script>
   <script src="../js/min/bootstrap-switch.min.js"></script>
-  <script src="../js/datawake/panel.js"></script>
+  <script src="../js/datawake/sidebar.js"></script>
 </body>
 
 </html>

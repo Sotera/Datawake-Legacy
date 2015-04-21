@@ -1,7 +1,6 @@
 var addon = self;
 
-
-var panelApp = angular.module('panelApp', ["ngRoute", "ngSanitize"]).config(['$provide', function($provide) {
+var sidebarApp = angular.module('sidebarApp', ["ngRoute", "ngSanitize"]).config(['$provide', function($provide) {
   $provide.decorator('$sniffer', ['$delegate', function($delegate) {
     $delegate.history = false;
     return $delegate;
@@ -9,7 +8,7 @@ var panelApp = angular.module('panelApp', ["ngRoute", "ngSanitize"]).config(['$p
 }]);
 
 
-panelApp.controller("PanelCtrl", function($scope, $document) {
+sidebarApp.controller("SidebarCtrl", function($scope, $document) {
   $scope.teamSpinner = true;
   $scope.domainSpinner = true;
   $scope.trailSpinner = true;
@@ -25,27 +24,29 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
 
   addon.port.on("ready", function(prefs) {
     console.log("Got Ready")
-    console.log("Datawake Prefs")
-    console.log(prefs.datawakeInfo)
     $scope.datawake = prefs.datawakeInfo;
 
-    $scope.datawake.domain = 'memex'
-    $scope.datawake.trail = 'trail'
+    $scope.datawake.domain = 'memex';
+    $scope.datawake.trail = 'trail';
+    addon.port.emit("refreshEntities", {
+      domain: "memex",
+      trail: "trail"
+    });
+    addon.port.emit("refreshWebPages", {
+      domain: "memex",
+      trail: "trail"
+    });
 
     $scope.current_url = prefs.current_url;
     $scope.lookaheadEnabled = prefs.useLookahead;
     $scope.domainFeaturesEnabled = prefs.useDomainFeatures;
-    //$scope.rankingEnabled = prefs.useRanking;
     $scope.versionNumber = prefs.versionNumber;
-    //$scope.pageVisits = prefs.pageVisits;
-    //$scope.starUrl = prefs.starUrl
   });
 
   console.log($scope.datawake);
 
   addon.port.on("trailEntities", function(entities_obj) {
     console.log("Got trail entities")
-    console.log(entities_obj)
     $scope.irrelevantEntities = entities_obj.irrelevantEntities;
     $scope.trailEntities = entities_obj.entities;
     $scope.trailEntitiesIter = createIterableEntityListForSorting(entities_obj.entities);
@@ -54,84 +55,28 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
   });
 
   addon.port.on("trailLinks", function(links_obj) {
-    console.log("got trail links")
-    console.log(links_obj)
+    console.log("Got trail links")
     $scope.visitedLinks = links_obj.visited;
     $scope.notVisitedLinks = links_obj.notVisited;
     $scope.$apply();
   });
 
-  // addon.port.on("ranking", function(rankingInfo) {
-  //   $scope.$apply(function() {
-  //     $scope.ranking = rankingInfo.ranking;
-  //     var starRating = $("#star_rating");
-  //     starRating.attr("data-average", rankingInfo.ranking);
-  //     createStarRating(addon.options.starUrl);
-  //   });
-  // });
-
-  // addon.port.on("features", function(features) {
-  //   $scope.extracted_entities_dict = features;
-  //   $scope.$apply();
-  // });
-  //
-  // addon.port.on("domain_features", function(features) {
-  //   $scope.domain_extracted_entities_dict = features;
-  //   $scope.$apply();
-  // });
-
-  // addon.port.on("externalLinks", function(links) {
-  //   console.debug("Loading External Entities..");
-  //   $scope.$apply(function() {
-  //     $scope.extracted_tools = links;
-  //   });
-  // });
-
+  addon.port.on("promptTrailBasedEntity", function(obj) {
+    var text = prompt(obj.prompt, obj.raw_text);
+    if (text) {
+      addon.port.emit(obj.callback, text);
+    }
+  });
 
   $scope.signOut = function() {
     addon.port.emit("signOut");
   }
-
-  // $scope.openExternalLink = function(externalUrl) {
-  //   addon.port.emit("openExternalLink", {
-  //     externalUrl: externalUrl
-  //   });
-  // };
-
-  // $scope.markInvalid = function(type, entity) {
-  //   var postObj = {};
-  //   postObj.team_id = $scope.datawake.team.id;
-  //   postObj.domain_id = $scope.datawake.domain.id;
-  //   postObj.trail_id = $scope.datawake.trail.id;
-  //   postObj.feature_type = type;
-  //   postObj.feature_value = entity;
-  //   addon.port.emit("markInvalid", postObj);
-  //   $scope.invalid[entity] = true;
-  // };
-  //
-  // addon.port.on("markedFeatures", function(features) {
-  //   for (i in features) {
-  //     var feature = features[i];
-  //     $scope.invalid[feature.value] = true;
-  //   }
-  //   $scope.$apply()
-  //
-  //
-  // });
 
   $scope.isExtracted = function(type, name) {
     if ($scope.entities_in_domain && $scope.entities_in_domain.hasOwnProperty(type)) {
       return $scope.entities_in_domain[type].indexOf(name) >= 0;
     }
   };
-
-  // $scope.editFeatures = function() {
-  //   if (!$scope.allowEditFeatures) {
-  //     $scope.allowEditFeatures = true;
-  //   } else {
-  //     $scope.allowEditFeatures = false;
-  //   }
-  // };
 
   $scope.getHostName = function(url) {
     //For some reason, sometimes errant spaces were apearing in the urls.
@@ -165,13 +110,6 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
     }
   };
 
-  // addon.port.on("infosaved", function(datawakeinfo) {
-  //   $scope.datawake = datawakeinfo;
-  //   $scope.$apply()
-  //   console.log("ON INFO SAVED")
-  //   console.log($scope.datawake)
-  // })
-
   $scope.refreshWebPages = function() {
     addon.port.emit("refreshWebPages", {
       domain: "memex",
@@ -200,7 +138,7 @@ panelApp.controller("PanelCtrl", function($scope, $document) {
   addon.port.emit("init");
 });
 
-panelApp.config(['$routeProvider',
+sidebarApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
     when('/trail/explored', {

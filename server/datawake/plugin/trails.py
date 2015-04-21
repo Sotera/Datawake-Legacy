@@ -89,7 +89,6 @@ def add_trail(trailname, domain, traildescription=u''):
 def get_trail_entity_links(domain, trail):
     org = helper.get_org()
     links = json.dumps(dict(visited=db.get_visited_trail_entity_links(org, domain, trail), notVisited=db.get_not_visited_trail_entity_links(org, domain, trail)))
-    tangelo.log("Links %s" % links)
     return links
 
 

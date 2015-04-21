@@ -3,6 +3,7 @@ var self = require("sdk/self");
 var data = self.data;
 var addOnPrefs = require("sdk/simple-prefs").prefs;
 var tabs = require("sdk/tabs");
+var notifications = require("sdk/notifications");
 var requestHelper = require("./request-helper");
 var storage = require("./storage");
 var tracking = require("./tracking");
@@ -10,134 +11,142 @@ var tracking = require("./tracking");
 exports.useContextMenu = useContextMenu;
 exports.cleanUpTab = cleanUpTab;
 
-var contextMenus = {};
-
 /**
  * Turns on the context menu with the datawake.
  * @param tab The tab to add the context to.
  */
-function useContextMenu(tab) {
-    if (addOnPrefs.useContextMenu) {
-        var url = tab.url;
-        var tabId = tab.id;
-        destroyPreviousContextMenu(tabId);
-        var datawakeInfo = storage.getDatawakeInfo(tabId);
-        contextMenus[tabId] = contextMenu.Menu({
-            label: "Datawake Menu: " + datawakeInfo.domain.name,
-            contentScriptFile: data.url("js/datawake/selections.js"),
-            context: contextMenu.URLContext(url),
-            items: [
-                contextMenu.Item({ label: "Capture Selection", data: "selection", context: contextMenu.SelectionContext()}),
-                contextMenu.Item({ label: "Tag a feature", data: "feedback", context: contextMenu.SelectionContext()}),
-                contextMenu.Separator(),
-                contextMenu.Item({ label: "Hide Selections", data: "hide"}),
-                contextMenu.Item({ label: "Show Selections", data: "highlight"}),
-
-            ],
-            onMessage: function (message) {
-                var tabId = tabs.activeTab.id;
-                var datawakeInfo = storage.getDatawakeInfo(tabId);
-                switch (message.intent) {
-                    case "highlight":
-                        highlightAllTextOnPage(tabId, datawakeInfo);
-                        break;
-                    case "selection":
-                        saveWindowSelection(datawakeInfo, tabs.activeTab.url, message.text);
-                        break;
-                    case "feedback":
-                        saveFeedback(message.text, tabs.activeTab.url, datawakeInfo);
-                        break;
-                    case "hide":
-                        hideSelections("selections");
-                        break;
-                }
-            }
-        });
+function useContextMenu() {
+  contextMenu.Menu({
+    label: 'Datawake Prefetch',
+    contentScriptFile: data.url("js/datawake/selections.js"),
+    // context: contextMenu.URLContext(url),
+    items: [
+      contextMenu.Item({
+        label: "Add Entity",
+        data: "add-entity",
+        context: contextMenu.SelectionContext()
+      }),
+      contextMenu.Item({
+        label: "Add Irrelevant Entity",
+        data: "add-irrelevant-entity",
+        context: contextMenu.SelectionContext()
+      }),
+      contextMenu.Item({
+        label: "Add Custom Entity",
+        data: "add-entity-custom"
+      }),
+      contextMenu.Item({
+        label: "Add Custom Irrelevant Entity",
+        data: "add-irrelevant-entity-custom"
+      }),
+      contextMenu.Separator(),
+      contextMenu.Item({
+        label: "Show Selections",
+        data: "show-trail"
+      }),
+      contextMenu.Item({
+        label: "Hide Selections",
+        data: "hide-trail"
+      })
+    ],
+    onMessage: function(message) {
+      var tabId = tabs.activeTab.id;
+      var datawakeInfo = storage.getDatawakeInfo(tabId);
+      switch (message.intent) {
+        case "add-entity-custom":
+          addCustomTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-irrelevant-entity-custom":
+          addCustomIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-entity":
+          addTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-irrelevant-entity":
+          addIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "show-trail":
+          showTrailEntities(datawakeInfo.domain.name, datawakeInfo.trail.name);
+          break;
+        case "hide-trail":
+          hideSelections("trailentities");
+          break;
+      }
     }
+  });
 }
 
 function hideSelections(className) {
-    tracking.hideSelections(className);
+  tracking.hideSelections(className);
 }
 
-/**
- * Saves extractor feedback
- * @param raw_text raw_text that was highlighted
- * @param url the url it occurred on
- * @param domain domain it was apart of.
- */
-function saveFeedback(raw_text, url, datawakeinfo) {
-
-    tracking.promptForExtractedFeedback(raw_text, function (type, extractedValue) {
-        var post_obj = {};
-        post_obj.raw_text = raw_text;
-        post_obj.feature_value = extractedValue;
-        post_obj.feature_type = type;
-        post_obj.url = url;
-        post_obj.team_id = datawakeinfo.team.id;
-        post_obj.domain_id = datawakeinfo.domain.id;
-        post_obj.trail_id = datawakeinfo.trail.id;
-        function logSuccess(response) {
-            console.log(raw_text + " was successfully saved as feedback.");
-        }
-
-        requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/feedback/add_manual_feature", JSON.stringify(post_obj), logSuccess);
-    });
-
+function showTrailEntities(domain, trail) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entities", post_obj, function(response) {
+    var entities = [];
+    for (var entity in response.json.entities)
+      entities.push({
+        entity: entity
+      });
+    tracking.highlightTrailEntities(entities);
+  });
 }
 
-/**
- * Highlights all selction text on the current page.
- * @param tabId The Id of the tab to highlight.
- * @param datawakeInfo The datawake information associated with this request.
- */
-function highlightAllTextOnPage(tabId, datawakeInfo) {
-    var post_data = JSON.stringify({
-        team_id: datawakeInfo.team.id,
-        domain_id: datawakeInfo.domain.id,
-        trail_id: datawakeInfo.trail.id,
-        url: tabs.activeTab.url
-    });
-    var post_url = addOnPrefs.datawakeDeploymentUrl + "/selections/get";
-    requestHelper.post(post_url, post_data, function (response) {
-        if (response.status != 200){
-            // TODO error handling
-            console.error(response)
-        }
-        else{
-            tracking.emitHighlightTextToTabWorker(tabId, response.json);
-        }
-
-    });
+function addCustomTrailEntity(domain, trail, entity) {
+  tracking.promptTrailBasedEntity(entity, function(text) {
+    addTrailEntity(domain, trail, text);
+  });
 }
 
-/**
- * Saves the current window selection.
- * @param datawakeInfo The datawake information associated with this request.
- * @param url The url associated with this request.
- * @param selectionText The text selected.
- */
-function saveWindowSelection(datawakeInfo, url, selectionText) {
-    var post_data = JSON.stringify({
-        team_id: datawakeInfo.team.id,
-        domain_id: datawakeInfo.domain.id,
-        trail_id: datawakeInfo.trail.id,
-        url: url,
-        selection: selectionText
-    });
-    var post_url = addOnPrefs.datawakeDeploymentUrl + "/selections/save";
-    requestHelper.post(post_url, post_data, function (response) {
-        console.debug("Selection saved");
-    });
+function addCustomIrrelevantTrailEntity(domain, trail, entity) {
+  tracking.promptIrrelevantTrailBasedEntity(entity, function(text) {
+    addIrrelevantTrailEntity(domain, trail, text);
+  });
 }
+
+function addTrailEntity(domain, trail, entity) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail,
+    entity: entity
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function(response) {
+    var myIconURL = data.url("img/waveicon38.png");
+    notifications.notify({
+      text: "Successfully added " + entity + " as an entity!",
+      title: "Datawake",
+      iconURL: myIconURL
+    });
+  });
+}
+
+function addIrrelevantTrailEntity(domain, trail, entity) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail,
+    entity: entity
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/irrelevant", post_obj, function(response) {
+    var myIconURL = data.url("img/waveicon38.png");
+    notifications.notify({
+      text: "Successfully added " + entity + " as an irrelevant entity!",
+      title: "Datawake",
+      iconURL: myIconURL
+    });
+  });
+}
+
 
 /**
  * Cleans up the old context menu.
  * @param tabId TabId Associated with the menu
  */
 function destroyPreviousContextMenu(tabId) {
-    if (contextMenus.hasOwnProperty(tabId))
-        contextMenus[tabId].destroy();
+  if (contextMenus.hasOwnProperty(tabId))
+    contextMenus[tabId].destroy();
 }
 
 /**
@@ -145,5 +154,5 @@ function destroyPreviousContextMenu(tabId) {
  * @param tabId The tabId to free.
  */
 function cleanUpTab(tabId) {
-    destroyPreviousContextMenu(tabId);
+  destroyPreviousContextMenu(tabId);
 }

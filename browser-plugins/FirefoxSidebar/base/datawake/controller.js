@@ -7,17 +7,19 @@ var tabs = require("sdk/tabs");
 var storage = require("./storage");
 var constants = require("./constants");
 var requestHelper = require("./request-helper");
-var tracking = require("./tracking");
 var service = require("./service");
 var panel = require("sdk/panel");
 var notifications = require("sdk/notifications");
-var trackingHelper = require("./tracking");
+//var selections = require("./selections");
+//var trackingHelper = require("./tracking")
+var contextMenu = require("sdk/context-menu");
 
+
+exports.useContextMenu = useContextMenu;
 exports.loadDatawake = loadDatawake;
 exports.resetIcon = resetIcon;
 exports.activeIcon = activeIcon;
 exports.notifyError = notifyError;
-exports.getFeaturesForPanel = getFeaturesForPanel;
 
 var datawakeButton;
 var sideBar;
@@ -30,6 +32,21 @@ var signedIn = false;
 var userInfo = null;
 var workerArray = [];
 
+function hackDatawakeInfo() {
+  dom = {
+    name: "memex"
+  };
+  tr = {
+    name: "trail"
+  };
+  infoObj = {
+    domain: dom,
+    team: "",
+    trail: tr,
+    isDatawakeOn: "true"
+  };
+  return infoObj;
+}
 
 /**
  * Load and start datawake components
@@ -39,20 +56,26 @@ function loadDatawake() {
   // attach panels (logon panel and main panel) to the datawake action button
   attachActionButton();
 
-  // set up the tracker on the current / initial tab
-  trackingHelper.setUpTab(tabs.activeTab);
-
   // set up a new tab listener to add the tracker to each new tab
   tabs.on("open", function(tab) {
-    var datawakeInfo = storage.getRecentlyUsedDatawakeInfo();
-    storage.setDatawakeInfo(tab.id, datawakeInfo);
-    trackingHelper.setUpTab(tab);
+    //Hack while i wait to set info.
+    ifoObj = hackDatawakeInfo();
+    storage.setDatawakeInfo(tab.id, infoObj);
+    var datawakeInfo = storage.getDatawakeInfo(tab.id);
+
+    trackingHelper.trackTab(tab, datawakeInfo);
+    trackingHelper.setupTabWorkerAndServices(tab);
+    // trackingHelper.setUpTab(tab);
   });
 
   // touch the datawake info for this tab so that it is the most recently used
   // and get set the button icon for on / off
   tabs.on("activate", function(tab) {
+    //Hack while i wait to set info.
+    ifoObj = hackDatawakeInfo();
+    storage.setDatawakeInfo(tab.id, infoObj);
     var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
+
     if (datawakeInfoForTab != null && datawakeInfoForTab.isDatawakeOn) {
       activeIcon();
     } else {
@@ -94,16 +117,6 @@ function attachActionButton() {
 }
 
 /**
- * Handles the button when the panel's hide even is triggered.
- */
-function handleHide() {
-  datawakeButton.state('window', {
-    checked: false
-  });
-}
-
-
-/**
  * Sets up the required information when the ToggleButton is clicked.
  * Opens the login or datawake panel as needed
  * @param state The state of the ToggleButton.
@@ -112,7 +125,8 @@ function onToggle(state) {
 
   // load the main datawake panel
   if (signedIn) {
-    launchDatawakePanel();
+    activeIcon();
+    launchDatawakeSidebar();
   }
   // load the login panel
   else {
@@ -132,7 +146,7 @@ function detachWorker(worker) {
   }
 }
 
-function launchDatawakePanel() {
+function launchDatawakeSidebar() {
   var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
   if (sideBar != null || sideBar != undefined) {
     sideBar.destroy();
@@ -144,24 +158,39 @@ function launchDatawakePanel() {
     url: require("sdk/self").data.url("html/datawake-widget-panel.html"),
     onReady: function(worker) {
       attachWorker(worker);
-      emitTrailEntities(worker, "memex", "trail")
-      emitTrailBasedLinks(worker, "memex", "trail")
       worker.port.emit("ready", {
-        starUrl: data.url("css/icons/"),
         datawakeInfo: datawakeInfo,
         useDomainFeatures: addOnPrefs.useDomainFeatures,
         useLookahead: addOnPrefs.useLookahead,
-        useRanking: addOnPrefs.useRanking,
         versionNumber: self.version,
         current_url: tabs.activeTab.url,
         pageVisits: badgeForTab[tabs.activeTab.id]
       });
-
       worker.port.on("refreshEntities", function(domainAndTrail) {
-        emitTrailEntities(worker, "memex", "trail")
+        emitTrailEntities(worker, domainAndTrail.domain, domainAndTrail.trail)
       });
       worker.port.on("refreshWebPages", function(domainAndTrail) {
-        emitTrailBasedLinks(worker, "memex", "trail")
+        emitTrailBasedLinks(worker, domainAndTrail.domain, domainAndTrail.trail)
+      });
+      worker.port.on("infochanged", function(infoObj) {
+
+        var old = storage.getDatawakeInfo(infoObj.tabId);
+        var wasOn = old && old.isDatawakeOn;
+        var isOn = infoObj.info && infoObj.info.isDatawakeOn;
+
+        storage.setDatawakeInfo(infoObj.tabId, infoObj.info);
+        worker.port.emit("infosaved", infoObj.info)
+
+
+        if (isOn != wasOn) {
+          if (isOn) {
+            activeIcon();
+            trackingHelper.trackTab(getAcitveTab());
+            useContextMenu();
+          } else {
+            resetIcon()
+          }
+        }
       });
     },
     onDetach: detachWorker,
@@ -189,8 +218,6 @@ function emitTrailEntities(worker, domain, trail) {
     trail: trail
   });
   requestHelper.post(post_url, post_data, function(response) {
-    console.log("Trail Based Entities Retrieved")
-    console.log(response.json)
     worker.port.emit("trailEntities", response.json);
   });
 }
@@ -202,180 +229,7 @@ function emitTrailBasedLinks(worker, domain, trail) {
     trail: trail
   });
   requestHelper.post(post_url, post_data, function(response) {
-    console.log("Trail Bases Links Retrieved");
-    console.log(response.json);
     worker.port.emit("trailLinks", response.json);
-  });
-}
-
-
-/**
- *
- */
-function getFeaturesForPanel(datawakeinfo) {
-  if (sideBar) {
-    if (constants.isValidUrl(tabs.activeTab.url)) {
-
-      service.getEntities(tabs.activeTab.url, function(response) {
-        if (response.status != 200) notifyError("Error getting features for this url.")
-        else sideBar.port.emit("features", response.json);
-      });
-
-      service.getDomainExtractedEntities(datawakeinfo.team.id, datawakeinfo.domain.id, tabs.activeTab.url, function(response) {
-        if (response.status != 200) notifyError("Error getting domain features for this url.")
-        else sideBar.port.emit("domain_features", response.json);
-      });
-
-      // get manually labeled features
-      loadManualFeatures(datawakeinfo);
-
-      // get list of features marked as invalid
-      emitMarkedEntities(datawakeinfo);
-
-    }
-  }
-}
-
-/**
- * Changes the team and resets domain and trail for a tab,
- * and fetches valid domains for this team.
- * @param tabId
- * @param newteam
- * @param callback, function handles response for /domains call to the server.
- * @returns The altered datawakeinfo object
- */
-function changeTeam(tabId, newteam, callback) {
-  var info = storage.getDatawakeInfo(tabId)
-  if (!info.team || info.team.id != newteam.id) {
-    info.team = newteam
-    info.domain = null;
-    info.trail = null;
-    info.isDatawakeOn = false;
-    storage.setDatawakeInfo(tabId, info)
-
-    service.getDomains(info.team.id, function(response) {
-      if (response.status == 200) {
-        var domains = response.json;
-        callback(domains);
-      } else {
-        //TODO handle the error
-        console.error("ERROR GETTING DOMAINS ");
-        console.error(response);
-      }
-    })
-  }
-  return info;
-}
-
-
-function changeDomain(tabId, newdomain, callback) {
-  var info = storage.getDatawakeInfo(tabId)
-  if (!info.domain || info.domain.id != newdomain.id) {
-    info.domain = newdomain
-    info.trail = null;
-    info.isDatawakeOn = false;
-    storage.setDatawakeInfo(tabId, info)
-
-    service.getTrails(info.team.id, info.domain.id, function(response) {
-      if (response.status == 200) {
-        var trails = response.json;
-        callback(trails);
-      } else {
-        console.error("ERROR GETTING trails ");
-        console.error(response);
-      }
-    })
-  }
-  return info;
-}
-
-/**
- * Marks an entity as invalid
- * @param entity Object(entity_value, entity_type, domain)
- */
-function markInvalid(data) {
-  var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/invalid_feature";
-  requestHelper.post(post_url, JSON.stringify(data), function(response) {
-    sideBar.port.emit("marked", data.feature_value);
-  });
-}
-
-function emitMarkedEntities(datawakeinfo) {
-  var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/get_invalid_features";
-  var post_obj = {
-    team_id: datawakeinfo.team.id,
-    domain_id: datawakeinfo.domain.id,
-    trail_id: datawakeinfo.trail.id
-  }
-  requestHelper.post(post_url, JSON.stringify(post_obj), function(response) {
-    if (response.status != 200) {
-      notifyError("Error retrieving invalid features for this trail.")
-    } else {
-      sideBar.port.emit("markedFeatures", response.json);
-    }
-
-  });
-}
-
-/**
- * Emits feedback entities
- * @param domain domainName
- */
-function loadManualFeatures(info) {
-  var post_url = addOnPrefs.datawakeDeploymentUrl + "/feedback/manual_features";
-  var post_data = JSON.stringify({
-    team_id: info.team.id,
-    domain_id: info.domain.id,
-    trail_id: info.trail.id,
-    url: tabs.activeTab.url
-  });
-  requestHelper.post(post_url, post_data, function(response) {
-    if (response.status != 200) {
-      notifyError("Error getting manual features for this url.")
-    } else {
-      sideBar.port.emit("manualFeatures", response.json);
-    }
-
-  });
-}
-
-function openExternalTool(externalUrlObject) {
-  console.log("Opening External Tool");
-  tabs.open(externalUrlObject.externalUrl);
-}
-
-/**
- * Emits Rank information to the panel attached to the widget.
- * @param datawakeInfo The datawake info associated with the current tab.
- */
-function emitRanks(datawakeInfo) {
-  var url = addOnPrefs.datawakeDeploymentUrl + "/ranks/get";
-  var post_data = JSON.stringify({
-    team_id: datawakeInfo.team.id,
-    domain_id: datawakeInfo.domain.id,
-    trail_id: datawakeInfo.trail.id,
-    url: tabs.activeTab.url
-  });
-  requestHelper.post(url, post_data, function(response) {
-    var rank = response.json.rank;
-    var rankingInfo = {};
-    rankingInfo.ranking = rank;
-    if (sideBar) sideBar.port.emit("ranking", rankingInfo);
-  });
-}
-
-/**
- * Sets the rank that the user rated the page.
- * @param rank_data
- */
-function setUrlRank(rank_data) {
-  rank_data.url = tabs.activeTab.url;
-  var url = addOnPrefs.datawakeDeploymentUrl + "/ranks/set";
-  console.debug("Posting Rank..");
-  requestHelper.post(url, JSON.stringify(rank_data), function(response) {
-    if (response.json.success) {
-      console.debug("Successfully set rank..");
-    }
   });
 }
 
@@ -407,7 +261,6 @@ function launchLoginPanel() {
 
   loginPanel = panel.Panel({
     contentURL: data.url("html/login-panel.html"),
-    onHide: handleHide,
     contentScriptOptions: {
       authType: authHelper.authType()
     }
@@ -417,16 +270,17 @@ function launchLoginPanel() {
     authHelper.signIn(function(response) {
       signedIn = true;
       userInfo = response.json
-        //loginPanel.port.emit("sendUserInfo", response.json);
       loginPanel.destroy()
       loginPanel = null;
+      activeIcon();
+      launchDatawakeSidebar();
+      useContextMenu();
       notifications.notify({
         title: "Datawake Sign On",
         text: "Sign On Successful.  Click the datawake button to begin.",
         iconURL: self.data.url("img/waveicon38.png"),
         onClick: function(data) {
           console.log("clicked it")
-          launchDatawakePanel()
         }
       });
     });
@@ -438,4 +292,167 @@ function launchLoginPanel() {
     });
   });
   loginPanel.show();
+}
+
+function getEntities(domain, callback) {
+  if (tracking.isTabWorkerAttached(tabs.activeTab.id) && constants.isValidUrl(tabs.activeTab.url)) {
+    service.getEntities(domain, tabs.activeTab.url, callback);
+  } else {
+    console.debug("The Datawake is not on for this tab.");
+  }
+}
+
+// Begin Copy and Paste
+/**
+ * Turns on the context menu with the datawake.
+ * @param tab The tab to add the context to.
+ */
+function useContextMenu() {
+  contextMenu.Menu({
+    label: 'Datawake Prefetch',
+    contentScriptFile: data.url("js/datawake/selections.js"),
+    // context: contextMenu.URLContext(url),
+    items: [
+      contextMenu.Item({
+        label: "Add Entity",
+        data: "add-entity",
+        context: contextMenu.SelectionContext()
+      }),
+      contextMenu.Item({
+        label: "Add Irrelevant Entity",
+        data: "add-irrelevant-entity",
+        context: contextMenu.SelectionContext()
+      }),
+      contextMenu.Item({
+        label: "Add Custom Entity",
+        data: "add-entity-custom"
+      }),
+      contextMenu.Item({
+        label: "Add Custom Irrelevant Entity",
+        data: "add-irrelevant-entity-custom"
+      }),
+      contextMenu.Separator(),
+      contextMenu.Item({
+        label: "Show Selections",
+        data: "show-trail"
+      }),
+      contextMenu.Item({
+        label: "Hide Selections",
+        data: "hide-trail"
+      })
+    ],
+    onMessage: function(message) {
+      var tabId = tabs.activeTab.id;
+      var datawakeInfo = storage.getDatawakeInfo(tabId);
+      switch (message.intent) {
+        case "add-entity-custom":
+          addCustomTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-irrelevant-entity-custom":
+          addCustomIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-entity":
+          addTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "add-irrelevant-entity":
+          addIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          break;
+        case "show-trail":
+          showTrailEntities(datawakeInfo.domain.name, datawakeInfo.trail.name);
+          break;
+        case "hide-trail":
+          hideSelections("trailentities");
+          break;
+      }
+    }
+  });
+}
+
+function showTrailEntities(domain, trail) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entities", post_obj, function(response) {
+    var entities = [];
+    for (var entity in response.json.entities)
+      entities.push({
+        entity: entity
+      });
+    tracking.highlightTrailEntities(entities);
+  });
+}
+
+function addCustomTrailEntity(domain, trail, entity) {
+  promptTrailBasedEntity(entity, function(text) {
+    addTrailEntity(domain, trail, text);
+  });
+}
+
+function addCustomIrrelevantTrailEntity(domain, trail, entity) {
+  promptIrrelevantTrailBasedEntity(entity, function(text) {
+    addIrrelevantTrailEntity(domain, trail, text);
+  });
+}
+
+function addTrailEntity(domain, trail, entity) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail,
+    entity: entity
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function(response) {
+    var myIconURL = data.url("img/waveicon38.png");
+    notifications.notify({
+      text: "Successfully added " + entity + " as an entity!",
+      title: "Datawake",
+      iconURL: myIconURL
+    });
+  });
+}
+
+function addIrrelevantTrailEntity(domain, trail, entity) {
+  var post_obj = JSON.stringify({
+    domain: domain,
+    trail: trail,
+    entity: entity
+  });
+  requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/irrelevant", post_obj, function(response) {
+    var myIconURL = data.url("img/waveicon38.png");
+    notifications.notify({
+      text: "Successfully added " + entity + " as an irrelevant entity!",
+      title: "Datawake",
+      iconURL: myIconURL
+    });
+  });
+}
+
+function promptTrailBasedEntity(entity, callback) {
+  var obj = {};
+  obj.raw_text = entity.trim();
+  obj.prompt = "Add trail based entity?";
+  obj.callback = "trailEntity";
+  promptForInput(obj, callback);
+}
+
+function promptIrrelevantTrailBasedEntity(entity, callback) {
+  var obj = {};
+  obj.raw_text = entity.trim();
+  obj.prompt = "Add irrelevant trail entity?";
+  obj.callback = "irrelevantEntity";
+  promptForInput(obj, callback);
+}
+
+function highlightTrailEntities(entities) {
+  var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+  currentTrackingTabWorker.port.emit("highlightTrailEntities", entities);
+}
+
+function promptForInput(obj, callback) {
+  //var currentTrackingTabWorker = trackingTabWorkers[tabs.activeTab.id];
+  var currentTrackingTabWorker = workerArray[0]
+  currentTrackingTabWorker.port.emit("promptTrailBasedEntity", obj);
+  currentTrackingTabWorker.port.on(obj.callback, function(text) {
+    callback(text);
+  });
 }
