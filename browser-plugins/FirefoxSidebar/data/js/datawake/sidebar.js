@@ -10,15 +10,10 @@ var sidebarApp = angular.module('sidebarApp', ["ngRoute", "ngSanitize"]).config(
 
 sidebarApp.controller("SidebarCtrl", function($scope, $document) {
   $scope.teamSpinner = true;
-  $scope.domainSpinner = true;
-  $scope.trailSpinner = true;
-  $scope.extracted_tools = [];
-  $scope.invalid = {};
   $scope.headerPartial = "partials/header-partial.html";
   $scope.createTrailPartial = "partials/trail-modal-partial.html";
   $scope.createDomainPartial = "partials/domain-modal-partial.html";
   $scope.createTeamPartial = "partials/team-modal-partial.html"
-  $scope.teamMembers = null;
   if (!$scope.domains) $scope.domains = [];
   $scope.trails = []
 
@@ -26,20 +21,15 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     console.log("Got Ready")
     $scope.datawake = prefs.datawakeInfo;
 
+    //hard coded until we add users
     $scope.datawake.domain = 'memex';
     $scope.datawake.trail = 'trail';
-    addon.port.emit("refreshEntities", {
-      domain: "memex",
-      trail: "trail"
-    });
-    addon.port.emit("refreshWebPages", {
-      domain: "memex",
-      trail: "trail"
-    });
+
+    addon.port.emit("infochanged", $scope.datawake);
+    addon.port.emit("refreshEntities");
+    addon.port.emit("refreshWebPages");
 
     $scope.current_url = prefs.current_url;
-    $scope.lookaheadEnabled = prefs.useLookahead;
-    $scope.domainFeaturesEnabled = prefs.useDomainFeatures;
     $scope.versionNumber = prefs.versionNumber;
   });
 
@@ -72,42 +62,11 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     addon.port.emit("signOut");
   }
 
-  $scope.isExtracted = function(type, name) {
-    if ($scope.entities_in_domain && $scope.entities_in_domain.hasOwnProperty(type)) {
-      return $scope.entities_in_domain[type].indexOf(name) >= 0;
-    }
-  };
-
   $scope.getHostName = function(url) {
-    //For some reason, sometimes errant spaces were apearing in the urls.
-    url = url.replace(/\s+/g, '');
     url = new URL(url).hostname
-      //Remove http/www
+    //Remove http/www to save display space.
     url = url.replace(/^(https?:\/\/)?(www\.)?/, '')
     return url
-  };
-
-  $scope.showEntities = function(link) {
-    if (!link.show) {
-      var data = {};
-      // data.domain = $scope.datawake.domain.name;
-      // data.trail = $scope.datawake.trail.name;
-      data.domain = 'memex';
-      data.trail = 'trail';
-
-      data.url = link.url;
-      addon.port.emit("getUrlEntities", data);
-
-      function updateLink(entities) {
-        link.entities = entities;
-        link.show = !link.show;
-        $scope.$apply();
-      }
-
-      addon.port.once("urlEntities", updateLink);
-    } else {
-      link.show = !link.show;
-    }
   };
 
   $scope.refreshWebPages = function() {
@@ -135,7 +94,6 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     return arr;
   }
 
-  addon.port.emit("init");
 });
 
 sidebarApp.config(['$routeProvider',

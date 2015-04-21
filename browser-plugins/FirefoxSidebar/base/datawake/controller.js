@@ -4,7 +4,6 @@ var addOnPrefs = require("sdk/simple-prefs").prefs;
 var ui = require('sdk/ui');
 var tabs = require("sdk/tabs");
 
-var storage = require("./storage");
 var constants = require("./constants");
 var requestHelper = require("./request-helper");
 var service = require("./service");
@@ -30,54 +29,17 @@ var authHelper = require("./auth-helper");
 var signedIn = false;
 var userInfo = null;
 var workerArray = [];
-
-function hackDatawakeInfo() {
-  dom = {
-    name: "memex"
-  };
-  tr = {
-    name: "trail"
-  };
-  infoObj = {
-    domain: dom,
-    team: "",
-    trail: tr,
-    isDatawakeOn: "true"
-  };
-  return infoObj;
-}
+var datawakeInfo = null;
 
 /**
  * Load and start datawake components
  */
 function loadDatawake() {
 
+  datawakeInfo = newDatawakeInfo();
+
   // attach panels (logon panel and main panel) to the datawake action button
   attachActionButton();
-
-  // set up a new tab listener to add the tracker to each new tab
-  tabs.on("open", function(tab) {
-    //Hack while i wait to set info.
-    ifoObj = hackDatawakeInfo();
-    storage.setDatawakeInfo(tab.id, infoObj);
-    var datawakeInfo = storage.getDatawakeInfo(tab.id);
-
-  });
-
-  // touch the datawake info for this tab so that it is the most recently used
-  // and get set the button icon for on / off
-  tabs.on("activate", function(tab) {
-    //Hack while i wait to set info.
-    ifoObj = hackDatawakeInfo();
-    storage.setDatawakeInfo(tab.id, infoObj);
-    var datawakeInfoForTab = storage.getDatawakeInfo(tab.id);
-
-    if (datawakeInfoForTab != null && datawakeInfoForTab.isDatawakeOn) {
-      activeIcon();
-    } else {
-      resetIcon();
-    }
-  });
 }
 
 /**
@@ -93,7 +55,7 @@ function clearAllState() {
     loginPanel.destory();
     loginPanel = null;
   }
-  storage.clear();
+  datawakeInfo = null;
   userInfo = null;
   signedIn = false;
 }
@@ -143,7 +105,6 @@ function detachWorker(worker) {
 }
 
 function launchDatawakeSidebar() {
-  var datawakeInfo = storage.getDatawakeInfo(tabs.activeTab.id);
   if (sideBar != null || sideBar != undefined) {
     sideBar.destroy();
   }
@@ -162,31 +123,15 @@ function launchDatawakeSidebar() {
         current_url: tabs.activeTab.url,
         pageVisits: badgeForTab[tabs.activeTab.id]
       });
-      worker.port.on("refreshEntities", function(domainAndTrail) {
-        emitTrailEntities(worker, domainAndTrail.domain, domainAndTrail.trail)
+      worker.port.on("refreshEntities", function() {
+        emitTrailEntities(worker, datawakeInfo.domain, datawakeInfo.trail)
       });
-      worker.port.on("refreshWebPages", function(domainAndTrail) {
-        emitTrailBasedLinks(worker, domainAndTrail.domain, domainAndTrail.trail)
+      worker.port.on("refreshWebPages", function() {
+        emitTrailBasedLinks(worker, datawakeInfo.domain, datawakeInfo.trail)
       });
       worker.port.on("infochanged", function(infoObj) {
-
-        var old = storage.getDatawakeInfo(infoObj.tabId);
-        var wasOn = old && old.isDatawakeOn;
-        var isOn = infoObj.info && infoObj.info.isDatawakeOn;
-
-        storage.setDatawakeInfo(infoObj.tabId, infoObj.info);
-        worker.port.emit("infosaved", infoObj.info)
-
-
-        if (isOn != wasOn) {
-          if (isOn) {
-            activeIcon();
-            //trackingHelper.trackTab(getAcitveTab());
-            useContextMenu();
-          } else {
-            resetIcon()
-          }
-        }
+        datawakeInfo = infoObj;
+        worker.port.emit("infosaved", infoObj)
       });
     },
     onDetach: detachWorker,
@@ -291,11 +236,20 @@ function launchLoginPanel() {
 }
 
 function getEntities(domain, callback) {
-    service.getEntities(domain, tabs.activeTab.url, callback);
+  service.getEntities(domain, tabs.activeTab.url, callback);
 
 }
 
 // Begin Copy and Paste
+
+function newDatawakeInfo(){
+    var dataWake = {};
+    dataWake.domain = null;
+    dataWake.trail = null;
+    dataWake.isDatawakeOn = false;
+    dataWake.team = null;
+    return dataWake;
+}
 /**
  * Turns on the context menu with the datawake.
  * @param tab The tab to add the context to.
@@ -304,7 +258,6 @@ function useContextMenu() {
   contextMenu.Menu({
     label: 'Datawake Prefetch',
     contentScriptFile: data.url("js/datawake/selections.js"),
-    // context: contextMenu.URLContext(url),
     items: [
       contextMenu.Item({
         label: "Add Entity",
@@ -336,22 +289,21 @@ function useContextMenu() {
     ],
     onMessage: function(message) {
       var tabId = tabs.activeTab.id;
-      var datawakeInfo = storage.getDatawakeInfo(tabId);
       switch (message.intent) {
         case "add-entity-custom":
-          addCustomTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          addCustomTrailEntity(datawakeInfo.domain, datawakeInfo.trail, message.text);
           break;
         case "add-irrelevant-entity-custom":
-          addCustomIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          addCustomIrrelevantTrailEntity(datawakeInfo.domain, datawakeInfo.trail, message.text);
           break;
         case "add-entity":
-          addTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          addTrailEntity(datawakeInfo.domain, datawakeInfo.trail, message.text);
           break;
         case "add-irrelevant-entity":
-          addIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
+          addIrrelevantTrailEntity(datawakeInfo.domain, datawakeInfo.trail, message.text);
           break;
         case "show-trail":
-          showTrailEntities(datawakeInfo.domain.name, datawakeInfo.trail.name);
+          showTrailEntities(datawakeInfo.domain, datawakeInfo.trail);
           break;
         case "hide-trail":
           hideSelections("trailentities");
