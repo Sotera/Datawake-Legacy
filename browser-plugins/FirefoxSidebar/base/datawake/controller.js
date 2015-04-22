@@ -136,17 +136,16 @@ function launchDatawakeSidebar() {
       worker.port.on("removeLink", function(data) {
         removeTrailBasedLink(worker, data)
       });
+      worker.port.on("signOut", function() {
+        authHelper.signOut(function(response) {
+          clearAllState()
+        });
+      });
     },
     onDetach: detachWorker
   })
   sideBar.show();
 }
-
-// function emitTrailBasedSearching(domain, trail) {
-//   emitTrailEntities(domain, trail);
-//   emitTrailBasedLinks(domain, trail);
-//   mainPanel.port.on("removeLink", removeTrailBasedLink)
-// }
 
 function removeTrailBasedLink(worker, data) {
   var post_data = {};
