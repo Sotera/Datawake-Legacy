@@ -64,7 +64,7 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
 
   $scope.getHostName = function(url) {
     url = new URL(url).hostname
-    //Remove http/www to save display space.
+      //Remove http/www to save display space.
     url = url.replace(/^(https?:\/\/)?(www\.)?/, '')
     return url
   };
@@ -83,24 +83,39 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     });
   };
 
-  $scope.showEntities = function (link) {
+  $scope.showEntities = function(link) {
     if (!link.show) {
-        var data = {};
-        data.domain = $scope.datawake.domain;
-        data.trail = $scope.datawake.trail;
-        data.url = link.url;
-        addon.port.emit("getUrlEntities", data);
-        function updateLink(entities) {
-            link.entities = entities;
-            link.show = !link.show;
-            $scope.$apply();
-        }
+      var data = {};
+      data.domain = $scope.datawake.domain;
+      data.trail = $scope.datawake.trail;
+      data.url = link.url;
+      addon.port.emit("getUrlEntities", data);
 
-        addon.port.once("urlEntities", updateLink);
-    } else {
+      function updateLink(entities) {
+        link.entities = entities;
         link.show = !link.show;
+        $scope.$apply();
+      }
+
+      addon.port.once("urlEntities", updateLink);
+    } else {
+      link.show = !link.show;
     }
-};
+  };
+
+  $scope.removeLink = function(link) {
+    var data = {};
+    data.domain = $scope.datawake.domain;
+    data.trail = $scope.datawake.trail;
+    data.url = link.url;
+    addon.port.once("removeTrailLink", function() {
+
+      $scope.notVisitedLinks.splice($scope.notVisitedLinks.indexOf(link), 1);
+      $scope.$apply();
+    });
+    addon.port.emit("removeLink", data);
+
+  };
 
   function createIterableEntityListForSorting(entities) {
     var arr = [];

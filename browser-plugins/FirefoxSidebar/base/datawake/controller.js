@@ -128,10 +128,13 @@ function launchDatawakeSidebar() {
       });
       worker.port.on("getUrlEntities", function(data) {
         getUrlEntities(worker, data)
-        });
+      });
       worker.port.on("infochanged", function(infoObj) {
         datawakeInfo = infoObj;
         worker.port.emit("infosaved", infoObj)
+      });
+      worker.port.on("removeLink", function(data) {
+        removeTrailBasedLink(worker, data)
       });
     },
     onDetach: detachWorker
@@ -139,11 +142,28 @@ function launchDatawakeSidebar() {
   sideBar.show();
 }
 
+// function emitTrailBasedSearching(domain, trail) {
+//   emitTrailEntities(domain, trail);
+//   emitTrailBasedLinks(domain, trail);
+//   mainPanel.port.on("removeLink", removeTrailBasedLink)
+// }
+
+function removeTrailBasedLink(worker, data) {
+  var post_data = {};
+  post_data.domain = data.domain;
+  post_data.trail = data.trail;
+  post_data.url = data.url;
+  var post_url = addOnPrefs.datawakeDeploymentUrl + "/trails/deleteLink";
+  requestHelper.post(post_url, JSON.stringify(post_data), function(response) {
+    worker.port.emit("removeTrailLink");
+  });
+}
+
 function getUrlEntities(worker, data) {
-    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/urlEntities";
-    requestHelper.post(url, JSON.stringify(data), function (response) {
-        worker.port.emit("urlEntities", response.json.entities);
-    });
+  var url = addOnPrefs.datawakeDeploymentUrl + "/trails/urlEntities";
+  requestHelper.post(url, JSON.stringify(data), function(response) {
+    worker.port.emit("urlEntities", response.json.entities);
+  });
 }
 
 function emitTrailEntities(worker, domain, trail) {
@@ -236,18 +256,18 @@ function getEntities(domain, callback) {
 
 // Begin Copy and Paste
 
-function newDatawakeInfo(){
+function newDatawakeInfo() {
     var dataWake = {};
     dataWake.domain = null;
     dataWake.trail = null;
     dataWake.isDatawakeOn = false;
     dataWake.team = null;
     return dataWake;
-}
-/**
- * Turns on the context menu with the datawake.
- * @param tab The tab to add the context to.
- */
+  }
+  /**
+   * Turns on the context menu with the datawake.
+   * @param tab The tab to add the context to.
+   */
 function useContextMenu() {
   contextMenu.Menu({
     label: 'Datawake Prefetch',
