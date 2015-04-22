@@ -22,19 +22,73 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     $scope.datawake = prefs.datawakeInfo;
 
     //hard coded until we add users
-    $scope.datawake.domain = 'memex';
-    $scope.datawake.trail = 'trail';
+    $scope.datawake.domain={}
+    $scope.datawake.domain.name = 'memex';
+    $scope.datawake.trail={}
+    $scope.datawake.trail.name = 'trail';
 
     addon.port.emit("infochanged", $scope.datawake);
     addon.port.emit("refreshEntities");
     addon.port.emit("refreshWebPages");
+    addon.port.emit("refreshTrails", $scope.datawake.domain);
 
     $scope.current_url = prefs.current_url;
     $scope.versionNumber = prefs.versionNumber;
   });
 
-  console.log($scope.datawake);
+  // TRAILS
+  $scope.trails = [];
+  $scope.selectedTrail = ($scope.datawake && $scope.datawake.trail) ? $scope.datawake.trail : null;
 
+  addon.port.on("trails", function(trails) {
+    $scope.trails = trails;
+    $scope.selectedTrail = null;
+    if ($scope.datawake.trail && $scope.trails) {
+      for (i in $scope.trails) {
+        if ($scope.trails[i].id == $scope.datawake.trail.id) {
+          $scope.selectedTrail = $scope.trails[i]
+        }
+      }
+    }
+    $scope.trailSpinner = false;
+    $scope.$apply();
+    console.log("GOT TRAILS")
+  });
+
+  $scope.trailChanged = function(trail) {
+    $scope.datawake.trail = trail.name;
+    addon.port.emit("infochanged", {
+      info: $scope.datawake
+    });
+    console.log("trailChanged")
+    console.log($scope.datawake)
+  };
+
+
+  $scope.newTrail = function(team, domain, newTrailName, newTrailDesc) {
+    var data = {}
+    data.team_id = team.id;
+    data.domain_id = domain.id;
+    data.name = newTrailName
+    data.description = (newTrailDesc) ? newTrailDesc : "";
+    $scope.trailChanged(null);
+    $scope.newTrailName = null;
+    addon.port.emit("createTrail", data);
+  }
+
+
+  addon.port.on("trailCreated", function(trail) {
+    $scope.trails.push(trail)
+    $scope.selectedTrail = trail
+    $scope.datawake.trail = trail;
+    addon.port.emit("infochanged", {
+      tabId: addon.options.tabId,
+      info: $scope.datawake
+    });
+    $scope.apply()
+  });
+
+  //Entities
   addon.port.on("trailEntities", function(entities_obj) {
     console.log("Got trail entities")
     $scope.irrelevantEntities = entities_obj.irrelevantEntities;

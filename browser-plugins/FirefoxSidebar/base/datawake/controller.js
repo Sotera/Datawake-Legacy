@@ -121,10 +121,10 @@ function launchDatawakeSidebar() {
         current_url: tabs.activeTab.url,
       });
       worker.port.on("refreshEntities", function() {
-        emitTrailEntities(worker, datawakeInfo.domain, datawakeInfo.trail)
+        emitTrailEntities(worker, datawakeInfo.domain.name, datawakeInfo.trail.name)
       });
       worker.port.on("refreshWebPages", function() {
-        emitTrailBasedLinks(worker, datawakeInfo.domain, datawakeInfo.trail)
+        emitTrailBasedLinks(worker, datawakeInfo.domain.name, datawakeInfo.trail.name)
       });
       worker.port.on("getUrlEntities", function(data) {
         getUrlEntities(worker, data)
@@ -139,6 +139,16 @@ function launchDatawakeSidebar() {
       worker.port.on("signOut", function() {
         authHelper.signOut(function(response) {
           clearAllState()
+        });
+      });
+      worker.port.on("refreshTrails", function(domain) {
+        console.debug("Getting trails for " + domain + "!");
+        service.getTrails(domain, function(response) {
+          if (response.status != 501) {
+            worker.port.emit("trails", response.trails);
+          } else {
+            console.error("There was an error getting trails: " + response.message);
+          }
         });
       });
     },
@@ -160,7 +170,12 @@ function removeTrailBasedLink(worker, data) {
 
 function getUrlEntities(worker, data) {
   var url = addOnPrefs.datawakeDeploymentUrl + "/trails/urlEntities";
-  requestHelper.post(url, JSON.stringify(data), function(response) {
+  var post_data = JSON.stringify({
+    domain: data.domain.name,
+    trail: data.trail.name,
+    url: data.url
+  });
+  requestHelper.post(url, post_data, function(response) {
     worker.port.emit("urlEntities", response.json.entities);
   });
 }
@@ -304,19 +319,19 @@ function useContextMenu() {
       var tabId = tabs.activeTab.id;
       switch (message.intent) {
         case "add-entity-custom":
-          addCustomTrailEntity(datawakeInfo.domain, datawakeInfo.trail, message.text);
+          addCustomTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
           break;
         case "add-irrelevant-entity-custom":
-          addCustomIrrelevantTrailEntity(datawakeInfo.domain, datawakeInfo.trail, message.text);
+          addCustomIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
           break;
         case "add-entity":
-          addTrailEntity(datawakeInfo.domain, datawakeInfo.trail, message.text);
+          addTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
           break;
         case "add-irrelevant-entity":
-          addIrrelevantTrailEntity(datawakeInfo.domain, datawakeInfo.trail, message.text);
+          addIrrelevantTrailEntity(datawakeInfo.domain.name, datawakeInfo.trail.name, message.text);
           break;
         case "show-trail":
-          showTrailEntities(datawakeInfo.domain, datawakeInfo.trail);
+          showTrailEntities(datawakeInfo.domain.name, datawakeInfo.trail.name);
           break;
         case "hide-trail":
           hideSelections("trailentities");
