@@ -117,11 +117,8 @@ function launchDatawakeSidebar() {
       attachWorker(worker);
       worker.port.emit("ready", {
         datawakeInfo: datawakeInfo,
-        useDomainFeatures: addOnPrefs.useDomainFeatures,
-        useLookahead: addOnPrefs.useLookahead,
         versionNumber: self.version,
         current_url: tabs.activeTab.url,
-        pageVisits: badgeForTab[tabs.activeTab.id]
       });
       worker.port.on("refreshEntities", function() {
         emitTrailEntities(worker, datawakeInfo.domain, datawakeInfo.trail)
@@ -129,6 +126,9 @@ function launchDatawakeSidebar() {
       worker.port.on("refreshWebPages", function() {
         emitTrailBasedLinks(worker, datawakeInfo.domain, datawakeInfo.trail)
       });
+      worker.port.on("getUrlEntities", function(data) {
+        getUrlEntities(worker, data)
+        });
       worker.port.on("infochanged", function(infoObj) {
         datawakeInfo = infoObj;
         worker.port.emit("infosaved", infoObj)
@@ -137,6 +137,13 @@ function launchDatawakeSidebar() {
     onDetach: detachWorker
   })
   sideBar.show();
+}
+
+function getUrlEntities(worker, data) {
+    var url = addOnPrefs.datawakeDeploymentUrl + "/trails/urlEntities";
+    requestHelper.post(url, JSON.stringify(data), function (response) {
+        worker.port.emit("urlEntities", response.json.entities);
+    });
 }
 
 function emitTrailEntities(worker, domain, trail) {

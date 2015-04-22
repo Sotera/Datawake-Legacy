@@ -83,6 +83,25 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     });
   };
 
+  $scope.showEntities = function (link) {
+    if (!link.show) {
+        var data = {};
+        data.domain = $scope.datawake.domain;
+        data.trail = $scope.datawake.trail;
+        data.url = link.url;
+        addon.port.emit("getUrlEntities", data);
+        function updateLink(entities) {
+            link.entities = entities;
+            link.show = !link.show;
+            $scope.$apply();
+        }
+
+        addon.port.once("urlEntities", updateLink);
+    } else {
+        link.show = !link.show;
+    }
+};
+
   function createIterableEntityListForSorting(entities) {
     var arr = [];
     $.map(entities, function(item, key) {
