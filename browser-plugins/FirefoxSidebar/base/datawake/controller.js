@@ -31,6 +31,39 @@ var userInfo = null;
 var workerArray = [];
 var datawakeInfo = null;
 
+// Listen for tab content loads.
+tabs.on('ready', function(tab) {
+  console.log('tab is loaded', tab.title, tab.url);
+
+  console.debug("Scraping Page");
+  pageContents={};
+  pageContents.url = tabs.activeTab.url;
+  pageContents.domain = datawakeInfo.domain.name;
+  pageContents.trail = datawakeInfo.trail.name;
+  tab.attach({
+    contentScript: "self.postMessage(document.body.innerHTML);",
+    onMessage: function(data)
+    {
+      console.log("Tab data received: " + data);
+      pageContents.html = encodeURIComponent(data);
+    }
+  });
+  console.log(pageContents);
+  var url = addOnPrefs.datawakeDeploymentUrl + "/scraper/scrape";
+  console.log(url);
+  requestHelper.post(url, JSON.stringify(pageContents), function (response) {
+      console.debug("Setting up selections and advanced search");
+      var scrapeObject = response.json;
+      console.log(scrapeObject);
+      //Sets up the context menu objects for this tab.
+      if (scrapeObject && currentTrackingTabWorker.tab != null) {
+          getDomainExtractedEntities(1000);
+          widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, scrapeObject.count);
+      }
+  });
+  // scrapePage();
+});
+
 /**
  * Load and start datawake components
  */
@@ -59,6 +92,7 @@ function clearAllState() {
   userInfo = null;
   signedIn = false;
 }
+
 
 
 /**
