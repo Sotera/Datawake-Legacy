@@ -46,20 +46,24 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     if ($scope.datawake.trail && $scope.trails) {
       for (i in $scope.trails) {
         if ($scope.trails[i].id == $scope.datawake.trail.id) {
-          $scope.selectedTrail = $scope.trails[i]
+          $scope.selectedTrail = $scope.trails[i];
         }
       }
+    } else {
+        // Insert Hack here
+        $sope.selectedTrail = $scope.trails[0];
+        //$scope.domain.trail = $scope.selectedTrail;
+        addon.port.emit("infochanged", $scope.datawake);
     }
+
     $scope.trailSpinner = false;
     $scope.$apply();
     console.log("GOT TRAILS")
   });
 
   $scope.trailChanged = function(trail) {
-    $scope.datawake.trail = trail.name;
-    addon.port.emit("infochanged", {
-      info: $scope.datawake
-    });
+    $scope.datawake.trail = trail;
+    addon.port.emit("infochanged", $scope.datawake);
     console.log("trailChanged")
     console.log($scope.datawake)
   };
@@ -182,6 +186,10 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     return arr;
   }
 
+});
+
+$('ul.nav.nav-pills li a').click(function() {
+    $(this).parent().addClass('active').siblings().removeClass('active');
 });
 
 sidebarApp.config(['$routeProvider',
