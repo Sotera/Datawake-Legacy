@@ -19,6 +19,15 @@ a:hover {
   border: 1px solid #fff;
 }
 
+#sidebar-box {
+    overflow-x: hidden !important;
+}
+#sidebar {
+    min-width: 0px !important;
+    max-width: none !important;
+    overflow-x: hidden !important;
+    width: 400px !important;
+}
 
 /*
  * Base structure
@@ -158,4 +167,3 @@ body {
     width: 700px;
   }
 }
-

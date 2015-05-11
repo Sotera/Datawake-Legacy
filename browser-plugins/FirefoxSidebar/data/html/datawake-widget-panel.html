@@ -21,21 +21,21 @@
 </head>
 
 <body ng-controller="SidebarCtrl">
-  <div class="container-fluid">
-    <div>
+  <div class="container">
+    <div class="row">
+      <div ng-include="headerPartial"></div>
+    </div>
       <div class="row">
         <ul class="nav nav-tabs nav-pills" role="tablist">
-          <li class="active"><a href="#/trail/config">Config</a></li>
+          <li class="active"><a href="#/trail/entities/relevant">Entities</a></li>
           <li><a href="#/trail/unexplored">Unexplored Pages</a></li>
           <li><a href="#/trail/explored">Explored Pages</a></li>
-          <li><a href="#/trail/entities/relevant">Entities</a></li>
           <li><a href="#/trail/entities/irrelevant">Irrelevant Entities</a></li>
         </ul>
-        <div class="tab-content">
+        <div class="tab-content col-sm-4">
           <div ng-view></div>
         </div>
       </div>
-    </div>
   </div>
   <script src="../js/min/jquery-1.11.1.min.js"></script>
   <script src="../js/min/jRating.jquery.js"></script>

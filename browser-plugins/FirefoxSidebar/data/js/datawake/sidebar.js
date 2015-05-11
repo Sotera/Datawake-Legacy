@@ -208,11 +208,8 @@ sidebarApp.config(['$routeProvider',
     when('/trail/entities/irrelevant', {
       templateUrl: 'partials/trail-based-irrelevant-entities-partial.html'
     }).
-    when('/trail/config', {
-      templateUrl: 'partials/header-partial.html'
-    }).
     otherwise({
-      redirectTo: '/trail/config'
+      redirectTo: 'partials/trail-based-relevant-entities-partial.html'
     });
   }
 ]);
