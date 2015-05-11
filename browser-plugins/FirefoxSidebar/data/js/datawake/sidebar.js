@@ -124,6 +124,7 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     url = new URL(url).hostname
       //Remove http/www to save display space.
     url = url.replace(/^(https?:\/\/)?(www\.)?/, '')
+    url = url.replace(/\./g, '.<wbr>');
     return url
   };
 
