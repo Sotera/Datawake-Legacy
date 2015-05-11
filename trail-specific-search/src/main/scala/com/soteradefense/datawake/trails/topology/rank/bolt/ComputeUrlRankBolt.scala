@@ -42,6 +42,8 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
         val domainTriplet = org + "\0" + domain + "\0" + trail
         emitConcatenatedTermSearch(collector, validTerms, domainTriplet)
       }
+    } catch {
+      case e:NumberFormatException => logger.error("Error getting rank" +e)
     } finally {
       if (htmlPrepare != null)
         htmlPrepare.close()
