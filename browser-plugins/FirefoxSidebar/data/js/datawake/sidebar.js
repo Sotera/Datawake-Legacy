@@ -21,11 +21,11 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     console.log("Got Ready")
     $scope.datawake = prefs.datawakeInfo;
 
-    //hard coded until we add users
+    //trying to figure out the best way to do this. Should probably be user/trail
+    //rather than domain/trail
     $scope.datawake.domain={}
     $scope.datawake.domain.name = 'memex';
     $scope.datawake.trail={}
-    $scope.datawake.trail.name = 'trail';
 
     addon.port.emit("infochanged", $scope.datawake);
     addon.port.emit("refreshEntities");
@@ -51,9 +51,7 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
         }
       }
     } else {
-        // Insert Hack here
-        $sope.selectedTrail = $scope.trails[0];
-        //$scope.domain.trail = $scope.selectedTrail;
+        $scope.domain.trail = $scope.selectedTrail;
         addon.port.emit("infochanged", $scope.datawake);
     }
 
