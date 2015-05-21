@@ -147,6 +147,7 @@ function launchDatawakeSidebar() {
         datawakeInfo: datawakeInfo,
         versionNumber: self.version,
         current_url: tabs.activeTab.url,
+        userInfo: userInfo
       });
       worker.port.on("refreshEntities", function() {
         emitTrailEntities(worker, datawakeInfo.domain.name, datawakeInfo.trail.name)

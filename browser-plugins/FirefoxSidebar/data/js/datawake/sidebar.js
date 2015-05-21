@@ -34,6 +34,7 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
 
     $scope.current_url = prefs.current_url;
     $scope.versionNumber = prefs.versionNumber;
+    $scope.user = prefs.userInfo;
   });
 
   // TRAILS
