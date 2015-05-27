@@ -29,13 +29,12 @@ function getTrails(domain, callback) {
 }
 
 
-function createTrail(team_id, domain_id, name, description, callback) {
+function createTrail(domain, name, description, callback) {
   var url = addOnPrefs.datawakeDeploymentUrl + "/trails/create";
   var post_data = JSON.stringify({
-    team_id: team_id,
-    domain_id: domain_id,
-    name: name,
-    description: description
+    domain: domain,
+    trailname: name,
+    traildescription: description
   });
   requestHelper.post(url, post_data, function(response) {
     callback(response);

@@ -180,6 +180,20 @@ function launchDatawakeSidebar() {
           }
         });
       });
+      worker.port.on("createTrail",function(data){
+        var callback = function(response){
+            if (response.status != 200){
+                if (response.body) notifyError(response.body)
+            }
+            else{
+                trail = {};
+                trail.name = data.name;
+                trail.description = data.description;
+                worker.port.emit("trailCreated",trail);
+            }
+        }
+        service.createTrail(data.domain,data.name,data.description,callback);
+    });
     },
     onDetach: detachWorker
   })

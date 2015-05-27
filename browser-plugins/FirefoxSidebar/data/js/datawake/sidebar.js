@@ -37,6 +37,13 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     $scope.user = prefs.userInfo;
   });
 
+  addon.port.on("infosaved",function(datawakeinfo){
+       $scope.datawake = datawakeinfo;
+       $scope.$apply();
+      console.log("ON INFO SAVED");
+      console.log($scope.datawake);
+   });
+
   // TRAILS
   $scope.trails = [];
   $scope.selectedTrail = ($scope.datawake && $scope.datawake.trail) ? $scope.datawake.trail : null;
@@ -60,36 +67,34 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     console.log("GOT TRAILS")
   });
 
+  addon.port.on("trailCreated", function(trail) {
+    console.log("trailCreated")
+    console.log($scope.datawake)
+    $scope.trails.push(trail);
+    $scope.selectedTrail = trail;
+    $scope.$apply();
+    addon.port.emit("infochanged", $scope.datawake);
+  });
+
   $scope.trailChanged = function(trail) {
     $scope.datawake.trail = trail;
     addon.port.emit("infochanged", $scope.datawake);
+    addon.port.emit("refreshEntities");
+    addon.port.emit("refreshWebPages");
     console.log("trailChanged")
     console.log($scope.datawake)
   };
 
 
-  $scope.newTrail = function(team, domain, newTrailName, newTrailDesc) {
+  $scope.newTrail = function(domain, newTrailName, newTrailDesc) {
     var data = {}
-    data.team_id = team.id;
-    data.domain_id = domain.id;
+    data.domain = domain.name;
     data.name = newTrailName
     data.description = (newTrailDesc) ? newTrailDesc : "";
-    $scope.trailChanged(null);
-    $scope.newTrailName = null;
+    $scope.trailChanged(newTrailName);
+    $scope.newTrailName = newTrailName;
     addon.port.emit("createTrail", data);
   }
-
-
-  addon.port.on("trailCreated", function(trail) {
-    $scope.trails.push(trail)
-    $scope.selectedTrail = trail
-    $scope.datawake.trail = trail;
-    addon.port.emit("infochanged", {
-      tabId: addon.options.tabId,
-      info: $scope.datawake
-    });
-    $scope.apply()
-  });
 
   //Entities
   addon.port.on("trailEntities", function(entities_obj) {
