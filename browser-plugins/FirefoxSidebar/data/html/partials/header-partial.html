@@ -1,28 +1,32 @@
-<table class="table">
-  <tbody>
-    <tr>
-      <td>
-        <b>Datawake Version:</b> {{versionNumber}}
-      </td>
-      <td align="right">
-        {{datawake.domain.name}}/{{user.user_name}}
-        <button class="btn btn-warning" ng-click="signOut()">Sign Out</button>
-      </td>
-    </tr>
-  </tbody>
-
-  <table class="table table-bordered">
-    <tbody>
-      <tr>
-        <td>
-          <b>Trail:</b>
-        </td>
-        <td style="white-space:nowrap;">
-          <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#trailModal" style="width: 5%">+</button>
-          <select id="trail_select" class="form-control" ng-model="selectedTrail" ng-change="trailChanged(selectedTrail);" ng-options="trail.name for trail in trails" placeholder="Select a previous Trail" style="display: inline-block; margin-right: 10px; width: 95%">
+<div class="row">
+  <div class="col-xs-12">
+    <b>Prefetch v:{{versionNumber}}</b>
+  </div>
+</div>
+<div class="row">
+  <div class="col-xs-9">
+    <b>User: </b> {{user.user_name}}
+  </div>
+  <div class="col-xs-2">
+    <button class="btn btn-warning" ng-click="signOut()">Sign Out</button>
+  </div>
+</div>
+<div class="row">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="form-group">
+        <label for="trail_select" class="control-label col-xs-2">Trail:</label>
+        <div class="col-xs-1">
+          <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#trailModal">
+            <i ng-hide="trailSpinner" class="fa fa-plus"></i>
+            <i ng-show="trailSpinner" class="fa fa-refresh fa-spin"></i>
+          </button>
+        </div>
+        <div class="col-xs-9">
+          <select class="form-control" id="trail_select" ng-model="selectedTrail" ng-change="trailChanged(selectedTrail);" ng-options="trail.name for trail in trails" placeholder="Select a previous Trail">
           </select>
-          <img ng-show="trailSpinner" src="../img/ajax-loader.gif" alt="Loading" />
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

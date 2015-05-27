@@ -6,6 +6,7 @@
   <link href="../css/bootstrap.min.css" rel="stylesheet">
   <link href="../css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
   <link href="../css/jRating.jquery.css" rel="stylesheet">
+  <link href="../css/font-awesome.min.css" rel="stylesheet">
   <style type="text/css">
     .vertical-center {
       min-height: 100%;
@@ -21,22 +22,24 @@
 </head>
 
 <body ng-controller="SidebarCtrl">
-  <div class="container">
+  <div class="container col-xs-11">
     <div class="row">
       <div ng-include="headerPartial"></div>
       <div ng-include="createTrailPartial"></div>
     </div>
-      <div class="row">
-        <ul class="nav nav-tabs nav-pills" role="tablist">
-          <li class="active"><a href="#/trail/entities/relevant">Entities</a></li>
-          <li><a href="#/trail/unexplored">Unexplored Pages</a></li>
-          <li><a href="#/trail/explored">Explored Pages</a></li>
-          <li><a href="#/trail/entities/irrelevant">Irrelevant Entities</a></li>
-        </ul>
-        <div class="tab-content col-sm-4">
-          <div ng-view></div>
-        </div>
+    <div class="row">
+      <div class="col-xs-12">
+      <ul class="nav nav-tabs nav-pills" role="tablist">
+        <li class="active"><a href="#/trail/entities/relevant" ng-click="refreshEntities();">Entities</a></li>
+        <li><a href="#/trail/entities/irrelevant" ng-click="refreshEntities();">Irrelevant Entities</a></li>
+        <li><a href="#/trail/unexplored" ng-click="refreshWebPages();">Unexplored Pages ({{notVisitedLinks.length}})</a></li>
+        <li><a href="#/trail/explored" ng-click="refreshWebPages();">Explored Pages</a></li>
+      </ul>
+    </div>
+      <div class="tab-content col-xs-12">
+        <div ng-view></div>
       </div>
+    </div>
   </div>
   <script src="../js/min/jquery-1.11.1.min.js"></script>
   <script src="../js/min/jRating.jquery.js"></script>
