@@ -39,7 +39,7 @@ ALL_SETTINGS['local-docker'] = {
     'appid': 'datawake',
     'crawler-in-topic' : 'crawler-in',
     'crawler-out-topic' : 'crawler-out',
-    'visited-topic': 'datawake-visited',
+    'visited-topic': 'memex-datawake-visited',
     'conn_pool' : os.environ['KAFKA_PORT_9092_TCP_ADDR']+":9092" if 'KAFKA_PORT_9092_TCP_ADDR' in os.environ else '',
     'crawler_conn_pool' : os.environ['KAFKA_PORT_9092_TCP_ADDR']+":9092" if 'KAFKA_PORT_9092_TCP_ADDR' in os.environ else '',
     'user':'root',

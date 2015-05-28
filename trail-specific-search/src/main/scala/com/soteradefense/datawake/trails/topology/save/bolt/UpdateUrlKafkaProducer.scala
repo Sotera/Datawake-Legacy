@@ -22,7 +22,6 @@ class UpdateUrlKafkaProducer(topic: String, brokers: String) extends HighLevelKa
     val messageContents = builder.toString()
     logger.info(messageContents)
     val message = new KeyedMessage[String, String](topic, messageContents)
-    logger.info("Posting to kafka topic " + topic)
     kafkaProducer.send(message)
   }
 }
