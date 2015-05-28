@@ -83,7 +83,7 @@ RUN git clone https://github.com/cloudera/impyla.git \
 #RUN wget -q http://mirror.gopotato.co.uk/apache/kafka/0.8.1.1/kafka_2.8.0-0.8.1.1.tgz -O /tmp/kafka_2.8.0-0.8.1.1.tgz
 RUN wget -q http://apache.arvixe.com/kafka/0.8.2.1/kafka_2.10-0.8.2.1.tgz
 RUN tar xfz /tmp/kafka_2.10.0-0.8.2.1.tgz -C /opt
-ENV KAFKA_HOME /opt/kafka_2.10.0-0.8.2.1
+ENV KAFKA_HOME /opt/kafka_2.10-0.8.2.1
 
 COPY . /memex-datawake-stream
 
