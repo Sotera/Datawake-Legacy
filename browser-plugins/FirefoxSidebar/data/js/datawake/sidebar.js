@@ -21,11 +21,9 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     console.log("Got Ready")
     $scope.datawake = prefs.datawakeInfo;
 
-    //trying to figure out the best way to do this. Should probably be user/trail
-    //rather than domain/trail
-    $scope.datawake.domain={}
+    $scope.datawake.domain = {}
     $scope.datawake.domain.name = 'memex';
-    $scope.datawake.trail={}
+    $scope.datawake.trail = {}
 
     addon.port.emit("infochanged", $scope.datawake);
     addon.port.emit("refreshEntities");
@@ -37,12 +35,12 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
     $scope.user = prefs.userInfo;
   });
 
-  addon.port.on("infosaved",function(datawakeinfo){
-       $scope.datawake = datawakeinfo;
-       $scope.$apply();
-      console.log("ON INFO SAVED");
-      console.log($scope.datawake);
-   });
+  addon.port.on("infosaved", function(datawakeinfo) {
+    $scope.datawake = datawakeinfo;
+    $scope.$apply();
+    console.log("ON INFO SAVED");
+    console.log($scope.datawake);
+  });
 
   // TRAILS
   $scope.trails = [];
@@ -55,11 +53,13 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
       for (i in $scope.trails) {
         if ($scope.trails[i].id == $scope.datawake.trail.id) {
           $scope.selectedTrail = $scope.trails[i];
+          $scope.datawake.trail = $scope.trails[i];
+          addon.port.emit("infochanged", $scope.datawake);
         }
       }
     } else {
-        $scope.domain.trail = $scope.selectedTrail;
-        addon.port.emit("infochanged", $scope.datawake);
+      $scope.domain.trail = $scope.selectedTrail;
+      addon.port.emit("infochanged", $scope.datawake);
     }
 
     $scope.trailSpinner = false;
@@ -77,7 +77,7 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
   });
 
   $scope.trailChanged = function(trail) {
-    $scope.datawake.trail = trail;
+    $scope.datawake.trail.name = trail;
     addon.port.emit("infochanged", $scope.datawake);
     addon.port.emit("refreshEntities");
     addon.port.emit("refreshWebPages");
@@ -194,7 +194,7 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
 });
 
 $('ul.nav.nav-pills li a').click(function() {
-    $(this).parent().addClass('active').siblings().removeClass('active');
+  $(this).parent().addClass('active').siblings().removeClass('active');
 });
 
 sidebarApp.config(['$routeProvider',

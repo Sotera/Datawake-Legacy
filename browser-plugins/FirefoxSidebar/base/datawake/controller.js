@@ -421,6 +421,7 @@ function addTrailEntity(domain, trail, entity) {
     trail: trail,
     entity: entity
   });
+  console.log("Adding trail entity: " + post_obj)
   requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function(response) {
     var myIconURL = data.url("img/waveicon38.png");
     notifications.notify({

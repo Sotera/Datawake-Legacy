@@ -66,7 +66,7 @@ dwsearch:
     DW_KAFKA_CRAWLER_BROKERS: k01.istresearch.com:9092
     #DW_ZK_QUORUM: 172.31.31.203:2181
     DW_ZK_QUORUM: z01.istresearch.com:2181
-    DW_SEARCH_API: http://172.31.41.61:8787/search/
+    DW_SEARCH_API: http://54.69.102.155:8787/search/
   volumes:
     - /home/ubuntu/trail-selections/trail-specific-search:/tss
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.search.SearchTopology
