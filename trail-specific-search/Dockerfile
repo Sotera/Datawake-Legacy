@@ -1,4 +1,4 @@
-FROM wurstmeister/kafka:0.8.1.1-1
+FROM wurstmeister/kafka:0.8.2.1
 
 RUN apt-get -y --fix-missing update \
     && apt-get -y --fix-missing upgrade

@@ -1,4 +1,4 @@
-FROM wurstmeister/kafka:0.8.1.1-1
+FROM wurstmeister/kafka:0.8.2.1
 
 RUN apt-get -y update \
     && apt-get -y upgrade
@@ -65,9 +65,9 @@ RUN wget http://dev.mysql.com/get/Downloads/Connector-Python/mysql-connector-pyt
 
 # install kafka python client
 
-RUN wget https://github.com/mumrah/kafka-python/releases/download/v0.9.2/kafka-python-0.9.2.tar.gz \
-    && tar -xzvf kafka-python-0.9.2.tar.gz \
-    && cd kafka-python-0.9.2/ \
+RUN wget https://github.com/mumrah/kafka-python/releases/download/v0.9.3/kafka-python-0.9.3.tar.gz \
+    && tar -xzvf kafka-python-0.9.3.tar.gz \
+    && cd kafka-python-0.9.3/ \
     && python setup.py install
 
 
@@ -81,9 +81,9 @@ RUN git clone https://github.com/cloudera/impyla.git \
 # install kafka
 
 #RUN wget -q http://mirror.gopotato.co.uk/apache/kafka/0.8.1.1/kafka_2.8.0-0.8.1.1.tgz -O /tmp/kafka_2.8.0-0.8.1.1.tgz
-RUN wget -q http://apache.arvixe.com/kafka/0.8.1.1/kafka_2.8.0-0.8.1.1.tgz
-RUN tar xfz /tmp/kafka_2.8.0-0.8.1.1.tgz -C /opt
-ENV KAFKA_HOME /opt/kafka_2.8.0-0.8.1.1
+RUN wget -q http://apache.arvixe.com/kafka/0.8.2.1/kafka_2.10.0-0.8.2.1.tgz
+RUN tar xfz /tmp/kafka_2.10.0-0.8.2.1.tgz -C /opt
+ENV KAFKA_HOME /opt/kafka_2.10.0-0.8.2.1
 
 COPY . /memex-datawake-stream
 
