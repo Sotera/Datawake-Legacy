@@ -54,8 +54,10 @@ def get_trails_for_domain_and_org(org, domain):
 def add_trail_based_entity(domain, trail, entity):
     org = helper.get_org()
     if not db.does_trail_entity_exist(org, domain, trail, entity):
+        tangelo.log("Added entity: %s to trail: %s" %(entity,trail))
         success = db.add_trail_based_entity(org, domain, trail, entity.encode("utf-8")) == 0
         if success:
+            tangelo.log("Posting: %s to kafka" %(entity))
             kafka_producer.send_trail_term_message(org, domain, trail, entity)
 
         return json.dumps(dict(success=success))
