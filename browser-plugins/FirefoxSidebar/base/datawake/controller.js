@@ -49,7 +49,7 @@ tabs.on('ready', function(tab) {
         var scrapeObject = response.json;
         console.log(scrapeObject);
         //Sets up the context menu objects for this tab.
-        if (scrapeObject && currentTrackingTabWorker.tab != null) {
+        if (scrapeObject) {
           getDomainExtractedEntities(1000);
           widgetHelper.switchToTab(currentTrackingTabWorker.tab.id, scrapeObject.count);
         }

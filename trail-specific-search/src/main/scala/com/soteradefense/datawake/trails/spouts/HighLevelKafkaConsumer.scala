@@ -42,8 +42,10 @@ class HighLevelKafkaConsumer[T <: StormData](outputFields: Fields, decoder: Deco
   override def nextTuple(): Unit = {
     stream.foreach { messageAndMetadata =>
       if (messageAndMetadata.message != null) {
+
         var value = messageAndMetadata.message().toValues
         collector.emit(value)
+        logger.info("Next Tuple: "+ value)
       }
     }
   }
