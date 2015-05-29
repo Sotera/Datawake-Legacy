@@ -9,6 +9,7 @@ import backtype.storm.tuple.Tuple
 import com.soteradefense.datawake.trails.bolts.HighLevelKafkaProducer
 import com.soteradefense.datawake.trails.sql.SqlCredentials
 import kafka.producer.KeyedMessage
+import kafka.common.FailedToSendMessageException
 
 class UpdateRankKafkaProducer(sqlCredentials: SqlCredentials, selectSql: String, topic: String, brokers: String) extends HighLevelKafkaProducer(brokers, topic) {
 
@@ -45,7 +46,7 @@ class UpdateRankKafkaProducer(sqlCredentials: SqlCredentials, selectSql: String,
         try {
           kafkaProducer.send(message)
         } catch {
-            case FailedToSendMessageException => logger.error("Error publishing " + message + " to topic: " + topic)
+            case e:FailedToSendMessageException => logger.error("Error publishing " + message + " to topic: " + topic)
         }
         builder.setLength(0)
       }

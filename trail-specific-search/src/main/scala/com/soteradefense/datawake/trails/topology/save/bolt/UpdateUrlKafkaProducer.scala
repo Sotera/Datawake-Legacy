@@ -4,6 +4,7 @@ import backtype.storm.topology.BasicOutputCollector
 import backtype.storm.tuple.Tuple
 import com.soteradefense.datawake.trails.bolts.HighLevelKafkaProducer
 import kafka.producer.KeyedMessage
+import kafka.common.FailedToSendMessageException
 
 class UpdateUrlKafkaProducer(topic: String, brokers: String) extends HighLevelKafkaProducer(brokers, topic) {
   override def execute(input: Tuple, collector: BasicOutputCollector): Unit = {
@@ -25,7 +26,7 @@ class UpdateUrlKafkaProducer(topic: String, brokers: String) extends HighLevelKa
     try {
       kafkaProducer.send(message)
     } catch {
-        case FailedToSendMessageException => logger.error("Error publishing " + message + " to topic: " + topic)
+        case e:FailedToSendMessageException => logger.error("Error publishing " + message + " to topic: " + topic)
       }
     }
 }
