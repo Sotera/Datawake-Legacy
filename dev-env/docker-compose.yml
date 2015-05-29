@@ -16,7 +16,7 @@ dwstream:
       DW_DB: memex_sotera
       DW_DB_USER: root
       DW_DB_PASSWORD: root
-      DW_DB_HOST: 172.31.31.203
+      DW_DB_HOST: 172.31.36.207
       DW_DB_PORT: 3336
       ZK_PORT_2888_TCP_ADDR: z01.istresearch.com:2181
       KAFKA_PORT_9092_TCP_ADDR: 54.152.161.20
@@ -33,7 +33,7 @@ dwsearch:
   environment:
     DW_DB_USER: root
     DW_DB_PASSWORD: root
-    DW_DB_JDBC: jdbc:mysql://172.31.31.203:3336/memex_sotera
+    DW_DB_JDBC: jdbc:mysql://172.31.36.207:3336/memex_sotera
     DW_CRAWLER_TOPIC: memex.crawled_trail-entities-search
     DW_BING_KEY: AeLgwrJ49hIsdsivwmnGs6VOHq3cNs3vkKdnkYlwffQ
     DW_GOOGLE_PUBLIC_KEY: AIzaSyAdmOWQGKH38VkGRiprHtSIVP3NhbDj69A
@@ -55,7 +55,7 @@ dwurlcontents:
   links:
     - mysql:mysql
   environment:
-    DW_DB_JDBC: jdbc:mysql://172.31.31.203:3336/memex_sotera
+    DW_DB_JDBC: jdbc:mysql://172.31.36.207:3336/memex_sotera
     DW_CRAWLER_OUT: crawler-out
     DW_USE_DISTRIBUTED: true
     DW_KAFKA_BROKERS: k01.istresearch.com:9092
@@ -75,7 +75,7 @@ dwurlrank:
   environment:
       DW_DB_USER: root
       DW_DB_PASSWORD: root
-      DW_DB_JDBC: jdbc:mysql://172.31.31.203:3336/memex_sotera
+      DW_DB_JDBC: jdbc:mysql://172.31.36.207:3336/memex_sotera
       DW_KAFKA_BROKERS: k01.istresearch.com:9092
       DW_ZK_QUORUM: z01.istresearch.com:2181
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.rank.UrlRankTopology
@@ -90,12 +90,12 @@ datawake:
     - dwstream
     - dwurlrank
   ports:
-    - "8080:80"
+    - "80:80"
   environment:
     DW_DB: memex_sotera
     DW_DB_USER: root
     DW_DB_PASSWORD: root
-    DW_DB_HOST: 172.31.31.203
+    DW_DB_HOST: 172.31.36.207
     DW_DB_PORT: 3336
     DW_KAFKA_CONN_POOL: k01.istresearch.com:9092
     DW_KAFKA_PUB_TOPIC: memex-datawake-visited
