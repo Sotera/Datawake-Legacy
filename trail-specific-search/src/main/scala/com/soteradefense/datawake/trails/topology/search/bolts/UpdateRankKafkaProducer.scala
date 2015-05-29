@@ -42,7 +42,11 @@ class UpdateRankKafkaProducer(sqlCredentials: SqlCredentials, selectSql: String,
         builder.append("\0")
         builder.append(url)
         val message = new KeyedMessage[String, String](topic, builder.toString())
-        kafkaProducer.send(message)
+        try {
+          kafkaProducer.send(message)
+        } catch {
+            case FailedToSendMessageException => logger.error("Error publishing " + message + " to topic: " + topic)
+        }
         builder.setLength(0)
       }
 
