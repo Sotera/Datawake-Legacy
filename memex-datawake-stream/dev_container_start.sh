@@ -4,10 +4,10 @@
 # not intended for production deployments.
 
 $KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic datawake-visited
-$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic crawler-out
-$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic crawler-in
-$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic trail-search
-$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic update-url
+$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic datawake-crawler-out
+$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic datawake-crawler-in
+$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic datawake-trail-search
+$KAFKA_HOME/bin/kafka-topics.sh --zookeeper $ZK_PORT_2888_TCP_ADDR --delete --topic datawake-update-url
 #$KAFKA_HOME/bin/kafka-run-class.sh kafka.admin.DeleteTopicCommand --zookeeper $ZK_PORT_2888_TCP_ADDR --topic memex-datawake-visited
 #$KAFKA_HOME/bin/kafka-run-class.sh kafka.admin.DeleteTopicCommand --zookeeper $ZK_PORT_2888_TCP_ADDR --topic crawler-out
 #$KAFKA_HOME/bin/kafka-run-class.sh kafka.admin.DeleteTopicCommand --zookeeper $ZK_PORT_2888_TCP_ADDR --topic crawler-in

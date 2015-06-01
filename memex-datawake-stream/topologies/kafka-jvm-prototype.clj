@@ -17,8 +17,8 @@
 
 ;; Read in the kafka topics from the environment
 (def visited-topic (or (System/getenv "DW_VISITED_TOPIC") "datawake-visited" ) )
-(def crawler-in-topic (or (System/getenv "DW_CRAWLER_IN_TOPIC") "crawler-in" ) )
-(def crawler-out-topic (or (System/getenv "DW_CRAWLER_OUT_TOPIC") "crawler-out" ) )
+(def crawler-in-topic (or (System/getenv "DW_CRAWLER_IN_TOPIC") "datawake-crawler-in" ) )
+(def crawler-out-topic (or (System/getenv "DW_CRAWLER_OUT_TOPIC") "datawake-crawler-out" ) )
 
 
 ;; Java Interop code that creates a JVM KafkaSpout

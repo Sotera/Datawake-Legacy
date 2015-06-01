@@ -19,7 +19,7 @@ object UrlRankTopology {
     val kafkaConsumer = new HighLevelKafkaConsumer[DatawakeLink](
       new Fields("kafkaOrg", "kafkaDomain", "kafkaTrail", "kafkaLink"),
       new DatawakeLinkDecoder,
-      "update-url", "count-entities-listener")
+      "datawake-update-url", "count-entities-listener")
 
     val updateSql: String = """UPDATE trail_term_rank SET rank = ? WHERE org = ? AND domain = ? AND trail = ? AND url = ?"""
     val jdbc = sys.env.getOrElse("DW_DB_JDBC", throw new DatawakeException("You need to set your JDBC String for interacting with a database."))

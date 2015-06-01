@@ -46,7 +46,7 @@ object UrlContentsTopology {
       .shuffleGrouping("save-html")
     val kafkaBrokers = sys.env.get("DW_KAFKA_BROKERS")
 
-    topologyBuilder.setBolt("count-link", new UpdateUrlKafkaProducer("update-url",kafkaBrokers.getOrElse(throw new DatawakeException("Your Kafka Brokers are not set!"))))
+    topologyBuilder.setBolt("count-link", new UpdateUrlKafkaProducer("datawake-update-url",kafkaBrokers.getOrElse(throw new DatawakeException("Your Kafka Brokers are not set!"))))
       .shuffleGrouping("save-url")
 
     val localCluster = new LocalCluster()

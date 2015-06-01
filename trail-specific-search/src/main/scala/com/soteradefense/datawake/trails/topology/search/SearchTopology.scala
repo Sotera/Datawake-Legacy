@@ -46,7 +46,7 @@ object SearchTopology {
     val kafkaBrokers = sys.env.get("DW_KAFKA_BROKERS")
     val kafkaCrawlerBrokers = if(useDistributedCrawler) sys.env.get("DW_KAFKA_CRAWLER_BROKERS") else kafkaBrokers
     //POSTS TO THE KAFKA QUEUE THAT UPDATES THE COUNT FOR A URL
-    topologyBuilder.setBolt("url-filter", new UpdateRankKafkaProducer(sqlCredentials, selectTrailUrlsSql, "update-url", kafkaBrokers.getOrElse(throw new DatawakeException("Your Kafka Brokers are not set!"))))
+    topologyBuilder.setBolt("url-filter", new UpdateRankKafkaProducer(sqlCredentials, selectTrailUrlsSql, "datawake-update-url", kafkaBrokers.getOrElse(throw new DatawakeException("Your Kafka Brokers are not set!"))))
       .shuffleGrouping("internet-search", "new-term")
 
     //POSTS TO THE KAFKA QUEUE THAT SCRAPES THE HTML

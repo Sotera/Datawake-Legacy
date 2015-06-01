@@ -20,5 +20,5 @@ object DatawakeConstants {
   /**
    * Search topic to read a new entity.
    */
-  val TRAIL_SEARCH_TOPIC: String = "trail-search"
+  val TRAIL_SEARCH_TOPIC: String = "datawake-trail-search"
 }
