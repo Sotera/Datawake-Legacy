@@ -39,6 +39,7 @@ RUN wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
     && mv lein /usr/bin \
     && /usr/bin/lein
 
+RUN easy_install -U setuptools
 
 # install streamparse
 RUN pip install streamparse \
@@ -50,10 +51,3 @@ RUN pip install streamparse \
 # install mysql client
 RUN pip install --allow-external mysql-connector-python \
  mysql-connector-python
-
-COPY . /memex-datawake-stream
-
-ADD dev_container_start.sh /usr/bin/dev_container_start.sh
-WORKDIR /memex-datawake-stream
-
-CMD dev_container_start.sh
