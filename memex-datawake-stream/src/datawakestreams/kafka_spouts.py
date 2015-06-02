@@ -23,6 +23,7 @@ class KafkaDatawakeVisitedSpout(Spout):
             self.conn_pool = settings['conn_pool'].encode()
             self.log('KafkaDatawakeVisitedSpout initialized with topic =' + self.topic + ' conn_pool=' + self.conn_pool)
             self.kafka = KafkaClient(self.conn_pool)
+            self.kafka.ensure_topic_exists(self.topic)
             self.consumer = SimpleConsumer(self.kafka, self.group, self.topic, max_buffer_size=None)
             self.consumer.seek(0, 2)  # move to the tail of the queue
         except:
@@ -99,7 +100,3 @@ class KafkaDatawakeLookaheadSpout(Spout):
                 'domain': crawled['attrs']['domain']
             }
             self.emit([crawled['url'], crawled['status_code'], '', '', crawled['body'], crawled['timestamp'], context['source'], context])
-
-
-
-
