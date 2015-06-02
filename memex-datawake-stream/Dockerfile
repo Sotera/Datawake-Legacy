@@ -51,3 +51,5 @@ RUN pip install streamparse \
 # install mysql client
 RUN pip install --allow-external mysql-connector-python \
  mysql-connector-python
+
+WORKDIR /memex-datawake-stream
