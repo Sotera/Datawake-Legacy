@@ -23,7 +23,8 @@ dwstream:
   volumes:
     - /home/ubuntu/prefetch/memex-datawake-stream:/memex-datawake-stream
     - /home/ubuntu/prefetch/dev-env:/dev-env
-
+  command:
+    - /memex-datawake-stream/dev_container_start.sh
 
 dwsearch:
   build: ../trail-specific-search
