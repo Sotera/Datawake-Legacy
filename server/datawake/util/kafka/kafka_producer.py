@@ -22,6 +22,7 @@ class KafkaProducer:
         self.conn_pool = conn_pool
         self.topic = topic
         self.kafka = KafkaClient(self.conn_pool)
+        self.kafka.ensure_topic_exists(self.topic)
         self.producer = SimpleProducer(self.kafka, async=True)
 
     def send(self, message):
@@ -77,4 +78,3 @@ def send_trail_term_message(org, domain, trail, term, validEntity=True):
             pass
         TRAIL_PRODUCER = None
         raise
-

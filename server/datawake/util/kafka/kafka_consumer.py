@@ -11,6 +11,7 @@ class KafkaConsumer:
         self.topic = topic
         self.group = group
         self.kafka = KafkaClient(self.conn_pool)
+        self.kafka.ensure_topic_exists(self.topic)
         self.consumer = SimpleConsumer(self.kafka,self.group,self.topic,max_buffer_size=None)
         self.consumer.seek(0,2) # move to the tail of the queue
 
@@ -18,6 +19,3 @@ class KafkaConsumer:
         offsetAndMessage = self.consumer.get_messages(timeout=None)[0]
         message = offsetAndMessage.message.value
         return message
-
-
-
