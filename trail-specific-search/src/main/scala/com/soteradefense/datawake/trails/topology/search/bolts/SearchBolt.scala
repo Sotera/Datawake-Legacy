@@ -56,6 +56,7 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
     if (customSearch != null) {
       if (isRelevantTerm) {
         logger.info("Total Result Count For {}: {}", searchTerm, customSearch.results.size)
+        logger.inof("Google results: {}", customSearch)
         var rank: Int = 0
         customSearch.results.foreach(f => {
           var pageRank = DatawakeUrlRankHelper.getPageRank(org, domain, trail, f.url, selectPageRank, connection)
@@ -69,7 +70,7 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
           rank = rank + 1
         })
         logger.info("Adding relevant entity: {} with {} pages ", searchTerm, customSearch.results.size)
-        updateResultCount(resultUpdateSql, org, domain, trail, searchTerm, customSearch.results.size)
+        updateResultCount(resultUpdateSql, org, domain, trail, searchTerm, customSearch.results.size.toString)
       } else {
         updateResultCount(invalidResultUpdateSql, org, domain, trail, searchTerm, customSearch.resultCount)
       }
