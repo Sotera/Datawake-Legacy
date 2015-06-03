@@ -56,7 +56,7 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
     if (customSearch != null) {
       if (isRelevantTerm) {
         logger.info("Total Result Count For {}: {}", searchTerm, customSearch.results.size)
-        logger.inof("Google results: {}", customSearch)
+        logger.info("Google results: {}", customSearch)
         var rank: Int = 0
         customSearch.results.foreach(f => {
           var pageRank = DatawakeUrlRankHelper.getPageRank(org, domain, trail, f.url, selectPageRank, connection)
