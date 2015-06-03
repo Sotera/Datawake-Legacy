@@ -87,6 +87,6 @@
             "value": true
         }
     ],
-    "icon": "./data/img/waveicon38.png",
+    "icon": "./data/img/waveicon38_bw.png",
     "dependencies": ["oauthorizer"]
 }

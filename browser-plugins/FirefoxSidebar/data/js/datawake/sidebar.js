@@ -26,9 +26,10 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document, $interval) {
     $scope.datawake.trail = {}
 
     addon.port.emit("infochanged", $scope.datawake);
+    addon.port.emit("refreshTrails", $scope.datawake.domain);
+
     addon.port.emit("refreshEntities");
     addon.port.emit("refreshWebPages");
-    addon.port.emit("refreshTrails", $scope.datawake.domain);
 
     $scope.current_url = prefs.current_url;
     $scope.versionNumber = prefs.versionNumber;
@@ -38,6 +39,8 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document, $interval) {
   addon.port.on("infosaved", function(datawakeinfo) {
     $scope.datawake = datawakeinfo;
     $scope.$apply();
+    addon.port.emit("refreshEntities");
+    addon.port.emit("refreshWebPages");
     console.log("ON INFO SAVED");
     console.log($scope.datawake);
   });
@@ -133,17 +136,11 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document, $interval) {
   };
 
   $scope.refreshWebPages = function() {
-    addon.port.emit("refreshWebPages", {
-      domain: "memex",
-      trail: "trail"
-    });
+    addon.port.emit("refreshWebPages");
   };
 
   $scope.refreshEntities = function() {
-    addon.port.emit("refreshEntities", {
-      domain: "memex",
-      trail: "trail"
-    });
+    addon.port.emit("refreshEntities");
   };
 
   $scope.showEntities = function(link) {
@@ -181,10 +178,8 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document, $interval) {
   };
 
   $interval(function(){
-    addon.port.emit("refreshWebPages", {
-      domain: "memex",
-      trail: "trail"
-    });
+    addon.port.emit("refreshWebPages");
+    addon.port.emit("refreshEntities");
   },10000);
 
   function createIterableEntityListForSorting(entities) {
