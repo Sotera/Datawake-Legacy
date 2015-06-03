@@ -1,8 +1,8 @@
 {
-    "name": "datawakefirefoxaddon",
-    "fullName": "DataWake",
+    "name": "prefetchFirefoxaddon",
+    "fullName": "DataWake Prefetch",
     "id": "jid1-NKjAjAgAESlIAg",
-    "description": "An add-on for the Tor/Firefox Browser that enables the DataWake.",
+    "description": "An add-on for the Tor/Firefox Browser that enables DataWake Prefetch.",
     "author": "",
     "license": "MPL 2.0",
     "lib": "base",
