@@ -68,6 +68,7 @@ class SearchBolt(sqlCredentials: SqlCredentials, newUrl: Fields, newTerm: Fields
 
           rank = rank + 1
         })
+        logger.info("Adding relevant entity: {} with [] pages ", searchTerm, customSearch.resultCount)
         updateResultCount(resultUpdateSql, org, domain, trail, searchTerm, customSearch.resultCount)
       } else {
         updateResultCount(invalidResultUpdateSql, org, domain, trail, searchTerm, customSearch.resultCount)
