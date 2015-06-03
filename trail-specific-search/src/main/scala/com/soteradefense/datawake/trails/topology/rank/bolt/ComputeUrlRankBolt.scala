@@ -43,7 +43,7 @@ class ComputeUrlRankBolt(sqlCredentials: SqlCredentials, validTermsSql: String, 
         emitConcatenatedTermSearch(collector, validTerms, domainTriplet)
       }
     } catch {
-      case e:NumberFormatException => logger.error("Error getting rank" +e)
+      case e:NumberFormatException => logger.error("Error getting rank" +e, e)
     } finally {
       if (htmlPrepare != null)
         htmlPrepare.close()
