@@ -200,7 +200,7 @@ function launchDatawakeSidebar() {
   sideBar.show();
 
   //This seems to be the only way to open the sidebar to it's full width.
-  var window = require('window/utils').getMostRecentBrowserWindow();
+  var window = require('sdk/window/utils').getMostRecentBrowserWindow();
   window.document.getElementById('sidebar').style.width = "400px";
 }
 

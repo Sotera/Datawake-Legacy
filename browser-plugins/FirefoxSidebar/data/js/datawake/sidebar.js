@@ -8,7 +8,7 @@ var sidebarApp = angular.module('sidebarApp', ["ngRoute", "ngSanitize"]).config(
 }]);
 
 
-sidebarApp.controller("SidebarCtrl", function($scope, $document) {
+sidebarApp.controller("SidebarCtrl", function($scope, $document, $interval) {
   $scope.teamSpinner = true;
   $scope.headerPartial = "partials/header-partial.html";
   $scope.createTrailPartial = "partials/trail-modal-partial.html";
@@ -180,6 +180,13 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document) {
 
   };
 
+  $interval(function(){
+    addon.port.emit("refreshWebPages", {
+      domain: "memex",
+      trail: "trail"
+    });
+  },10000);
+
   function createIterableEntityListForSorting(entities) {
     var arr = [];
     $.map(entities, function(item, key) {
@@ -213,7 +220,7 @@ sidebarApp.config(['$routeProvider',
       templateUrl: 'partials/trail-based-irrelevant-entities-partial.html'
     }).
     otherwise({
-      redirectTo: 'partials/trail-based-relevant-entities-partial.html'
+      redirectTo: '/trail/entities/relevant'
     });
   }
 ]);
