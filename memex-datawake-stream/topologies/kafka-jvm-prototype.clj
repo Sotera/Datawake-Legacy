@@ -17,7 +17,7 @@
 
 ;; Read in the kafka topics from the environment
 (def visited-topic (or (System/getenv "DW_VISITED_TOPIC") "datawake-visited" ) )
-(def crawler-in-topic (or (System/getenv "DW_CRAWLER_IN_TOPIC") "datawake-crawler-in" ) )
+(def crawler-in-topic (or (System/getenv "DW_CRAWLER_IN_TOPIC") "datawake-crawler-input" ) )
 (def crawler-out-topic (or (System/getenv "DW_CRAWLER_OUT_TOPIC") "datawake-crawler-out" ) )
 
 

@@ -18,7 +18,7 @@ ALL_SETTINGS['cluster'] = {
     'topology':'cluster',
 
     'appid': 'datawake',
-    'crawler-in-topic' : 'datawake-crawler-in',
+    'crawler-in-topic' : 'datawake-crawler-input',
     'crawler-out-topic' : 'datawake-crawler-out',
     'visited-topic': 'datawake-visited',
     'conn_pool' : "",
@@ -37,7 +37,7 @@ ALL_SETTINGS['local-docker'] = {
     'topology':'local',
 
     'appid': 'datawake',
-    'crawler-in-topic' : 'datawake-crawler-in',
+    'crawler-in-topic' : 'datawake-crawler-input',
     'crawler-out-topic' : 'datawake-crawler-out',
     'visited-topic': 'datawake-visited',
     'conn_pool' : os.environ['KAFKA_PORT_9092_TCP_ADDR']+":9092" if 'KAFKA_PORT_9092_TCP_ADDR' in os.environ else '',

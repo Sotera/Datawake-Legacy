@@ -101,7 +101,7 @@ datawake:
     DW_DB_PORT: 3336
     DW_KAFKA_CONN_POOL: k01.istresearch.com:9092
     DW_KAFKA_PUB_TOPIC: datawake-visited
-    DW_KAFKA_TRAIL_TOPIC: trail-search
+    DW_KAFKA_TRAIL_TOPIC: datawake-trail-search
     DW_GOOGLE_CLIENT_IDS: 587886725690-bsns7flvb68l48q95f9l1su82q0p4k00.apps.googleusercontent.com,587886725690-njd26v0l3krmar5vtc8e06oprtqvkdvd.apps.googleusercontent.com
     DW_MOCK_AUTH:  1
     DW_CONN_TYPE: mysql
