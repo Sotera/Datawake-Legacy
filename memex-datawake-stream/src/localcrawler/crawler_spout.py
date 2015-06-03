@@ -50,6 +50,3 @@ class CrawlerSpout(Spout):
         message = offsetAndMessage.message.value
         to_crawl = json.loads(message)
         self.emit([to_crawl])
-
-
-
