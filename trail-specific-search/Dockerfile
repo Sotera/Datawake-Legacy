@@ -18,7 +18,7 @@ RUN apt-get install --fix-missing -y software-properties-common \
 
 RUN add-apt-repository ppa:cwchien/gradle \
     && apt-get update \
-    && apt-get install -y gradle-1.10
+    && apt-get install -y gradle
 
 
 COPY . /trail-specific-search
