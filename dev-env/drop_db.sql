@@ -37,5 +37,3 @@ DROP TABLE IF EXISTS trail_term_rank;
 DROP TABLE IF EXISTS trail_entities_contents;
 
 DROP TABLE IF EXISTS entities_on_url;
-
-exit;
