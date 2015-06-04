@@ -1,11 +1,7 @@
-buildscript {
-    repositories { jcenter() }
-    dependencies { classpath 'com.github.jengelman.gradle.plugins:shadow:1.0.1' }
+plugins {
+  id 'java' // or 'groovy' Must be explicitly applied
+  id 'com.github.johnrengelman.shadow' version '1.2.1'
 }
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'scala'
-apply plugin: 'java'
-version = '1.0'
 
 repositories {
     mavenCentral()
