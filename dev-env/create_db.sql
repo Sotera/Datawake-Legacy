@@ -164,9 +164,7 @@ CREATE TABLE IF NOT EXISTS entities_on_url (
 );
 
 CREATE TABLE IF NOT EXISTS trail_entities_contents(
-  url varchar(1024),
+  url varchar(2048),
   html MEDIUMBLOB,
   index(url(255))
 );
-
-exit;
