@@ -1,8 +1,8 @@
-version = '1.0'
 plugins {
   id 'java' // or 'groovy' Must be explicitly applied
   id 'com.github.johnrengelman.shadow' version '1.2.1'
 }
+version = '1.0'
 
 repositories {
     mavenCentral()
