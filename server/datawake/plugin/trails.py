@@ -115,7 +115,9 @@ def add_irrelevant_trail_entity(domain, trail, entity):
 @is_in_session
 @required_parameters(['domain', 'trail', 'url'])
 def get_url_entities(domain, trail, url):
-    return json.dumps(dict(entities=db.get_entities_on_url(helper.get_org(), domain, trail, url)))
+    results = json.dumps(dict(entities=db.get_entities_on_url(helper.get_org(), domain, trail, url)))
+    tangelo.log_info(results)
+    return results
 
 
 post_actions = {
