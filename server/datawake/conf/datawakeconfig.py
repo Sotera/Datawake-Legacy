@@ -21,14 +21,7 @@ OPTIONAL ENVIRONMENT VARIABLES
 
 DW_GOOGLE_CLIENT_IDS: list of client ids used for google user authentication
 DW_MOCK_AUTH:  If set actual user authentication is bypassed. (for dev / demos only)
-DW_CONN_TYPE:  Determines mysql or impala / hbase is used to store the generated web index data. default=mysql. can by mysql or cluster
-DW_IMPALA_HOSTS: Comma separated list of impala hosts (cluster only)
-DW_IMPALA_PORT: impala port
-DW_HBASE_HOST: hbase host name (cluster only)
-DW_HBASE_NAMESPACE: hbase namespace (cluster only, default: default)
-DW_HBASE_DOMAIN_ENTITIES_TABLE (cluster only, default: datawake_domain_entities_hbase)
-DW_HBASE_EXTRACTED_ALL_TABLE (cluster only, default: general_extractor_web_index_hbase)
-DW_HBASE_EXTRACTED_DOMAIN_TABLE (cluster only, default: domain_extractor_web_index_hbase)
+DW_CONN_TYPE:  Determines mysql is used to store the generated web index data. default=mysql. can by mysql or cluster
 DW_EXTERNAL_LINK_NAMES: Comma separated list of links names to provide for extracted features found in the domain index.
 DW_EXTERNAL_LINK_VALUES: Comma separated list of links to provide for extracted features found in the domain index.
     The link text may contain "$ATTR" and/or "$VALUE", which will be replaced with an extracted type and value such as "phone" and "5555555555"
@@ -89,25 +82,8 @@ MOCK_AUTH = 'DW_MOCK_AUTH' in os.environ
 ENTITY_CONNECTION = 'mysql'
 if 'DW_CONN_TYPE' in os.environ:
     ENTITY_CONNECTION = os.environ['DW_CONN_TYPE'].lower()
-if ENTITY_CONNECTION != 'mysql' and ENTITY_CONNECTION != 'cluster-impala' and ENTITY_CONNECTION != 'cluster-hbase':
-    raise ValueError("DW_CONN_TYPE must be 'mysql' or 'cluster-impala', or 'cluster-hbase' if set. ")
-
-
-IMPALA_HOSTS = os.environ['DW_IMPALA_HOSTS'].strip().split(',') if 'DW_IMPALA_HOSTS' in os.environ else []
-IMPALA_PORT = os.environ['DW_IMPALA_PORT'] if 'DW_IMPALA_PORT' in os.environ else '21050'
-IMPALA_DB = os.environ['DW_IMPALA_DB'] if 'DW_IMPALA_DB' in os.environ else 'default'
-IMPALA_DOMAIN_ENTITIES_TABLE = os.environ['DW_IMPALA_DOMAIN_ENTITIES_TABLE'] if 'DW_IMPALA_DOMAIN_ENTITIES_TABLE' in os.environ else 'datawake_domain_entities'
-IMPALA_EXTRACTED_ALL_TABLE = os.environ['DW_IMPALA_EXTRACTED_ALL_TABLE'] if 'DW_IMPALA_EXTRACTED_ALL_TABLE' in os.environ else 'general_extractor_web_index'
-IMPALA_EXTRACTED_DOMAIN_TABLE = os.environ['DW_IMPALA_EXTRACTED_DOMAIN_TABLE'] if 'DW_IMPALA_EXTRACTED_DOMAIN_TABLE' in os.environ else 'domain_extractor_web_index'
-
-
-HBASE_HOST = os.environ['DW_HBASE_HOST'] if 'DW_HBASE_HOST' in os.environ else 'NO HBASE HOST SET'
-HBASE_PORT = os.environ['DW_HBASE_PORT'] if 'DW_HBASE_PORT' in os.environ else '9090'
-HBASE_NAMESPACE = os.environ['DW_HBASE_NAMESPACE'] if 'DW_HBASE_NAMESPACE' in os.environ else 'default'
-HBASE_DOMAIN_ENTITIES_TABLE = os.environ['DW_HBASE_DOMAIN_ENTITIES_TABLE'] if 'DW_HBASE_DOMAIN_ENTITIES_TABLE' in os.environ else 'datawake_domain_entities_hbase'
-HBASE_EXTRACTED_ALL_TABLE = os.environ['DW_HBASE_EXTRACTED_ALL_TABLE'] if 'DW_HBASE_EXTRACTED_ALL_TABLE' in os.environ else 'general_extractor_web_index_hbase'
-HBASE_EXTRACTED_DOMAIN_TABLE = os.environ['DW_HBASE_EXTRACTED_DOMAIN_TABLE'] if 'DW_HBASE_EXTRACTED_DOMAIN_TABLE' in os.environ else 'domain_extractor_web_index_hbase'
-
+if ENTITY_CONNECTION != 'mysql':
+    raise ValueError("DW_CONN_TYPE must be 'mysql' if set. ")
 
 
 #
@@ -125,5 +101,3 @@ if 'DW_EXTERNAL_LINK_NAMES' in os.environ or 'DW_EXTERNAL_LINK_VALUES' in os.env
             EXTERNAL_LINKS.append({'display':linkNames[i],'link':linkValues[i]})
     except:
         raise ValueError("if DW_LINK_NAMES or DW_LINK_VALUES are set, both must be set and of equal length")
-
-

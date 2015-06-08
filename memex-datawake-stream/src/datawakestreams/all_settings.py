@@ -23,13 +23,6 @@ ALL_SETTINGS['cluster'] = {
     'visited-topic': 'datawake-visited',
     'conn_pool' : "",
     'crawler_conn_pool' : "",
-
-    'hbase_host':'',
-    'hbase_port':'9090',
-    'hbase_namespace':'default',
-    'hbase_domain_table': '',
-    'hbase_extracted_all_table': '',
-    'hbase_extracted_domain_table': ''
 }
 
 
