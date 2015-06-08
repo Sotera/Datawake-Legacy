@@ -8,22 +8,6 @@ CREATE TABLE IF NOT EXISTS datawake_org (
 );
 
 
-CREATE TABLE IF NOT EXISTS datawake_domains (
-  name VARCHAR(300),
-  description TEXT,
-  PRIMARY KEY(name)
-);
-
-
-CREATE TABLE IF NOT EXISTS datawake_selections (
-  id INT NOT NULL AUTO_INCREMENT,
-  postId INT NOT NULL,
-  selection TEXT,
-  PRIMARY KEY(id),
-  INDEX(postId)
-);
-
-
 CREATE TABLE IF NOT EXISTS datawake_data (
   id INT NOT NULL AUTO_INCREMENT,
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -49,34 +33,6 @@ CREATE TABLE IF NOT EXISTS datawake_trails (
 );
 
 
-CREATE TABLE IF NOT EXISTS starred_features (
-  org VARCHAR(300),
-  trail VARCHAR(100) NOT NULL,
-  type VARCHAR(100),
-  value VARCHAR(1024),
-  INDEX(org,trail)
-);
-
-
-CREATE TABLE IF NOT EXISTS datawake_url_rank (
-  id INT NOT NULL AUTO_INCREMENT,
-  url TEXT,
-  userId TEXT,
-  trailname VARCHAR(100),
-  rank INT,
-  org VARCHAR(300),
-  domain VARCHAR(300),
-  PRIMARY KEY(id),
-  INDEX(url(30),userId(20),trailname)
-);
-
-
-CREATE TABLE IF NOT EXISTS datawake_domain_entities (
-  rowkey varchar(1024),
-  INDEX(rowkey(300))
-);
-
-
 CREATE TABLE IF NOT EXISTS general_extractor_web_index (
   url varchar(1024),
   entity_type varchar(100),
@@ -85,34 +41,6 @@ CREATE TABLE IF NOT EXISTS general_extractor_web_index (
   index(url(300))
 );
 
-
-CREATE TABLE IF NOT EXISTS domain_extractor_web_index (
-  domain VARCHAR(300),
-  url varchar(1024),
-  entity_type varchar(100),
-  entity_value varchar(1024),
-  ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  index(domain(300),url(300))
-);
-
-
-CREATE TABLE IF NOT EXISTS domain_extractor_runtimes (
-  domain VARCHAR(300),
-  url varchar(1024),
-  entity_type varchar(100),
-  ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  index(domain(300),url(300))
-);
-
-CREATE TABLE IF NOT EXISTS scraping_feedback (
-  entity_type varchar(100),
-  entity_value varchar(1024),
-  raw_text varchar (100),
-  url varchar(1024),
-  domain varchar (300),
-  org VARCHAR(300),
-  index(org(300),domain(300))
-);
 
 CREATE TABLE IF NOT EXISTS invalid_extracted_entity (
   entity_value varchar (1024),
