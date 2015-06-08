@@ -13,7 +13,7 @@ dwstream:
   links:
     - mysql:mysql
   environment:
-      DW_DB: datawawke_prefetch
+      DW_DB: datawake_prefetch
       DW_DB_USER: root
       DW_DB_PASSWORD: root
       DW_DB_HOST: 172.31.43.141
@@ -35,7 +35,7 @@ dwsearch:
   environment:
     DW_DB_USER: root
     DW_DB_PASSWORD: root
-    DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawawke_prefetch
+    DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawake_prefetch
     DW_CRAWLER_TOPIC: memex.crawled_trail-entities-search
     DW_BING_KEY: AeLgwrJ49hIsdsivwmnGs6VOHq3cNs3vkKdnkYlwffQ
     DW_GOOGLE_PUBLIC_KEY: AIzaSyAdmOWQGKH38VkGRiprHtSIVP3NhbDj69A
@@ -57,7 +57,7 @@ dwurlcontents:
   links:
     - mysql:mysql
   environment:
-    DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawawke_prefetch
+    DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawake_prefetch
     DW_CRAWLER_OUT: datawake-crawler-out
     DW_USE_DISTRIBUTED: true
     DW_KAFKA_BROKERS: k01.istresearch.com:9092
@@ -77,7 +77,7 @@ dwurlrank:
   environment:
       DW_DB_USER: root
       DW_DB_PASSWORD: root
-      DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawawke_prefetch
+      DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawake_prefetch
       DW_KAFKA_BROKERS: k01.istresearch.com:9092
       DW_ZK_QUORUM: z01.istresearch.com:2181
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.rank.UrlRankTopology
@@ -94,7 +94,7 @@ datawake:
   ports:
     - "80:80"
   environment:
-    DW_DB: datawawke_prefetch
+    DW_DB: datawake_prefetch
     DW_DB_USER: root
     DW_DB_PASSWORD: root
     DW_DB_HOST: 172.31.43.141

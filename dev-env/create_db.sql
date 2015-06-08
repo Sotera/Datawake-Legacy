@@ -1,6 +1,6 @@
 
-CREATE DATABASE IF NOT EXISTS datawawke_prefetch;
-USE datawawke_prefetch;
+CREATE DATABASE IF NOT EXISTS datawake_prefetch;
+USE datawake_prefetch;
 
 CREATE TABLE IF NOT EXISTS datawake_org (
   email VARCHAR(300),
