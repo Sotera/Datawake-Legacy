@@ -261,7 +261,6 @@ function notifyError(message) {
   notifications.notify({
     title: "Datawake Error",
     text: message,
-    iconURL: self.data.url("img/waveicon38.png"),
   });
 }
 
@@ -294,7 +293,6 @@ function launchLoginPanel() {
       notifications.notify({
         title: "Datawake Sign On",
         text: "Sign On Successful.  Click the datawake button to begin.",
-        iconURL: self.data.url("img/waveicon38.png"),
         onClick: function(data) {
           console.log("clicked it")
         }
@@ -423,11 +421,9 @@ function addTrailEntity(domain, trail, entity) {
   });
   console.log("Adding trail entity: " + post_obj)
   requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/entity", post_obj, function(response) {
-    var myIconURL = data.url("img/waveicon38.png");
     notifications.notify({
       text: "Successfully added " + entity + " as an entity!",
       title: "Datawake",
-      iconURL: myIconURL
     });
   });
 }
@@ -439,11 +435,9 @@ function addIrrelevantTrailEntity(domain, trail, entity) {
     entity: entity
   });
   requestHelper.post(addOnPrefs.datawakeDeploymentUrl + "/trails/irrelevant", post_obj, function(response) {
-    var myIconURL = data.url("img/waveicon38.png");
     notifications.notify({
       text: "Successfully added " + entity + " as an irrelevant entity!",
       title: "Datawake",
-      iconURL: myIconURL
     });
   });
 }
