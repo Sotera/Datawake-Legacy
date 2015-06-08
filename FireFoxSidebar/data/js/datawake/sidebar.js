@@ -25,11 +25,7 @@ sidebarApp.controller("SidebarCtrl", function($scope, $document, $interval) {
     $scope.datawake.domain.name = 'memex';
     $scope.datawake.trail = {}
 
-    addon.port.emit("infochanged", $scope.datawake);
     addon.port.emit("refreshTrails", $scope.datawake.domain);
-
-    addon.port.emit("refreshEntities");
-    addon.port.emit("refreshWebPages");
 
     $scope.current_url = prefs.current_url;
     $scope.versionNumber = prefs.versionNumber;
