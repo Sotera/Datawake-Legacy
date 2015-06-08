@@ -36,7 +36,7 @@ ALL_SETTINGS['local-docker'] = {
     'conn_pool' : os.environ['KAFKA_PORT_9092_TCP_ADDR']+":9092" if 'KAFKA_PORT_9092_TCP_ADDR' in os.environ else '',
     'crawler_conn_pool' : os.environ['KAFKA_PORT_9092_TCP_ADDR']+":9092" if 'KAFKA_PORT_9092_TCP_ADDR' in os.environ else '',
     'user':'root',
-    'database':'memex_sotera',
+    'database':'datawake_prefetch',
     'password':os.environ['MYSQL_ENV_MYSQL_ROOT_PASSWORD'] if 'MYSQL_ENV_MYSQL_ROOT_PASSWORD' in os.environ else '',
     'host':os.environ['MYSQL_PORT_3306_TCP_ADDR'] if 'MYSQL_PORT_3306_TCP_ADDR' in os.environ else ''
 }
