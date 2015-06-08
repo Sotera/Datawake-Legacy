@@ -1,6 +1,6 @@
 
-CREATE DATABASE IF NOT EXISTS memex_sotera;
-USE memex_sotera;
+CREATE DATABASE IF NOT EXISTS datawawke_prefetch;
+USE datawawke_prefetch;
 
 CREATE TABLE IF NOT EXISTS datawake_org (
   email VARCHAR(300),
