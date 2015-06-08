@@ -5,7 +5,7 @@ mysql:
   ports:
     - "3336:3306"
   volumes:
-    - /home/ubuntu/prefetch/dev-env:/dev-env
+    - ./:/dev-env
 
 
 dwstream:
@@ -13,7 +13,7 @@ dwstream:
   links:
     - mysql:mysql
   environment:
-      DW_DB: memex_sotera
+      DW_DB: datawawke_prefetch
       DW_DB_USER: root
       DW_DB_PASSWORD: root
       DW_DB_HOST: 172.31.43.141
@@ -21,8 +21,8 @@ dwstream:
       ZK_PORT_2888_TCP_ADDR: z01.istresearch.com:2181
       KAFKA_PORT_9092_TCP_ADDR: 54.152.161.20
   volumes:
-    - /home/ubuntu/prefetch/memex-datawake-stream:/memex-datawake-stream
-    - /home/ubuntu/prefetch/dev-env:/dev-env
+    - ../memex-datawake-stream:/memex-datawake-stream
+    - ../dev-env:/dev-env
   command:
     - /memex-datawake-stream/dev_container_start.sh
 
@@ -35,7 +35,7 @@ dwsearch:
   environment:
     DW_DB_USER: root
     DW_DB_PASSWORD: root
-    DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/memex_sotera
+    DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawawke_prefetch
     DW_CRAWLER_TOPIC: memex.crawled_trail-entities-search
     DW_BING_KEY: AeLgwrJ49hIsdsivwmnGs6VOHq3cNs3vkKdnkYlwffQ
     DW_GOOGLE_PUBLIC_KEY: AIzaSyAdmOWQGKH38VkGRiprHtSIVP3NhbDj69A
@@ -47,7 +47,7 @@ dwsearch:
     DW_ZK_QUORUM: z01.istresearch.com:2181
     DW_SEARCH_API: http://54.69.102.155:8787/search/
   volumes:
-    - /home/ubuntu/prefetch/trail-specific-search:/tss
+    - ../trail-specific-search:/tss
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.search.SearchTopology
 
 
@@ -57,7 +57,7 @@ dwurlcontents:
   links:
     - mysql:mysql
   environment:
-    DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/memex_sotera
+    DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawawke_prefetch
     DW_CRAWLER_OUT: datawake-crawler-out
     DW_USE_DISTRIBUTED: true
     DW_KAFKA_BROKERS: k01.istresearch.com:9092
@@ -77,7 +77,7 @@ dwurlrank:
   environment:
       DW_DB_USER: root
       DW_DB_PASSWORD: root
-      DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/memex_sotera
+      DW_DB_JDBC: jdbc:mysql://172.31.43.141:3336/datawawke_prefetch
       DW_KAFKA_BROKERS: k01.istresearch.com:9092
       DW_ZK_QUORUM: z01.istresearch.com:2181
   command: scala -classpath "build/libs/Search-Crawler-1.0-all.jar" com.soteradefense.datawake.trails.topology.rank.UrlRankTopology
@@ -94,7 +94,7 @@ datawake:
   ports:
     - "80:80"
   environment:
-    DW_DB: memex_sotera
+    DW_DB: datawawke_prefetch
     DW_DB_USER: root
     DW_DB_PASSWORD: root
     DW_DB_HOST: 172.31.43.141
@@ -107,6 +107,6 @@ datawake:
     DW_CONN_TYPE: mysql
     PYTHONPATH: /usr/local/share/tangelo/web
   volumes:
-    - /home/ubuntu/prefetch/server/:/usr/local/share/tangelo/web
-    - /home/ubuntu/prefetch/server/conf/:/usr/local/share/tangelo/conf
+    - ../server/:/usr/local/share/tangelo/web
+    - ../server/conf/:/usr/local/share/tangelo/conf
   command: tangelo -c "/usr/local/share/tangelo/conf/tangelo.conf"
