@@ -12,7 +12,6 @@ var notifications = require("sdk/notifications");
 
 var contextMenu = require("sdk/context-menu");
 
-
 exports.useContextMenu = useContextMenu;
 exports.loadDatawake = loadDatawake;
 exports.resetIcon = resetIcon;
@@ -23,7 +22,6 @@ var datawakeButton;
 var sideBar;
 var loginPanel;
 var badgeForTab = {};
-
 
 var authHelper = require("./auth-helper");
 var signedIn = false;
@@ -62,9 +60,6 @@ tabs.on('ready', function(tab) {
  * Load and start datawake components
  */
 function loadDatawake() {
-
-  datawakeInfo = newDatawakeInfo();
-
   // attach panels (logon panel and main panel) to the datawake action button
   attachActionButton();
 }
@@ -85,6 +80,7 @@ function clearAllState() {
   datawakeInfo = null;
   userInfo = null;
   signedIn = false;
+  resetIcon();
 }
 
 
@@ -136,6 +132,8 @@ function launchDatawakeSidebar() {
   if (sideBar != null || sideBar != undefined) {
     sideBar.destroy();
   }
+
+  datawakeInfo = newDatawakeInfo();
 
   sideBar = require("sdk/ui/sidebar").Sidebar({
     id: 'datawake-prefetch',
